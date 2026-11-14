@@ -262,6 +262,7 @@ function baseProps(lv,wallHp){const b=W0.base,X=x=>b.ox+x,Y=y=>b.oy+y,out=[],o=(
   for(let x=x0;x<x1;x+=64){const w=Math.min(64,x1-x);segs.push({t,x:X(x),y:Y(y0),w,h:10,k:k++})}
   for(let x=x0;x<x1;x+=64){const w=Math.min(64,x1-x);if(x+w<=BASE.gate[0]||x>=BASE.gate[1]){segs.push({t,x:X(x),y:Y(y1),w,h:10,k:k++})}else{if(x<BASE.gate[0])segs.push({t,x:X(x),y:Y(y1),w:BASE.gate[0]-x,h:10,k:k++});if(x+w>BASE.gate[1])segs.push({t,x:X(BASE.gate[1]),y:Y(y1),w:x+w-BASE.gate[1],h:10,k:k++})}}
   for(let y=y0+10;y<y1;y+=64){const h=Math.min(64,y1-y);segs.push({t,x:X(x0),y:Y(y),w:10,h,k:k++});segs.push({t,x:X(x1-10),y:Y(y),w:10,h,k:k++})}
+  segs.push({t:'gateB',x:X(BASE.gate[0]),y:Y(y1),w:BASE.gate[1]-BASE.gate[0],h:10,k:999,gate:1,lv:wl});
   segs.forEach(s=>{s.base=1;s.wall=1;s.hp=wallHp&&wallHp[s.k]!=null?wallHp[s.k]:1;out.push(s)})}
  return out}
 
