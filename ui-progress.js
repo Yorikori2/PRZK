@@ -44,10 +44,10 @@ function renderChar(){const el=document.getElementById('pgChar'),s=CH.stats,need
  el.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{const k=b.dataset.st,d=+b.dataset.d;if(d>0&&statPts()<=0)return;CH.stats[k]=Math.max(STAT_BASE,Math.min(STAT_MAX,CH.stats[k]+d));renderChar()});
  el.querySelectorAll('[data-sk]').forEach(n=>{n.onclick=()=>{const b=n.dataset.sk,i=+n.dataset.i;if(CH.lv<TIER_LV[i])return;if(CH.sk[b][i]<3&&skPts()>0)CH.sk[b][i]++;else if(CH.sk[b][i]>=3||skPts()<=0)CH.sk[b][i]=Math.max(0,CH.sk[b][i]-1);renderChar();renderMod()}})}
 /* ---------- gun customization ---------- */
-const MY_GUNS=['ar','sniper','smg','pistol','pump'];
+const MY_GUNS=['m4a1','k2','m24','mp5','glock17','r870'];
 const PINV=['sup_p','sup_r','comp','flash','choke','brake','b_long','b_short','b_heavy','b_match','o_rd','o_holo','o_4x','o_8x','o_th','u_grip','u_laser','u_light','u_bipod','u_gl','m_ext','m_drum','m_fast','m_tube','s_light','s_tac','s_cheek','t_light','t_bin','t_match'];
-const MODS={ar:{optic:'o_holo',mag:'m_ext',under:'u_grip',stock:'s_tac'},sniper:{optic:'o_4x',under:'u_bipod'},smg:{muzzle:'sup_p',optic:'o_rd'},pistol:{under:'u_laser'},pump:{muzzle:'choke'}};
-let mg='ar',ms='optic';
+const MODS={m4a1:{optic:'o_holo',mag:'m_ext',under:'u_grip',stock:'s_tac'},k2:{optic:'o_rd'},m24:{optic:'o_4x',under:'u_bipod'},mp5:{muzzle:'sup_p',optic:'o_rd'},glock17:{under:'u_laser'},r870:{muzzle:'choke'}};
+let mg='m4a1',ms='optic';
 const FXN={dmg:['피해','%'],rng:['사거리','%'],acc:['정확도',''],rec:['반동','%'],rof:['연사','%'],mag:['장탄','%'],rld:['재장전','%'],nz:['소음',''],mov:['기동성','%'],night:['야간 시야',''],gl:['유탄 발사','']};
 const fxChips=e=>Object.entries(e).map(([k,v])=>{const good=['rec','rld','nz'].includes(k)?v<0:v>0;return '<span class="'+(good?'p':'n')+'">'+FXN[k][0]+' '+(k=='night'||k=='gl'?'✓':(v>0?'+':'')+v+FXN[k][1])+'</span>'}).join('');
 function renderMod(){const el=document.getElementById('pgMod');if(!el)return;const cl=GCLASS[mg],sl=CSLOT[cl],mods=MODS[mg],w=W_BY[mg];if(!sl.includes(ms))ms=sl[0];
