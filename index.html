@@ -106,7 +106,7 @@ function roll(n,L=LT){const r={};for(let i=0;i<n;i++){const k=L[Math.random()*L.
 function give(r){const p=S.p,s=[];for(const k in r){if(!r[k])continue;p.inv[k]=(p.inv[k]||0)+r[k];s.push(NMI[k]+' '+r[k])}msg('획득: '+s.join(', '));if(r.antenna)msg('📡 GPS 활성화! 미니맵 사용 가능')}
 const avail=o=>S.lo[o.id]===undefined||(S.wv<300&&S.tt-S.lo[o.id]>2400);
 const rdist=(o,x,y)=>Math.hypot(Math.max(o.x-x,0,x-o.x-o.w),Math.max(o.y-y,0,y-o.y-o.h));
-const SPEC={police:{pistol:1,ammo:16},mil:{rifle:1,ammo:24},clinic:{bandage:5,food:2},school:{food:4,water:3},mart:{food:5,water:5},hard:{wood:10,scrap:6}};
+const SPEC={police:{pistol:1,ammo:16},mil:{ammo:24},clinic:{bandage:5,food:2},school:{food:4,water:3},mart:{food:5,water:5},hard:{wood:10,scrap:6}};
 function nearObj(){const p=S.p;let best=null,bd=30;const gx=p.x/DC|0,gy=p.y/DC|0;for(let y=gy-1;y<=gy+1;y++)for(let x=gx-1;x<=gx+1;x++){if(x<0||y<0||x>=DX||y>=DY)continue;for(const d of DG[y*DX+x]){if(d.k!='o'||!LOOTT[d.r.t])continue;const dd=rdist(d.r,p.x,p.y);if(dd<bd){bd=dd;best=d.r}}}return best}
 function ia(){const p=S.p,s=S;if(s.dr){s.dr=0;p.y+=24;if(blocker(p.x,p.y,7,'car'))p.y-=48;return msg('하차')}
  if(Math.hypot(s.car.x-p.x,s.car.y-p.y)<46){if((p.inv.fuel||0)>0){s.dr=1;p.x=s.car.x;p.y=s.car.y;return msg('🚗 운전 (연료 '+(p.inv.fuel|0)+')')}return msg('연료가 필요합니다')}
@@ -114,10 +114,10 @@ function ia(){const p=S.p,s=S;if(s.dr){s.dr=0;p.y+=24;if(blocker(p.x,p.y,7,'car'
  for(const q of s.pois)if(q.on&&Math.hypot(q.x-p.x,q.y-p.y)<40){q.on=0;const r=roll(q.k=='drop'?7:q.k=='zone'?9:11);r.ammo=(r.ammo||0)+10;r.bandage=(r.bandage||0)+2;if(q.k=='bunker')r.scrap=(r.scrap||0)+8;return give(r)}
  const o=nearObj();if(o){if(!avail(o))return msg(s.wv>=300?'아이템 리스폰 중단됨':'이미 수색한 '+NM[o.t]);
   const r=roll(1+(Math.random()*3|0),LOOTT[o.t]),b=W0.b[o.b],kind=b?b.kind:'';
-  if(SPEC[kind]&&!s.ks[kind]&&(kind!='police'&&kind!='mil'||['gunrack','locker','ammo'].includes(o.t))){s.ks[kind]=1;for(const k in SPEC[kind])r[k]=(r[k]||0)+SPEC[kind][k]}
-  if(o.radio&&!s.ks.radio){s.ks.radio=1;r.antenna=1}
+  if(SPEC[kind]&&!s.ks[kind]&&(kind!='police'&&kind!='mil'||['gunrack','locker','ammo'].includes(o.t))){s.ks[kind]=1;for(const k in SPEC[kind])r[k]=(r[k]||0)+SPEC[kind][k];if(kind=='mil'&&Math.random()<.3)r.rifle=1}
+  let note='';if(o.radio&&!s.ks.radio){if(Math.random()<.25){s.ks.radio=1;r.antenna=1}else note=' · 📻 쓸 만한 안테나는 없었다'}
   const gun=['gunrack','locker','ammo','pcar','truck'].includes(o.t);if(gun&&kind=='police'&&Math.random()<.12)r.pistol=1;if(gun&&kind=='mil'){r.ammo=(r.ammo||0)+4;if(Math.random()<.1)r.rifle=1}
-  s.lo[o.id]=s.tt;return give(r)}
+  s.lo[o.id]=s.tt;give(r);if(note)msg($('msg').textContent+note);return}
  msg('주변에 상호작용할 대상이 없음')}
 function use(k){const p=S.p;if(!(p.inv[k]>0))return msg(NMI[k]+' 없음');p.inv[k]--;if(k=='food')p.food=Math.min(100,p.food+35);if(k=='water')p.water=Math.min(100,p.water+40);if(k=='bandage'){p.bleed=0;p.hp=Math.min(100,p.hp+(S.base.lv.med>=3?25:10))}}
 function cr(k){const bl=S.base.lv.bench,p=S.p;if(k=='axe'&&!bl)return msg('도끼는 거점 작업대가 필요합니다');if(k=='armor'&&bl<3)return msg('방탄복은 공방(작업대 Lv3)이 필요합니다');
