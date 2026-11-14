@@ -213,6 +213,7 @@ P('mailbox','우편함',null,o=>{const{x,y,w,h}=o;B3(x,y,w,h,24,'#9aa0a6','#7a80
 P('washer','세탁기',['water','scrap'],o=>{const{x,y,w,h}=o;B3(x,y,w,h,18,'#f4f4ee','#d8dee2');blob(x+w/2,y+h-9,5,5,'#5a6068');blob(x+w/2,y+h-9,3,3,'#9fc4d4')});
 P('slide','미끄럼틀',null,o=>{const{x,y,w,h}=o;R('#555',x+2,y-24,3,24+h);R('#555',x+12,y-24,3,24+h);R('#1d1714',x,y-28,18,6);R('#3a6ea8',x+1,y-27,16,4);for(let i=0;i<w-18;i++)R('#e0b03a',x+18+i,y-24+i*((24+h-4)/(w-18)),3,2)});
 P('swing','그네',null,o=>{const{x,y,w}=o;R('#c43c32',x,y-30,3,30);R('#c43c32',x+w-3,y-30,3,30);R('#c43c32',x,y-31,w,3);[[w*.3],[w*.65]].forEach(([a])=>{R('#9aa0a6',x+a,y-28,1,20);R('#2a2a2a',x+a-4,y-8,10,2)})},false);
+P('alarmbox','경보 장치',null,o=>{const{x,y}=o;R('#1d1714',x-1,y-23,12,15);R('#c9ccd0',x,y-22,10,13);const on=Math.sin(performance.now()/200)>0;R(on?'#ff3030':'#802020',x+3,y-19,4,3);R('#3a3f45',x+2,y-13,6,2);R('#555',x+4,y-9,2,9)},false);
 const SPRC={};
 function sprite(key,w,h,draw){if(SPRC[key])return SPRC[key];const c=document.createElement('canvas');c.width=w;c.height=h;const o=g;g=c.getContext('2d');draw();g=o;
  const x=c.getContext('2d'),im=x.getImageData(0,0,w,h),d=im.data,out=new Uint8ClampedArray(d);
@@ -242,7 +243,7 @@ function person(o,dir,fr,wpn){const p=R,s=dir=='l'?-1:dir=='r'?1:0,up=dir=='u',s
  const hx=s?15:13,hw=s?9:10;U(o.sk,hx,5,hw,11);U(o.skd,s>0?hx:hx+hw-2,5,2,11);U(o.h,hx,3,hw,4);
  if(up)U(o.h,hx,5,hw,9);else if(s)U(o.h,s>0?hx:hx+hw-3,5,3,6);else{U(o.h,hx,5,1,4);U(o.h,hx+hw-1,5,1,4)}
  if(o.cap){U(o.cap,hx-1,2,hw+2,3);if(s)U(o.cap,s<0?hx-4:hx+hw,4,4,2)}if(o.helm){U(o.helm,hx-1,1,hw+2,5);U('#00000030',hx-1,5,hw+2,1)}if(o.ncap){U(o.ncap,hx+1,1,hw-2,3);U('#d33a3a',hx+(hw>>1)-1,1,2,2)}
- if(!up){const ey=o.zb?'#d82020':'#1a1a1a';if(s)U(ey,s>0?hx+6:hx+1,9,1,2);else{U(ey,hx+2,9,2,2);U(ey,hx+6,9,2,2);if(o.zb){U('#6e0e0e',hx+3,13,4,1);U('#8f1616',hx+4,14,2,2)}}}}
+ if(!up){const ey=o.zb?'#d82020':'#1a1a1a';if(s)U(ey,s>0?hx+6:hx+1,9,1,2);else{U(ey,hx+2,9,2,2);U(ey,hx+6,9,2,2);if(o.zb){U('#6e0e0e',hx+3,13,4,1);U('#8f1616',hx+4,14,2,2)}if(o.scream)U('#1d1714',hx+3,12,4,3)}}}
 const ZBASE={zb:1,sk:'#9aab86',skd:'#7f9070',h:'#4a4a3a'};
 const LOOKS={
  player:{p:'#3d4f6b',pd:'#2f3d54',c:'#5a6b45',cl:'#6f8257',cd:'#46553a',sk:'#e0b48c',skd:'#c4966f',h:'#3b2a1e',cap:'#2f3a2a',pack:1},
@@ -254,6 +255,8 @@ const LOOKS={
  civ3:{...ZBASE,p:'#5a4a3a',pd:'#4a3a2a',c:'#4f7a8a',cl:'#6a94a4',cd:'#3e6270',h:'#2a2a22'},
  cop:{...ZBASE,p:'#1e2a44',pd:'#141e34',c:'#2f4a7a',cl:'#4a64a0',cd:'#22385e',h:'#2a2a22',cap:'#1e2a44'},
  soldier:{...ZBASE,p:'#4f5a35',pd:'#3e4729',c:'#5a6440',cl:'#6b7650',cd:'#4a5434',h:'#3a3a2a',helm:'#4a5434',vest:'#3e4729'},
+ runner:{...ZBASE,sk:'#8a9aa0',skd:'#6a7a80',p:'#3a3a40',pd:'#2a2a30',c:'#5a4a4a',cl:'#6a5a5a',cd:'#4a3a3a',h:'#2a2a22'},
+ screamer:{...ZBASE,sk:'#c8ccc0',skd:'#a8ac9c',h:'#e8e8e0',p:'#5a5a60',pd:'#4a4a50',c:'#8a8a90',cl:'#9a9aa0',cd:'#6a6a70',scream:1},
  heavy:{...ZBASE,p:'#2a2f35',pd:'#1e2226',c:'#3a4048',cl:'#4a5058',cd:'#2a2f35',h:'#2a2a22',helm:'#2a2f35',vest:'#1e2226'},
  hazmat:{...ZBASE,p:'#d9c43a',pd:'#b8a42a',c:'#e8d44a',cl:'#f4e46a',cd:'#c4b03a',sk:'#5a6068',skd:'#3a4048',h:'#d9c43a',helm:'#e8d44a'},
  fire:{...ZBASE,p:'#3a3a40',pd:'#2a2a30',c:'#c9a46a',cl:'#ddb880',cd:'#a8844a',h:'#2a2a22',helm:'#c43c32',vest:'#e8e8a0'},

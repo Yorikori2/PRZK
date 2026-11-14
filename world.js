@@ -1,6 +1,7 @@
 /* PROJECT LEGACY — world layout (3x3 city blocks) and hand-built buildings.
    Coordinates are world pixels. Each block is 896x704, roads are 128 wide. */
 'use strict';
+const TIER={houses:1,mart:1,school:2,hard:2,clinic:3,police:4,mil:5,fire:2,ware:2,apt:1,church:1,lab:5},ALR={school:.1,clinic:.2,police:.3,mil:.4,lab:.45};
 const BW=896,BH=704,RD=128,WW=4*RD+3*BW,WH=4*RD+3*BH;let NBX=3,NBY=3;
 const bo=(c,r)=>[RD+c*(BW+RD),RD+r*(BH+RD)];
 let W0;
@@ -17,7 +18,7 @@ function Bld(name,c,r,kind){const[ox,oy]=bo(c,r),b={name,kind,ox,oy,c,r};const b
   room:(n,x,y)=>W0.rooms.push([n,ox+x,oy+y]),
   ent:(x,y,dx,dy)=>W0.ents.push([ox+x,oy+y,dx,dy]),
   light:(x,y,r,a,col)=>W0.lights.push([ox+x,oy+y,r,a,col]),
-  z:(look,x,y)=>W0.zs.push({look,x:ox+x,y:oy+y}),
+  z:(look,x,y)=>W0.zs.push({look,x:ox+x,y:oy+y,b:bi}),
  };return A}
 /* outer walls helper: north wall tall, others cut */
 function shell(A,x0,y0,x1,y1,face,southGaps=[]){A.hw(x0-4,x1+4,y0,34,face);A.vw(x0,y0,y1,34);A.vw(x1,y0,y1,34);let x=x0-4;for(const[a,b]of southGaps){A.hw(x,a,y1,8,'#b8b2a6');x=b}A.hw(x,x1+4,y1,8,'#b8b2a6')}
@@ -65,7 +66,7 @@ function buildClinic(){const A=Bld('진료소',1,0,'clinic');const L=56,RR=840,T
  // pharmacy / restroom / staff
  A.o('register',556,334,22,64);A.o('medshelf',668,302,24,116);A.o('medshelf',572,410,86,12);A.o('aisle',612,340,26,56);A.o('crate',580,350,22,16);
  A.o('sink',560,432,62,12,{n:2});A.o('stall',600,500,3,58);A.o('stall',640,500,3,58);[566,612,660].forEach(x=>A.o('toilet',x,540,16,16));
- A.o('fridge',702,300,20,14);A.o('kitchen',776,300,60,14,{cm:1});A.o('locker',814,316,24,100);A.o('rtable',728,440,40,22);A.o('ctable',736,504,48,10);A.o('sofa',722,530,84,18);A.o('plant',818,540,14,10);
+ A.o('fridge',702,300,20,14);A.o('kitchen',776,300,60,14,{cm:1});A.o('locker',814,316,24,100);A.o('rtable',728,440,40,22);A.o('ctable',736,504,48,10);A.o('sofa',722,530,84,18);A.o('plant',818,540,14,10);A.o('alarmbox',706,404,10,6);
  // outside
  A.o('planter',92,572,110,12);A.o('planter',502,572,110,12);A.o('planter',672,572,110,12);A.o('sign',306,590,34,6,{icon:crossIcon});[342,382,422,462].forEach(x=>A.o('bollard',x,588,6,6));A.o('lamp',62,592,6,6);A.o('lamp',822,592,6,6);
  A.o('ambulance',432,640,120,34);A.o('car',86,640,56,28,{c:'#3a6ea8'});A.o('car',198,640,56,28,{c:'#8a8f95'});A.o('car',652,664,56,28,{c:'#c9a42a'});
@@ -93,7 +94,7 @@ function buildPolice(){const A=Bld('경찰서',0,0,'police');const L=48,RR=848,T
  // evidence
  A.o('shelf',244,90,24,124);A.o('shelf',356,90,24,124);A.o('crate',300,120,22,18);A.o('crate',300,160,24,16);A.o('crate',322,200,20,14);
  // interrogation + observation
- A.o('chair',440,118,12,8);A.o('ctable',426,140,56,18,{c:'#5a5f66'});A.o('chair',460,170,12,8);A.o('desk',530,108,60,18);A.o('chair',554,92,12,8);A.o('plant',570,200,14,10);
+ A.o('chair',440,118,12,8);A.o('ctable',426,140,56,18,{c:'#5a5f66'});A.o('chair',460,170,12,8);A.o('desk',530,108,60,18);A.o('alarmbox',536,192,10,6);A.z('heavy',100,170);A.o('chair',554,92,12,8);A.o('plant',570,200,14,10);
  // detectives office
  [[620,100],[724,100],[620,176],[724,176]].forEach(([x,y])=>{A.o('chair',x+24,y-14,12,8);A.o('desk',x,y,64,18)});A.o('bookshelf',812,90,24,124);A.o('cooler',800,214,12,10);
  // corridor
@@ -126,7 +127,7 @@ function buildSchool(){const A=Bld('학교',2,0,'school');const L=48,RR=848,TP=6
  [200,400,560,640].forEach(x=>A.door(x,CN-10,30,'v'));
  const cls=(x0)=>{A.o('board',x0+60,74,80,6);A.o('desk',x0+20,92,50,16,{pc:false});for(let r=0;r<3;r++)for(let c=0;c<4;c++)A.o('sdesk',x0+24+c*40,130+r*40,20,22);A.o('bookshelf',x0+170,90,24,60)};
  cls(L);cls(248);cls(608);A.o('plant',820,230,14,10);
- A.o('desk',462,90,60,18);A.o('desk',536,90,60,18);A.o('desk',462,160,60,18);A.o('cabinet',540,200,50,10);A.o('cooler',580,140,12,10);A.o('sofa',470,230,70,14,{c:'#6a4a3a'});
+ A.o('desk',462,90,60,18);A.o('desk',536,90,60,18);A.o('desk',462,160,60,18);A.o('cabinet',540,200,50,10);A.o('cooler',580,140,12,10);A.o('alarmbox',470,208,10,6);A.o('sofa',470,230,70,14,{c:'#6a4a3a'});
  A.o('lockrow',60,268,130,12);A.o('lockrow',260,268,130,12);A.o('lockrow',690,268,140,12);A.o('extinguisher',440,300,8,6);A.o('bench',300,310,60,10);
  A.o('hoop',60,344,40,4);A.o('hoop',396,344,40,4);A.o('bleacher',100,566,280,20);A.o('crate',60,520,20,16);A.o('crate',410,520,24,16);
  [380,440,500].forEach(y=>A.o('longtable',470,y,200,26));A.o('kitchen',720,334,120,14);A.o('fridge',816,380,20,14);A.o('fridge',816,412,20,14);A.o('sink',724,520,50,12);A.o('counter',724,470,80,18,{fc:'#7a6a5a'});
@@ -147,7 +148,7 @@ function buildMilitary(){const A=Bld('군부대',0,2,'mil');
  // HQ
  const hqN=(x0,x1,y,h)=>{const o=A.ox;R('#7a8068',o+48,y,352,h);for(let yy=y+4;yy<y+h-4;yy+=8)R('#6a7058',o+48,yy,352,1);R('#00000030',o+48,y+h-3,352,3);winD(o+90,30,y,h);winD(o+300,30,y,h);R('#1d1714',o+150,y+3,64,22);R('#4a6a4a',o+151,y+4,62,20);for(let i=0;i<5;i++)ln(o+156+i*10,y+8,o+160+i*12,y+20,'#d9c35a')};
  shell(A,48,64,400,304,hqN,[[120,160]]);vseg(A,224,64,304,[[100,136],[230,266]],34);hseg(A,224,400,184);
- A.o('console',60,72,150,14);A.o('ctable',90,160,90,40,{c:'#5a6440'});A.o('chair',120,144,12,8);A.o('chair',150,210,12,8);A.o('board',60,240,60,6,{c:'#e8e8e0'});
+ A.o('console',60,72,150,14);A.o('ctable',90,160,90,40,{c:'#5a6440'});A.o('chair',120,144,12,8);A.o('chair',150,210,12,8);A.o('board',60,240,60,6,{c:'#e8e8e0'});A.o('alarmbox',190,268,10,6);A.z('heavy',300,110);A.z('heavy',200,450);
  A.o('gunrack',236,70,74,12);A.o('gunrack',318,70,74,12);A.o('ammo',240,140,24,14);A.o('ammo',270,140,24,14);A.o('ammo',360,150,24,14);A.o('locker',372,96,24,50,{c:'#4f5a35'});
  A.o('rack',240,194,24,12);A.o('rack',270,194,24,12);A.o('console',310,196,82,14,{radio:1});A.o('desk',300,252,60,18);
  A.roof(48,64,352,240,'mil','지휘소');
