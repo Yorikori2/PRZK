@@ -61,8 +61,8 @@ main{max-width:980px;margin:0 auto;padding:12px 8px 32px}h1{font-size:18px;margi
 .legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin-top:8px}
 .notes{max-width:420px;margin:12px auto 0;font-size:13px;color:var(--mut)}.notes li{margin:3px 0}
 </style></head><body><main>
-<h1>무기 · 인벤토리 · 인터페이스 샘플</h1><p class="lead">아직 게임에 넣지 않은 미리보기입니다. 확인해 주시면 게임에 적용합니다.</p>
-<div class="tabs"><button data-t="hud" class="on">🎮 새 게임 화면</button><button data-t="inv">🎒 인벤토리</button><button data-t="cat">⚔ 무기 도감</button></div>
+<h1>무기 · 인벤토리 · 성장 · 총기 개조 샘플</h1><p class="lead">아직 게임에 넣지 않은 미리보기입니다. 확인해 주시면 게임에 적용합니다.</p>
+<div class="tabs"><button data-t="hud" class="on">🎮 새 게임 화면</button><button data-t="inv">🎒 인벤토리</button><button data-t="cat">⚔ 무기 도감</button><button data-t="char">🧬 캐릭터 · 스킬</button><button data-t="mod">🔧 총기 개조</button></div>
 <section id="phoneWrap">
 <div class="phone" id="ph"><canvas class="scene" id="scn" width="432" height="880"></canvas>
  <div class="ab g status"><div class="ava"><canvas id="ava" width="24" height="24"></canvas></div><div><div class="hp"><span>체력</span><b>68 / 100</b></div><div class="bar"><i style="width:68%;background:linear-gradient(90deg,#b8322c,#e0574f)"></i></div><div class="hp"><span>방어 37% · 무게 23.6kg</span></div></div>
@@ -81,9 +81,10 @@ main{max-width:980px;margin:0 auto;padding:12px 8px 32px}h1{font-size:18px;margi
 </div>
 <ul class="notes" id="notes"></ul>
 </section>
+<section class="pg" id="pgChar"></section><section class="pg" id="pgMod"></section>
 <section class="cat" id="cat"><div class="tabs" id="cf"></div><div class="legend" id="lg"></div><div class="cards" id="cards"></div></section>
 </main>
-<script src="art.js"></script><script src="world.js"></script><script src="items.js"></script>
+<script src="art.js"></script><script src="world.js"></script><script src="items.js"></script><script src="progression.js"></script><script src="ui-progress.js"></script>
 <script>
 /* ---------- scene ---------- */
 buildWorld();
@@ -135,8 +136,8 @@ function catalog(){const cards=document.getElementById('cards');cards.innerHTML=
 /* ---------- tabs ---------- */
 const NOTES={hud:['상단 왼쪽: 초상화, 체력, 허기·갈증·<b>기력</b>(달리기), 상태 효과 칩','상단 오른쪽: <b>원형 미니맵</b>, 날짜·시간, 웨이브까지 남은 시간','현재 건물의 위험도와 경보 상태를 항상 표시','상호작용 대상 위에 <b>"수색 · 접수대"</b> 안내 말풍선','오른쪽 아래: 무기 카드(탄창/예비 탄약, 재장전, 교체), 공격·수색·<b>은신</b> 버튼','아래 가운데: <b>퀵슬롯 4칸</b> (붕대·구급상자·화염병·수류탄)','왼쪽: 가방·제작·거점·지도 버튼'],
  inv:['<b>무게 기반 가방</b>: 기본 20kg + 가방 장착 시 증가 (학생 +10, 등산 +20, 군용 +35)','장비 슬롯 7개: 주무기 · 보조무기 · 근접 · 투척 · 머리 · 몸통 · 가방','분류 필터와 등급 색상, 장착 중 표시(E)','아이템을 누르면 상세 정보와 장착·사용·퀵슬롯·버리기','무겁게 들면 이동 속도 감소 예정'],cat:[]};
-function setTab(t){document.querySelectorAll('.tabs [data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t==t));document.getElementById('phoneWrap').style.display=t=='cat'?'none':'';document.getElementById('cat').classList.toggle('on',t=='cat');
+function setTab(t){document.querySelectorAll('.tabs [data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t==t));document.getElementById('phoneWrap').style.display=(t=='cat'||t=='char'||t=='mod')?'none':'';document.getElementById('pgChar').classList.toggle('on',t=='char');document.getElementById('pgMod').classList.toggle('on',t=='mod');document.getElementById('cat').classList.toggle('on',t=='cat');
  const sh=document.getElementById('sheet');if(t=='inv')openInv();else sh.classList.remove('on');document.getElementById('notes').innerHTML=(NOTES[t]||[]).map(n=>'<li>'+n+'</li>').join('')}
 document.querySelectorAll('.tabs [data-t]').forEach(b=>b.onclick=()=>setTab(b.dataset.t));document.querySelector('[data-open]').onclick=()=>setTab('inv');
-wcard();quick();catalog();setTab('hud');
+wcard();quick();catalog();renderChar();renderMod();setTab('hud');
 </script></body></html>
