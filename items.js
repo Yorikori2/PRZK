@@ -98,3 +98,47 @@ const bagI=(c,c2)=>()=>{R(blk,5,5,14,17);R(c,6,6,12,15);R(c2,6,6,12,3);R(blk,8,1
 I('bag1',bagI('#3a6ea8','#5a8ec8'));I('bag2',bagI('#c94f3a','#e06a50'));I('bag3',bagI('#4f5a35','#6b7650'));
 I('antenna',()=>{blob(12,10,8,6,blk);blob(12,10,7,5,'#c9ced3');blob(12,10,3,2,'#9aa0a6');R(blk,11,15,2,6);R(blk,7,20,10,2);R('#d33a3a',16,6,2,2)});
 function iconCanvas(id,scale=2){const c=document.createElement('canvas');c.width=c.height=24;const o=g;g=c.getContext('2d');(IC[id]||(()=>{R('#555',6,6,12,12)}))();g=o;const x=c.getContext('2d'),im=x.getImageData(0,0,24,24),d=im.data,out=new Uint8ClampedArray(d);for(let j=0;j<24;j++)for(let i=0;i<24;i++){const k=(j*24+i)*4;if(d[k+3])continue;if([[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>{const ii=i+a,jj=j+b;return ii>=0&&jj>=0&&ii<24&&jj<24&&d[(jj*24+ii)*4+3]>0})){out[k]=150;out[k+1]=165;out[k+2]=175;out[k+3]=140}}im.data.set(out);x.putImageData(im,0,0);c.style.width=c.style.height=(24*scale)+'px';c.style.imageRendering='pixelated';return c}
+/* ---------- expansion firearms ---------- */
+Object.assign(AMMO,{'357':'.357 매그넘','50':'.50 대구경','762':'7.62mm 탄','arrow':'화살','nail':'못','flare':'신호탄','40mm':'40mm 유탄','rocket':'로켓','taser':'테이저 카트리지'});
+WEAPONS.push(
+ ['revolver','리볼버','g','u',{d:48,cd:.5,r:260,mag:6,nz:4,wt:1.2,ammo:'357'},'강력한 한 발 · 재장전 느림','주택 · 경찰서'],
+ ['hpistol','대구경 권총','g','e',{d:75,cd:.7,r:280,mag:7,nz:5,wt:2,ammo:'50',pierce:2},'중무장 좀비 관통 · 큰 반동','군부대'],
+ ['mpistol','기관권총','g','r',{d:18,cd:.07,r:180,mag:20,nz:4,wt:1.4,ammo:'9mm'},'권총 크기의 연사','경찰 특공 사물함'],
+ ['taser','테이저','g','u',{d:5,cd:1,r:90,mag:3,nz:1,wt:.5,ammo:'taser'},'명중 시 3초 기절 · 연쇄 감전','경찰서'],
+ ['flare','신호탄 총','g','u',{d:20,cd:1.2,r:240,mag:1,nz:2,wt:.8,ammo:'flare'},'불 붙임 · 좀비 유인 · 밤 조명','소방서 · 주유소'],
+ ['nailgun','네일건','g','c',{d:16,cd:.2,r:120,mag:40,nz:1,wt:2.2,ammo:'nail'},'조용한 연사 · 못 제작 가능','철물점'],
+ ['ssmg','소음 기관단총','g','e',{d:20,cd:.1,r:220,mag:30,nz:1,wt:2.9,ammo:'9mm'},'일체형 소음기 · 거의 무소음','군부대 · 연구소'],
+ ['pdw','개인방어화기','g','r',{d:22,cd:.07,r:240,mag:50,nz:4,wt:2.4,ammo:'9mm'},'50발 탄창 · 빠른 연사','경찰서 · 군부대'],
+ ['sawnoff','소드오프 산탄총','g','u',{d:12,cd:.25,r:110,mag:2,nz:5,wt:2,ammo:'12g',pel:9},'한 손 사용 · 근거리 폭발적 화력','주택 · 교회'],
+ ['autosg','자동 산탄총','g','e',{d:14,cd:.3,r:170,mag:10,nz:5,wt:4.2,ammo:'12g',pel:6},'산탄 연사 · 무리 제압','군부대 무기고'],
+ ['hunting','사냥용 소총','g','u',{d:95,cd:1.3,r:460,mag:5,nz:5,wt:3.8,ammo:'308',pierce:2},'볼트액션 · 한 발 한 발 강력','주택 · 교회'],
+ ['carbine','카빈','g','r',{d:30,cd:.14,r:300,mag:30,nz:4,wt:3,ammo:'556'},'가볍고 다루기 쉬운 소총','경찰서'],
+ ['battle','전투소총','g','e',{d:48,cd:.16,r:380,mag:20,nz:5,wt:4.4,ammo:'762'},'고위력 연사 · 반동 큼','군부대'],
+ ['dmr','지정사수소총','g','e',{d:70,cd:.45,r:460,mag:10,nz:5,wt:4.6,ammo:'762',pierce:2},'반자동 정밀 사격','군부대'],
+ ['amr','대물 저격총','g','l',{d:260,cd:2,r:640,mag:5,nz:5,wt:13,ammo:'50',pierce:6},'장갑 관통 · 일직선 6마리 관통 · 매우 무거움','군부대 무기고 (전설)'],
+ ['minigun','미니건','g','l',{d:22,cd:.03,r:300,mag:300,nz:5,wt:16,ammo:'762'},'회전 후 초고속 연사 · 이동 매우 느림','군부대 (전설)'],
+ ['gl','유탄 발사기','g','l',{d:140,cd:1.5,r:300,mag:6,nz:5,wt:6,ammo:'40mm',aoe:80},'범위 폭발 · 6연발 회전식','군부대 무기고 (전설)'],
+ ['rpg','로켓 발사기','g','l',{d:400,cd:3,r:420,mag:1,nz:5,wt:7,ammo:'rocket',aoe:120},'초대형 폭발 · 보스용','군부대 · 연구소 (전설)'],
+ ['bow','컴파운드 활','g','u',{d:55,cd:.9,r:280,mag:1,nz:0,wt:1.6,ammo:'arrow'},'무소음 · 화살 회수 · 제작 가능','교회 · 주택'],
+);
+WEAPONS.forEach(w=>W_BY[w[0]]=w);
+const SUB={pistol:'권총',spistol:'권총',revolver:'권총',hpistol:'권총',mpistol:'권총',smg:'기관단총',ssmg:'기관단총',pdw:'기관단총',pump:'산탄총',dbarrel:'산탄총',sawnoff:'산탄총',autosg:'산탄총',ar:'소총',carbine:'소총',battle:'소총',hunting:'저격',sniper:'저격',dmr:'저격',amr:'저격',lmg:'중화기',minigun:'중화기',gl:'중화기',rpg:'중화기',flamer:'중화기',crossbow:'특수',bow:'특수',taser:'특수',flare:'특수',nailgun:'특수'};
+I('revolver',()=>{R(steelD,2,8,11,3);R(steel,2,8,11,1);R(blk,12,7,5,6);R(steelD,13,8,1,4);R(steelD,15,8,1,4);R(steelD,16,8,3,4);R(woodC,15,12,5,8);R(woodD,15,18,5,2);R(blk,13,12,2,3)});
+I('hpistol',()=>{R('#c9ced3',1,7,18,6);R('#e8ecef',1,7,18,1);for(let x=13;x<18;x+=2)R(steelD,x,8,1,4);R(blk,12,13,6,8);R(blkL,12,13,6,1);R(blk,9,13,3,2)});
+I('mpistol',()=>{R(blk,3,8,14,5);R(blkL,3,8,14,1);R(blk,11,13,4,6);R(blk,11,19,4,4);R(steelD,11,22,4,1);R(blk,2,9,2,2);R(blk,17,9,3,2)});
+I('taser',()=>{R('#e0b03a',3,8,13,5);R('#f0c84a',3,8,13,1);R(blk,1,8,3,5);R(blk,11,13,5,7);R(blkL,11,13,5,1);R('#4aa0ff',1,9,1,1);R('#4aa0ff',1,11,1,1)});
+I('flare',()=>{R('#e07a2a',3,8,12,6);R('#f09a4a',3,8,12,1);R(blk,1,8,3,6);R('#e07a2a',13,13,5,7);R('#c86020',13,18,5,2);R(blk,11,14,2,2)});
+I('nailgun',()=>{R(blk,2,10,6,3);R('#e0b03a',6,6,13,7);R('#f0c84a',6,6,13,1);R(blk,14,13,5,7);R(blkL,14,13,5,1);for(let i=0;i<5;i++)R(steelL,7+i*2,13+i,2,1)});
+I('ssmg',()=>{R(blk,0,9,10,4);R(blkL,0,9,10,1);R(blk,9,8,11,6);R(blkL,9,8,11,1);R(blk,12,14,3,7);R(blk,17,14,3,4);R(blk,20,9,3,3)});
+I('pdw',()=>{blob(12,11,9,4,blk);R(blkL,5,7,14,1);R('#3a4048',7,8,10,2);R('#c9a46a',8,8,8,1);R(blk,1,10,4,2);R(blk,9,15,3,5);R(blk,15,15,3,3)});
+I('sawnoff',()=>{R(steelD,3,8,10,2);R(steelD,3,10,10,2);R(steel,3,8,10,1);R(steel,3,10,10,1);R(blk,12,8,3,5);R(woodC,14,10,5,4);R(woodC,16,13,4,7);R(woodD,16,18,4,2)});
+I('autosg',()=>{R(steelD,1,9,13,2);R(steel,1,9,13,1);R(blk,1,11,12,2);R(blk,12,8,8,6);R(blkL,12,8,8,1);R(blk,13,14,4,6);R(blk,18,14,3,4);R(blk,20,9,3,5)});
+I('hunting',()=>{R(steelD,0,10,11,2);R(woodC,10,9,13,5);R(woodL,10,9,13,1);R(woodD,15,13,8,3);R(blk,8,6,9,3);R(steelL,8,6,2,3);R(steel,15,7,2,2);R(blk,13,13,2,3)});
+I('carbine',()=>{R(blk,2,10,7,2);R('#8a7a5a',8,8,10,5);R('#a8986a',8,8,10,1);R(blk,11,13,3,6);R(blk,15,13,3,4);R('#8a7a5a',18,9,4,4);R(blk,10,6,4,2)});
+I('battle',()=>{R(blk,0,10,8,2);R(blk,7,8,11,5);R(blkL,7,8,11,1);R(woodC,6,9,4,3);ln(11,13,13,20,blk);ln(12,13,14,20,blk);R(blk,16,13,3,4);R(woodC,18,9,5,5);R(woodD,18,13,5,2)});
+I('dmr',()=>{R(blk,0,10,9,2);R('#4a5434',8,8,11,5);R('#5a6440',8,8,11,1);R(blk,9,5,9,3);R(steelL,9,5,1,3);R(blk,11,13,3,6);R('#4a5434',19,9,4,5);R(blk,3,12,1,5)});
+I('amr',()=>{R(blk,0,9,4,5);R(steelD,3,10,9,3);R(steel,3,10,9,1);R(blk,11,7,12,7);R(blkL,11,7,12,1);R(blk,12,3,10,3);R(steelL,12,3,2,3);R(blk,13,14,3,5);R(blk,5,13,1,6);R(blk,8,13,1,6);R(blk,20,14,3,3)});
+I('minigun',()=>{for(let i=0;i<3;i++)R(i==1?steel:steelD,0,8+i*2,13,2);R(blk,0,7,2,8);R(blk,12,6,10,10);R(blkL,12,6,10,1);R('#4a5434',13,16,6,5);R(blk,14,3,6,3);R(steelD,15,3,4,1)});
+I('gl',()=>{R('#4a5434',2,8,11,6);R('#5a6440',2,8,11,1);R(blk,1,8,2,6);blob(15,11,4,4,blk);blob(15,11,3,3,'#3e4729');R(blk,15,15,3,5);R(blk,19,9,4,4)});
+I('rpg',()=>{R('#4a5434',3,9,20,5);R('#5a6440',3,9,20,1);R('#6a7a4a',0,8,4,7);R('#3e4729',0,10,2,3);R(blk,9,14,3,5);R(blk,15,14,3,4);R(blk,11,6,4,3)});
+I('bow',()=>{ln(13,1,7,8,blk);ln(7,8,7,16,blk);ln(7,16,13,23,blk);ln(14,1,8,8,'#3a3f45');ln(8,16,14,23,'#3a3f45');blob(13,2,2,2,steel);blob(13,22,2,2,steel);ln(13,2,13,22,'#c9c0a0');R(woodC,2,12,20,1);R(steelL,1,11,3,3);R('#c94f3a',20,11,3,3);R(blk,6,10,3,5)});
