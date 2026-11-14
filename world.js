@@ -1,7 +1,7 @@
 /* PROJECT LEGACY — world layout (3x3 city blocks) and hand-built buildings.
    Coordinates are world pixels. Each block is 896x704, roads are 128 wide. */
 'use strict';
-const BW=896,BH=704,RD=128,WW=4*RD+3*BW,WH=4*RD+3*BH;
+const BW=896,BH=704,RD=128,WW=4*RD+3*BW,WH=4*RD+3*BH;let NBX=3,NBY=3;
 const bo=(c,r)=>[RD+c*(BW+RD),RD+r*(BH+RD)];
 let W0;
 function newWorld(){W0={fl:[],hw:[],vw:[],objs:[],dec:[],roofs:[],rooms:[],ents:[],lights:[],zs:[],b:[],spawn:{},base:null,car:null};return W0}
@@ -271,11 +271,11 @@ function buildWorld(){newWorld();buildPolice();buildClinic();buildSchool();build
  W0.objs.forEach((o,i)=>o.id=i);return W0}
 /* roads/grass background for a rect (static) */
 function drawGround(x0,y0,w,h){R('#3b5a30',x0,y0,w,h);
- for(let i=0;i<4;i++){const sx=i*(BW+RD),sy=i*(BH+RD);
+ for(let i=0;i<=Math.max(NBX,NBY);i++){const sx=i<=NBX?i*(BW+RD):-1e9,sy=i<=NBY?i*(BH+RD):-1e9;
   // vertical road strip
   if(sx<x0+w&&sx+RD>x0){floor(sx,y0,24,h,'walk');floor(sx+24,y0,80,h,'asphalt');floor(sx+104,y0,24,h,'walk');for(let y=Math.floor(y0/48)*48;y<y0+h;y+=48)R('#d9c35a',sx+63,y,2,26)}
   if(sy<y0+h&&sy+RD>y0){floor(x0,sy,w,24,'walk');floor(x0,sy+24,w,80,'asphalt');floor(x0,sy+104,w,24,'walk');for(let x=Math.floor(x0/48)*48;x<x0+w;x+=48)R('#d9c35a',x,sy+63,26,2)}}
- for(let i=0;i<4;i++)for(let j=0;j<4;j++){const sx=i*(BW+RD),sy=j*(BH+RD);if(sx<x0+w&&sx+RD>x0&&sy<y0+h&&sy+RD>y0){floor(sx+24,sy+24,80,80,'asphalt');for(let k=0;k<6;k++){R('#e8e8e0',sx+28+k*13,sy+14,8,10);R('#e8e8e0',sx+28+k*13,sy+104,8,10);R('#e8e8e0',sx+14,sy+28+k*13,10,8);R('#e8e8e0',sx+104,sy+28+k*13,10,8)}}}}
+ for(let i=0;i<=NBX;i++)for(let j=0;j<=NBY;j++){const sx=i*(BW+RD),sy=j*(BH+RD);if(sx<x0+w&&sx+RD>x0&&sy<y0+h&&sy+RD>y0){floor(sx+24,sy+24,80,80,'asphalt');for(let k=0;k<6;k++){R('#e8e8e0',sx+28+k*13,sy+14,8,10);R('#e8e8e0',sx+28+k*13,sy+104,8,10);R('#e8e8e0',sx+14,sy+28+k*13,10,8);R('#e8e8e0',sx+104,sy+28+k*13,10,8)}}}}
 function drawStatic(x0,y0,w,h){drawGround(x0,y0,w,h);const hit=(x,y,ww,hh2)=>x<x0+w&&x+ww>x0&&y<y0+h&&y+hh2>y0;
  for(const f of W0.fl)if(hit(f[0],f[1],f[2],f[3]))floor(...f);
  for(const d of W0.dec)if(hit(d.x,d.y,d.w,d.h))d.f();
