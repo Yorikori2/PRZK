@@ -11,17 +11,23 @@ h1{font-size:19px;margin:4px 0 2px}main>p{margin:0 0 12px;color:var(--mut);font-
 canvas{display:block;width:100%;image-rendering:pixelated;border-radius:6px}
 .cap{font-size:11px;color:var(--mut);margin-top:3px}
 .cur{border-color:#6fb3e066}.cur h2 b{color:#6fb3e0}
+.tier{display:inline-block;font-style:normal;font-size:10px;font-weight:700;border-radius:4px;padding:0 4px;margin-right:4px;color:#111}
+.t1{background:#b8bcc2}.t2{background:#7ac86a}.t3{background:#5aa8e8}.t4{background:#b07ae8}.t5{background:#e8b03a}.t6{background:#e87a3a}.t7{background:#e84a5a}.t8{background:#5ae8d8}
+#gal h3{font-size:14px;margin:12px 0 6px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px}
+.gi{background:#0e1215;border:1px solid #ffffff14;border-radius:8px;padding:5px;cursor:pointer}.gi.on{border-color:#e0b03a}.gi canvas{border-radius:4px}
+.gn{font-size:12px;margin-top:4px}.gs{font-size:11px;color:var(--mut)}
 </style><style>
 .ctl{display:grid;gap:8px;margin:0 0 10px}.grp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}.grp>span{min-width:46px;color:var(--mut);font-size:12px}
 button{font:inherit;font-size:13px;color:var(--fg);background:#1d2328;border:1px solid #ffffff22;border-radius:8px;padding:5px 9px;cursor:pointer}button.on{background:#5a4a1e;border-color:#e0b03a}
 button small{color:#e0b03a;font-size:10px;margin-left:3px}
 .stat{font-size:13px;color:#c8d0d6;background:#ffffff0a;border-radius:8px;padding:6px 10px;margin:8px 0 0}
 </style></head><body><main>
-<h1>장비 착용 미리보기</h1>
-<p>장비를 고르면 플레이어 모습이 바로 바뀌어요. 헬멧, 방독면, 방탄조끼, 배낭, 무기가 4방향으로 걸을 때와 공격할 때 모두 보이고, 오른쪽은 실제 게임 크기 화면이에요. <small style="color:#e0b03a">제안</small> 표시는 아직 게임에 없는 새 장비 아이디어예요.</p>
+<h1>장비 착용 미리보기 · 단계별 장비</h1>
+<p>장비를 고르면 플레이어 모습이 바로 바뀌어요. 머리·몸 장비는 5단계, 가방은 8단계예요. 4방향으로 걸을 때와 공격할 때 모두 보이고, 오른쪽은 실제 게임 크기 화면이에요. <small style="color:#e0b03a">제안</small> 표시는 아직 게임에 없는 새 장비 아이디어예요.</p>
 <div class="card"><div class="ctl" id="ctl"></div>
 <div class="row"><div><canvas id="pv"></canvas><div class="cap">확대 (앞 · 오른쪽 · 뒤 · 왼쪽 · 공격)</div></div><div><canvas id="sc"></canvas><div class="cap">실제 게임 크기 (진료소 로비)</div></div></div>
 <div class="stat" id="stat"></div></div>
+<div class="card" id="gal"><h2>단계별 장비 한눈에 보기</h2><p>누르면 위 캐릭터에 바로 입혀져요. 단계가 높을수록 높은 위험 지역(경찰서·군부대·연구소)에서만 나와요.</p></div>
 </main>
 <script src="art.js"></script><script src="world.js"></script>
 <script>
@@ -37,6 +43,83 @@ function spriteS(key,W,H,ol,olw,draw,post){if(SC[key])return SC[key];const p=2,c
   for(let j=0;j<h;j++)for(let i=0;i<w;i++){const k=(j*w+i)*4;if(d[k+3])continue;let n=-1;for(const[a,b]of[[0,-1],[1,0],[-1,0],[0,1]]){const ii=i+a,jj=j+b;if(ii>=0&&jj>=0&&ii<w&&jj<h&&d[(jj*w+ii)*4+3]>0){n=(jj*w+ii)*4;break}}if(n>=0){out[k]=d[n]*.34+oc[0]*.66;out[k+1]=d[n+1]*.34+oc[1]*.66;out[k+2]=d[n+2]*.34+oc[2]*.66;out[k+3]=255}}im.data.set(out)}x.putImageData(im,0,0)}
  return SC[key]=c}
 
+/* ================= GEAR (5-tier head/body, 6 crafted designs, 8-tier packs) ================= */
+const HEADT=[null,{n:'니트 비니',t:1,def:3},{n:'공사장 안전모',t:2,def:6},{n:'경찰 진압 헬멧',t:3,def:10},{n:'군용 헬멧',t:4,def:14},{n:'전술 헬멧',t:5,def:18}];
+const BODYT=[null,{n:'누빔 패딩 조끼',t:1,def:10},{n:'제작 방탄복',t:2,def:25},{n:'경찰 방탄조끼',t:3,def:35},{n:'진압 보호복',t:4,def:45},{n:'군용 방탄복',t:5,def:55}];
+const CRAFT=[{n:'고철 판 엮음',m:'고철 12 · 천 4'},{n:'타이어 고무 갑옷',m:'타이어 2 · 끈 3'},{n:'도로 표지판 갑옷',m:'표지판 1 · 고철 6 · 끈 2'},{n:'잡지 덕트테이프 갑옷',m:'잡지 6 · 테이프 3'},{n:'사슬 + 냄비뚜껑',m:'사슬 4 · 냄비 1 · 고철 4'},{n:'스포츠 보호대',m:'보호대 1 · 테이프 2'}];
+const PACKT=[null,{n:'허리 파우치',t:1,sl:4},{n:'학생 책가방',t:2,sl:8},{n:'소형 등산 배낭',t:3,sl:12},{n:'캠핑 배낭',t:4,sl:16},{n:'군용 배낭',t:5,sl:20},{n:'대형 등산 배낭',t:6,sl:26},{n:'택티컬 대형 배낭',t:7,sl:32},{n:'원정용 프레임 배낭',t:8,sl:40}];
+const PKC=[null,'#6a5a48','#c84a4a','#3a7aa8','#8a6a3a','#55613a','#c86a2a','#3a3e44','#2a5a8a'];
+/* pack behind the body: side view and the parts that peek out in front view */
+function packBehind(C){const{U,rr,s,up,tx,tw,pk}=C,c=PKC[pk],cl=lt(c,1.22),cd=lt(c,.72);
+ if(s){if(pk==1)return;
+  const dims=[0,0,[4,22,5,8],[4,21,5,10],[5,20,6,11],[5,21,6,11],[6,19,7,14],[6,18,7,15],[7,16,7,17]][pk],[o,y,w,h]=dims,x=tx-o;
+  if(pk==8){U('#9aa0a6',x-1,10,1,25);U('#9aa0a6',x-1,10,3,1);U('#7a8086',x+1,33,w-1,1)}
+  rr(c,x,y,w,h);U(cl,x+1,y,w-2,1);U(cl,x,y+2,1,h-4);U(cd,x+1,y+h-1,w-2,1);
+  rr(lt(c,1.08),x,y,w,Math.min(4,h>>2|2));U(cd,x+1,y+(h>>2|2),w-2,1);
+  if(pk==2){U('#e8e0d0',x+1,y+5,w-2,1)}
+  if(pk==3){rr('#7ab8d8',x-1,y+6,2,4)}
+  if(pk==4){rr('#d8c070',x,y+h-1,w,4);U('#b89a50',x+1,y+h+1,w-2,1)}
+  if(pk==5){for(let yy=y+5;yy<y+h-2;yy+=2)U(cd,x+1,yy,w-2,1);rr(cd,x-1,y+5,2,4)}
+  if(pk>=6){const rc=pk==6?'#3a7bc9':pk==7?'#5a6438':'#b83a3a';rr(rc,x,y-3,w,4);U(lt(rc,1.3),x+1,y-3,w-2,1);U(lt(rc,.72),x+1,y,w-2,1);U('#2a2420',x+2,y-3,1,4)}
+  if(pk==7){for(let yy=y+5;yy<y+h-2;yy+=2)U(lt(c,1.15),x+1,yy,w-2,1);rr('#4a5034',x-1,y+7,2,5)}
+  if(pk==8){rr('#8a8e94',x-2,y+10,3,3);U('#5a5e64',x-2,y+9,3,1);U('#f0d060',x+w-1,y+12,1,1)}
+  return}
+ if(!up){if(pk>=4){const w=pk>=6?tw+4:tw+2,x=tx-(w-tw)/2,y=pk>=6?18:21;rr(cd,x,y,w,12)}
+  if(pk>=6){const rc=pk==6?'#3a7bc9':pk==7?'#5a6438':'#b83a3a';rr(rc,tx-3,15,tw+6,4);U(lt(rc,1.3),tx-2,15,tw+4,1)}
+  if(pk==8){U('#9aa0a6',tx-4,9,1,24);U('#9aa0a6',tx+tw+3,9,1,24);U('#9aa0a6',tx-4,9,tw+8,1)}}}
+/* pack seen from behind (drawn over the body and head) plus straps in front/side view */
+function packTop(C){const{U,rr,s,up,cx,tx,tw,pk}=C,c=PKC[pk],cl=lt(c,1.22),cd=lt(c,.72);
+ if(!up){if(pk==1){const x=s?tx-1:tx+tw-1;rr(c,x,28,3,4);U(cl,x+1,28,1,1);U(cd,x,31,3,1)}else{U(cd,tx+1,22,1,8);if(!s)U(cd,tx+tw-2,22,1,8);if(pk>=5&&!s){U(cd,tx+1,27,tw-2,1)}}return}
+ if(pk==1){rr(c,cx-2,29,4,3);U(cl,cx-1,29,2,1);return}
+ const P=[0,0,[0,22,0,9],[0,21,0,10],[1,20,2,11],[1,21,2,11],[2,19,4,14],[2,18,4,15],[2,15,4,18]][pk],x=tx-P[0],y=P[1],w=tw+P[2],h=P[3];
+ if(pk==8){U('#9aa0a6',x-1,9,1,26);U('#9aa0a6',x+w,9,1,26);U('#9aa0a6',x-1,9,w+2,1);U('#c8ccd0',x-1,9,w+2,1)}
+ if(pk>=6){const rc=pk==6?'#3a7bc9':pk==7?'#5a6438':'#b83a3a';rr(rc,x-1,y-3,w+2,4);U(lt(rc,1.3),x,y-3,w,1);U(lt(rc,.72),x,y,w,1);U('#2a2420',x+1,y-3,1,4);U('#2a2420',x+w-2,y-3,1,4)}
+ rr(c,x,y,w,h);U(cl,x+1,y,w-2,1);U(cl,x,y+2,1,h-4);U(cd,x+w-1,y+2,1,h-4);U(cd,x+1,y+h-1,w-2,1);
+ rr(lt(c,1.08),x,y,w,4);U(cd,x+1,y+4,w-2,1);U('#d8b850',cx-1,y+3,2,1);
+ if(pk==2){U('#e8e0d0',x+1,y+6,w-2,1);rr(lt(c,.85),x+2,y+6,w-4,3)}
+ if(pk==3){rr('#7ab8d8',x-1,y+5,2,4);rr(lt(c,.85),x+2,y+6,w-4,3)}
+ if(pk==4){rr('#d8c070',x-1,y+h-2,w+2,4);U('#b89a50',x,y+h,w,1);rr(lt(c,.85),x+1,y+6,w-2,4)}
+ if(pk==5){rr(cd,x+1,y+6,3,4);rr(cd,x+w-4,y+6,3,4);U(cl,x+1,y+6,3,1);U(cl,x+w-4,y+6,3,1)}
+ if(pk==6){rr(lt(c,.82),x+2,y+6,w-4,5);U(cl,x+3,y+6,w-6,1);rr('#3a3e44',x-2,y+6,2,5)}
+ if(pk==7){for(let yy=y+6;yy<y+h-1;yy+=2)U(lt(c,1.18),x+1,yy,w-2,1);rr('#4a5034',x-2,y+6,2,6);rr('#4a5034',x+w,y+6,2,6);rr('#4a5034',x+2,y+8,w-4,5)}
+ if(pk==8){rr(lt(c,.8),x+2,y+7,w-4,6);rr('#8a8e94',x+w,y+12,3,3);U('#5a5e64',x+w,y+11,3,1);U('#f0d060',x-2,y+10,2,3);U('#3a3a3a',x-2,y+9,2,1)}}
+/* body armour, fitted to the torso */
+function bodyGear(C){const{U,rr,s,up,cx,tx,tw,eq,SH}=C,T=eq.body;
+ const shell=(c)=>{const cl=lt(c,1.35),cm=lt(c,1.12),cd=lt(c,.72);rr(c,tx,22,tw,9);U(cl,tx+1,22,tw-2,1);U(cm,tx+1,23,tw-2,2);U(cd,tx+1,30,tw-2,1);U(cd,tx+tw-1,24,1,5);if(!s){U(c,tx,21,2,1);U(c,tx+tw-2,21,2,1);U(cl,tx,21,1,1);U(cl,tx+tw-2,21,1,1)}return[cl,cm,cd]};
+ if(T==1){const c='#c07a3a',[cl,cm,cd]=shell(c);for(const y of[24,26,28])U(cd,tx+1,y,tw-2,1);if(!s&&!up){U(SH,cx-1,22,2,3);U(cd,cx,25,1,5)}U(cl,tx,25,1,1);return}
+ if(T==2)return craftGear(C,eq.craft||0);
+ if(T==3){const V='#2c3854',[VL,VM,VD]=shell(V);if(!up&&!s){U(SH,cx-1,22,2,2);U(VD,cx,24,1,5);U('#e0bc50',tx+1,25,2,2);U('#fff0a0',tx+1,25,1,1);U(lt(V,.85),cx+1,26,2,3);U(VM,cx+1,26,2,1)}else if(up){U('#d8dade',tx+1,25,tw-2,2);U('#ffffff',tx+1,25,tw-2,1)}else{rr(lt(V,.85),tx+2,25,3,4);U('#d8dade',tx,26,1,2)}return}
+ if(T==4){const K='#22252a',[KL,KM,KD]=shell(K);if(!up){if(!s){rr('#3a3e46',tx+1,23,tw-2,4);U('#5a5e66',tx+2,23,tw-4,1);for(let i=0;i<3;i++)rr('#30343a',tx+1+i*2,27,2,3)}else{rr('#3a3e46',tx+1,23,tw-2,4);U('#5a5e66',tx+2,23,tw-4,1)}}else{rr('#3a3e46',tx+1,23,tw-2,6);U('#e8e8e0',tx+2,25,tw-4,1)}return}
+ if(T==5){const M='#56613a',[ML2,MM,MD]=shell(M);U(lt(M,.82),cx-2,21,4,1);
+  if(!up){const pp=s?[tx+2]:[tx,tx+3,tx+6];pp.forEach(x=>{U(MD,x,27,2,3);U(MM,x,27,2,1);U(lt(M,.55),x,29,2,1)});if(!s){U(MM,tx+1,24,2,1);U('#2a2a20',tx+tw-2,23,1,3);U('#5a5a50',tx+tw-2,21,1,2)}}else{rr(MD,tx+1,24,tw-2,5);U(MM,tx+2,24,tw-4,1)}}}
+/* parts that sit over the arms (riot shoulder guards, sports shoulder caps) */
+function bodyPost(C){const{U,rr,s,up,cx,tx,tw,eq}=C;const pad=(c)=>{const cl=lt(c,1.4);if(s){rr(c,cx-2,21,5,4);U(cl,cx-1,21,3,1)}else{rr(c,tx-3,21,4,4);rr(c,tx+tw-1,21,4,4);U(cl,tx-2,21,2,1);U(cl,tx+tw,21,2,1)}};
+ if(eq.body==4)pad('#3a3e46');if(eq.body==2&&(eq.craft||0)==5)pad('#e8eaee')}
+function craftGear(C,k){const{U,rr,s,up,cx,tx,tw,SH}=C;
+ if(k==0){const AB='#54443a',PL='#8e9298';rr(AB,tx,22,tw,9);U(lt(AB,1.25),tx+1,22,tw-2,1);U(lt(AB,.75),tx+1,30,tw-2,1);const cols=s?[tx+2]:[tx+1,tx+4];
+  cols.forEach((xx,ci)=>[23,27].forEach((yy,ri)=>{const c=lt(PL,1+((ci+ri)%2)*.1-ri*.05);U(c,xx,yy,3,3);U(lt(c,1.22),xx,yy,2,1);U(lt(c,.75),xx+2,yy+1,1,2);U('#d8dce0',xx,yy,1,1)}));
+  U('#3a2c22',tx+1,26,tw-2,1);if(!s&&!up)for(let y=23;y<30;y+=2)U('#c8a878',cx,y,1,1);return}
+ if(k==1){const T='#2a2a2e';rr(T,tx,22,tw,9);for(let y=23;y<30;y+=3){U('#3e3e44',tx+1,y,tw-2,2);for(let x=tx+1;x<tx+tw-1;x+=2)U('#55555c',x,y,1,1)}U('#8a6a3a',tx,26,tw,1);if(!s)U('#8a6a3a',s?tx:tx+1,22,1,8);return}
+ if(k==2){rr('#5a4a3a',tx,22,tw,9);if(up){rr('#c83030',tx+1,23,tw-2,6);U('#f4f4ee',tx+2,25,tw-4,2)}else if(s){rr('#e0b020',tx+1,23,tw-2,6);U('#1a1a1a',tx+2,25,2,1)}else{rr('#1a1a1a',tx,23,tw,7);rr('#e0b020',tx+1,24,tw-2,5);U('#1a1a1a',cx-1,25,2,1);U('#1a1a1a',cx-2,26,4,1);U('#1a1a1a',cx-1,27,1,2);U('#fff4a0',tx+1,24,2,1)}U('#8a7a6a',tx,30,tw,1);return}
+ if(k==3){const pal=['#e8a0a0','#a0c8e8','#e8d8a0','#b8e0b0','#d8b8e8'];for(let y=22,i=0;y<31;y+=3,i++)for(let x=tx,j=0;x<tx+tw;x+=4,j++)U(pal[(i*2+j)%5],x,y,Math.min(4,tx+tw-x),3);
+  g.clearRect(tx,22+C.bob,1,1);g.clearRect(tx+tw-1,22+C.bob,1,1);U('#b8bcc2',tx,24,tw,2);U('#e0e4e8',tx,24,tw,1);U('#b8bcc2',tx,28,tw,2);U('#e0e4e8',tx,28,tw,1);if(!s&&!up){U('#b8bcc2',cx-1,22,2,9)}return}
+ if(k==4){rr('#6a6e74',tx,22,tw,9);for(let y=22;y<31;y++)for(let x=tx;x<tx+tw;x++)if((x+y)%2==0)U('#8a8e94',x,y,1,1);g.clearRect(tx,22+C.bob,1,1);g.clearRect(tx+tw-1,22+C.bob,1,1);
+  if(!up){C.Bl(s?tx+3:cx,26,s?2:3,3,'#a8acb2');C.Bl(s?tx+3:cx,25,s?1:2,1,'#d0d4d8');U('#3a3a3a',s?tx+3:cx-1,25,s?1:2,1)}return}
+ if(k==5){rr('#e8eaee',tx,22,tw,9);U('#ffffff',tx+1,22,tw-2,1);U('#c8ccd4',tx+1,30,tw-2,1);U('#3a5ac0',tx,25,tw,2);U('#5a7ae0',tx,25,tw,1);if(!s&&!up){U('#3a5ac0',cx-1,27,2,3)}else if(up){U('#3a5ac0',cx-2,27,1,3);U('#3a5ac0',cx+1,27,1,3)}return}}
+/* head gear tiers */
+function headGear(C){const{U,Bl,s,up,cx,hy,eq}=C,T=eq.head,X=s?cx-1:cx;
+ if(T==1){const c='#8a3a3a',cl=lt(c,1.3),cd=lt(c,.72);Bl(X,hy-1,9,4,c);for(let x=-7;x<=7;x+=2)U(cd,X+x,hy-3,1,4);U(cd,X-9,hy+2,18,2);U(lt(c,.9),X-9,hy+2,18,1);Bl(X,hy-6,2,2,'#e8e0d0');U(cl,X-4,hy-4,5,1);return}
+ if(T==2){const c='#e8c030';Bl(X,hy+4,10,1.4,lt(c,.72));Bl(X,hy,8,5,c);U(lt(c,.82),X-1,hy-5,2,8);U(lt(c,1.3),X-5,hy-3,3,1);U(lt(c,1.2),X+2,hy-3,2,1);if(s)U(lt(c,.72),X+7,hy+3,4,2);return}
+ if(T==3){const c='#20283a';Bl(X,hy+3,10,1.4,lt(c,.8));Bl(X,hy,9,5,c);U(lt(c,1.6),X-4,hy-4,5,1);U('#e8e8e0',X-1,hy-2,2,1);
+  if(up)return;if(s){U('#9ac8e860',X+1,hy+3,10,9);U('#c8e8ff90',X+9,hy+3,1,9);U('#3a4050',X+1,hy+3,10,1)}else{U('#9ac8e858',X-8,hy+3,16,10);U('#3a4050',X-8,hy+3,16,1);U('#d8f0ff90',X-6,hy+5,2,4);U('#3a4050',X-8,hy+12,16,1)}return}
+ if(T==4){const HC='#4f5a35',HCD=lt(HC,.72);Bl(X,hy+4,10,1.4,HCD);Bl(X,hy,9,5,HC);Bl(X,hy+2,9,1.4,lt(HC,.86));Bl(X-1,hy-2,5,2,lt(HC,1.12));U(lt(HC,1.35),cx-4,hy-4,5,1);U(lt(HC,1.25),cx-6,hy-3,2,1);
+  if(!up){if(s)U('#2a2a20',cx+1,hy+5,1,8);else{U('#2a2a20',cx-7,hy+5,1,8);U('#2a2a20',cx+6,hy+5,1,8)}}return}
+ if(T==5){const c='#3a3e38',cd=lt(c,.72),cl=lt(c,1.45);Bl(X,hy,9,5,c);U(cd,X-9,hy+2,18,2);Bl(X-1,hy-2,5,2,lt(c,1.15));U(cl,X-4,hy-4,5,1);
+  if(s){U('#1a1a1a',X+5,hy-1,3,3);U('#2a2a2a',X+7,hy-3,4,3);U('#40ff80',X+10,hy-2,1,1);U(cd,X-3,hy-1,5,2)}else if(!up){U('#2a2a2a',X-3,hy-4,6,4);U('#1a1a1a',X-3,hy-1,6,1);U('#40ff80',X-2,hy-3,1,1);U('#40ff80',X+1,hy-3,1,1);U(cd,X-9,hy-1,2,4);U(cd,X+7,hy-1,2,4)}else{U('#6a6e60',X-3,hy+1,6,3)}
+  if(!up){if(s)U('#2a2a20',cx+1,hy+4,1,9);else{U('#2a2a20',cx-7,hy+4,1,9);U('#2a2a20',cx+6,hy+4,1,9)}}}}
+function gasMask(C){const{U,Bl,s,up,cx,hy,bob}=C,m='#3a3e40';if(up){U('#2a2a2a',cx-8,hy+8,16,2);return}
+ if(s){Bl(cx+4,hy+10,4,4,m);Bl(cx+4,hy+8,3,1,lt(m,1.3));blob(cx+5,hy+9+bob,2,2,'#9ad0c0');U('#ffffff',cx+4,hy+8,1,1);U('#62666a',cx+6,hy+12,3,4);U('#2a2a2a',cx-6,hy+8,7,2)}
+ else{Bl(cx,hy+10,7,4,m);Bl(cx,hy+8,6,1,lt(m,1.3));blob(cx-4,hy+9+bob,2,2,'#9ad0c0');blob(cx+3,hy+9+bob,2,2,'#9ad0c0');U('#ffffff',cx-5,hy+8,1,1);U('#ffffff',cx+2,hy+8,1,1);Bl(cx,hy+14,2.5,2,'#62666a');U('#8a8e92',cx-1,hy+13,2,1);U('#2a2a2a',cx-9,hy+8,2,2);U('#2a2a2a',cx+7,hy+8,2,2)}}
 /* ---------- anime chibi player (30x44, feet at y=41). Side view is drawn facing right; left = mirrored ---------- */
 const FW=[...Array(14)].map((_,r)=>{const t=(r-6.5)/7.5;return Math.max(6,2*Math.round(7*Math.sqrt(Math.max(0,1-t*t))))});
 function aniP(d,dir,fr,wpn,eq={}){const s=dir=='l'||dir=='r',up=dir=='u',st=fr<0?0:[0,1,0,-1][fr%4],bob=(fr==1||fr==3)?-1:0,cx=20,hy=6,atk=fr==-2,pk=eq.back??(d.pack?1:0),GUN=['pistol','shotgun','rifle'].includes(wpn),MEL=wpn&&!GUN&&wpn!='fist';
@@ -49,9 +132,8 @@ function aniP(d,dir,fr,wpn,eq={}){const s=dir=='l'||dir=='r',up=dir=='u',st=fr<0
  if(d.twin){const L=d.twin;if(s){U(H,cx-10,hy+3,5,L);U(HD,cx-10,hy+L,4,3);U(d.tie,cx-9,hy+2,3,2)}else{for(const x of[cx-12,cx+8]){U(H,x,hy+3,4,L);U(HD,x+(x<cx?0:1),hy+L,3,3);U(HL,x+1,hy+5,1,L-6);U(d.tie,x,hy+2,4,2)}}}
  if(d.hood&&!up)Bl(s?cx-1:cx,hy+6,10,9,lt(d.hood,.8));
  const tw=s?6:8,tx=cx-tw/2,PK='#6b4a2a',PKF='#7d5a34',PKD='#4a321c',BP='#55613a',BPD=lt('#55613a',.72),BPL=lt('#55613a',1.2),ROL='#3a7bc9',rr=(c,x,y,w,h)=>{U(c,x+1,y,w-2,1);U(c,x,y+1,w,h-2);U(c,x+1,y+h-1,w-2,1)};
- // backpack behind body (side view)
- if(s&&pk==1){rr(PK,tx-4,22,5,9);rr(PKF,tx-4,22,5,4);U(lt(PKF,1.2),tx-3,22,3,1);U(PKD,tx-3,26,3,1);U(lt(PK,1.2),tx-4,25,1,4);U(lt(PK,.8),tx-3,30,3,1)}
- if(s&&pk==2){rr(BP,tx-6,20,7,13);U(BPL,tx-5,20,5,1);U(BPL,tx-6,22,1,9);U(lt(BP,.86),tx-5,26,5,1);rr(BPD,tx-6,27,3,4);U(lt(BP,.8),tx-5,32,5,1);rr(ROL,tx-6,17,7,4);U(lt(ROL,1.3),tx-5,17,5,1);U(lt(ROL,.75),tx-5,20,5,1);U('#2a2420',tx-3,17,1,4)}
+ const C={U,Bl,rr,s,up,st,bob,cx,hy,tx,tw,d,eq,SH,J,pk};
+ if(pk&&(s||!up))packBehind(C);
  // legs (slim)
  if(s){const k=st*2;R(PD,cx-2-k,32,3,7);R(BT,cx-2-k,38,4,3);R(P,cx-1+k,32,3,7);R(BT,cx-1+k,38,5,3);R(lt(BT,1.4),cx+k,38,3,1);if(d.shorts){R(SK,cx-2-k,35,3,3);R(SK,cx-1+k,35,3,3)}}
  else{R(P,cx-3,32,3,7-(st>0?1:0));R(PD,cx-3,32,1,7);R(BT,cx-4,38-(st>0?1:0),4,3);R(P,cx+1,32,3,7-(st<0?1:0));R(PD,cx+3,32,1,7);R(BT,cx+1,38-(st<0?1:0),4,3);
@@ -65,22 +147,9 @@ function aniP(d,dir,fr,wpn,eq={}){const s=dir=='l'||dir=='r',up=dir=='u',st=fr<0
  if(d.coat){U(J,tx-1,31,tw+2,5);U(JD,tx-1,35,tw+2,1);if(!s&&!up)U(JD,cx,31,1,5)}
  if(d.skirt){U(d.skirt,tx-1,31,tw+2,4);U(lt(d.skirt,.72),tx-1,34,tw+2,1);for(let i=1;i<tw+2;i+=3)U(lt(d.skirt,.85),tx-1+i,31,1,3)}
  if(d.over){U(d.over,tx+1,24,tw-2,8);if(!s&&!up){U(d.over,tx+1,22,1,2);U(d.over,tx+tw-2,22,1,2);U(lt(d.over,.75),cx-1,26,2,2)}}
- // body armour – fitted to the torso, never wider than the body
- if(eq.body=='vest'){const V='#2c3854',VL=lt(V,1.4),VM=lt(V,1.15),VD=lt(V,.72);rr(V,tx,22,tw,9);U(VL,tx+1,22,tw-2,1);U(VM,tx+1,23,tw-2,2);U(VD,tx+1,30,tw-2,1);U(VD,tx+tw-1,24,1,5);
-  if(!s){U(V,tx,21,2,1);U(V,tx+tw-2,21,2,1);U(VL,tx,21,1,1);U(VL,tx+tw-2,21,1,1)}
-  if(!up&&!s){U(SH,cx-1,22,2,2);U(VD,cx,24,1,5);U('#e0bc50',tx+1,25,2,2);U('#fff0a0',tx+1,25,1,1);U(lt(V,.85),cx+1,26,2,3);U(VM,cx+1,26,2,1)}else if(up){U(lt('#d8dade',.95),tx+1,25,tw-2,2);U('#ffffff',tx+1,25,tw-2,1)}else{rr(lt(V,.85),tx+2,25,3,4);U('#d8dade',tx,26,1,2)}}
- if(eq.body=='armor'){const AB='#54443a',PL='#8e9298';rr(AB,tx,22,tw,9);U(lt(AB,1.25),tx+1,22,tw-2,1);U(lt(AB,.75),tx+1,30,tw-2,1);const cols=s?[tx+2]:[tx+1,tx+4];
-  cols.forEach((xx,ci)=>[23,27].forEach((yy,ri)=>{const c=lt(PL,1+((ci+ri)%2)*.1-ri*.05);U(c,xx,yy,3,3);U(lt(c,1.22),xx,yy,2,1);U(lt(c,.75),xx+2,yy+1,1,2);U(lt(c,.75),xx+1,yy+2,1,1);U('#d8dce0',xx,yy,1,1)}));
-  U('#3a2c22',tx+1,26,tw-2,1);if(!s&&!up)for(let y=23;y<30;y+=2)U('#c8a878',cx,y,1,1)}
- if(eq.body=='milarmor'){const M='#56613a',ML2=lt(M,1.3),MM=lt(M,1.12),MD=lt(M,.72);rr(M,tx,22,tw,9);U(ML2,tx+1,22,tw-2,1);U(MM,tx+1,23,tw-2,2);U(MD,tx+1,30,tw-2,1);U(MD,tx+tw-1,24,1,5);
-  if(!s){U(M,tx,21,2,1);U(M,tx+tw-2,21,2,1)}
-  if(!up){const pp=s?[tx+2]:[tx,tx+3,tx+6];pp.forEach(x=>{U(MD,x,27,2,3);U(MM,x,27,2,1);U(lt(M,.55),x,29,2,1)});if(!s){U(MM,tx+1,24,2,1);U('#2a2a20',tx+tw-2,23,1,3);U('#5a5a50',tx+tw-2,21,1,2)}}else{rr(MD,tx+1,24,tw-2,5);U(MM,tx+2,24,tw-4,1)}}
+ if(eq.body)bodyGear(C);
  if(d.arm&&!up){U('#f4f4ee',s?cx-2:tx-2,24,s?3:2,3);U('#d33a3a',s?cx-1:tx-2,25,1,1)}
- // backpack on top (back view) and straps (front / side)
- if(up&&pk==1){rr(PK,tx+1,23,tw-2,9);rr(PKF,tx+1,23,tw-2,4);U(lt(PKF,1.2),tx+2,23,tw-4,1);U(PKD,tx+1,27,tw-2,1);U('#c9a43a',cx-1,25,2,1);U(PKD,tx+1,30,tw-2,1);U(PKD,tx+1,22,1,2);U(PKD,tx+tw-2,22,1,2)}
- if(up&&pk==2){rr(BP,tx,20,tw,13);U(BPL,tx+1,20,tw-2,1);U(lt(BP,.8),tx+1,32,tw-2,1);rr(BPD,tx+1,26,tw-2,4);U(BPL,tx+2,26,tw-4,1);rr(ROL,tx-1,17,tw+2,4);U(lt(ROL,1.3),tx-1,17,tw+2,1);U(lt(ROL,.7),tx-1,19,tw+2,1);U('#2a2420',tx+1,17,1,3);U('#2a2420',tx+tw-2,17,1,3)}
- if(!s&&!up&&pk){U(PKD,tx+1,22,1,8);U(PKD,tx+tw-2,22,1,8);if(pk==2){rr(ROL,tx-2,17,3,4);rr(ROL,tx+tw-1,17,3,4);U(lt(ROL,1.3),tx-1,17,1,1);U(lt(ROL,1.3),tx+tw,17,1,1);U(lt(ROL,.7),tx-2,20,2,1);U(lt(ROL,.7),tx+tw,20,2,1)}}
- if(s&&pk){U(PKD,tx+1,22,1,8)}
+ if(pk&&!up)packTop(C);
  // arms
 
  const gun=(x,y)=>{if(wpn=='pistol'){U('#1e1e1e',x,y,6,2);U('#44464a',x+1,y,4,1);U('#1e1e1e',x,y+2,2,3);return 6}
@@ -101,8 +170,9 @@ function aniP(d,dir,fr,wpn,eq={}){const s=dir=='l'||dir=='r',up=dir=='u',st=fr<0
  else if(s){const w=st*2;U(J,cx-1-w,23,3,7);U(JD,cx+1-w,23,1,7);U(HN,cx-1-w,30,3,2);if(MEL)mel(cx+1-w,31,cx+1-w+Math.round(ML*.7),31-Math.round(ML*.7))}
  else{U(J,tx-2,22+(st>0?1:0),2,8);U(HN,tx-2,30+(st>0?1:0),2,2);U(J,tx+tw,22+(st<0?1:0),2,8);U(HN,tx+tw,30+(st<0?1:0),2,2);
   if(MEL){if(up)mel(tx-2,31+(st>0?1:0),tx-5,31-ML);else mel(tx+tw+1,31+(st<0?1:0),tx+tw+4,31-ML)}}
+ if(eq.body)bodyPost(C);
  // scarf (over torso)
- if(d.scarf){const sc=d.scarf,sd=lt(sc,.72);U(sc,tx-1,20,tw+2,3);U(sd,tx-1,22,tw+2,1);if(s){U(sc,tx-3,21,3,7);U(sd,tx-3,27,3,1)}else if(!up){U(sc,cx+1,22,3,6);U(sd,cx+1,27,3,1)}else{U(sc,cx-2,22,3,6)}}
+ if(d.scarf){const sc=d.scarf,sd=lt(sc,.72);U(sc,tx-1,20,tw+2,3);U(sd,tx-1,22,tw+2,1);if(eq.body){}else if(s){U(sc,tx-3,21,3,7);U(sd,tx-3,27,3,1)}else if(!up){U(sc,cx+1,22,3,6);U(sd,cx+1,27,3,1)}else{U(sc,cx-2,22,3,6)}}
  U(SKD,cx-2,19,4,3);
  // head
  for(let r=0;r<FW.length;r++){const w=FW[r],x=s?cx-6+(14-w):cx-w/2;U(up?H:SK,x,hy+r,w,1);if(!up)U(SKD,s?x:x+w-1,hy+r,1,1)}
@@ -114,7 +184,7 @@ function aniP(d,dir,fr,wpn,eq={}){const s=dir=='l'||dir=='r',up=dir=='u',st=fr<0
   const B=d.bangs;for(let i=7;i<14;i++){U(H,cx-6+i,hy,1,B[i]);U(HD,cx-6+i,hy+B[i]-1,1,1)}if(d.side)U(H,cx+1,hy+1,2,Math.min(d.side,8))}
  else{const B=d.bangs;for(let i=0;i<14;i++){U(H,cx-7+i,hy,1,B[i]);U(HD,cx-7+i,hy+B[i]-1,1,1)}
   const sl=d.side||9;U(H,cx-8,hy+1,1,sl-2);U(H,cx-7,hy+1,1,sl);U(H,cx+7,hy+1,1,sl-2);U(H,cx+6,hy+1,1,sl);U(HD,cx-7,hy+sl,1,1);U(HD,cx+6,hy+sl,1,1);U(HD,cx-8,hy+sl-2,1,1);U(HD,cx+7,hy+sl-2,1,1)}
- if(d.ahoge&&eq.head!='helmet'&&eq.head!='both'){U(H,cx+1,hy-6,1,3);U(H,cx+2,hy-7,2,1);U(H,cx+3,hy-6,1,1)}
+ if(d.ahoge&&!eq.head){U(H,cx+1,hy-6,1,3);U(H,cx+2,hy-7,2,1);U(H,cx+3,hy-6,1,1)}
  if(d.hood){const h=d.hood,hd2=lt(h,.78);U(h,cx-8,hy-4,16,4);if(s){U(h,cx-9,hy-1,8,12);U(hd2,cx-9,hy+10,8,1)}else if(!up){U(h,cx-9,hy-1,2,13);U(h,cx+7,hy-1,2,13);U(hd2,cx-9,hy+11,18,1)}else{U(h,cx-9,hy-1,18,13);U(hd2,cx-9,hy+11,18,1)}U(lt(h,1.2),cx-4,hy-4,8,1)}
  // face
  if(!up){const ey=hy+8,E=d.eye,ED=lt(E,.55);
@@ -125,14 +195,13 @@ function aniP(d,dir,fr,wpn,eq={}){const s=dir=='l'||dir=='r',up=dir=='u',st=fr<0
   if(d.mask){const m=d.mask;if(s){U(m,cx+1,hy+11,7,3);U(lt(m,.75),cx+1,hy+13,7,1)}else{U(m,cx-6,hy+11,12,3);U(lt(m,.75),cx-6,hy+13,12,1);U(lt(m,.85),cx-1,hy+11,1,2)}}
   if(d.gog){const fr2='#3a3030',ln='#7ad0e0';U(fr2,s?cx-8:cx-8,hy+1,16,2);if(s){U(fr2,cx+3,hy,5,4);U(ln,cx+4,hy+1,3,2);U('#ffffff',cx+4,hy+1,1,1)}else for(const x of[cx-6,cx+1]){U(fr2,x,hy,5,4);U(ln,x+1,hy+1,3,2);U('#ffffff',x+1,hy+1,1,1)}}}
  else if(d.gog)U('#3a3030',cx-8,hy+1,16,2);
- if(!eq.head||eq.head=='gas'){
+ if(!eq.head){
  if(d.beret){const b=d.beret;Bl(cx+1,hy-2,9,3,b);U(lt(b,1.25),cx-3,hy-4,6,1);U(lt(b,.75),cx-7,hy,16,1);U(b,cx+1,hy-6,2,2)}
  if(d.cap){const c=d.cap,cd=lt(c,.72);U(c,cx-8,hy-4,16,5);U(lt(c,1.25),cx-5,hy-4,8,1);if(s)U(cd,cx+4,hy+1,6,2);else if(!up)U(cd,cx-7,hy+1,14,2);U('#f4f4ee',cx-1,hy-2,2,2)}
 }
- if(eq.head=='gas'||eq.head=='both'){const m='#3a3e40';if(up){U('#2a2a2a',cx-8,hy+8,16,2)}else if(s){Bl(cx+4,hy+10,4,4,m);Bl(cx+4,hy+8,3,1,lt(m,1.3));blob(cx+5,hy+9+bob,2,2,'#9ad0c0');U('#ffffff',cx+4,hy+8,1,1);U('#5a5e60',cx+6,hy+12,3,4);U('#2a2a2a',cx-6,hy+8,7,2)}
-  else{Bl(cx,hy+10,7,4,m);Bl(cx,hy+8,6,1,lt(m,1.3));blob(cx-4,hy+9+bob,2,2,'#9ad0c0');blob(cx+3,hy+9+bob,2,2,'#9ad0c0');U('#ffffff',cx-5,hy+8,1,1);U('#ffffff',cx+2,hy+8,1,1);Bl(cx,hy+14,2.5,2,'#62666a');U('#8a8e92',cx-1,hy+13,2,1);U('#2a2a2e',cx-1,hy+15,2,1);U('#2a2a2a',cx-9,hy+8,2,2);U('#2a2a2a',cx+7,hy+8,2,2)}}
- if(eq.head=='helmet'||eq.head=='both'){const HC='#4f5a35',HCD=lt(HC,.72);Bl(s?cx-1:cx,hy+4,10,1.4,HCD);Bl(s?cx-1:cx,hy,9,5,HC);Bl(s?cx-1:cx,hy+2,9,1.4,lt(HC,.86));Bl(s?cx-2:cx-1,hy-2,5,2,lt(HC,1.12));U(lt(HC,1.35),cx-4,hy-4,5,1);U(lt(HC,1.25),cx-6,hy-3,2,1);
-  if(!up){if(s)U('#2a2a20',cx+1,hy+5,1,8);else{U('#2a2a20',cx-7,hy+5,1,8);U('#2a2a20',cx+6,hy+5,1,8)}}U(HCD,cx-2,hy-2,4,1)}
+ if(eq.face=='gas')gasMask(C);
+ if(eq.head)headGear(C);
+ if(pk&&up)packTop(C);
 }
 const DES=[
  {n:'현재 플레이어',d:'지금 게임의 플레이어 (비교용).',orig:1},
@@ -157,23 +226,38 @@ const tri=(t,r)=>{const p=(t%2+2)%2;return p<1?p*r:(2-p)*r};
 const PPATH=[[398,404],[398,500],[470,500],[470,404]];
 function ppos(t){const per=PPATH.length,seg=(t*.45)%per,i=seg|0,f=seg-i,a=PPATH[i],b=PPATH[(i+1)%per],dx=b[0]-a[0],dy=b[1]-a[1];return{x:a[0]+dx*f,y:a[1]+dy*f,dir:Math.abs(dx)>Math.abs(dy)?(dx>0?'r':'l'):(dy>0?'d':'u')}}
 
-const EQ={char:1,head:'',body:'',back:1,wpn:'pistol'};
+const EQ={char:1,head:0,face:'',body:2,craft:0,back:3,wpn:'pistol'};
+const star=n=>'★'.repeat(n);
 const OPT=[['char','캐릭터',DES.slice(1).map((d,i)=>[i+1,d.n.split(' · ')[0]])],
- ['head','머리',[['','없음'],['helmet','헬멧'],['gas','방독면',1],['both','헬멧+방독면',1]]],
- ['body','몸',[['','없음'],['vest','경찰 방탄조끼'],['armor','방탄복 (제작)'],['milarmor','군용 방탄복']]],
- ['back','등',[[0,'없음'],[1,'배낭'],[2,'대형 배낭',1]]],
+ ['head','머리',[[0,'없음'],...HEADT.slice(1).map((h,i)=>[i+1,h.n,0,h.t])]],
+ ['face','얼굴',[['','없음'],['gas','방독면',1]]],
+ ['body','몸',[[0,'없음'],...BODYT.slice(1).map((h,i)=>[i+1,h.n,0,h.t])]],
+ ['craft','제작 디자인',CRAFT.map((c,i)=>[i,c.n])],
+ ['back','가방',[[0,'없음'],...PACKT.slice(1).map((h,i)=>[i+1,h.n,0,h.t])]],
  ['wpn','무기',[['fist','맨손'],['knife','식칼'],['bat','배트'],['crowbar','쇠지렛대'],['machete','마체테'],['axe','도끼'],['pistol','권총'],['shotgun','산탄총'],['rifle','소총']]],
- ['preset','세트',[['p0','초반 생존자'],['p1','경찰서 털이'],['p2','군부대 완전무장'],['p3','근접 특화']]]];
-const PRE={p0:{head:'',body:'',back:0,wpn:'fist'},p1:{head:'helmet',body:'vest',back:1,wpn:'shotgun'},p2:{head:'helmet',body:'milarmor',back:2,wpn:'rifle'},p3:{head:'gas',body:'armor',back:1,wpn:'machete'}};
+ ['preset','세트',[['p0','초반 생존자'],['p1','DIY 생존자'],['p2','경찰서 털이'],['p3','진압대'],['p4','군부대 완전무장']]]];
+const PRE={p0:{head:0,face:'',body:0,back:1,wpn:'fist'},p1:{head:1,face:'',body:2,craft:1,back:3,wpn:'bat'},p2:{head:3,face:'',body:3,back:4,wpn:'shotgun'},p3:{head:3,face:'gas',body:4,back:5,wpn:'crowbar'},p4:{head:5,face:'',body:5,back:7,wpn:'rifle'}};
 const ctl=document.getElementById('ctl');
-function drawUI(){ctl.innerHTML='';OPT.forEach(([k,lab,ops])=>{const r=document.createElement('div');r.className='grp';r.innerHTML='<span>'+lab+'</span>';ops.forEach(([v,n,sg])=>{const b=document.createElement('button');b.innerHTML=n+(sg?'<small>제안</small>':'');if(k!='preset'&&EQ[k]===v)b.className='on';
+function drawUI(){ctl.innerHTML='';OPT.forEach(([k,lab,ops])=>{if(k=='craft'&&EQ.body!=2)return;const r=document.createElement('div');r.className='grp';r.innerHTML='<span>'+lab+'</span>';ops.forEach(([v,n,sg,t])=>{const b=document.createElement('button');b.innerHTML=(t?'<i class="tier t'+t+'">'+t+'</i>':'')+n+(sg?'<small>제안</small>':'');if(k!='preset'&&EQ[k]===v)b.className='on';
  b.onclick=()=>{if(k=='preset')Object.assign(EQ,PRE[v]);else EQ[k]=v;drawUI()};r.appendChild(b)});ctl.appendChild(r)});
- const inv={vest:EQ.body=='vest',armor:EQ.body=='armor',milarmor:EQ.body=='milarmor',helmet:EQ.head=='helmet'||EQ.head=='both'};const am=Math.min(inv.milarmor?.45:1,inv.armor?.6:1,inv.vest?.7:1)*(inv.helmet?.9:1);
+ const hd=EQ.head?HEADT[EQ.head].def:0,bd=EQ.body?BODYT[EQ.body].def:0,tot=Math.round(100-(100-hd)*(100-bd)/100);
  const W={fist:'맨손 피해 10',knife:'식칼 피해 20',bat:'배트 피해 32',crowbar:'쇠지렛대 피해 38',machete:'마체테 피해 46',axe:'도끼 피해 52',pistol:'권총 피해 35 · 사거리 256',shotgun:'산탄총 피해 24×4 · 사거리 170',rifle:'소총 피해 60 · 사거리 320'}[EQ.wpn];
- document.getElementById('stat').innerHTML='🛡 받는 피해 <b>-'+Math.round((1-am)*100)+'%</b>'+(inv.helmet?' · 출혈 확률 절반':'')+(EQ.head=='gas'||EQ.head=='both'?' · 독가스 면역 (제안)':'')+(EQ.back==2?' · 가방 칸 +50% (제안)':EQ.back==1?' · 가방 칸 기본':' · 가방 없음')+'<br>⚔ '+W}
-drawUI();
-function drawE(x,y,dir,fr,sc=1){const D0=DES[EQ.char],eq={head:EQ.head,body:EQ.body,back:EQ.back},w=EQ.wpn,key='e'+EQ.char+EQ.head+EQ.body+EQ.back+w+dir+fr,sp=spriteS(key,40,44,'#1f1418',1,()=>aniP(D0,dir,fr,w,eq));
+ document.getElementById('stat').innerHTML='🛡 받는 피해 <b>-'+tot+'%</b> (머리 -'+hd+'% · 몸 -'+bd+'%)'+(EQ.face?' · 독가스 면역':'')+'<br>🎒 가방 '+(EQ.back?PACKT[EQ.back].n+' · 추가 칸 <b>+'+PACKT[EQ.back].sl+'</b>':'없음 (기본 칸만)')+'<br>⚔ '+W+(EQ.body==2?'<br>🔧 제작 재료: '+CRAFT[EQ.craft].m:'');
+ document.querySelectorAll('.gi').forEach(e=>e.classList.toggle('on',EQ[e.dataset.k]==e.dataset.v))}
+function drawE(x,y,dir,fr,sc=1,o={}){const E={...EQ,...o},D0=DES[E.char],eq={head:E.head,face:E.face,body:E.body,craft:E.craft,back:E.back},w=E.wpn,key='e'+E.char+'|'+E.head+E.face+E.body+E.craft+'|'+E.back+w+dir+fr,sp=spriteS(key,40,44,'#1f1418',1,()=>aniP(D0,dir,fr,w,eq));
  shd(x-9*sc,y-1,18*sc,4,.3);g.imageSmoothingEnabled=false;g.drawImage(sp,Math.round(x-22*sc),Math.round(y-45*sc),44*sc,48*sc)}
+/* tier gallery */
+const GAL=[['head','머리 장비 5단계',HEADT.slice(1).map((h,i)=>({v:i+1,n:h.n,t:h.t,st:'머리 피해 -'+h.def+'%'})),['d','r']],
+ ['body','몸 장비 5단계',BODYT.slice(1).map((h,i)=>({v:i+1,n:h.n,t:h.t,st:'몸 피해 -'+h.def+'%'})),['d','u']],
+ ['craft','제작 방탄복 디자인 6종 (2단계)',CRAFT.map((c,i)=>({v:i,n:c.n,st:c.m,o:{body:2}})),['d','r']],
+ ['back','가방 8단계',PACKT.slice(1).map((h,i)=>({v:i+1,n:h.n,t:h.t,st:'추가 칸 +'+h.sl})),['r','u']]];
+const gal=document.getElementById('gal');
+GAL.forEach(([k,title,items,dirs])=>{gal.insertAdjacentHTML('beforeend','<h3>'+title+'</h3>');const grid=document.createElement('div');grid.className='grid';gal.appendChild(grid);
+ items.forEach(it=>{const d=document.createElement('div');d.className='gi';d.dataset.k=k;d.dataset.v=it.v;const c=document.createElement('canvas');c.width=80;c.height=56;d.appendChild(c);
+  d.insertAdjacentHTML('beforeend','<div class="gn">'+(it.t?'<i class="tier t'+it.t+'">'+it.t+'</i>':'')+it.n+'</div><div class="gs">'+it.st+'</div>');
+  d.onclick=()=>{EQ[k]=it.v;if(it.o)Object.assign(EQ,it.o);drawUI();document.getElementById('ctl').scrollIntoView({behavior:'smooth'})};grid.appendChild(d);
+  const x=c.getContext('2d');g=x;FLOORS.hall(0,0,80,56);const base={char:2,head:0,face:'',body:0,back:0,wpn:'fist',...(it.o||{})};base[k]=it.v;drawE(22,52,dirs[0],-1,1,base);drawE(58,52,dirs[1],-1,1,base)})});
+drawUI();
 const pv=document.getElementById('pv'),sc=document.getElementById('sc');pv.width=CW;pv.height=CHh;sc.width=CW;sc.height=CHh;
 function frame(t){t/=1000;const fr=(t*7|0)%4;
  let x=pv.getContext('2d');g=x;x.setTransform(1,0,0,1,0,0);FLOORS.hall(0,0,CW,CHh);const by=CHh/2+52,s2=2.2;
