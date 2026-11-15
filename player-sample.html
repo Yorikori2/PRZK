@@ -1,0 +1,137 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Player Character Samples</title>
+<style>
+:root{--bg:#0e1113;--card:#161b1f;--fg:#e8ecef;--mut:#9aa3aa;--acc:#e0b03a;color-scheme:dark}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,sans-serif}
+main{max-width:900px;margin:0 auto;padding:14px 16px 32px}
+h1{font-size:19px;margin:4px 0 2px}main>p{margin:0 0 12px;color:var(--mut);font-size:13px}
+.card{background:var(--card);border:1px solid #ffffff14;border-radius:10px;padding:10px;margin:0 0 14px}
+.card h2{font-size:16px;margin:0 0 2px}.card h2 b{color:var(--acc);margin-right:6px}
+.card p{margin:0 0 8px;color:var(--mut);font-size:13px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}@media(max-width:620px){.row{grid-template-columns:1fr}}
+canvas{display:block;width:100%;image-rendering:pixelated;border-radius:6px}
+.cap{font-size:11px;color:var(--mut);margin-top:3px}
+.cur{border-color:#6fb3e066}.cur h2 b{color:#6fb3e0}
+</style></head><body><main>
+<h1>플레이어 캐릭터 샘플 8종 (애니메 도트 스타일)</h1>
+<p>배경과 좀비는 지금 게임 그대로 두고 <b>플레이어만</b> 바꿨습니다. 큰 머리, 결이 보이는 머리카락, 큰 눈의 애니메 도트 느낌이에요. 왼쪽은 4방향으로 걷는 확대 모습, 오른쪽은 실제 게임 크기로 진료소에서 좀비들 사이를 걷는 모습입니다. 0번은 지금 플레이어예요.</p>
+<div id="list"></div>
+</main>
+<script src="art.js"></script><script src="world.js"></script>
+<script>
+'use strict';
+buildWorld();
+const cRGB=c=>{c=c.replace('#','');if(c.length==3)c=[...c].map(x=>x+x).join('');return[0,2,4].map(i=>parseInt(c.slice(i,i+2),16))};
+const cHex=a=>'#'+a.map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');
+const lt=(c,f)=>cHex(cRGB(c).map(v=>v*f));
+const SC={};
+function spriteS(key,W,H,ol,olw,draw,post){if(SC[key])return SC[key];const p=2,c=document.createElement('canvas');c.width=W+p*2;c.height=H+p*2;const x=c.getContext('2d'),o=g;g=x;x.translate(p,p);draw();x.setTransform(1,0,0,1,0,0);g=o;
+ if(post)post(x,c.width,c.height);
+ if(ol){const im=x.getImageData(0,0,c.width,c.height);const oc=cRGB(ol);for(let it=0;it<olw;it++){const d=im.data,out=new Uint8ClampedArray(d),w=c.width,h=c.height;
+  for(let j=0;j<h;j++)for(let i=0;i<w;i++){const k=(j*w+i)*4;if(d[k+3])continue;if([[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>{const ii=i+a,jj=j+b;return ii>=0&&jj>=0&&ii<w&&jj<h&&d[(jj*w+ii)*4+3]>0})){out[k]=oc[0];out[k+1]=oc[1];out[k+2]=oc[2];out[k+3]=255}}im.data.set(out)}x.putImageData(im,0,0)}
+ return SC[key]=c}
+
+/* ---------- anime chibi player (30x44, feet at y=41). Side view is drawn facing right; left = mirrored ---------- */
+const FW=[10,12,14,14,14,14,14,14,14,14,13,12,10,8];
+function aniP(d,dir,fr,wpn){const s=dir=='l'||dir=='r',up=dir=='u',st=fr<0?0:[0,1,0,-1][fr%4],bob=(fr==1||fr==3)?-1:0,cx=15,hy=6;
+ if(dir=='l'){g.translate(30,0);g.scale(-1,1)}
+ const U=(c,x,y,w,h)=>R(c,x,y+bob,w,h),Bl=(x,y,rx,ry,c)=>blob(x,y+bob,rx,ry,c);
+ const H=d.hair,HD=lt(H,.7),HL=lt(H,1.35),SK=d.skin||'#f6d0b4',SKD=lt(SK,.86),J=d.jk,JD=lt(J,.72),JL=lt(J,1.2),P=d.pants,PD=lt(P,.72),BT=d.boots||'#4a3226',SH=d.shirt||'#ece6da',HN=d.glove||SK,LASH='#2a1a1e',CAP=d.hood||H;
+ // behind: long hair, ponytail, twin tails, hood back
+ if(d.back){const L=d.back;if(up){U(H,cx-8,hy+6,16,L);U(HD,cx-8,hy+5+L,16,1);for(let i=0;i<16;i+=3)U(HD,cx-8+i,hy+6,1,L-2)}else if(s){U(H,cx-8,hy+6,8,L);U(HD,cx-8,hy+5+L,8,1)}else{U(HD,cx-9,hy+6,3,L);U(HD,cx+6,hy+6,3,L)}}
+ if(d.pony){if(s){U(H,cx-10,hy+1,4,4);U(H,cx-12,hy+4,5,10);U(HD,cx-12,hy+12,4,3);U(HL,cx-11,hy+5,1,6);U(d.tie||'#d04050',cx-9,hy+2,2,3)}else if(up){U(H,cx-2,hy+2,5,16);U(HD,cx-1,hy+16,3,3);U(HL,cx,hy+4,1,8);U(d.tie||'#d04050',cx-2,hy+3,5,2)}else{U(HD,cx-10,hy+5,2,8)}}
+ if(d.twin){const L=d.twin;if(s){U(H,cx-10,hy+3,5,L);U(HD,cx-10,hy+L,4,3);U(d.tie,cx-9,hy+2,3,2)}else{for(const x of[cx-12,cx+8]){U(H,x,hy+3,4,L);U(HD,x+(x<cx?0:1),hy+L,3,3);U(HL,x+1,hy+5,1,L-6);U(d.tie,x,hy+2,4,2)}}}
+ if(d.hood&&!up)Bl(s?cx-1:cx,hy+6,10,9,lt(d.hood,.8));
+ if(d.pack&&s){U('#6b4a2a',cx-10,23,6,10);U('#8a6a42',cx-10,25,6,2)}
+ // legs
+ if(s){const k=st*2;R(PD,cx-2-k,32,4,7);R(BT,cx-2-k,38,5,3);R(P,cx-1+k,32,4,7);R(BT,cx-1+k,38,6,3);R(lt(BT,1.4),cx+k,38,3,1);if(d.shorts){R(SK,cx-2-k,35,4,3);R(SK,cx-1+k,35,4,3)}}
+ else{R(P,cx-4,32,4,7-(st>0?1:0));R(PD,cx-4,32,1,7);R(BT,cx-5,38-(st>0?1:0),5,3);R(P,cx+1,32,4,7-(st<0?1:0));R(PD,cx+4,32,1,7);R(BT,cx+1,38-(st<0?1:0),5,3);
+  R(lt(BT,1.4),cx-4,38-(st>0?1:0),3,1);R(lt(BT,1.4),cx+2,38-(st<0?1:0),3,1);if(d.shorts){R(SK,cx-4,35,4,3-(st>0?1:0));R(SK,cx+1,35,4,3-(st<0?1:0))}}
+ // torso
+ const tw=s?8:10,tx=cx-tw/2;
+ U(J,tx,22,tw,10);U(JL,tx,22,1,10);U(JD,tx+tw-1,22,1,10);
+ if(!s&&!up&&!d.closed){U(SH,cx-2,22,4,8);U(JD,cx-3,23,1,8);U(JD,cx+2,23,1,8)}
+ if(!s&&!up&&d.closed){U(JD,cx,23,1,7);if(d.pocket)U(JD,cx-3,27,6,1)}
+ if(s&&!up&&!d.closed)U(SH,tx+tw-2,22,2,7);
+ U(d.belt||'#2e2622',tx,30,tw,2);if(!s&&!up)U('#d4b04a',cx-1,30,2,2);
+ if(d.coat){U(J,tx-1,31,tw+2,5);U(JD,tx-1,35,tw+2,1);if(!s&&!up)U(JD,cx,31,1,5)}
+ if(d.skirt){U(d.skirt,tx-1,31,tw+2,4);U(lt(d.skirt,.72),tx-1,34,tw+2,1);for(let i=1;i<tw+2;i+=3)U(lt(d.skirt,.85),tx-1+i,31,1,3)}
+ if(d.arm&&!up){U('#f4f4ee',s?cx-2:tx-2,24,s?3:2,3);U('#d33a3a',s?cx-1:tx-2,25,1,1)}
+ if(d.pack&&up){U('#6b4a2a',tx,23,tw,10);U('#8a6a42',tx+1,26,tw-2,3);U('#5a3e22',tx,23,tw,1);U('#c9a43a',cx-1,27,2,1)}
+ if(d.pack&&!s&&!up){U('#5a3e22',tx+1,22,2,8);U('#5a3e22',tx+tw-3,22,2,8)}
+ if(d.over){U(d.over,tx+1,24,tw-2,8);if(!s&&!up){U(d.over,tx+1,22,2,2);U(d.over,tx+tw-3,22,2,2);U(lt(d.over,.75),cx-2,26,4,2)}}
+ // arms
+ if(wpn&&s){U(J,cx,23,6,3);U(JD,cx,25,6,1);U(HN,cx+6,23,2,3);const L=wpn=='rifle'?12:6;U('#1e1e1e',cx+7,22,L,2);U('#44464a',cx+8,22,L-2,1);U('#1e1e1e',cx+7,24,2,3);if(wpn=='rifle'){U('#6b4426',cx-3,23,4,2);U('#1e1e1e',cx+11,24,2,3)}}
+ else if(wpn){U(J,tx-2,22,2,6);U(J,tx+tw,22,2,6);if(!up){U(HN,tx-1,28,3,2);U(HN,tx+tw-2,28,3,2);U('#1e1e1e',cx-1,27,3,wpn=='rifle'?8:5);U('#44464a',cx-1,27,1,wpn=='rifle'?8:5)}}
+ else if(s){const w=st*2;U(J,cx-1-w,23,3,7);U(JD,cx+1-w,23,1,7);U(HN,cx-1-w,30,3,2)}
+ else{U(J,tx-2,22+(st>0?1:0),2,8);U(HN,tx-2,30+(st>0?1:0),2,2);U(J,tx+tw,22+(st<0?1:0),2,8);U(HN,tx+tw,30+(st<0?1:0),2,2)}
+ // scarf (over torso)
+ if(d.scarf){const sc=d.scarf,sd=lt(sc,.72);U(sc,tx-1,20,tw+2,3);U(sd,tx-1,22,tw+2,1);if(s){U(sc,tx-3,21,3,7);U(sd,tx-3,27,3,1)}else if(!up){U(sc,cx+1,22,3,6);U(sd,cx+1,27,3,1)}else{U(sc,cx-2,22,3,6)}}
+ U(SKD,cx-2,19,4,3);
+ // head
+ for(let r=0;r<FW.length;r++){const w=FW[r],x=s?cx-6+(14-w):cx-w/2;U(up?H:SK,x,hy+r,w,1);if(!up)U(SKD,s?x:x+w-1,hy+r,1,1)}
+ // hair cap
+ Bl(s?cx-1:cx,hy+2,9,6,CAP);U(HL,cx-4,hy-3,5,1);U(HL,cx-6,hy-2,2,1);U(HL,cx+2,hy-2,3,1);
+ if(up){U(H,cx-8,hy,16,12);U(HD,cx-7,hy+11,14,2);for(let i=0;i<14;i+=2)U(HD,cx-7+i,hy+12,1,1+(i%4?1:0));U(HL,cx-5,hy+1,3,1);U(HL,cx+2,hy+2,2,1)}
+ else if(s){U(H,cx-8,hy,9,11);U(HD,cx-8,hy+10,9,1);for(let i=0;i<9;i+=2)U(HD,cx-8+i,hy+11,1,1);U(HL,cx-6,hy+2,3,1);
+  U(SK,cx+1,hy+8,2,3);U(SKD,cx+1,hy+9,1,1);
+  const B=d.bangs;for(let i=7;i<14;i++){U(H,cx-6+i,hy,1,B[i]);U(HD,cx-6+i,hy+B[i]-1,1,1)}if(d.side)U(H,cx+1,hy+1,2,Math.min(d.side,8))}
+ else{const B=d.bangs;for(let i=0;i<14;i++){U(H,cx-7+i,hy,1,B[i]);U(HD,cx-7+i,hy+B[i]-1,1,1)}
+  const sl=d.side||9;U(H,cx-8,hy+1,2,sl);U(H,cx+6,hy+1,2,sl);U(HD,cx-8,hy+sl,2,1);U(HD,cx+6,hy+sl,2,1)}
+ if(d.ahoge){U(H,cx+1,hy-6,1,3);U(H,cx+2,hy-7,2,1);U(H,cx+3,hy-6,1,1)}
+ if(d.hood){const h=d.hood,hd2=lt(h,.78);U(h,cx-8,hy-4,16,4);if(s){U(h,cx-9,hy-1,8,12);U(hd2,cx-9,hy+10,8,1)}else if(!up){U(h,cx-9,hy-1,2,13);U(h,cx+7,hy-1,2,13);U(hd2,cx-9,hy+11,18,1)}else{U(h,cx-9,hy-1,18,13);U(hd2,cx-9,hy+11,18,1)}U(lt(h,1.2),cx-4,hy-4,8,1)}
+ // face
+ if(!up){const ey=hy+8,E=d.eye,ED=lt(E,.55);
+  if(s){const ex=cx+4;U(LASH,ex,ey,3,1);U(LASH,ex+3,ey-1,1,1);U(E,ex,ey+1,2,3);U(ED,ex+1,ey+2,1,2);U('#ffffff',ex,ey+1,1,1);if(!d.mask){U('#f2a0a0',cx+5,ey+4,2,1);U('#9a4a4a',cx+6,hy+12,1,1)}}
+  else{for(const[ex,f]of[[cx-5,-1],[cx+2,3]]){U(LASH,ex,ey,3,1);U(LASH,ex+f,ey-1,1,1);U(E,ex,ey+1,3,3);U(ED,ex+1,ey+2,1,2);U(lt(E,1.3),ex+2,ey+3,1,1);U('#ffffff',ex,ey+1,1,1)}
+   if(!d.mask){U('#f2a0a0',cx-7,ey+4,2,1);U('#f2a0a0',cx+5,ey+4,2,1);U('#9a4a4a',cx-1,hy+12,2,1)}}
+  if(d.glasses){const G=d.glasses;if(s){U(G,cx+3,ey,4,1);U(G,cx+3,ey+4,4,1);U(G,cx+3,ey,1,5);U(G,cx+1,ey+1,2,1)}else for(const ex of[cx-5,cx+2]){U(G,ex-1,ey,5,1);U(G,ex-1,ey+4,5,1);U(G,ex-1,ey,1,5);U(G,ex+3,ey,1,5);U(G,cx-1,ey+1,2,1)}}
+  if(d.mask){const m=d.mask;if(s){U(m,cx+1,hy+11,7,3);U(lt(m,.75),cx+1,hy+13,7,1)}else{U(m,cx-6,hy+11,12,3);U(lt(m,.75),cx-6,hy+13,12,1);U(lt(m,.85),cx-1,hy+11,1,2)}}
+  if(d.gog){const fr2='#3a3030',ln='#7ad0e0';U(fr2,s?cx-8:cx-8,hy+1,16,2);if(s){U(fr2,cx+3,hy,5,4);U(ln,cx+4,hy+1,3,2);U('#ffffff',cx+4,hy+1,1,1)}else for(const x of[cx-6,cx+1]){U(fr2,x,hy,5,4);U(ln,x+1,hy+1,3,2);U('#ffffff',x+1,hy+1,1,1)}}}
+ else if(d.gog)U('#3a3030',cx-8,hy+1,16,2);
+ if(d.beret){const b=d.beret;Bl(cx+1,hy-2,9,3,b);U(lt(b,1.25),cx-3,hy-4,6,1);U(lt(b,.75),cx-7,hy,16,1);U(b,cx+1,hy-6,2,2)}
+ if(d.cap){const c=d.cap,cd=lt(c,.72);U(c,cx-8,hy-4,16,5);U(lt(c,1.25),cx-5,hy-4,8,1);if(s)U(cd,cx+4,hy+1,6,2);else if(!up)U(cd,cx-7,hy+1,14,2);U('#f4f4ee',cx-1,hy-2,2,2)}
+}
+const DES=[
+ {n:'현재 플레이어',d:'지금 게임의 플레이어 (비교용).',orig:1},
+ {n:'레오 · 떠돌이 생존자',d:'부스스한 갈색 머리, 파란 목도리, 초록 야전 재킷과 배낭. 지금 플레이어의 옷차림을 애니메 스타일로 다시 그린 기본 주인공.',hair:'#7a4a2a',eye:'#5a8ad0',jk:'#5a6b45',pants:'#3d4f6b',scarf:'#3a7bc9',pack:1,glove:'#5a4030',bangs:[5,7,6,8,6,7,5,7,8,6,7,6,7,5],ahoge:1},
+ {n:'하나 · 단발 소녀',d:'금발 단발, 빨간 후드 재킷, 반바지. 밝고 활발한 인상.',hair:'#e8c860',eye:'#3a8ad8',jk:'#c43c3c',pants:'#3a4a7a',shorts:1,shirt:'#f4f0e4',bangs:[6,7,7,7,7,7,6,7,7,7,7,7,7,6],side:12,boots:'#5a3a2a'},
+ {n:'유키 · 은발 포니테일',d:'은발 포니테일, 검은 전술 재킷, 장갑. 냉정한 사격수 느낌.',hair:'#c8ccd8',eye:'#9a6ad8',jk:'#2e3238',pants:'#3a3e44',closed:1,pocket:1,glove:'#1e2024',pony:1,tie:'#8a3ad0',bangs:[7,6,5,6,7,5,6,7,6,5,7,6,7,8],boots:'#1e1e22'},
+ {n:'준 · 안경 엔지니어',d:'단정한 검은 머리, 둥근 안경, 남색 롱코트. 지능형 제작 특화 느낌.',hair:'#2a2a34',eye:'#5a6a7a',jk:'#2f3f6a',pants:'#3a3a40',coat:1,glasses:'#1e1e24',bangs:[5,6,6,6,6,6,5,5,6,6,6,6,6,5],side:7},
+ {n:'리아 · 붉은 장발',d:'붉은 긴 머리와 베레모, 갈색 코트. 차분한 탐험가.',hair:'#c83a3a',eye:'#3aa86a',jk:'#8a5a3a',pants:'#4a3a32',coat:1,back:16,beret:'#3a2a3a',bangs:[6,7,7,6,7,7,6,6,7,7,6,7,7,8],side:13},
+ {n:'모모 · 의무병',d:'분홍 트윈테일, 흰 구급 재킷, 빨간 십자 완장, 치마. 치료 담당.',hair:'#f08ab0',eye:'#d84a6a',jk:'#eef0f2',pants:'#e8d8d0',skirt:'#5a6a8a',arm:1,twin:16,tie:'#5a6a8a',shirt:'#d8e8f0',skin:'#f8d8c0',bangs:[6,7,6,7,7,6,7,7,6,7,7,6,7,6],boots:'#7a4a4a'},
+ {n:'카이 · 후드 정찰병',d:'회색 후드와 얼굴 마스크로 입을 가린 조용한 정찰병. 날카로운 호박색 눈.',hair:'#3a3a40',eye:'#e0a030',jk:'#3e4248',pants:'#2e3034',hood:'#5a5e66',mask:'#24262a',closed:1,glove:'#24262a',bangs:[6,7,8,7,6,7,8,7,6,7,8,7,6,7],boots:'#24262a'},
+ {n:'테오 · 정비공',d:'삐죽한 초록 머리, 이마의 고글, 주황색 작업복. 손재주 좋은 정비공.',hair:'#4aa85a',eye:'#d87a2a',jk:'#5a5048',pants:'#d87a2a',over:'#d87a2a',shirt:'#5a5048',closed:1,gog:1,glove:'#4a3a30',bangs:[4,7,5,8,4,7,6,8,5,7,4,8,6,4],ahoge:1,boots:'#3a2a22'},
+];
+function drawP(D0,x,y,dir,fr,wpn,sc=1){if(D0.orig)return drawChar('player',x,y,dir,fr,wpn,sc);const i=DES.indexOf(D0),sp=spriteS('a'+i+dir+fr+(wpn||''),30,44,'#1f1418',1,()=>aniP(D0,dir,fr,wpn));
+ shd(x-9*sc,y-1,18*sc,4,.3);g.imageSmoothingEnabled=false;g.drawImage(sp,Math.round(x-17*sc),Math.round(y-45*sc),34*sc,48*sc)}
+
+/* ---------- scene (original art + original zombies) ---------- */
+const [OX,OY]=bo(1,0),CX=OX+236,CY=OY+356,CW=300,CHh=190;
+const bg=document.createElement('canvas');bg.width=CW;bg.height=CHh;{const x=bg.getContext('2d');g=x;x.translate(-CX,-CY);drawStatic(CX,CY,CW,CHh);
+ const inR=(a,b,w,h)=>a<CX+CW&&a+w>CX&&b<CY+CHh&&b+h>CY,L=[];
+ for(const h of W0.hw)if(inR(h.x0,h.y-50,h.x1-h.x0,60))L.push({y:h.y,f:()=>hwallD(h.x0,h.x1,h.y,h.h,h.face)});
+ for(const o of W0.objs)if(inR(o.x-20,o.y-100,o.w+40,o.h+110))L.push({y:o.y+o.h,f:()=>D[o.t](o)});
+ L.sort((a,b)=>a.y-b.y).forEach(o=>o.f())}
+const ZS=[['doctor',446,452,'x',80,13,1.2],['nurse',262,522,'x',90,12,2],['patient',512,396,'y',110,10,.5],['screamer',268,392,'x',50,9,3],['civ2',330,515,'y',0,0,0]];
+const tri=(t,r)=>{const p=(t%2+2)%2;return p<1?p*r:(2-p)*r};
+const PPATH=[[398,404],[398,500],[470,500],[470,404]];
+function ppos(t){const per=PPATH.length,seg=(t*.45)%per,i=seg|0,f=seg-i,a=PPATH[i],b=PPATH[(i+1)%per],dx=b[0]-a[0],dy=b[1]-a[1];return{x:a[0]+dx*f,y:a[1]+dy*f,dir:Math.abs(dx)>Math.abs(dy)?(dx>0?'r':'l'):(dy>0?'d':'u')}}
+const cards=[],list=document.getElementById('list');
+DES.forEach((D0,i)=>{const d=document.createElement('div');d.className='card'+(D0.orig?' cur':'');
+ d.innerHTML=`<h2><b>${i}</b>${D0.n}</h2><p>${D0.d}</p><div class="row"><div class="a"></div><div class="b"></div></div>`;
+ const a=document.createElement('canvas');a.width=148;a.height=CHh*148/CW|0;const b=document.createElement('canvas');b.width=CW;b.height=CHh;
+ d.querySelector('.a').append(a);d.querySelector('.a').insertAdjacentHTML('beforeend','<div class="cap">확대 (앞 · 오른쪽 · 뒤 · 총 겨눔)</div>');d.querySelector('.b').append(b);d.querySelector('.b').insertAdjacentHTML('beforeend','<div class="cap">실제 게임 크기 (진료소 로비)</div>');
+ list.appendChild(d);cards.push({D0,a,b,vis:i<3})});
+const io=new IntersectionObserver(es=>es.forEach(e=>{const c=cards.find(c=>c.a.closest('.card')==e.target);if(c)c.vis=e.isIntersecting}),{rootMargin:'200px'});cards.forEach(c=>io.observe(c.a.closest('.card')));
+function frame(t){t/=1000;const fr=(t*7|0)%4;
+ for(const c of cards){if(!c.vis)continue;
+  const x=c.a.getContext('2d');g=x;x.setTransform(1,0,0,1,0,0);x.fillStyle='#d3d5d4';x.fillRect(0,0,c.a.width,c.a.height);FLOORS.hall(0,0,c.a.width,c.a.height);
+  const by=c.a.height/2+22;drawP(c.D0,20,by,'d',fr,null,1.25);drawP(c.D0,55,by,'r',fr,null,1.25);drawP(c.D0,90,by,'u',fr,null,1.25);drawP(c.D0,124,by,'r',-1,'pistol',1.25);
+  const y=c.b.getContext('2d');g=y;y.setTransform(1,0,0,1,0,0);y.drawImage(bg,0,0);y.translate(-CX,-CY);
+  const L=ZS.map(([lk,ax,ay,axis,rg,sp,ph])=>{if(!rg)return{y:OY+ay,f:()=>drawChar(lk,OX+ax,OY+ay,'l',-1)};const T=t*sp/rg+ph,p=tri(T,rg),fw=tri(T+.01,rg)>p;
+   return axis=='x'?{y:OY+ay,f:()=>drawChar(lk,OX+ax+p,OY+ay,fw?'r':'l',fr)}:{y:OY+ay+p,f:()=>drawChar(lk,OX+ax,OY+ay+p,fw?'d':'u',fr)}});
+  const pp=ppos(t);L.push({y:OY+pp.y,f:()=>drawP(c.D0,OX+pp.x,OY+pp.y,pp.dir,fr,'pistol')});
+  L.sort((p,q)=>p.y-q.y).forEach(o=>o.f())}
+ requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+</script></body></html>
