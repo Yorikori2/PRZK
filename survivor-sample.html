@@ -38,8 +38,8 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;border-rad
  <section class="panel" aria-label="안내">
   <h2>적용하려면 필요한 것</h2>
   <ul class="note">
-   <li><b>걷기 모션</b> 서 있는 자세에서 다리 부분을 분리해 움직이는 방식으로 8방향 × 4프레임 걷기 모션을 만들었어요. 옆모습은 다리가 앞뒤로 벌어지고, 앞뒤 모습은 발을 번갈아 들고, 대각선은 둘을 섞었어요. 걸을 때 몸이 1픽셀씩 오르내려요.</li>
-   <li><b>더 자연스럽게 하려면</b> 자동으로 만든 모션이라 팔은 움직이지 않고, 다리 모양이 조금 단순해요. 캐릭터를 만든 도구에서 걷기(Walk) 애니메이션을 직접 뽑아 주시면 그걸로 바로 바꿀 수 있어요.</li>
+   <li><b>걷기 모션</b> 스프라이트마다 어깨·엉덩이 위치를 잡고 8방향 × 6프레임 걷기를 만들었어요. 팔은 같은 쪽 다리와 반대로 흔들리고(앞뒤 모습은 손이 오르내리고, 옆모습은 팔이 앞뒤로 움직임), 다리는 앞뒤로 벌어지며 뒤에 있는 다리 무릎이 굽어요. 다리가 모일 때 몸이 1픽셀 올라가요.</li>
+   <li><b>더 자연스럽게 하려면</b> 원본 한 장을 변형해서 만든 모션이라 손으로 그린 애니메이션보다는 단순하고, 일부 프레임에 작은 픽셀 튐이 있을 수 있어요. 캐릭터를 만든 도구에서 걷기(Walk) 애니메이션을 직접 뽑아 주시면 그걸로 바로 바꿀 수 있어요.</li>
    <li><b>크기</b> 여자 캐릭터는 키 46픽셀, 남자 캐릭터는 62픽셀이고 지금 좀비는 37픽셀이에요. "게임 크기 맞춤"은 둘 다 44픽셀 정도로 맞춰요. 남자 캐릭터도 48×48로 다시 뽑으면 줄이지 않아도 돼서 더 선명해요.</li>
    <li><b>그래픽 통일</b> 두 캐릭터는 어둡고 사실적인 스타일이라, 나중에 좀비도 같은 스타일로 뽑으면 화면이 더 잘 어울려요.</li>
   </ul>
@@ -52,7 +52,7 @@ const DIRS=['south','south-east','east','north-east','north','north-west','west'
 const CHARS=[{id:'female',n:'여자 생존자',px:48},{id:'male',n:'남자 생존자',px:64}];
 const IMG={};let loaded=0;const total=CHARS.length*DIRS.length;
 const WALK={};CHARS.forEach(c=>{IMG[c.id]={};WALK[c.id]={};DIRS.forEach(d=>{const im=new Image();im.onload=()=>{loaded++};im.src='assets/players/'+c.id+'/'+d+'.png';IMG[c.id][d]=im;
- WALK[c.id][d]=[0,1,2,3].map(f=>{const w=new Image();w.src='assets/players/'+c.id+'/walk/'+d+'_'+f+'.png';return w})})});
+ WALK[c.id][d]=[0,1,2,3,4,5].map(f=>{const w=new Image();w.src='assets/players/'+c.id+'/walk/'+d+'_'+f+'.png';return w})})});
 const ST={char:'female',size:'fit',anim:'walk'};
 /* feet row (lowest opaque row) per sprite, measured after load */
 const FEET={};
@@ -92,14 +92,14 @@ function step(now){const dt=Math.min(.05,(now-last)/1000);last=now;const t=now/1
  render(t);requestAnimationFrame(step)}
 function render(t){const fr=(t*7|0)%4,sc=scaleOf(ST.char);
  /* turntable */
- tx.fillStyle='#c9cdca';tx.fillRect(0,0,384,72);g=tx;FLOORS.hall(0,0,384,72);DIRS.forEach((d,i)=>drawSurv(tx,ST.char,d,24+i*48,69,ST.char=='male'?1:1.35,0,0,ST.anim=='walk'?fr:-1));
+ tx.fillStyle='#c9cdca';tx.fillRect(0,0,384,72);g=tx;FLOORS.hall(0,0,384,72);DIRS.forEach((d,i)=>drawSurv(tx,ST.char,d,24+i*48,69,ST.char=='male'?1:1.35,0,0,ST.anim=='walk'?((t*9|0)%6):-1));
  /* scene */
  const a=lowA.getContext('2d'),b=lowB.getContext('2d');g=a;a.setTransform(1,0,0,1,0,0);a.drawImage(bg,0,0);a.translate(-CX,-CY);b.setTransform(1,0,0,1,0,0);b.clearRect(0,0,CW,CHh);b.translate(-CX,-CY);
  const Z=ZS.map(([lk,ax,ay,axis,rg,sp,ph])=>{if(!rg)return{y:OY+ay,f:()=>drawChar(lk,OX+ax,OY+ay,'l',-1)};const T=t*sp/rg+ph,p=tri(T,rg),fw=tri(T+.01,rg)>p;
   return axis=='x'?{y:OY+ay,f:()=>drawChar(lk,OX+ax+p,OY+ay,fw?'r':'l',fr)}:{y:OY+ay+p,f:()=>drawChar(lk,OX+ax,OY+ay+p,fw?'d':'u',fr)}}).sort((p,q)=>p.y-q.y);
  Z.forEach(z=>{g=z.y<=PL.y?a:b;z.f()});
  gx.setTransform(1,0,0,1,0,0);gx.imageSmoothingEnabled=false;gx.drawImage(lowA,0,0,CW*K,CHh*K);
- const wf=(PL.walkT*7|0)%4;
+ const wf=(PL.walkT*9|0)%6;
  drawSurv(gx,ST.char,PL.dir,(PL.x-CX)*K,(PL.y-CY)*K,K*sc,0,0,PL.moving?wf:-1);
  gx.drawImage(lowB,0,0,CW*K,CHh*K)}
 requestAnimationFrame(step);
