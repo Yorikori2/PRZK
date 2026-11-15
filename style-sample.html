@@ -8,22 +8,32 @@ main{max-width:1100px;margin:0 auto;padding:12px 10px 40px}h1{font-size:18px;mar
 .card canvas{display:block;width:100%;height:auto;image-rendering:pixelated;background:#000}
 .card .t{padding:10px 12px 12px}.card h3{margin:0;font-size:15px;display:flex;gap:8px;align-items:center}.card h3 .n{font-size:12px;color:#ffd36a;border:1px solid #8a6a2a;border-radius:99px;padding:0 8px}
 .card .d{font-size:12.5px;color:var(--mut);margin-top:3px}.tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}.tags span{font-size:11px;padding:1px 7px;border-radius:99px;background:#ffffff10;color:#c9d2d8}
-.card.ref{border-color:#4a7aa0}
+.card.ref{border-color:#4a7aa0}.card.new{border-color:#e0574f;box-shadow:0 0 0 1px #e0574f55}
 #zoom{position:fixed;inset:0;background:#000d;display:none;align-items:center;justify-content:center;padding:12px;z-index:9;flex-direction:column;gap:8px}#zoom canvas{max-width:100%;max-height:85vh;image-rendering:pixelated}#zoom div{color:#fff;font-size:14px}
 </style></head><body><main>
-<h1>도트 그래픽 스타일 샘플 10종</h1><p class="lead">같은 장면(진료소 로비)을 10가지 스타일로 표현했습니다. 카드를 누르면 크게 볼 수 있습니다. 마음에 드는 번호를 알려주세요.</p>
+<h1>도트 그래픽 스타일 샘플 11종</h1><p class="lead">같은 장면(진료소 로비)을 10가지 스타일로 표현했습니다. 카드를 누르면 크게 볼 수 있습니다. 마음에 드는 번호를 알려주세요.</p>
 <div class="grid" id="g"></div></main><div id="zoom"></div>
 <script src="art.js"></script><script src="world.js"></script>
 <script>
 buildWorld();
 const SW=448,SH=336,[ox,oy]=bo(1,0),X0=ox+392-SW/2,Y0=oy+410-SH/2;
-function base(){const c=document.createElement('canvas');c.width=SW;c.height=SH;const x=c.getContext('2d');g=x;x.translate(-X0,-Y0);drawStatic(X0,Y0,SW,SH);
+function base(o={}){const c=document.createElement('canvas');c.width=SW;c.height=SH;const x=c.getContext('2d');g=x;x.translate(-X0,-Y0);drawStatic(X0,Y0,SW,SH);
+ if(o.ref){// snow / dust drifts along wall bases + heavy gore on floors
+  const drift=(x0,x1,y,dir)=>{for(let xx=x0;xx<x1;xx+=2){const h=hh(xx,y,4),t=1+Math.round(h*3+Math.sin(xx*.3)*1.2);if(h<.12)continue;R('#eef2f4',xx,dir>0?y+1:y-t,2,t);if(h>.8)R('#ffffff',xx,dir>0?y+1:y-t,1,1)}};
+  for(const h of W0.hw)if(h.x1>X0&&h.x0<X0+SW&&h.y>Y0&&h.y<Y0+SH+20){drift(h.x0,h.x1,h.y,1)}
+  for(const v of W0.vw)if(v.x>X0-8&&v.x<X0+SW+8){for(let yy=v.y0;yy<v.y1;yy+=2){const q=hh(v.x,yy,5);if(q<.5)continue;const t=1+Math.round(q*2);R('#eef2f4',v.x+3,yy,t,2);R('#eef2f4',v.x-3-t,yy,t,2)}}
+  const spray=(cx,cy,n,rad,seed)=>{for(let i=0;i<n;i++){const a=hh(i,seed,1)*6.28,r2=Math.pow(hh(i,seed,2),1.6)*rad,s=hh(i,seed,3)<.25?2:1;R(hh(i,seed,4)<.5?'#c41414':'#8a0a0a',cx+Math.cos(a)*r2,cy+Math.sin(a)*r2*.7,s,s)}blob(cx,cy,3,2,'#a80f0f')};
+  [[300,478,90,40,1],[330,470,60,26,2],[250,402,70,30,3],[365,295,50,24,4],[280,505,80,34,5],[440,478,30,14,6],[520,335,50,30,7],[150,520,40,20,8],[600,400,40,22,9]].forEach(([a,b2,n,r2,sd])=>spray(ox+a,oy+b2,n,r2,sd));
+  for(let i=0;i<40;i++)R(i%3?'#8a0a0a':'#c41414',ox+238+i*1.6+Math.sin(i/4)*3,oy+500+Math.cos(i/5)*2,2,1)}
+ 
  const inR=(a,b,w,h)=>a<X0+SW&&a+w>X0&&b<Y0+SH&&b+h>Y0,L=[];
  for(const h of W0.hw)if(inR(h.x0,h.y-50,h.x1-h.x0,60))L.push({y:h.y,f:()=>hwallD(h.x0,h.x1,h.y,h.h,h.face)});
  for(const o of W0.objs)if(inR(o.x-20,o.y-100,o.w+40,o.h+110))L.push({y:o.y+o.h,f:()=>D[o.t](o)});
  const P=(lk,dx,dy,dir,w,s=1,fr=1)=>L.push({y:oy+dy,f:()=>drawChar(lk,ox+dx,oy+dy,dir,fr,w,s)});
  P('player',440,500,'l','rifle',1,-1);P('runner',300,470,'r');P('nurse',360,290,'d');P('doctor',250,400,'r');P('heavy',520,330,'d',null,1.35);P('patient',300,540,'r');
+ if(o.ref)for(const h of W0.hw)if(h.h>=20&&h.x1>X0&&h.x0<X0+SW&&h.y>Y0&&h.y<Y0+SH+40)L.push({y:h.y+.01,f:()=>{for(let xx=Math.max(h.x0,X0);xx<Math.min(h.x1,X0+SW);xx+=7){const q=hh(xx,h.y,9);if(q<.86)continue;const ln2=3+(q*10|0);R('#9a0c0c',xx,h.y-h.h,2,Math.min(h.h,ln2));R('#c41414',xx,h.y-h.h,1,Math.min(h.h,ln2-2))}}});
  L.sort((a,b)=>a.y-b.y).forEach(o=>o.f());poolD(ox+330,oy+478,7);corpseD(ox+280,oy+505,'civ1');for(let i=0;i<120;i+=2)R('#fff3a0',ox+424-i,oy+483-i*.11,1,1);blob(ox+422,oy+483,4,3,'#ffd36a');
+ if(o.ref){x.globalCompositeOperation='lighter';const gr=x.createRadialGradient(ox+420,oy+483,0,ox+420,oy+483,20);gr.addColorStop(0,'rgba(255,200,110,.7)');gr.addColorStop(1,'rgba(255,120,40,0)');x.fillStyle=gr;x.fillRect(ox+400,oy+463,40,40);x.globalCompositeOperation='source-over';for(let i=0;i<8;i++)R('#ffd36a',ox+404-hh(i,7,1)*20,oy+476+hh(i,7,2)*14,1,1)}
  x.setTransform(1,0,0,1,0,0);return c}
 const SRCIMG=base();
 /* ---------- helpers ---------- */
@@ -41,7 +51,9 @@ const BAYER=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5].map(v=>(v+.5)/16);
 const NES=['#7c7c7c','#0000fc','#0000bc','#4428bc','#940084','#a80020','#a81000','#881400','#503000','#007800','#006800','#005800','#004058','#000000','#bcbcbc','#0078f8','#0058f8','#6844fc','#d800cc','#e40058','#f83800','#e45c10','#ac7c00','#00b800','#00a800','#00a844','#008888','#f8f8f8','#3cbcfc','#6888fc','#9878f8','#f878f8','#f85898','#f87858','#fca044','#f8b800','#b8f818','#58d854','#58f898','#00e8d8','#787878','#fcfcfc','#a4e4fc','#b8b8f8','#d8b8f8','#f8b8f8','#f8a4c0','#f0d0b0','#fce0a8','#f8d878','#d8f878','#b8f8b8','#b8f8d8','#00fcfc','#f8d8f8'];
 const RETRO32=['#0b0b14','#1e1e2e','#34344a','#55556e','#8888a0','#c4c4d4','#f0f0f4','#4a1a1a','#8a2a2a','#c84040','#e88060','#f4c090','#3a2a1a','#6a4a2a','#a07040','#d0a060','#1a3a2a','#2a6a3a','#4aa050','#90d060','#1a2a4a','#2a4a8a','#4a80c8','#90c0f0','#4a3a5a','#7a5a8a','#c090c0','#a0a040','#e0d060','#5a6a6a','#8aa0a0','#d0e0d8'];
 const PASTEL=['#fbf5ef','#f2d3ab','#c69fa5','#8b6d9c','#494d7e','#272744','#f5e6c8','#e8c1a0','#cfe5c8','#9fcfb0','#a8d0e6','#7aa8d0','#f4b6c2','#e8879c','#fff1a8','#d8c8f0'];
+function refGrade(c){return px(c,(r,g2,b)=>{const bl=r>70&&g2<45&&b<45;if(bl)return[cl(r*1.18+16),cl(g2*.5),cl(b*.5)];const l=lum(r,g2,b),k=.6;let R2=r*k+l*(1-k),G=g2*k+l*(1-k),B=b*k+l*(1-k);R2=R2*.94+6;G=G*.96+8;B=B*.98+10;const ct=v=>cl((v-128)*.95+124);return[ct(R2),ct(G),ct(B)]})}
 const STYLES=[
+ ['🆕 참고 이미지 스타일','무채색에 가까운 차분한 회색·녹회색 톤 + 아주 선명한 붉은 피 + 벽 아래 하얗게 쌓인 눈·먼지 + 밝게 번지는 총구 섬광.',['참고 이미지','무채색','선명한 피','눈 쌓인 벽'],()=>{const c=base({ref:1});return refGrade(c)},0,1],
  ['현재 스타일 (기준)','지금 게임에 쓰고 있는 32px 고해상도 도트. 비교 기준입니다.',['기준','32px','자연 색감'],c=>c,1],
  ['레트로 16비트','해상도를 절반으로 낮춰 16px 타일처럼 굵직하게, 32색 팔레트로 정리.',['SFC 감성','굵은 픽셀','32색'],c=>quant(down(c,2),RETRO32)],
  ['패미컴 8비트','8비트 콘솔 팔레트(54색)와 4배 큰 픽셀. 가장 고전적인 느낌.',['8비트','54색','큰 픽셀'],c=>quant(down(c,3),NES)],
@@ -56,8 +68,8 @@ const STYLES=[
  ['포스트 아포칼립스 노을','주황빛 하이라이트와 청록색 그림자로 영화처럼 색 보정. 먼지 낀 노을.',['영화 색감','노을','청록·주황'],c=>{px(c,(r,g2,b)=>{const l=lum(r,g2,b)/255,t=l;return[cl(r*.75+t*70+(1-t)*5),cl(g2*.75+t*30+(1-t)*30),cl(b*.7+(1-t)*45)]});const x=c.getContext('2d'),gr=x.createLinearGradient(0,0,0,SH);gr.addColorStop(0,'rgba(255,140,60,.22)');gr.addColorStop(1,'rgba(20,60,70,.18)');x.fillStyle=gr;x.fillRect(0,0,SW,SH);return vignette(c,.45,'20,10,0')}],
 ];
 const G=document.getElementById('g'),Z=document.getElementById('zoom');
-STYLES.forEach(([n,d,tags,f,ref],i)=>{const c=f(clone()),card=document.createElement('div');card.className='card'+(ref?' ref':'');card.appendChild(c);
- card.insertAdjacentHTML('beforeend','<div class="t"><h3>'+(ref?'':'<span class="n">'+i+'</span>')+n+'</h3><div class="d">'+d+'</div><div class="tags">'+tags.map(t=>'<span>'+t+'</span>').join('')+'</div></div>');
- card.onclick=()=>{Z.innerHTML='';const b=document.createElement('canvas');b.width=SW;b.height=SH;b.getContext('2d').drawImage(c,0,0);b.style.width=Math.min(innerWidth-24,SW*2.4)+'px';Z.appendChild(b);Z.insertAdjacentHTML('beforeend','<div>'+(ref?'':i+'. ')+n+' — 화면을 누르면 닫힙니다</div>');Z.style.display='flex'};G.appendChild(card)});
+let num=0;STYLES.forEach(([n,d,tags,f,ref,isNew],i)=>{const c=f(clone()),card=document.createElement('div');card.className='card'+(ref?' ref':'')+(isNew?' new':'');if(!ref&&!isNew)num++;const no=isNew?'NEW':num;card.appendChild(c);
+ card.insertAdjacentHTML('beforeend','<div class="t"><h3>'+(ref?'':'<span class="n">'+no+'</span>')+n+'</h3><div class="d">'+d+'</div><div class="tags">'+tags.map(t=>'<span>'+t+'</span>').join('')+'</div></div>');
+ card.onclick=()=>{Z.innerHTML='';const b=document.createElement('canvas');b.width=SW;b.height=SH;b.getContext('2d').drawImage(c,0,0);b.style.width=Math.min(innerWidth-24,SW*2.4)+'px';Z.appendChild(b);Z.insertAdjacentHTML('beforeend','<div>'+(ref?'':no+'. ')+n+' — 화면을 누르면 닫힙니다</div>');Z.style.display='flex'};G.appendChild(card)});
 Z.onclick=()=>Z.style.display='none';
 </script></body></html>
