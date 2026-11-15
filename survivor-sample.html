@@ -1,0 +1,104 @@
+<title>생존자 플레이어</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* layout: one column — character picker, 8-direction turntable, playable in-game view. Dark single theme to match the game. */
+:root{--bg:#101314;--panel:#181d20;--line:#ffffff1a;--fg:#e8ebec;--mut:#9aa3a8;--acc:#c9a45a;--blue:#7fb2d4;
+ --f-body:'Noto Sans KR',system-ui,sans-serif;--f-head:'Black Han Sans','Noto Sans KR',sans-serif;color-scheme:dark}
+html,body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;line-height:1.55}
+main{max-width:900px;margin:0 auto;padding-block:16px 36px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:14px}
+h1{font-family:var(--f-head);font-weight:400;font-size:26px;margin:0;letter-spacing:.5px}
+.lead{margin:0;color:var(--mut);max-width:66ch}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;display:grid;gap:10px;min-width:0}
+.panel h2{font-size:15px;margin:0}.panel p{margin:0;color:var(--mut);font-size:13px}
+.grp{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.grp>span{min-width:44px;color:var(--mut);font-size:12px}
+button{font:inherit;font-size:13px;color:var(--fg);background:#22292d;border:1px solid #ffffff24;border-radius:8px;padding:5px 11px;cursor:pointer}
+button:hover{border-color:#ffffff55}button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}button.on{background:#43381c;border-color:var(--acc)}
+canvas{display:block;width:100%;height:auto;image-rendering:pixelated;border-radius:8px}
+#game{touch-action:none;cursor:crosshair}
+.dirs{display:grid;grid-template-columns:repeat(8,1fr);text-align:center;font-size:11px;color:var(--mut)}
+.note{font-size:13px;color:var(--mut);margin:0;padding-left:18px;display:grid;gap:4px}
+.note b{color:var(--acc)}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap">
+<main>
+ <h1>생존자 플레이어</h1>
+ <p class="lead">보내주신 두 캐릭터(여자 48×48, 남자 64×64, 8방향)를 플레이어로 넣어 봤어요. 배경과 좀비는 지금 게임 그대로예요.</p>
+ <section class="panel" aria-label="캐릭터 선택">
+  <div class="grp"><span>캐릭터</span><div class="grp" id="c-char"></div></div>
+  <div class="grp"><span>크기</span><div class="grp" id="c-size"></div></div>
+  <canvas id="turn" width="384" height="72"></canvas>
+  <div class="dirs"><span>남</span><span>남동</span><span>동</span><span>북동</span><span>북</span><span>북서</span><span>서</span><span>남서</span></div>
+ </section>
+ <section class="panel" aria-label="게임 화면">
+  <h2>게임 화면에서 움직여 보기</h2>
+  <p>화면을 누르거나 드래그하면 그쪽으로 걸어가요. 키보드 방향키나 WASD도 돼요. 가만히 두면 혼자 8방향으로 돌아다녀요.</p>
+  <canvas id="game" width="900" height="570"></canvas>
+ </section>
+ <section class="panel" aria-label="안내">
+  <h2>적용하려면 필요한 것</h2>
+  <ul class="note">
+   <li><b>지금 가능한 것</b> 8방향 서 있는 모습 그대로 플레이어로 쓸 수 있어요. 걸을 때는 임시로 1픽셀 위아래 흔들림만 넣었어요.</li>
+   <li><b>걷기 애니메이션</b> 받은 파일에는 Idle 상태만 들어 있어요. 같은 도구에서 걷기(Walk)·달리기·공격·피격·사망 애니메이션도 내보내서 보내주시면 그대로 연결할게요.</li>
+   <li><b>크기</b> 여자 캐릭터는 키 46픽셀, 남자 캐릭터는 62픽셀이고 지금 좀비는 37픽셀이에요. "게임 크기 맞춤"은 둘 다 44픽셀 정도로 맞춰요. 남자 캐릭터도 48×48로 다시 뽑으면 줄이지 않아도 돼서 더 선명해요.</li>
+   <li><b>그래픽 통일</b> 두 캐릭터는 어둡고 사실적인 스타일이라, 나중에 좀비도 같은 스타일로 뽑으면 화면이 더 잘 어울려요.</li>
+  </ul>
+ </section>
+</main>
+<script src="art.js"></script><script src="world.js"></script>
+<script>
+'use strict';
+const DIRS=['south','south-east','east','north-east','north','north-west','west','south-west'];
+const CHARS=[{id:'female',n:'여자 생존자',px:48},{id:'male',n:'남자 생존자',px:64}];
+const IMG={};let loaded=0;const total=CHARS.length*DIRS.length;
+CHARS.forEach(c=>{IMG[c.id]={};DIRS.forEach(d=>{const im=new Image();im.onload=()=>{loaded++};im.src='assets/players/'+c.id+'/'+d+'.png';IMG[c.id][d]=im})});
+const ST={char:'female',size:'fit'};
+/* feet row (lowest opaque row) per sprite, measured after load */
+const FEET={};
+function feetOf(c,d){const k=c+d;if(FEET[k]!=null)return FEET[k];const im=IMG[c][d];if(!im.complete||!im.naturalWidth)return im.naturalHeight||48;const cv=document.createElement('canvas');cv.width=im.naturalWidth;cv.height=im.naturalHeight;const x=cv.getContext('2d');x.drawImage(im,0,0);const dd=x.getImageData(0,0,cv.width,cv.height).data;let f=0;for(let y=cv.height-1;y>=0&&!f;y--)for(let xx=0;xx<cv.width;xx++)if(dd[(y*cv.width+xx)*4+3]>0){f=y+1;break}return FEET[k]=f}
+function scaleOf(c){const ch=CHARS.find(q=>q.id==c);if(ST.size=='native')return 1;return ch.px==64?0.72:0.96}
+function btns(id,list,key){const el=document.getElementById(id);el.innerHTML='';list.forEach(([v,n])=>{const b=document.createElement('button');b.id=id+'-'+v;b.textContent=n;b.className=ST[key]==v?'on':'';b.onclick=()=>{ST[key]=v;ui()};el.appendChild(b)})}
+function ui(){btns('c-char',CHARS.map(c=>[c.id,c.n]),'char');btns('c-size',[['fit','게임 크기 맞춤'],['native','원본 크기']],'size')}
+ui();
+/* draw a sprite with feet at (x,y) on a context, at a given pixel scale */
+function drawSurv(ctx,c,d,x,y,sc,bob=0,sway=0){const im=IMG[c][d];if(!im.complete||!im.naturalWidth)return;const w=im.naturalWidth,h=im.naturalHeight,f=feetOf(c,d);
+ ctx.fillStyle='rgba(10,8,6,.3)';ctx.beginPath();ctx.ellipse(x,y-sc,9*sc*(w/48),2.6*sc,0,0,7);ctx.fill();
+ ctx.imageSmoothingEnabled=false;ctx.drawImage(im,Math.round(x-w/2*sc+sway*sc),Math.round(y-(f-bob)*sc),Math.round(w*sc),Math.round(h*sc))}
+/* ---------- scene (original art) ---------- */
+buildWorld();const[OX,OY]=bo(1,0),CX=OX+236,CY=OY+356,CW=300,CHh=190,K=3;
+const bg=document.createElement('canvas');bg.width=CW;bg.height=CHh;{const x=bg.getContext('2d');g=x;x.translate(-CX,-CY);drawStatic(CX,CY,CW,CHh);
+ const inR=(a,b,w,h)=>a<CX+CW&&a+w>CX&&b<CY+CHh&&b+h>CY,L=[];
+ for(const h of W0.hw)if(inR(h.x0,h.y-50,h.x1-h.x0,60))L.push({y:h.y,f:()=>hwallD(h.x0,h.x1,h.y,h.h,h.face)});
+ for(const o of W0.objs)if(inR(o.x-20,o.y-100,o.w+40,o.h+110))L.push({y:o.y+o.h,f:()=>D[o.t](o)});L.sort((a,b)=>a.y-b.y).forEach(o=>o.f())}
+const ZS=[['doctor',446,452,'x',80,13,1.2],['nurse',262,522,'x',90,12,2],['patient',512,396,'y',110,10,.5],['screamer',268,392,'x',50,9,3],['civ2',330,515,'y',0,0,0]];
+const tri=(t,r)=>{const p=(t%2+2)%2;return p<1?p*r:(2-p)*r};
+const lowA=document.createElement('canvas'),lowB=document.createElement('canvas');lowA.width=lowB.width=CW;lowA.height=lowB.height=CHh;
+const game=document.getElementById('game'),gx=game.getContext('2d'),turn=document.getElementById('turn'),tx=turn.getContext('2d');
+/* player state (world coords inside the clinic block) */
+const PL={x:OX+400,y:OY+470,dir:'south',moving:false,walkT:0};
+const AUTO=[[400,470],[470,410],[470,500],[400,500],[330,440],[400,410],[470,470]];let ai=0,manual=0,target=null;
+const keys={};addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=1;if(e.key.startsWith('Arrow'))e.preventDefault();manual=3});addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=0});
+function toWorld(e){const r=game.getBoundingClientRect();return{x:CX+(e.clientX-r.left)/r.width*CW,y:CY+(e.clientY-r.top)/r.height*CHh}}
+let ptr=false;game.addEventListener('pointerdown',e=>{ptr=true;game.setPointerCapture(e.pointerId);target=toWorld(e);manual=3});game.addEventListener('pointermove',e=>{if(ptr){target=toWorld(e);manual=3}});
+const up=()=>{ptr=false};game.addEventListener('pointerup',up);game.addEventListener('pointercancel',up);
+function dirFrom(dx,dy){const a=Math.atan2(dy,dx);const i=((Math.round(a/(Math.PI/4))%8)+8)%8;return['east','south-east','south','south-west','west','north-west','north','north-east'][i]}
+const BX0=OX+250,BX1=OX+535,BY0=OY+392,BY1=OY+540;
+let last=performance.now();
+function step(now){const dt=Math.min(.05,(now-last)/1000);last=now;const t=now/1000;
+ let vx=0,vy=0;if(keys.arrowleft||keys.a)vx-=1;if(keys.arrowright||keys.d)vx+=1;if(keys.arrowup||keys.w)vy-=1;if(keys.arrowdown||keys.s)vy+=1;
+ if(!vx&&!vy){let tg=target;if(!tg&&manual<=0){const a=AUTO[ai];tg={x:OX+a[0],y:OY+a[1]};}if(tg){const dx=tg.x-PL.x,dy=tg.y-PL.y,d=Math.hypot(dx,dy);if(d<2){if(target&&!ptr)target=null;else if(!target){ai=(ai+1)%AUTO.length}}else{vx=dx/d;vy=dy/d}}}
+ manual-=dt;const m=Math.hypot(vx,vy);PL.moving=m>0;if(m){vx/=m;vy/=m;PL.x=Math.max(BX0,Math.min(BX1,PL.x+vx*42*dt));PL.y=Math.max(BY0,Math.min(BY1,PL.y+vy*42*dt));PL.dir=dirFrom(vx,vy);PL.walkT+=dt}
+ render(t);requestAnimationFrame(step)}
+function render(t){const fr=(t*7|0)%4,sc=scaleOf(ST.char);
+ /* turntable */
+ tx.fillStyle='#c9cdca';tx.fillRect(0,0,384,72);g=tx;FLOORS.hall(0,0,384,72);DIRS.forEach((d,i)=>drawSurv(tx,ST.char,d,24+i*48,69,ST.char=='male'?1:1.35));
+ /* scene */
+ const a=lowA.getContext('2d'),b=lowB.getContext('2d');g=a;a.setTransform(1,0,0,1,0,0);a.drawImage(bg,0,0);a.translate(-CX,-CY);b.setTransform(1,0,0,1,0,0);b.clearRect(0,0,CW,CHh);b.translate(-CX,-CY);
+ const Z=ZS.map(([lk,ax,ay,axis,rg,sp,ph])=>{if(!rg)return{y:OY+ay,f:()=>drawChar(lk,OX+ax,OY+ay,'l',-1)};const T=t*sp/rg+ph,p=tri(T,rg),fw=tri(T+.01,rg)>p;
+  return axis=='x'?{y:OY+ay,f:()=>drawChar(lk,OX+ax+p,OY+ay,fw?'r':'l',fr)}:{y:OY+ay+p,f:()=>drawChar(lk,OX+ax,OY+ay+p,fw?'d':'u',fr)}}).sort((p,q)=>p.y-q.y);
+ Z.forEach(z=>{g=z.y<=PL.y?a:b;z.f()});
+ gx.setTransform(1,0,0,1,0,0);gx.imageSmoothingEnabled=false;gx.drawImage(lowA,0,0,CW*K,CHh*K);
+ const wf=(PL.walkT*7|0)%4,bob=PL.moving&&(wf==1||wf==3)?1:0,sway=PL.moving?(wf==1?.5:wf==3?-.5:0):0;
+ drawSurv(gx,ST.char,PL.dir,(PL.x-CX)*K,(PL.y-CY)*K,K*sc,bob,sway);
+ gx.drawImage(lowB,0,0,CW*K,CHh*K)}
+requestAnimationFrame(step);
+</script>
