@@ -121,6 +121,7 @@ function gasMask(C){const{U,Bl,s,up,cx,hy,bob}=C,m='#3a3e40';if(up){U('#2a2a2a',
  if(s){Bl(cx+4,hy+10,4,4,m);Bl(cx+4,hy+8,3,1,lt(m,1.3));blob(cx+5,hy+9+bob,2,2,'#9ad0c0');U('#ffffff',cx+4,hy+8,1,1);U('#62666a',cx+6,hy+12,3,4);U('#2a2a2a',cx-6,hy+8,7,2)}
  else{Bl(cx,hy+10,7,4,m);Bl(cx,hy+8,6,1,lt(m,1.3));blob(cx-4,hy+9+bob,2,2,'#9ad0c0');blob(cx+3,hy+9+bob,2,2,'#9ad0c0');U('#ffffff',cx-5,hy+8,1,1);U('#ffffff',cx+2,hy+8,1,1);Bl(cx,hy+14,2.5,2,'#62666a');U('#8a8e92',cx-1,hy+13,2,1);U('#2a2a2a',cx-9,hy+8,2,2);U('#2a2a2a',cx+7,hy+8,2,2)}}
 /* ---------- anime chibi player (30x44, feet at y=41). Side view is drawn facing right; left = mirrored ---------- */
+const FWS=[5,6,7,7,8,8,8,8,8,7,7,6,5,3];
 const FW=[...Array(14)].map((_,r)=>{const t=(r-6.5)/7.5;return Math.max(6,2*Math.round(7*Math.sqrt(Math.max(0,1-t*t))))});
 function aniP(d,dir,fr,wpn,eq={}){const s=dir=='l'||dir=='r',up=dir=='u',st=fr<0?0:[0,1,0,-1][fr%4],bob=(fr==1||fr==3)?-1:0,cx=20,hy=6,atk=fr==-2,pk=eq.back??(d.pack?1:0),GUN=['pistol','shotgun','rifle'].includes(wpn),MEL=wpn&&!GUN&&wpn!='fist';
  if(dir=='l'){g.translate(40,0);g.scale(-1,1)}
@@ -175,24 +176,24 @@ function aniP(d,dir,fr,wpn,eq={}){const s=dir=='l'||dir=='r',up=dir=='u',st=fr<0
  if(d.scarf){const sc=d.scarf,sd=lt(sc,.72);U(sc,tx-1,20,tw+2,3);U(sd,tx-1,22,tw+2,1);if(eq.body){}else if(s){U(sc,tx-3,21,3,7);U(sd,tx-3,27,3,1)}else if(!up){U(sc,cx+1,22,3,6);U(sd,cx+1,27,3,1)}else{U(sc,cx-2,22,3,6)}}
  U(SKD,cx-2,19,4,3);
  // head
- for(let r=0;r<FW.length;r++){const w=FW[r],x=s?cx-6+(14-w):cx-w/2;U(up?H:SK,x,hy+r,w,1);if(!up)U(SKD,s?x:x+w-1,hy+r,1,1)}
+ for(let r=0;r<FW.length;r++){const w=s?6+FWS[r]:FW[r],x=s?cx-6:cx-w/2;U(up?H:SK,x,hy+r,w,1);if(!up)U(SKD,s?x:x+w-1,hy+r,1,1)}
  // hair cap
  Bl(s?cx-1:cx,hy+3,9,7,CAP);U(HL,cx-4,hy-3,5,1);U(HL,cx-6,hy-2,2,1);U(HL,cx+2,hy-2,3,1);
  if(up){Bl(cx,hy+5,8,7,H);U(HD,cx-6,hy+11,12,2);for(let i=0;i<14;i+=2)U(HD,cx-7+i,hy+12,1,1+(i%4?1:0));U(HL,cx-5,hy+1,3,1);U(HL,cx+2,hy+2,2,1)}
  else if(s){Bl(cx-4,hy+5,5,6,H);U(H,cx-8,hy+1,9,7);U(HD,cx-7,hy+10,7,1);for(let i=0;i<8;i+=2)U(HD,cx-7+i,hy+11,1,1);U(HL,cx-6,hy+2,3,1);
   U(SK,cx+1,hy+8,2,3);U(SKD,cx+1,hy+9,1,1);
-  const B=d.bangs;for(let i=7;i<14;i++){U(H,cx-6+i,hy,1,B[i]);U(HD,cx-6+i,hy+B[i]-1,1,1)}if(d.side)U(H,cx+1,hy+1,2,Math.min(d.side,8))}
+  const B=d.bangs;for(let i=7;i<13;i++){U(H,cx-6+i,hy,1,B[i]);U(HD,cx-6+i,hy+B[i]-1,1,1)}if(d.side)U(H,cx+1,hy+1,2,Math.min(d.side,8))}
  else{const B=d.bangs;for(let i=0;i<14;i++){U(H,cx-7+i,hy,1,B[i]);U(HD,cx-7+i,hy+B[i]-1,1,1)}
   const sl=d.side||9;U(H,cx-8,hy+1,1,sl-2);U(H,cx-7,hy+1,1,sl);U(H,cx+7,hy+1,1,sl-2);U(H,cx+6,hy+1,1,sl);U(HD,cx-7,hy+sl,1,1);U(HD,cx+6,hy+sl,1,1);U(HD,cx-8,hy+sl-2,1,1);U(HD,cx+7,hy+sl-2,1,1)}
  if(d.ahoge&&!eq.head){U(H,cx+1,hy-6,1,3);U(H,cx+2,hy-7,2,1);U(H,cx+3,hy-6,1,1)}
  if(d.hood){const h=d.hood,hd2=lt(h,.78);U(h,cx-8,hy-4,16,4);if(s){U(h,cx-9,hy-1,8,12);U(hd2,cx-9,hy+10,8,1)}else if(!up){U(h,cx-9,hy-1,2,13);U(h,cx+7,hy-1,2,13);U(hd2,cx-9,hy+11,18,1)}else{U(h,cx-9,hy-1,18,13);U(hd2,cx-9,hy+11,18,1)}U(lt(h,1.2),cx-4,hy-4,8,1)}
  // face
  if(!up){const ey=hy+8,E=d.eye,ED=lt(E,.55);
-  if(s){const ex=cx+4;U(LASH,ex,ey,3,1);U(LASH,ex+3,ey-1,1,1);U(E,ex,ey+1,2,3);U(ED,ex+1,ey+2,1,2);U('#ffffff',ex,ey+1,1,1);if(!d.mask){U('#f2a0a0',cx+5,ey+4,2,1);U('#9a4a4a',cx+6,hy+12,1,1)}}
+  if(s){const ex=cx+3;U(LASH,ex,ey,3,1);U(LASH,ex+3,ey-1,1,1);U(E,ex,ey+1,2,3);U(ED,ex+1,ey+2,1,2);U('#ffffff',ex,ey+1,1,1);if(!d.mask){U('#f2a0a0',cx+2,ey+4,2,1);U('#9a4a4a',cx+4,hy+12,1,1)}}
   else{for(const[ex,f]of[[cx-5,-1],[cx+2,3]]){U(LASH,ex,ey,3,1);U(LASH,ex+f,ey-1,1,1);U(E,ex,ey+1,3,3);U(ED,ex+1,ey+2,1,2);U(lt(E,1.3),ex+2,ey+3,1,1);U('#ffffff',ex,ey+1,1,1)}
    if(!d.mask){U('#f2a0a0',cx-7,ey+4,2,1);U('#f2a0a0',cx+5,ey+4,2,1);U('#9a4a4a',cx-1,hy+12,2,1)}}
-  if(d.glasses){const G=d.glasses;if(s){U(G,cx+3,ey,4,1);U(G,cx+3,ey+4,4,1);U(G,cx+3,ey,1,5);U(G,cx+1,ey+1,2,1)}else for(const ex of[cx-5,cx+2]){U(G,ex-1,ey,5,1);U(G,ex-1,ey+4,5,1);U(G,ex-1,ey,1,5);U(G,ex+3,ey,1,5);U(G,cx-1,ey+1,2,1)}}
-  if(d.mask){const m=d.mask;if(s){U(m,cx+1,hy+11,7,3);U(lt(m,.75),cx+1,hy+13,7,1)}else{U(m,cx-6,hy+11,12,3);U(lt(m,.75),cx-6,hy+13,12,1);U(lt(m,.85),cx-1,hy+11,1,2)}}
+  if(d.glasses){const G=d.glasses;if(s){U(G,cx+2,ey,4,1);U(G,cx+2,ey+4,4,1);U(G,cx+2,ey,1,5);U(G,cx+1,ey+1,1,1)}else for(const ex of[cx-5,cx+2]){U(G,ex-1,ey,5,1);U(G,ex-1,ey+4,5,1);U(G,ex-1,ey,1,5);U(G,ex+3,ey,1,5);U(G,cx-1,ey+1,2,1)}}
+  if(d.mask){const m=d.mask;if(s){U(m,cx+1,hy+11,6,1);U(m,cx+1,hy+12,5,1);U(lt(m,.75),cx+1,hy+13,3,1)}else{U(m,cx-6,hy+11,12,3);U(lt(m,.75),cx-6,hy+13,12,1);U(lt(m,.85),cx-1,hy+11,1,2)}}
   if(d.gog){const fr2='#3a3030',ln='#7ad0e0';U(fr2,s?cx-8:cx-8,hy+1,16,2);if(s){U(fr2,cx+3,hy,5,4);U(ln,cx+4,hy+1,3,2);U('#ffffff',cx+4,hy+1,1,1)}else for(const x of[cx-6,cx+1]){U(fr2,x,hy,5,4);U(ln,x+1,hy+1,3,2);U('#ffffff',x+1,hy+1,1,1)}}}
  else if(d.gog)U('#3a3030',cx-8,hy+1,16,2);
  if(!eq.head){
