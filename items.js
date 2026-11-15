@@ -99,12 +99,12 @@ I('bag1',bagI('#3a6ea8','#5a8ec8'));I('bag2',bagI('#c94f3a','#e06a50'));I('bag3'
 I('antenna',()=>{blob(12,10,8,6,blk);blob(12,10,7,5,'#c9ced3');blob(12,10,3,2,'#9aa0a6');R(blk,11,15,2,6);R(blk,7,20,10,2);R('#d33a3a',16,6,2,2)});
 function iconCanvas(id,scale=2){const c=document.createElement('canvas');c.width=c.height=24;const o=g;g=c.getContext('2d');(IC[id]||(()=>{R('#555',6,6,12,12)}))();g=o;const x=c.getContext('2d'),im=x.getImageData(0,0,24,24),d=im.data,out=new Uint8ClampedArray(d);for(let j=0;j<24;j++)for(let i=0;i<24;i++){const k=(j*24+i)*4;if(d[k+3])continue;if([[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>{const ii=i+a,jj=j+b;return ii>=0&&jj>=0&&ii<24&&jj<24&&d[(jj*24+ii)*4+3]>0})){out[k]=150;out[k+1]=165;out[k+2]=175;out[k+3]=140}}im.data.set(out);x.putImageData(im,0,0);c.style.width=c.style.height=(24*scale)+'px';c.style.imageRendering='pixelated';return c}
 /* ---------- expansion firearms ---------- */
-Object.assign(AMMO,{'357':'.357 매그넘','50':'.50 대구경','762':'7.62mm 탄','arrow':'화살','nail':'못','flare':'신호탄','40mm':'40mm 유탄','rocket':'로켓','taser':'테이저 카트리지'});
+Object.assign(AMMO,{'357':'.357 매그넘','50':'.50 대구경','762':'7.62mm 탄','arrow':'화살','nail':'못','flare':'신호탄','40mm':'40mm 유탄','rocket':'로켓','taser':'전기충격 카트리지'});
 WEAPONS.push(
  ['revolver','리볼버','g','u',{d:48,cd:.5,r:260,mag:6,nz:4,wt:1.2,ammo:'357'},'강력한 한 발 · 재장전 느림','주택 · 경찰서'],
  ['hpistol','대구경 권총','g','e',{d:75,cd:.7,r:280,mag:7,nz:5,wt:2,ammo:'50',pierce:2},'중무장 좀비 관통 · 큰 반동','군부대'],
  ['mpistol','기관권총','g','r',{d:18,cd:.07,r:180,mag:20,nz:4,wt:1.4,ammo:'9mm'},'권총 크기의 연사','경찰 특공 사물함'],
- ['taser','테이저','g','u',{d:5,cd:1,r:90,mag:3,nz:1,wt:.5,ammo:'taser'},'명중 시 3초 기절 · 연쇄 감전','경찰서'],
+ ['taser','전기충격총','g','u',{d:5,cd:1,r:90,mag:3,nz:1,wt:.5,ammo:'taser'},'명중 시 3초 기절 · 연쇄 감전','경찰서'],
  ['flare','신호탄 총','g','u',{d:20,cd:1.2,r:240,mag:1,nz:2,wt:.8,ammo:'flare'},'불 붙임 · 좀비 유인 · 밤 조명','소방서 · 주유소'],
  ['nailgun','네일건','g','c',{d:16,cd:.2,r:120,mag:40,nz:1,wt:2.2,ammo:'nail'},'조용한 연사 · 못 제작 가능','철물점'],
  ['ssmg','소음 기관단총','g','e',{d:20,cd:.1,r:220,mag:30,nz:1,wt:2.9,ammo:'9mm'},'일체형 소음기 · 거의 무소음','군부대 · 연구소'],
