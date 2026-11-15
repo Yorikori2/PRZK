@@ -1,0 +1,189 @@
+<title>레거시 3D 캐릭터</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* layout: one column — controls, big 3D viewer, then the in-game composite; dark single theme to match the game */
+:root{--bg:#0f1214;--panel:#171c20;--line:#ffffff1a;--fg:#e8ecef;--mut:#9aa4ab;--acc:#e0b03a;--acc2:#6fb3e0;
+ --f-body:'Noto Sans KR',system-ui,sans-serif;--f-head:'Black Han Sans','Noto Sans KR',sans-serif;color-scheme:dark}
+html,body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;line-height:1.55}
+main{max-width:920px;margin:0 auto;padding-block:16px 36px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:14px}
+h1{font-family:var(--f-head);font-weight:400;font-size:26px;letter-spacing:.5px;margin:0;text-wrap:balance}
+.lead{margin:0;color:var(--mut);max-width:68ch}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;display:grid;gap:10px;min-width:0}
+.panel h2{font-size:15px;margin:0}.panel p{margin:0;color:var(--mut);font-size:13px}
+.grp{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.grp>span{min-width:52px;color:var(--mut);font-size:12px;letter-spacing:.3px}
+button{font:inherit;font-size:13px;color:var(--fg);background:#20272c;border:1px solid #ffffff24;border-radius:8px;padding:5px 10px;cursor:pointer}
+button:hover{border-color:#ffffff55}button:focus-visible{outline:2px solid var(--acc2);outline-offset:2px}
+button.on{background:#4a3c14;border-color:var(--acc)}
+.view{position:relative;width:100%;border-radius:8px;overflow:hidden;background:#14191c;touch-action:none}
+#v3{display:block;width:100%;height:min(70vw,460px);cursor:grab}
+#v3.px{image-rendering:pixelated}
+.hint{position:absolute;left:10px;bottom:8px;font-size:11px;color:#c8d0d6;background:#0008;border-radius:6px;padding:2px 8px;pointer-events:none}
+#game{display:block;width:100%;height:auto;image-rendering:pixelated;border-radius:8px}
+.cmp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}@media(max-width:640px){.cmp{grid-template-columns:1fr}}
+.cmp div{background:#0f1315;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px}
+.cmp b{display:block;color:var(--acc);font-size:13px;margin-bottom:2px}
+.load{color:var(--mut);font-size:13px}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap">
+<main>
+ <h1>3D 캐릭터 샘플</h1>
+ <p class="lead">애니메 도트로 만들었던 레오·하나·유키를 3D 모델로 만들어 봤어요. 드래그해서 돌려 볼 수 있고, 렌더링 방식 3가지와 장비를 바꿔 볼 수 있어요. 아래에는 같은 3D 캐릭터를 지금 게임 화면(진료소 로비)에 넣어 좀비들 사이를 걷게 했어요.</p>
+ <section class="panel" aria-label="3D 뷰어">
+  <div class="grp"><span>캐릭터</span><div class="grp" id="c-char"></div></div>
+  <div class="grp"><span>렌더링</span><div class="grp" id="c-style"></div></div>
+  <div class="grp"><span>동작</span><div class="grp" id="c-pose"></div></div>
+  <div class="grp"><span>시점</span><div class="grp" id="c-cam"></div></div>
+  <div class="grp"><span>장비</span><div class="grp" id="c-gear"></div></div>
+  <div class="view"><canvas id="v3"></canvas><div class="hint" id="hint">드래그해서 돌려 보세요</div></div>
+  <div class="load" id="load">3D 엔진 불러오는 중…</div>
+ </section>
+ <section class="panel" aria-label="게임 화면 합성">
+  <h2>게임 화면에 넣었을 때</h2>
+  <p>배경과 좀비는 지금 게임 그대로이고, 플레이어만 3D로 실시간 렌더링했어요. 위에서 고른 렌더링 방식과 장비가 그대로 적용돼요.</p>
+  <canvas id="game" width="900" height="570"></canvas>
+ </section>
+ <section class="panel" aria-label="렌더링 비교">
+  <h2>렌더링 방식 비교</h2>
+  <div class="cmp">
+   <div><b>부드러운 3D</b>빛과 그림자가 자연스러운 일반 3D. 가장 입체적이지만 지금 도트 배경과는 느낌이 달라요.</div>
+   <div><b>툰 + 외곽선</b>3단계 명암과 외곽선을 넣은 카툰 3D. 애니메 느낌을 살리면서 배경과도 잘 어울려요.</div>
+   <div><b>3D → 도트</b>3D를 저해상도로 그려 픽셀로 바꾼 방식. 지금 도트 배경과 가장 잘 어울리고, 360도 어느 방향이든 자연스럽게 돌아요.</div>
+  </div>
+ </section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="art.js"></script><script src="world.js"></script>
+<script>
+'use strict';
+/* ================= character data ================= */
+const DES3=[
+ {n:'레오',hair:0x7a4a2a,hs:'spiky',eye:'#4a7ad0',skin:0xf6d0b4,jk:0x5a6b45,shirt:0xece6da,pants:0x3d4f6b,boots:0x4a3226,scarf:0x3a7bc9,pack:1,ahoge:1,open:1},
+ {n:'하나',hair:0xe8c860,hs:'bob',eye:'#3a8ad8',skin:0xf8d6bc,jk:0xc43c3c,shirt:0xf4f0e4,pants:0x3a4a7a,shorts:1,boots:0x5a3a2a,open:1},
+ {n:'유키',hair:0xc8ccd8,hs:'pony',eye:'#9a6ad8',skin:0xf6d6c4,jk:0x2e3238,pants:0x3a3e44,boots:0x1e1e22,glove:0x1e2024,tie:0x8a3ad0}];
+const ST={char:0,style:'toon',pose:'walk',cam:'orbit',helmet:false,vest:false,bigpack:false};
+const STYLES=[['smooth','부드러운 3D'],['toon','툰 + 외곽선'],['pixel','3D → 도트']];
+const POSES=[['idle','대기'],['walk','걷기'],['aim','총 겨눔']];
+const CAMS=[['orbit','자유 회전'],['game','게임 시점 (위에서)']];
+const GEARS=[['helmet','군용 헬멧'],['vest','경찰 방탄조끼'],['bigpack','대형 배낭']];
+function buttons(id,list,key,toggle){const el=document.getElementById(id);el.innerHTML='';list.forEach(([v,n])=>{const b=document.createElement('button');b.id=id+'-'+v;b.textContent=n;
+ const on=toggle?ST[v]:ST[key]===v;b.className=on?'on':'';b.onclick=()=>{if(toggle)ST[v]=!ST[v];else ST[key]=v;refresh()};el.appendChild(b)})}
+function drawUI(){buttons('c-char',DES3.map((d,i)=>[i,d.n]),'char');buttons('c-style',STYLES,'style');buttons('c-pose',POSES,'pose');buttons('c-cam',CAMS,'cam');buttons('c-gear',GEARS,null,true)}
+
+if(!window.THREE){document.getElementById('load').textContent='3D 엔진을 불러오지 못했어요. 새로고침해 주세요.'}else{
+document.getElementById('load').hidden=true;
+/* ================= materials ================= */
+const grad=(()=>{const t=new THREE.DataTexture(new Uint8Array([95,175,255]),3,1,THREE.LuminanceFormat);t.minFilter=t.magFilter=THREE.NearestFilter;t.generateMipmaps=false;t.needsUpdate=true;return t})();
+const OLM=new THREE.MeshBasicMaterial({color:0x1f1418,side:THREE.BackSide});
+let STY='toon';
+const MAT=c=>STY=='smooth'?new THREE.MeshStandardMaterial({color:c,roughness:.78,metalness:0}):new THREE.MeshToonMaterial({color:c,gradientMap:grad});
+const G={sph:(r,a=28,b=20)=>new THREE.SphereGeometry(r,a,b),cyl:(t,b,h,s=20)=>new THREE.CylinderGeometry(t,b,h,s),box:(w,h,d)=>new THREE.BoxGeometry(w,h,d),cone:(r,h,s=10)=>new THREE.ConeGeometry(r,h,s),tor:(r,t,a=Math.PI*2)=>new THREE.TorusGeometry(r,t,10,24,a)};
+function part(geo,c,parent,pos,rot,scl,ol=true){const m=new THREE.Mesh(geo,MAT(c));if(pos)m.position.set(...pos);if(rot)m.rotation.set(...rot);if(scl)m.scale.set(...scl);parent.add(m);
+ if(ol&&STY!='smooth'){geo.computeBoundingSphere();const s=scl?Math.max(...scl):1,r=geo.boundingSphere.radius*s,o=new THREE.Mesh(geo,OLM);o.scale.setScalar(1+.035/Math.max(r,.05));m.add(o)}return m}
+const texCache={};
+function eyeTex(col){if(texCache[col])return texCache[col];const c=document.createElement('canvas');c.width=48;c.height=64;const x=c.getContext('2d');
+ const gr=x.createLinearGradient(0,14,0,62);gr.addColorStop(0,'#1a1020');gr.addColorStop(.35,col);gr.addColorStop(1,'#d8ecff');x.fillStyle=gr;x.beginPath();x.ellipse(24,38,16,23,0,0,7);x.fill();
+ x.fillStyle='#120a14';x.beginPath();x.ellipse(24,40,7,11,0,0,7);x.fill();x.fillStyle='#fff';x.beginPath();x.arc(16,28,6,0,7);x.fill();x.beginPath();x.arc(31,48,3,0,7);x.fill();
+ x.fillStyle='#22141a';x.beginPath();x.moveTo(2,18);x.quadraticCurveTo(24,6,46,14);x.lineTo(47,20);x.quadraticCurveTo(24,13,3,22);x.fill();x.fillRect(40,12,7,5);
+ const t=new THREE.CanvasTexture(c);t.minFilter=THREE.LinearFilter;return texCache[col]=t}
+function decal(tex,parent,pos,ry,w,h,flip,rx=0){const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:tex,transparent:true,depthWrite:false}));m.position.set(...pos);m.rotation.set(rx,ry,0);if(flip)m.scale.x=-1;parent.add(m);return m}
+function flat(color,opa,parent,pos,ry,w,h,rx=0){const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({color,transparent:true,opacity:opa,depthWrite:false}));m.position.set(...pos);m.rotation.set(rx,ry,0);parent.add(m);return m}
+function spike(parent,c,base,dir,len,r){{const l=Math.hypot(...dir);dir=dir.map(v=>v/l)}const m=part(G.cone(r,len),c,parent,[base[0]+dir[0]*len/2,base[1]+dir[1]*len/2,base[2]+dir[2]*len/2]);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),new THREE.Vector3(...dir).normalize());return m}
+
+/* ================= character builder ================= */
+function build(d,gear){const root=new THREE.Group(),R={root};
+ const sh=new THREE.Mesh(new THREE.CircleGeometry(.5,24),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.28,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=.005;root.add(sh);
+ for(const s of[-1,1]){const hip=new THREE.Group();hip.position.set(s*.14,.92,0);root.add(hip);
+  if(d.shorts){part(G.cyl(.125,.12,.3),d.pants,hip,[0,-.15,0]);part(G.cyl(.1,.09,.42),d.skin,hip,[0,-.5,0])}else part(G.cyl(.115,.1,.68),d.pants,hip,[0,-.34,0]);
+  part(G.sph(1),d.boots,hip,[0,-.8,.05],null,[.12,.1,.19]);R[s<0?'legL':'legR']=hip}
+ const tor=new THREE.Group();tor.position.y=.92;root.add(tor);R.tor=tor;
+ part(G.cyl(.25,.29,.7),d.jk,tor,[0,.36,0],null,[1,1,.78]);part(G.sph(1),d.jk,tor,[0,.68,0],null,[.27,.11,.21]);
+ if(d.open)part(G.box(.11,.56,.03),d.shirt,tor,[0,.38,.215],null,null,false);
+ part(G.cyl(.295,.295,.07),0x2e2622,tor,[0,.05,0],null,[1,1,.8]);part(G.box(.07,.06,.02),0xd4b04a,tor,[0,.05,.24],null,null,false);
+ if(gear.vest){part(G.cyl(.275,.305,.56),0x2c3854,tor,[0,.38,0],null,[1,1,.8]);part(G.box(.08,.08,.02),0xe0bc50,tor,[-.12,.48,.25],null,null,false);part(G.box(.4,.05,.02),0xd8dade,tor,[0,.3,-.25],null,null,false)}
+ for(const s of[-1,1]){const a=new THREE.Group();a.position.set(s*.33,.64,0);tor.add(a);part(G.cyl(.08,.07,.48),d.jk,a,[0,-.24,0]);part(G.sph(.08),d.glove||d.skin,a,[0,-.52,0]);R[s<0?'armL':'armR']=a;
+  if(gear.vest)part(G.sph(1),0x2c3854,a,[0,-.02,0],null,[.1,.06,.1])}
+ const gun=new THREE.Group();gun.position.set(0,-.58,.02);R.armR.add(gun);part(G.box(.06,.42,.08),0x1e1e1e,gun,[0,-.12,0]);part(G.box(.05,.06,.14),0x1e1e1e,gun,[0,.05,-.07]);part(G.box(.035,.25,.04),0x44464a,gun,[0,-.2,.04],null,null,false);R.gun=gun;
+ part(G.cyl(.075,.085,.14),d.skin,tor,[0,.77,0],null,null,false);
+ if(d.scarf){part(G.tor(.19,.065),d.scarf,tor,[0,.74,0],[Math.PI/2,0,0]);part(G.box(.1,.32,.05),d.scarf,tor,[.08,.56,.22],[0,0,.12])}
+ const pk=gear.bigpack?2:d.pack?1:0;
+ if(pk==1){part(G.sph(1),0x6b4a2a,tor,[0,.38,-.32],null,[.24,.27,.13]);part(G.sph(1),0x7d5a34,tor,[0,.52,-.36],null,[.22,.1,.1])}
+ if(pk==2){part(G.sph(1),0x55613a,tor,[0,.42,-.38],null,[.3,.36,.18]);part(G.cyl(.1,.1,.62),0x3a7bc9,tor,[0,.86,-.36],[0,0,Math.PI/2]);part(G.sph(1),0x4a5432,tor,[0,.3,-.53],null,[.16,.1,.06])}
+ if(pk){for(const s of[-1,1])part(G.box(.05,.5,.03),0x4a321c,tor,[s*.14,.42,.23],[-.08,0,0],null,false)}
+ const head=new THREE.Group();head.position.y=1.3;tor.add(head);R.head=head;
+ part(G.sph(.52,36,28),d.skin,head,[0,0,0],null,[1,.94,.92]);
+ for(const s of[-1,1])part(G.sph(.09),d.skin,head,[s*.5,-.05,-.02],null,[.6,1,1]);
+ hair(d,head,gear);
+ decal(eyeTex(d.eye),head,[-.19,-.06,.462],-.36,.2,.27,false);decal(eyeTex(d.eye),head,[.19,-.06,.462],.36,.2,.27,true);
+ flat(0xf08a8a,.55,head,[-.3,-.22,.39],-.65,.12,.05);flat(0xf08a8a,.55,head,[.3,-.22,.39],.65,.12,.05);flat(0x9a4a4a,1,head,[0,-.3,.405],0,.06,.025,-.5);
+ if(gear.helmet){part(new THREE.SphereGeometry(.62,32,16,0,Math.PI*2,0,Math.PI/2),0x4f5a35,head,[0,.04,-.02],null,[1,.95,1]);part(G.tor(.6,.04),0x3e4729,head,[0,.04,-.02],[Math.PI/2,0,0]);
+  for(const s of[-1,1])part(G.box(.025,.42,.025),0x2a2a20,head,[s*.43,-.2,.1],null,null,false)}
+ return R}
+function hair(d,head,gear){const H=d.hair;
+ part(G.sph(.56),H,head,[0,.09,-.05],null,[1.04,.97,1]);
+ if(d.hs=='spiky'){for(let i=-3;i<=3;i++)spike(head,H,[i*.11,.3,.36-Math.abs(i)*.03],[i*.15,-1,.5],.34,.1);
+  for(const s of[-1,1])spike(head,H,[s*.42,.08,.18],[s*.15,-1,.15],.42,.09);
+  [[0,1,-.2],[.5,.8,-.4],[-.5,.8,-.4],[.3,.5,-.85],[-.3,.5,-.85],[0,.2,-1],[.6,.2,-.8],[-.6,.2,-.8]].forEach(v=>{const n=new THREE.Vector3(...v).normalize();spike(head,H,[n.x*.48,.09+n.y*.46,-.05+n.z*.48],v,.3,.13)});
+  if(d.ahoge&&!gear.helmet)part(G.tor(.1,.025,Math.PI*1.3),H,head,[.05,.68,0],[0,Math.PI/2,.3])}
+ if(d.hs=='bob'){part(G.sph(1),H,head,[0,-.08,-.1],null,[.6,.52,.5]);for(const s of[-1,1])part(G.sph(1),H,head,[s*.45,-.16,.04],null,[.15,.42,.36]);
+  for(let i=-4;i<=4;i++)spike(head,H,[i*.085,.32,.38-Math.abs(i)*.025],[i*.05,-1,.45],.3,.075)}
+ if(d.hs=='pony'){for(let i=-3;i<=3;i++)spike(head,H,[i*.11,.3,.36-Math.abs(i)*.03],[-.2+i*.1,-1,.5],.36,.1);for(const s of[-1,1])spike(head,H,[s*.43,.05,.2],[0,-1,.1],.48,.08);
+  part(G.tor(.07,.03),d.tie,head,[0,.2,-.55],[0,0,0]);part(G.sph(.1),H,head,[0,.2,-.6]);part(G.sph(1),H,head,[0,-.2,-.72],[.35,0,0],[.13,.42,.12]);part(G.sph(1),H,head,[0,-.55,-.82],[.5,0,0],[.07,.14,.06])}}
+
+/* ================= main viewer ================= */
+const cv=document.getElementById('v3'),ren=new THREE.WebGLRenderer({canvas:cv,antialias:false,alpha:false});ren.setClearColor(0x14191c);
+const scn=new THREE.Scene(),cam=new THREE.PerspectiveCamera(28,1,.1,50);
+const hemi=new THREE.HemisphereLight(0xffffff,0xa8a4ac,.75),key=new THREE.DirectionalLight(0xffffff,.75);key.position.set(-2,4,3);scn.add(hemi,key);
+const floorC=document.createElement('canvas');floorC.width=floorC.height=64;{const x=floorC.getContext('2d');for(let i=0;i<2;i++)for(let j=0;j<2;j++){x.fillStyle=(i+j)%2?'#cfd3d2':'#c7cbca';x.fillRect(i*32,j*32,32,32)}x.fillStyle='#b8bcbb';for(let i=0;i<2;i++){x.fillRect(i*32+31,0,1,64);x.fillRect(0,i*32+31,64,1)}}
+const ftex=new THREE.CanvasTexture(floorC);ftex.wrapS=ftex.wrapT=THREE.RepeatWrapping;ftex.repeat.set(6,6);ftex.magFilter=THREE.NearestFilter;
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(14,14),new THREE.MeshBasicMaterial({map:ftex,color:0x8e9494}));floor.rotation.x=-Math.PI/2;scn.add(floor);
+let CH=null,yaw=.35,pitch=.18,auto=true,drag=null;
+function rebuild(){STY=ST.style;if(CH)scn.remove(CH.root);CH=build(DES3[ST.char],ST);scn.add(CH.root);if(G2.ch)G2.scn.remove(G2.ch.root);G2.ch=build(DES3[ST.char],ST);G2.scn.add(G2.ch.root)}
+function size(){const w=cv.clientWidth,h=cv.clientHeight,px=ST.style=='pixel';cv.classList.toggle('px',px);ren.setPixelRatio(px?1:Math.min(2,devicePixelRatio||1));ren.setSize(px?Math.round(w/4):w,px?Math.round(h/4):h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,yaw,pitch};auto=false;cv.setPointerCapture(e.pointerId);document.getElementById('hint').hidden=true});
+cv.addEventListener('pointermove',e=>{if(!drag)return;yaw=drag.yaw+(e.clientX-drag.x)*.01;pitch=Math.max(-.1,Math.min(1.1,drag.pitch+(e.clientY-drag.y)*.006))});
+const end=()=>drag=null;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+function pose(R,t,p){const w=p=='walk'?Math.sin(t*8):0,b=p=='walk'?Math.abs(Math.cos(t*8))*.05:Math.sin(t*2)*.012;
+ R.legL.rotation.x=w*.6;R.legR.rotation.x=-w*.6;R.tor.position.y=.92+b;R.head.rotation.z=p=='idle'?Math.sin(t*1.3)*.04:0;
+ if(p=='aim'){R.armR.rotation.set(-Math.PI/2+.05,0,0);R.armL.rotation.set(-1.25,0,.55);R.gun.visible=true}
+ else{R.armL.rotation.set(-w*.6,0,-.06);R.armR.rotation.set(w*.6,0,.06);R.gun.visible=false}
+ R.legL.position.y=R.legR.position.y=.92}
+/* ================= in-game composite ================= */
+const G2={scn:new THREE.Scene(),ch:null};G2.scn.add(new THREE.HemisphereLight(0xffffff,0xa8a4ac,.75));{const k=new THREE.DirectionalLight(0xffffff,.75);k.position.set(-2,4,3);G2.scn.add(k)}
+const VW=48,VH=64,UNIT=12.6,cam2=new THREE.OrthographicCamera(-VW/2/UNIT,VW/2/UNIT,VH/2/UNIT,-VH/2/UNIT,.1,50);
+{const p=.62,D=10;cam2.position.set(0,1.3+D*Math.sin(p),D*Math.cos(p));cam2.lookAt(0,1.3,0);cam2.updateMatrixWorld()}
+const c2=document.createElement('canvas'),ren2=new THREE.WebGLRenderer({canvas:c2,antialias:false,alpha:true,preserveDrawingBuffer:true});ren2.setClearColor(0,0);
+const feet=new THREE.Vector3(0,0,0).project(cam2),FX=(feet.x+1)/2*VW,FY=(1-feet.y)/2*VH;
+buildWorld();const[OX,OY]=bo(1,0),CX=OX+236,CY=OY+356,CW=300,CHh=190,K=3;
+const bg=document.createElement('canvas');bg.width=CW;bg.height=CHh;{const x=bg.getContext('2d');g=x;x.translate(-CX,-CY);drawStatic(CX,CY,CW,CHh);
+ const inR=(a,b,w,h)=>a<CX+CW&&a+w>CX&&b<CY+CHh&&b+h>CY,L=[];
+ for(const h of W0.hw)if(inR(h.x0,h.y-50,h.x1-h.x0,60))L.push({y:h.y,f:()=>hwallD(h.x0,h.x1,h.y,h.h,h.face)});
+ for(const o of W0.objs)if(inR(o.x-20,o.y-100,o.w+40,o.h+110))L.push({y:o.y+o.h,f:()=>D[o.t](o)});L.sort((a,b)=>a.y-b.y).forEach(o=>o.f())}
+const ZS=[['doctor',446,452,'x',80,13,1.2],['nurse',262,522,'x',90,12,2],['patient',512,396,'y',110,10,.5],['screamer',268,392,'x',50,9,3],['civ2',330,515,'y',0,0,0]];
+const tri=(t,r)=>{const p=(t%2+2)%2;return p<1?p*r:(2-p)*r};
+const PATH=[[398,404],[398,500],[470,500],[470,404]];
+function ppos(t){const n=PATH.length,sg=(t*.45)%n,i=sg|0,f=sg-i,a=PATH[i],b=PATH[(i+1)%n],dx=b[0]-a[0],dy=b[1]-a[1];return{x:a[0]+dx*f,y:a[1]+dy*f,dir:Math.abs(dx)>Math.abs(dy)?(dx>0?'r':'l'):(dy>0?'d':'u')}}
+const lowA=document.createElement('canvas'),lowB=document.createElement('canvas');lowA.width=lowB.width=CW;lowA.height=lowB.height=CHh;
+const game=document.getElementById('game'),gx=game.getContext('2d');gx.imageSmoothingEnabled=false;
+let gyaw=0;
+function drawGame(t){const fr=(t*7|0)%4,pp=ppos(t),py=OY+pp.y;
+ const a=lowA.getContext('2d'),b=lowB.getContext('2d');g=a;a.setTransform(1,0,0,1,0,0);a.drawImage(bg,0,0);a.translate(-CX,-CY);b.setTransform(1,0,0,1,0,0);b.clearRect(0,0,CW,CHh);b.translate(-CX,-CY);
+ const Z=ZS.map(([lk,ax,ay,axis,rg,sp,ph])=>{if(!rg)return{y:OY+ay,f:()=>drawChar(lk,OX+ax,OY+ay,'l',-1)};const T=t*sp/rg+ph,p=tri(T,rg),fw=tri(T+.01,rg)>p;
+  return axis=='x'?{y:OY+ay,f:()=>drawChar(lk,OX+ax+p,OY+ay,fw?'r':'l',fr)}:{y:OY+ay+p,f:()=>drawChar(lk,OX+ax,OY+ay+p,fw?'d':'u',fr)}}).sort((p,q)=>p.y-q.y);
+ Z.forEach(z=>{g=z.y<=py?a:b;z.f()});
+ const target={d:0,u:Math.PI,r:Math.PI/2,l:-Math.PI/2}[pp.dir];let dd=target-gyaw;while(dd>Math.PI)dd-=Math.PI*2;while(dd<-Math.PI)dd+=Math.PI*2;gyaw+=dd*.2;
+ G2.ch.root.rotation.y=gyaw;pose(G2.ch,t,ST.pose=='idle'?'walk':ST.pose);
+ const q=ST.style=='pixel'?1:K;ren2.setPixelRatio(1);ren2.setSize(VW*q,VH*q,false);ren2.render(G2.scn,cam2);
+ gx.setTransform(1,0,0,1,0,0);gx.imageSmoothingEnabled=false;gx.drawImage(lowA,0,0,CW*K,CHh*K);
+ const sx=(OX+pp.x-CX-FX)*K,sy=(py-CY-FY)*K;gx.imageSmoothingEnabled=q>1;gx.drawImage(c2,Math.round(sx),Math.round(sy),VW*K,VH*K);gx.imageSmoothingEnabled=false;gx.drawImage(lowB,0,0,CW*K,CHh*K)}
+/* ================= loop ================= */
+function refresh(){drawUI();rebuild();size()}
+window.refresh=refresh;window.setView=(y,p)=>{yaw=y;if(p!=null)pitch=p;auto=false};
+const t0=performance.now();
+function loop(now){const t=(now-t0)/1000;if(auto)yaw+=.006;
+ if(ST.cam=='game'){const p=.62,D=9;cam.position.set(0,1.5+D*Math.sin(p),D*Math.cos(p));cam.lookAt(0,1.4,0);CH.root.rotation.y=yaw}
+ else{const D=8.2;cam.position.set(Math.sin(yaw)*D*Math.cos(pitch),1.5+D*Math.sin(pitch),Math.cos(yaw)*D*Math.cos(pitch));cam.lookAt(0,1.5,0);CH.root.rotation.y=0}
+ pose(CH,t,ST.pose);ren.render(scn,cam);drawGame(t);requestAnimationFrame(loop)}
+addEventListener('resize',size);refresh();requestAnimationFrame(loop);
+}
+</script>
