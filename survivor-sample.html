@@ -26,6 +26,7 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;border-rad
  <section class="panel" aria-label="캐릭터 선택">
   <div class="grp"><span>캐릭터</span><div class="grp" id="c-char"></div></div>
   <div class="grp"><span>크기</span><div class="grp" id="c-size"></div></div>
+  <div class="grp"><span>동작</span><div class="grp" id="c-anim"></div></div>
   <canvas id="turn" width="384" height="72"></canvas>
   <div class="dirs"><span>남</span><span>남동</span><span>동</span><span>북동</span><span>북</span><span>북서</span><span>서</span><span>남서</span></div>
  </section>
@@ -37,8 +38,8 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;border-rad
  <section class="panel" aria-label="안내">
   <h2>적용하려면 필요한 것</h2>
   <ul class="note">
-   <li><b>지금 가능한 것</b> 8방향 서 있는 모습 그대로 플레이어로 쓸 수 있어요. 걸을 때는 임시로 1픽셀 위아래 흔들림만 넣었어요.</li>
-   <li><b>걷기 애니메이션</b> 받은 파일에는 Idle 상태만 들어 있어요. 같은 도구에서 걷기(Walk)·달리기·공격·피격·사망 애니메이션도 내보내서 보내주시면 그대로 연결할게요.</li>
+   <li><b>걷기 모션</b> 서 있는 자세에서 다리 부분을 분리해 움직이는 방식으로 8방향 × 4프레임 걷기 모션을 만들었어요. 옆모습은 다리가 앞뒤로 벌어지고, 앞뒤 모습은 발을 번갈아 들고, 대각선은 둘을 섞었어요. 걸을 때 몸이 1픽셀씩 오르내려요.</li>
+   <li><b>더 자연스럽게 하려면</b> 자동으로 만든 모션이라 팔은 움직이지 않고, 다리 모양이 조금 단순해요. 캐릭터를 만든 도구에서 걷기(Walk) 애니메이션을 직접 뽑아 주시면 그걸로 바로 바꿀 수 있어요.</li>
    <li><b>크기</b> 여자 캐릭터는 키 46픽셀, 남자 캐릭터는 62픽셀이고 지금 좀비는 37픽셀이에요. "게임 크기 맞춤"은 둘 다 44픽셀 정도로 맞춰요. 남자 캐릭터도 48×48로 다시 뽑으면 줄이지 않아도 돼서 더 선명해요.</li>
    <li><b>그래픽 통일</b> 두 캐릭터는 어둡고 사실적인 스타일이라, 나중에 좀비도 같은 스타일로 뽑으면 화면이 더 잘 어울려요.</li>
   </ul>
@@ -50,17 +51,18 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;border-rad
 const DIRS=['south','south-east','east','north-east','north','north-west','west','south-west'];
 const CHARS=[{id:'female',n:'여자 생존자',px:48},{id:'male',n:'남자 생존자',px:64}];
 const IMG={};let loaded=0;const total=CHARS.length*DIRS.length;
-CHARS.forEach(c=>{IMG[c.id]={};DIRS.forEach(d=>{const im=new Image();im.onload=()=>{loaded++};im.src='assets/players/'+c.id+'/'+d+'.png';IMG[c.id][d]=im})});
-const ST={char:'female',size:'fit'};
+const WALK={};CHARS.forEach(c=>{IMG[c.id]={};WALK[c.id]={};DIRS.forEach(d=>{const im=new Image();im.onload=()=>{loaded++};im.src='assets/players/'+c.id+'/'+d+'.png';IMG[c.id][d]=im;
+ WALK[c.id][d]=[0,1,2,3].map(f=>{const w=new Image();w.src='assets/players/'+c.id+'/walk/'+d+'_'+f+'.png';return w})})});
+const ST={char:'female',size:'fit',anim:'walk'};
 /* feet row (lowest opaque row) per sprite, measured after load */
 const FEET={};
 function feetOf(c,d){const k=c+d;if(FEET[k]!=null)return FEET[k];const im=IMG[c][d];if(!im.complete||!im.naturalWidth)return im.naturalHeight||48;const cv=document.createElement('canvas');cv.width=im.naturalWidth;cv.height=im.naturalHeight;const x=cv.getContext('2d');x.drawImage(im,0,0);const dd=x.getImageData(0,0,cv.width,cv.height).data;let f=0;for(let y=cv.height-1;y>=0&&!f;y--)for(let xx=0;xx<cv.width;xx++)if(dd[(y*cv.width+xx)*4+3]>0){f=y+1;break}return FEET[k]=f}
 function scaleOf(c){const ch=CHARS.find(q=>q.id==c);if(ST.size=='native')return 1;return ch.px==64?0.72:0.96}
 function btns(id,list,key){const el=document.getElementById(id);el.innerHTML='';list.forEach(([v,n])=>{const b=document.createElement('button');b.id=id+'-'+v;b.textContent=n;b.className=ST[key]==v?'on':'';b.onclick=()=>{ST[key]=v;ui()};el.appendChild(b)})}
-function ui(){btns('c-char',CHARS.map(c=>[c.id,c.n]),'char');btns('c-size',[['fit','게임 크기 맞춤'],['native','원본 크기']],'size')}
+function ui(){btns('c-char',CHARS.map(c=>[c.id,c.n]),'char');btns('c-size',[['fit','게임 크기 맞춤'],['native','원본 크기']],'size');btns('c-anim',[['walk','걷기'],['idle','서 있기']],'anim')}
 ui();
 /* draw a sprite with feet at (x,y) on a context, at a given pixel scale */
-function drawSurv(ctx,c,d,x,y,sc,bob=0,sway=0){const im=IMG[c][d];if(!im.complete||!im.naturalWidth)return;const w=im.naturalWidth,h=im.naturalHeight,f=feetOf(c,d);
+function drawSurv(ctx,c,d,x,y,sc,bob=0,sway=0,wf=-1){let im=IMG[c][d];if(wf>=0){const w=WALK[c][d][wf];if(w.complete&&w.naturalWidth)im=w}if(!im.complete||!im.naturalWidth)return;const w=im.naturalWidth,h=im.naturalHeight,f=feetOf(c,d);
  ctx.fillStyle='rgba(10,8,6,.3)';ctx.beginPath();ctx.ellipse(x,y-sc,9*sc*(w/48),2.6*sc,0,0,7);ctx.fill();
  ctx.imageSmoothingEnabled=false;ctx.drawImage(im,Math.round(x-w/2*sc+sway*sc),Math.round(y-(f-bob)*sc),Math.round(w*sc),Math.round(h*sc))}
 /* ---------- scene (original art) ---------- */
@@ -90,15 +92,15 @@ function step(now){const dt=Math.min(.05,(now-last)/1000);last=now;const t=now/1
  render(t);requestAnimationFrame(step)}
 function render(t){const fr=(t*7|0)%4,sc=scaleOf(ST.char);
  /* turntable */
- tx.fillStyle='#c9cdca';tx.fillRect(0,0,384,72);g=tx;FLOORS.hall(0,0,384,72);DIRS.forEach((d,i)=>drawSurv(tx,ST.char,d,24+i*48,69,ST.char=='male'?1:1.35));
+ tx.fillStyle='#c9cdca';tx.fillRect(0,0,384,72);g=tx;FLOORS.hall(0,0,384,72);DIRS.forEach((d,i)=>drawSurv(tx,ST.char,d,24+i*48,69,ST.char=='male'?1:1.35,0,0,ST.anim=='walk'?fr:-1));
  /* scene */
  const a=lowA.getContext('2d'),b=lowB.getContext('2d');g=a;a.setTransform(1,0,0,1,0,0);a.drawImage(bg,0,0);a.translate(-CX,-CY);b.setTransform(1,0,0,1,0,0);b.clearRect(0,0,CW,CHh);b.translate(-CX,-CY);
  const Z=ZS.map(([lk,ax,ay,axis,rg,sp,ph])=>{if(!rg)return{y:OY+ay,f:()=>drawChar(lk,OX+ax,OY+ay,'l',-1)};const T=t*sp/rg+ph,p=tri(T,rg),fw=tri(T+.01,rg)>p;
   return axis=='x'?{y:OY+ay,f:()=>drawChar(lk,OX+ax+p,OY+ay,fw?'r':'l',fr)}:{y:OY+ay+p,f:()=>drawChar(lk,OX+ax,OY+ay+p,fw?'d':'u',fr)}}).sort((p,q)=>p.y-q.y);
  Z.forEach(z=>{g=z.y<=PL.y?a:b;z.f()});
  gx.setTransform(1,0,0,1,0,0);gx.imageSmoothingEnabled=false;gx.drawImage(lowA,0,0,CW*K,CHh*K);
- const wf=(PL.walkT*7|0)%4,bob=PL.moving&&(wf==1||wf==3)?1:0,sway=PL.moving?(wf==1?.5:wf==3?-.5:0):0;
- drawSurv(gx,ST.char,PL.dir,(PL.x-CX)*K,(PL.y-CY)*K,K*sc,bob,sway);
+ const wf=(PL.walkT*7|0)%4;
+ drawSurv(gx,ST.char,PL.dir,(PL.x-CX)*K,(PL.y-CY)*K,K*sc,0,0,PL.moving?wf:-1);
  gx.drawImage(lowB,0,0,CW*K,CHh*K)}
 requestAnimationFrame(step);
 </script>
