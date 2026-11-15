@@ -27,11 +27,11 @@ const SC={};
 function spriteS(key,W,H,ol,olw,draw,post){if(SC[key])return SC[key];const p=2,c=document.createElement('canvas');c.width=W+p*2;c.height=H+p*2;const x=c.getContext('2d'),o=g;g=x;x.translate(p,p);draw();x.setTransform(1,0,0,1,0,0);g=o;
  if(post)post(x,c.width,c.height);
  if(ol){const im=x.getImageData(0,0,c.width,c.height);const oc=cRGB(ol);for(let it=0;it<olw;it++){const d=im.data,out=new Uint8ClampedArray(d),w=c.width,h=c.height;
-  for(let j=0;j<h;j++)for(let i=0;i<w;i++){const k=(j*w+i)*4;if(d[k+3])continue;if([[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>{const ii=i+a,jj=j+b;return ii>=0&&jj>=0&&ii<w&&jj<h&&d[(jj*w+ii)*4+3]>0})){out[k]=oc[0];out[k+1]=oc[1];out[k+2]=oc[2];out[k+3]=255}}im.data.set(out)}x.putImageData(im,0,0)}
+  for(let j=0;j<h;j++)for(let i=0;i<w;i++){const k=(j*w+i)*4;if(d[k+3])continue;let n=-1;for(const[a,b]of[[0,-1],[1,0],[-1,0],[0,1]]){const ii=i+a,jj=j+b;if(ii>=0&&jj>=0&&ii<w&&jj<h&&d[(jj*w+ii)*4+3]>0){n=(jj*w+ii)*4;break}}if(n>=0){out[k]=d[n]*.34+oc[0]*.66;out[k+1]=d[n+1]*.34+oc[1]*.66;out[k+2]=d[n+2]*.34+oc[2]*.66;out[k+3]=255}}im.data.set(out)}x.putImageData(im,0,0)}
  return SC[key]=c}
 
 /* ---------- anime chibi player (30x44, feet at y=41). Side view is drawn facing right; left = mirrored ---------- */
-const FW=[10,12,14,14,14,14,14,14,14,14,13,12,10,8];
+const FW=[...Array(14)].map((_,r)=>{const t=(r-6.5)/7.5;return Math.max(6,2*Math.round(7*Math.sqrt(Math.max(0,1-t*t))))});
 function aniP(d,dir,fr,wpn,eq={}){const s=dir=='l'||dir=='r',up=dir=='u',st=fr<0?0:[0,1,0,-1][fr%4],bob=(fr==1||fr==3)?-1:0,cx=20,hy=6,atk=fr==-2,pk=eq.back??(d.pack?1:0),GUN=['pistol','shotgun','rifle'].includes(wpn),MEL=wpn&&!GUN&&wpn!='fist';
  if(dir=='l'){g.translate(40,0);g.scale(-1,1)}
  const U=(c,x,y,w,h)=>R(c,x,y+bob,w,h),Bl=(x,y,rx,ry,c)=>blob(x,y+bob,rx,ry,c);
@@ -41,16 +41,16 @@ function aniP(d,dir,fr,wpn,eq={}){const s=dir=='l'||dir=='r',up=dir=='u',st=fr<0
  if(d.pony){if(s){U(H,cx-10,hy+1,4,4);U(H,cx-12,hy+4,5,10);U(HD,cx-12,hy+12,4,3);U(HL,cx-11,hy+5,1,6);U(d.tie||'#d04050',cx-9,hy+2,2,3)}else if(up){U(H,cx-2,hy+2,5,16);U(HD,cx-1,hy+16,3,3);U(HL,cx,hy+4,1,8);U(d.tie||'#d04050',cx-2,hy+3,5,2)}else{U(HD,cx-10,hy+5,2,8)}}
  if(d.twin){const L=d.twin;if(s){U(H,cx-10,hy+3,5,L);U(HD,cx-10,hy+L,4,3);U(d.tie,cx-9,hy+2,3,2)}else{for(const x of[cx-12,cx+8]){U(H,x,hy+3,4,L);U(HD,x+(x<cx?0:1),hy+L,3,3);U(HL,x+1,hy+5,1,L-6);U(d.tie,x,hy+2,4,2)}}}
  if(d.hood&&!up)Bl(s?cx-1:cx,hy+6,10,9,lt(d.hood,.8));
- const tw=s?6:8,tx=cx-tw/2,PK='#6b4a2a',PKF='#7d5a34',PKD='#4a321c',BP='#55613a',BPD=lt('#55613a',.72),BPL=lt('#55613a',1.2),ROL='#3a7bc9';
+ const tw=s?6:8,tx=cx-tw/2,PK='#6b4a2a',PKF='#7d5a34',PKD='#4a321c',BP='#55613a',BPD=lt('#55613a',.72),BPL=lt('#55613a',1.2),ROL='#3a7bc9',rr=(c,x,y,w,h)=>{U(c,x+1,y,w-2,1);U(c,x,y+1,w,h-2);U(c,x+1,y+h-1,w-2,1)};
  // backpack behind body (side view)
- if(s&&pk==1){U(PK,tx-4,23,4,8);U(PK,tx-3,22,3,1);U(PKF,tx-4,23,4,3);U(PKD,tx-4,26,4,1);U(lt(PK,1.25),tx-4,24,1,6);U(PKD,tx-4,30,4,1)}
- if(s&&pk==2){U(BP,tx-6,21,6,11);U(BP,tx-5,20,4,1);U(BPL,tx-6,21,1,10);U(BPD,tx-6,31,6,1);U(BPD,tx-6,26,6,1);U(BPD,tx-6,27,2,3);U(ROL,tx-6,17,6,3);U(lt(ROL,1.3),tx-6,17,6,1);U(lt(ROL,.7),tx-6,19,6,1);U('#2a2420',tx-4,17,1,3)}
+ if(s&&pk==1){rr(PK,tx-4,22,5,9);rr(PKF,tx-4,22,5,4);U(lt(PKF,1.2),tx-3,22,3,1);U(PKD,tx-3,26,3,1);U(lt(PK,1.2),tx-4,25,1,4);U(lt(PK,.8),tx-3,30,3,1)}
+ if(s&&pk==2){rr(BP,tx-6,20,7,13);U(BPL,tx-5,20,5,1);U(BPL,tx-6,22,1,9);U(lt(BP,.86),tx-5,26,5,1);rr(BPD,tx-6,27,3,4);U(lt(BP,.8),tx-5,32,5,1);rr(ROL,tx-6,17,7,4);U(lt(ROL,1.3),tx-5,17,5,1);U(lt(ROL,.75),tx-5,20,5,1);U('#2a2420',tx-3,17,1,4)}
  // legs (slim)
  if(s){const k=st*2;R(PD,cx-2-k,32,3,7);R(BT,cx-2-k,38,4,3);R(P,cx-1+k,32,3,7);R(BT,cx-1+k,38,5,3);R(lt(BT,1.4),cx+k,38,3,1);if(d.shorts){R(SK,cx-2-k,35,3,3);R(SK,cx-1+k,35,3,3)}}
  else{R(P,cx-3,32,3,7-(st>0?1:0));R(PD,cx-3,32,1,7);R(BT,cx-4,38-(st>0?1:0),4,3);R(P,cx+1,32,3,7-(st<0?1:0));R(PD,cx+3,32,1,7);R(BT,cx+1,38-(st<0?1:0),4,3);
   R(lt(BT,1.4),cx-3,38-(st>0?1:0),2,1);R(lt(BT,1.4),cx+2,38-(st<0?1:0),2,1);if(d.shorts){R(SK,cx-3,35,3,3-(st>0?1:0));R(SK,cx+1,35,3,3-(st<0?1:0))}}
  // torso
- U(J,tx,22,tw,10);U(JL,tx,22,1,10);U(JD,tx+tw-1,22,1,10);U(JD,tx,22,tw,1);
+ U(J,tx,22,tw,10);U(JL,tx,23,1,9);U(JD,tx+tw-1,23,1,9);g.clearRect(tx,22+bob,1,1);g.clearRect(tx+tw-1,22+bob,1,1);U(JL,tx+1,22,tw-2,1);
  if(!s&&!up&&!d.closed){U(SH,cx-1,22,2,8);U(JD,cx-2,23,1,8);U(JD,cx+1,23,1,8)}
  if(!s&&!up&&d.closed){U(JD,cx,23,1,7);if(d.pocket)U(JD,cx-3,27,6,1)}
  if(s&&!up&&!d.closed)U(SH,tx+tw-2,22,2,7);
@@ -59,17 +59,20 @@ function aniP(d,dir,fr,wpn,eq={}){const s=dir=='l'||dir=='r',up=dir=='u',st=fr<0
  if(d.skirt){U(d.skirt,tx-1,31,tw+2,4);U(lt(d.skirt,.72),tx-1,34,tw+2,1);for(let i=1;i<tw+2;i+=3)U(lt(d.skirt,.85),tx-1+i,31,1,3)}
  if(d.over){U(d.over,tx+1,24,tw-2,8);if(!s&&!up){U(d.over,tx+1,22,1,2);U(d.over,tx+tw-2,22,1,2);U(lt(d.over,.75),cx-1,26,2,2)}}
  // body armour – fitted to the torso, never wider than the body
- if(eq.body=='vest'){const V='#2a3550',VL=lt(V,1.35),VD=lt(V,.7);U(V,tx,22,tw,8);U(VL,tx,22,tw,1);U(VD,tx,29,tw,1);U(VD,tx+tw-1,23,1,6);
-  if(!up&&!s){U(SH,cx-1,22,2,2);U(VD,cx,24,1,5);U('#d4b04a',tx+1,24,2,2);U(VD,cx+2,26,2,2)}else if(up){U('#e8e8e0',tx+1,25,tw-2,2)}else{U(VD,tx+2,24,2,3);U('#e8e8e0',tx,26,1,2)}}
- if(eq.body=='armor'){const AB='#4a3a2a',PL='#8a8e94';U(AB,tx,22,tw,9);U(lt(AB,.75),tx,30,tw,1);const cols=s?[tx+1]:[tx+1,tx+4];
-  cols.forEach((xx,ci)=>[23,27].forEach((yy,ri)=>{const c=lt(PL,1+((ci+ri)%2)*.12-(ri*.06));U(c,xx,yy,3,3);U(lt(c,1.25),xx,yy,3,1);U('#3a3e44',xx+1,yy+1,1,1)}));U('#2a2018',tx,26,tw,1);if(!s&&!up)U('#2a2018',cx,22,1,9)}
- if(eq.body=='milarmor'){const M='#4f5a35',ML2=lt(M,1.25),MD=lt(M,.7);U(M,tx,22,tw,9);U(ML2,tx,22,tw,1);U(MD,tx,30,tw,1);U(lt(M,.82),cx-2,21,4,1);
-  if(!up){const pp=s?[tx+2]:[tx,tx+3,tx+6];pp.forEach(x=>{U(MD,x,27,2,3);U(ML2,x,27,2,1)});if(!s){U(MD,tx+1,23,2,2);U('#2a2a20',tx+tw-3,23,2,3)}}else{U(MD,tx+1,24,tw-2,4);U(ML2,tx+1,24,tw-2,1)}}
+ if(eq.body=='vest'){const V='#2c3854',VL=lt(V,1.4),VM=lt(V,1.15),VD=lt(V,.72);rr(V,tx,22,tw,9);U(VL,tx+1,22,tw-2,1);U(VM,tx+1,23,tw-2,2);U(VD,tx+1,30,tw-2,1);U(VD,tx+tw-1,24,1,5);
+  if(!s){U(V,tx,21,2,1);U(V,tx+tw-2,21,2,1);U(VL,tx,21,1,1);U(VL,tx+tw-2,21,1,1)}
+  if(!up&&!s){U(SH,cx-1,22,2,2);U(VD,cx,24,1,5);U('#e0bc50',tx+1,25,2,2);U('#fff0a0',tx+1,25,1,1);U(lt(V,.85),cx+1,26,2,3);U(VM,cx+1,26,2,1)}else if(up){U(lt('#d8dade',.95),tx+1,25,tw-2,2);U('#ffffff',tx+1,25,tw-2,1)}else{rr(lt(V,.85),tx+2,25,3,4);U('#d8dade',tx,26,1,2)}}
+ if(eq.body=='armor'){const AB='#54443a',PL='#8e9298';rr(AB,tx,22,tw,9);U(lt(AB,1.25),tx+1,22,tw-2,1);U(lt(AB,.75),tx+1,30,tw-2,1);const cols=s?[tx+2]:[tx+1,tx+4];
+  cols.forEach((xx,ci)=>[23,27].forEach((yy,ri)=>{const c=lt(PL,1+((ci+ri)%2)*.1-ri*.05);U(c,xx,yy,3,3);U(lt(c,1.22),xx,yy,2,1);U(lt(c,.75),xx+2,yy+1,1,2);U(lt(c,.75),xx+1,yy+2,1,1);U('#d8dce0',xx,yy,1,1)}));
+  U('#3a2c22',tx+1,26,tw-2,1);if(!s&&!up)for(let y=23;y<30;y+=2)U('#c8a878',cx,y,1,1)}
+ if(eq.body=='milarmor'){const M='#56613a',ML2=lt(M,1.3),MM=lt(M,1.12),MD=lt(M,.72);rr(M,tx,22,tw,9);U(ML2,tx+1,22,tw-2,1);U(MM,tx+1,23,tw-2,2);U(MD,tx+1,30,tw-2,1);U(MD,tx+tw-1,24,1,5);
+  if(!s){U(M,tx,21,2,1);U(M,tx+tw-2,21,2,1)}
+  if(!up){const pp=s?[tx+2]:[tx,tx+3,tx+6];pp.forEach(x=>{U(MD,x,27,2,3);U(MM,x,27,2,1);U(lt(M,.55),x,29,2,1)});if(!s){U(MM,tx+1,24,2,1);U('#2a2a20',tx+tw-2,23,1,3);U('#5a5a50',tx+tw-2,21,1,2)}}else{rr(MD,tx+1,24,tw-2,5);U(MM,tx+2,24,tw-4,1)}}
  if(d.arm&&!up){U('#f4f4ee',s?cx-2:tx-2,24,s?3:2,3);U('#d33a3a',s?cx-1:tx-2,25,1,1)}
  // backpack on top (back view) and straps (front / side)
- if(up&&pk==1){U(PK,tx+1,24,tw-2,7);U(PK,tx+2,23,tw-4,1);U(PKF,tx+1,24,tw-2,3);U(PKD,tx+1,27,tw-2,1);U('#c9a43a',cx-1,25,2,1);U(PKD,tx+1,30,tw-2,1);U(PKD,tx+1,22,1,2);U(PKD,tx+tw-2,22,1,2)}
- if(up&&pk==2){U(BP,tx,21,tw,11);U(BP,tx+1,20,tw-2,1);U(BPL,tx,21,tw,1);U(BPD,tx,31,tw,1);U(BPD,tx+1,27,tw-2,3);U(BPL,tx+1,27,tw-2,1);U(ROL,tx-1,17,tw+2,3);U(lt(ROL,1.3),tx-1,17,tw+2,1);U(lt(ROL,.7),tx-1,19,tw+2,1);U('#2a2420',tx+1,17,1,3);U('#2a2420',tx+tw-2,17,1,3)}
- if(!s&&!up&&pk){U(PKD,tx+1,22,1,8);U(PKD,tx+tw-2,22,1,8);if(pk==2){U(ROL,tx-2,18,2,3);U(ROL,tx+tw,18,2,3);U(lt(ROL,.7),tx-2,20,2,1);U(lt(ROL,.7),tx+tw,20,2,1)}}
+ if(up&&pk==1){rr(PK,tx+1,23,tw-2,9);rr(PKF,tx+1,23,tw-2,4);U(lt(PKF,1.2),tx+2,23,tw-4,1);U(PKD,tx+1,27,tw-2,1);U('#c9a43a',cx-1,25,2,1);U(PKD,tx+1,30,tw-2,1);U(PKD,tx+1,22,1,2);U(PKD,tx+tw-2,22,1,2)}
+ if(up&&pk==2){rr(BP,tx,20,tw,13);U(BPL,tx+1,20,tw-2,1);U(lt(BP,.8),tx+1,32,tw-2,1);rr(BPD,tx+1,26,tw-2,4);U(BPL,tx+2,26,tw-4,1);rr(ROL,tx-1,17,tw+2,4);U(lt(ROL,1.3),tx-1,17,tw+2,1);U(lt(ROL,.7),tx-1,19,tw+2,1);U('#2a2420',tx+1,17,1,3);U('#2a2420',tx+tw-2,17,1,3)}
+ if(!s&&!up&&pk){U(PKD,tx+1,22,1,8);U(PKD,tx+tw-2,22,1,8);if(pk==2){rr(ROL,tx-2,17,3,4);rr(ROL,tx+tw-1,17,3,4);U(lt(ROL,1.3),tx-1,17,1,1);U(lt(ROL,1.3),tx+tw,17,1,1);U(lt(ROL,.7),tx-2,20,2,1);U(lt(ROL,.7),tx+tw,20,2,1)}}
  if(s&&pk){U(PKD,tx+1,22,1,8)}
  // arms
 
@@ -97,13 +100,13 @@ function aniP(d,dir,fr,wpn,eq={}){const s=dir=='l'||dir=='r',up=dir=='u',st=fr<0
  // head
  for(let r=0;r<FW.length;r++){const w=FW[r],x=s?cx-6+(14-w):cx-w/2;U(up?H:SK,x,hy+r,w,1);if(!up)U(SKD,s?x:x+w-1,hy+r,1,1)}
  // hair cap
- Bl(s?cx-1:cx,hy+2,9,6,CAP);U(HL,cx-4,hy-3,5,1);U(HL,cx-6,hy-2,2,1);U(HL,cx+2,hy-2,3,1);
- if(up){U(H,cx-8,hy,16,12);U(HD,cx-7,hy+11,14,2);for(let i=0;i<14;i+=2)U(HD,cx-7+i,hy+12,1,1+(i%4?1:0));U(HL,cx-5,hy+1,3,1);U(HL,cx+2,hy+2,2,1)}
- else if(s){U(H,cx-8,hy,9,11);U(HD,cx-8,hy+10,9,1);for(let i=0;i<9;i+=2)U(HD,cx-8+i,hy+11,1,1);U(HL,cx-6,hy+2,3,1);
+ Bl(s?cx-1:cx,hy+3,9,7,CAP);U(HL,cx-4,hy-3,5,1);U(HL,cx-6,hy-2,2,1);U(HL,cx+2,hy-2,3,1);
+ if(up){Bl(cx,hy+5,8,7,H);U(HD,cx-6,hy+11,12,2);for(let i=0;i<14;i+=2)U(HD,cx-7+i,hy+12,1,1+(i%4?1:0));U(HL,cx-5,hy+1,3,1);U(HL,cx+2,hy+2,2,1)}
+ else if(s){Bl(cx-4,hy+5,5,6,H);U(H,cx-8,hy+1,9,7);U(HD,cx-7,hy+10,7,1);for(let i=0;i<8;i+=2)U(HD,cx-7+i,hy+11,1,1);U(HL,cx-6,hy+2,3,1);
   U(SK,cx+1,hy+8,2,3);U(SKD,cx+1,hy+9,1,1);
   const B=d.bangs;for(let i=7;i<14;i++){U(H,cx-6+i,hy,1,B[i]);U(HD,cx-6+i,hy+B[i]-1,1,1)}if(d.side)U(H,cx+1,hy+1,2,Math.min(d.side,8))}
  else{const B=d.bangs;for(let i=0;i<14;i++){U(H,cx-7+i,hy,1,B[i]);U(HD,cx-7+i,hy+B[i]-1,1,1)}
-  const sl=d.side||9;U(H,cx-8,hy+1,2,sl);U(H,cx+6,hy+1,2,sl);U(HD,cx-8,hy+sl,2,1);U(HD,cx+6,hy+sl,2,1)}
+  const sl=d.side||9;U(H,cx-8,hy+1,1,sl-2);U(H,cx-7,hy+1,1,sl);U(H,cx+7,hy+1,1,sl-2);U(H,cx+6,hy+1,1,sl);U(HD,cx-7,hy+sl,1,1);U(HD,cx+6,hy+sl,1,1);U(HD,cx-8,hy+sl-2,1,1);U(HD,cx+7,hy+sl-2,1,1)}
  if(d.ahoge&&eq.head!='helmet'&&eq.head!='both'){U(H,cx+1,hy-6,1,3);U(H,cx+2,hy-7,2,1);U(H,cx+3,hy-6,1,1)}
  if(d.hood){const h=d.hood,hd2=lt(h,.78);U(h,cx-8,hy-4,16,4);if(s){U(h,cx-9,hy-1,8,12);U(hd2,cx-9,hy+10,8,1)}else if(!up){U(h,cx-9,hy-1,2,13);U(h,cx+7,hy-1,2,13);U(hd2,cx-9,hy+11,18,1)}else{U(h,cx-9,hy-1,18,13);U(hd2,cx-9,hy+11,18,1)}U(lt(h,1.2),cx-4,hy-4,8,1)}
  // face
@@ -119,9 +122,9 @@ function aniP(d,dir,fr,wpn,eq={}){const s=dir=='l'||dir=='r',up=dir=='u',st=fr<0
  if(d.beret){const b=d.beret;Bl(cx+1,hy-2,9,3,b);U(lt(b,1.25),cx-3,hy-4,6,1);U(lt(b,.75),cx-7,hy,16,1);U(b,cx+1,hy-6,2,2)}
  if(d.cap){const c=d.cap,cd=lt(c,.72);U(c,cx-8,hy-4,16,5);U(lt(c,1.25),cx-5,hy-4,8,1);if(s)U(cd,cx+4,hy+1,6,2);else if(!up)U(cd,cx-7,hy+1,14,2);U('#f4f4ee',cx-1,hy-2,2,2)}
 }
- if(eq.head=='gas'||eq.head=='both'){const m='#3a3e40';if(up){U('#2a2a2a',cx-8,hy+8,16,2)}else if(s){U(m,cx+1,hy+7,7,7);U(lt(m,1.3),cx+1,hy+7,7,1);blob(cx+5,hy+9+bob,2,2,'#9ad0c0');U('#ffffff',cx+4,hy+8,1,1);U('#5a5e60',cx+6,hy+12,3,4);U('#2a2a2a',cx-6,hy+8,7,2)}
-  else{U(m,cx-7,hy+7,14,7);U(lt(m,1.3),cx-7,hy+7,14,1);blob(cx-4,hy+9+bob,2,2,'#9ad0c0');blob(cx+3,hy+9+bob,2,2,'#9ad0c0');U('#ffffff',cx-5,hy+8,1,1);U('#ffffff',cx+2,hy+8,1,1);U('#5a5e60',cx-2,hy+12,4,4);U('#2a2a2e',cx-1,hy+15,2,1);U('#2a2a2a',cx-9,hy+8,2,2);U('#2a2a2a',cx+7,hy+8,2,2)}}
- if(eq.head=='helmet'||eq.head=='both'){const HC='#4f5a35',HCD=lt(HC,.72);Bl(s?cx-1:cx,hy,9,5,HC);U(lt(HC,1.3),cx-4,hy-4,6,1);U(lt(HC,1.15),cx-6,hy-3,3,2);U(HCD,s?cx-10:cx-9,hy+3,18,2);U(lt(HC,.85),s?cx-10:cx-9,hy+3,18,1);
+ if(eq.head=='gas'||eq.head=='both'){const m='#3a3e40';if(up){U('#2a2a2a',cx-8,hy+8,16,2)}else if(s){Bl(cx+4,hy+10,4,4,m);Bl(cx+4,hy+8,3,1,lt(m,1.3));blob(cx+5,hy+9+bob,2,2,'#9ad0c0');U('#ffffff',cx+4,hy+8,1,1);U('#5a5e60',cx+6,hy+12,3,4);U('#2a2a2a',cx-6,hy+8,7,2)}
+  else{Bl(cx,hy+10,7,4,m);Bl(cx,hy+8,6,1,lt(m,1.3));blob(cx-4,hy+9+bob,2,2,'#9ad0c0');blob(cx+3,hy+9+bob,2,2,'#9ad0c0');U('#ffffff',cx-5,hy+8,1,1);U('#ffffff',cx+2,hy+8,1,1);Bl(cx,hy+14,2.5,2,'#62666a');U('#8a8e92',cx-1,hy+13,2,1);U('#2a2a2e',cx-1,hy+15,2,1);U('#2a2a2a',cx-9,hy+8,2,2);U('#2a2a2a',cx+7,hy+8,2,2)}}
+ if(eq.head=='helmet'||eq.head=='both'){const HC='#4f5a35',HCD=lt(HC,.72);Bl(s?cx-1:cx,hy+4,10,1.4,HCD);Bl(s?cx-1:cx,hy,9,5,HC);Bl(s?cx-1:cx,hy+2,9,1.4,lt(HC,.86));Bl(s?cx-2:cx-1,hy-2,5,2,lt(HC,1.12));U(lt(HC,1.35),cx-4,hy-4,5,1);U(lt(HC,1.25),cx-6,hy-3,2,1);
   if(!up){if(s)U('#2a2a20',cx+1,hy+5,1,8);else{U('#2a2a20',cx-7,hy+5,1,8);U('#2a2a20',cx+6,hy+5,1,8)}}U(HCD,cx-2,hy-2,4,1)}
 }
 const DES=[
