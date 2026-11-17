@@ -1,0 +1,63 @@
+<title>주택 비교</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* layout: one column of two comparison cards (type A, type B), each a before/after pair of canvases. Dark single theme to match the game. */
+:root{--bg:#101315;--panel:#181d21;--line:#ffffff1a;--fg:#e9ecee;--mut:#9ba5ac;--acc:#e0b03a;--old:#c9797a;--new:#7fc98f;
+ --f-body:'Noto Sans KR',system-ui,sans-serif;--f-head:'Black Han Sans','Noto Sans KR',sans-serif;color-scheme:dark}
+html,body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;line-height:1.55}
+main{max-width:1000px;margin:0 auto;padding-block:16px 36px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:14px}
+h1{font-family:var(--f-head);font-weight:400;font-size:26px;margin:0;letter-spacing:.5px}
+.lead{margin:0;color:var(--mut);max-width:68ch}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;display:grid;gap:10px;min-width:0}
+.panel h2{font-size:16px;margin:0}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:640px){.pair{grid-template-columns:1fr}}
+figure{margin:0;display:grid;gap:4px;min-width:0}figcaption{font-size:12px;color:var(--mut)}
+figcaption b{font-weight:700;margin-right:6px}.o b{color:var(--old)}.n b{color:var(--new)}
+canvas{display:block;width:100%;height:auto;image-rendering:pixelated;border-radius:6px;background:#000}
+ul{margin:0;padding-left:18px;display:grid;gap:3px;font-size:13px;color:#cfd6db}
+.row{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;font-size:13px;color:var(--fg);background:#22292e;border:1px solid #ffffff24;border-radius:8px;padding:5px 11px;cursor:pointer}
+button:hover{border-color:#ffffff55}button:focus-visible{outline:2px solid var(--new);outline-offset:2px}button.on{background:#4a3c14;border-color:var(--acc)}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap">
+<main>
+ <h1>주택 비교</h1>
+ <p class="lead">주택가의 두 가지 집을 넓히고 가구를 다시 배치했어요. 땅 크기(448×352)는 그대로이고 집만 커졌어요. 왼쪽이 지금 게임, 오른쪽이 새 버전이에요.</p>
+ <div class="row" id="opts"><button id="b-lab" class="on">방 이름</button><button id="b-pl" class="on">플레이어 표시</button><button id="b-v">색상 바꾸기</button></div>
+ <section class="panel"><h2>타입 A · 방 2개 집</h2>
+  <div class="pair"><figure class="o"><canvas id="a0"></canvas><figcaption><b>이전</b>320×200 · 방 5개가 좁게 붙어 있음</figcaption></figure><figure class="n"><canvas id="a1"></canvas><figcaption><b>새 버전</b>400×270 · 같은 방 구성에 공간 여유</figcaption></figure></div>
+  <ul><li>거실: TV를 뒷벽에 두고 러그를 사이에 둔 채 소파가 마주 보게, 1인용 의자와 책장, 화분 추가</li>
+   <li>부엌: 조리대가 ㄱ자로 벽을 따라 이어지고 냉장고는 조리대 끝에, 식탁은 방 가운데</li>
+   <li>침실 2: 책상과 의자, 책장, 러그를 넣은 공부방</li>
+   <li>욕실: 욕조는 안쪽 벽, 세면대와 변기는 문 옆 벽 쪽</li></ul>
+ </section>
+ <section class="panel"><h2>타입 B · 차고 있는 집</h2>
+  <div class="pair"><figure class="o"><canvas id="b0"></canvas><figcaption><b>이전</b>280×150 · 침실과 거실이 한 방, 차는 차고 밖</figcaption></figure><figure class="n"><canvas id="b1"></canvas><figcaption><b>새 버전</b>400×260 · 침실 · 욕실 · 세탁실 분리, 차고 안에 차</figcaption></figure></div>
+  <ul><li>침실, 욕실, 세탁실(세탁기 2대, 선반)을 따로 나눔</li>
+   <li>거실 겸 부엌: 왼쪽 벽을 따라 조리대와 냉장고, 식탁. 오른쪽은 소파, 러그, TV가 마주 보는 거실</li>
+   <li>차고: 문이 열린 차고 안에 차, 작업대, 공구함, 타이어, 드럼통, 상자. 앞에는 진입로</li></ul>
+ </section>
+</main>
+<script src="art.js"></script><script src="world.js"></script><script src="houses_old.js"></script>
+<script>
+'use strict';
+let VAR=0,LAB=true,PL=true;
+function build(){newWorld();const A=Bld('비교 A',0,0,'houses');A.fl(0,0,BW,BH,'grass');houseA_old(A,0,0,VAR);houseA(A,448,0,VAR);
+ const B=Bld('비교 B',0,1,'houses');B.fl(0,0,BW,BH,'grass');houseB_old(B,0,0,VAR+1);houseB(B,448,0,VAR+1)}
+const ROOMS={a0:[['침실',100,85],['욕실',190,85],['침실',290,85],['거실',140,185],['주방',300,185]],a1:[['침실 1',94,90],['욕실',204,90],['침실 2',334,90],['거실',144,225],['주방 · 식당',344,225]],
+ b0:[['침실 · 거실',160,135],['욕실',300,95],['차고',300,170]],b1:[['침실',97,100],['욕실',205,100],['세탁실',270,100],['주방',80,230],['거실',217,230],['차고',362,160]]};
+const PLAYER={a0:[150,200],a1:[100,236],b0:[124,170],b1:[210,262]};
+function render(id,bx,by,lx){const c=document.getElementById(id),W=448,H=352,S=2;c.width=W*S;c.height=H*S;const x=c.getContext('2d');
+ const [ox,oy]=bo(bx,by),X0=ox+lx,Y0=oy;const t=document.createElement('canvas');t.width=W;t.height=H;const tx=t.getContext('2d');g=tx;tx.translate(-X0,-Y0);
+ drawStatic(X0,Y0,W,H);const inR=o=>o.x<X0+W&&o.x+o.w>X0&&o.y<Y0+H+60&&o.y+o.h>Y0;const L=[];
+ for(const h of W0.hw)if(h.x1>X0&&h.x0<X0+W&&h.y>Y0&&h.y<Y0+H+40)L.push({y:h.y,f:()=>hwallD(h.x0,h.x1,h.y,h.h,h.face)});
+ for(const o of W0.objs)if(!FLAT[o.t]&&inR(o))L.push({y:o.y+o.h,f:()=>D[o.t](o)});
+ if(PL){const[px,py]=PLAYER[id];L.push({y:Y0+py,f:()=>drawChar('player',X0+px,Y0+py,'d',-1,null)})}
+ L.sort((a,b)=>a.y-b.y).forEach(o=>o.f());
+ x.imageSmoothingEnabled=false;x.drawImage(t,0,0,W*S,H*S);
+ if(LAB){x.font='600 22px system-ui';x.textAlign='center';x.textBaseline='middle';for(const[n,rx,ry]of ROOMS[id]){const w=x.measureText(n).width+16;x.fillStyle='rgba(12,16,20,.72)';x.beginPath();x.roundRect(rx*S-w/2,ry*S-15,w,30,8);x.fill();x.fillStyle='#f2f4f5';x.fillText(n,rx*S,ry*S+1)}}}
+function all(){build();render('a0',0,0,0);render('a1',0,0,448);render('b0',0,1,0);render('b1',0,1,448)}
+const tg=(id,f)=>{const b=document.getElementById(id);b.onclick=()=>{f();b.classList.toggle('on');all()}};
+tg('b-lab',()=>LAB=!LAB);tg('b-pl',()=>PL=!PL);document.getElementById('b-v').onclick=()=>{VAR=(VAR+1)%4;all()};
+all();
+</script>
