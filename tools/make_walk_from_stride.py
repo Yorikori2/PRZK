@@ -45,12 +45,12 @@ def legs_box(im):
     w, h = im.size; px = im.load()
     ys = [y for y in range(h) for x in range(w) if px[x, y][3]]
     y0, y1 = min(ys), max(ys)
-    hip = y0 + int((y1 - y0) * 0.66)
+    hip = y0 + int((y1 - y0) * 0.75)
     fx = [x for y in range(y1 - 6, y1 + 1) for x in range(w) if px[x, y][3]]
     return hip, y1, min(fx) - 1, max(fx) + 1
 
 
-def passing(im, pull=0.6):
+def passing(im, pull=0.6, bob=-1, lift_side=0, lift=0):
     """Bring the stride legs together: pixels left of the feet centre move right and
     vice versa, growing from 0 at the hip to `pull` of the gap at the feet; body up 1px."""
     w, h = im.size; px = im.load()
@@ -60,21 +60,22 @@ def passing(im, pull=0.6):
     for y in range(h):
         for x in range(w):
             q = px[x, y]
-            if q[3] and not (y >= hip and fl <= x <= fr) and y - 1 >= 0:
-                op[x, y - 1] = q
+            if q[3] and not (y >= hip and fl <= x <= fr) and 0 <= y + bob < h:
+                op[x, y + bob] = q
     # each leg half moves toward the centre; the half nearer the viewer is drawn last
     for side in (-1, 1):
         for y in range(hip, h):
             t = (y - hip) / L
             gap = (cx - fl) if side < 0 else (fr - cx)
-            dx = side * -1 * pull * gap * t * 0.5
+            dx = side * -1 * pull * gap * t
+            up = int(round(lift * max(0.0, (t - 0.55) / 0.45))) if side == lift_side else 0
             for x in range(fl, fr + 1):
                 if (x < cx) != (side < 0):
                     continue
                 q = px[x, y]
                 if not q[3]:
                     continue
-                X = int(round(x + dx)); Y = y - 1 if y < hip + 3 else y
+                X = int(round(x + dx)); Y = (y + bob if y < hip + 3 else y) - up
                 if 0 <= X < w and 0 <= Y < h:
                     op[X, Y] = q
     # close 1px holes
@@ -103,22 +104,39 @@ def passing(im, pull=0.6):
                         X, Y = a + dx, b + dy
                         if 0 <= X < w and 0 <= Y < h and (X, Y) not in seen and cp[X, Y][3]:
                             seen.add((X, Y)); stack.append((X, Y))
-            if len(comp) <= 3:
+            if len(comp) <= 6:
                 for a, b in comp:
                     op[a, b] = (0, 0, 0, 0)
     return out
 
 
+FWD = {'east': 1, 'west': -1, 'south-east': 1, 'north-east': 1, 'south-west': -1, 'north-west': -1}
+NF = 8
+
+
 def main(stride_dir, idle_dir, out_dir):
+    """8-frame cycle. Leg spread follows |cos| of the phase (1, .7, 0, .7, 1, ...) so the legs
+    open and close in steps instead of snapping; the body is 1px higher around the passing
+    pose and the trailing foot lifts as it swings through."""
+    import math
     os.makedirs(out_dir, exist_ok=True)
     for f in os.listdir(out_dir):
         os.remove(os.path.join(out_dir, f))
     for d in DIRS:
         st = Image.open(os.path.join(stride_dir, d + '.png')).convert('RGBA')
-        idle = Image.open(os.path.join(idle_dir, d + '.png')).convert('RGBA')
-        alt = swap_legs(st) if d in ('south', 'north') else st
-        pull = 0.35 if d in ('south', 'north') else 0.7
-        for i, fr in enumerate([st, passing(st, pull), alt, passing(alt, pull)]):
+        front = d in ('south', 'north')
+        alt = swap_legs(st) if front else st
+        for i in range(NF):
+            c = math.cos(2 * math.pi * i / NF)
+            src = st if (c >= 0 or not front) else alt
+            spread = abs(c)
+            pull = (1 - spread) * (0.45 if front else 0.85)
+            bob = -1 if spread < 0.5 else 0
+            lift_side = 0
+            if not front and spread < 0.9:
+                lift_side = -1 if FWD[d] > 0 else 1      # trailing leg is the one behind the facing
+            lift = 2 if spread < 0.5 else 1
+            fr = st if (spread > 0.99 and not front) else (src if spread > 0.99 else passing(src, pull, bob, lift_side, lift if lift_side else 0))
             fr.save(os.path.join(out_dir, f'{d}_{i}.png'))
     print('done', out_dir)
 

@@ -38,7 +38,7 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;border-rad
  <section class="panel" aria-label="안내">
   <h2>적용하려면 필요한 것</h2>
   <ul class="note">
-   <li><b>남자 걷기</b> 보내주신 걸음 자세를 그대로 써서, 걸음 자세 한 장으로 4프레임 걷기를 만들었어요. 걸음 자세 → 두 다리가 모이는 통과 자세(몸 1픽셀 위로) → 반대 다리 걸음 자세 → 통과 자세 순서예요. 서 있는 그림과 섞지 않아서 걷는 동안 몸이 깜빡이지 않아요.</li>
+   <li><b>남자 걷기</b> 보내주신 걸음 자세 한 장으로 8프레임 걷기를 만들었어요. 다리가 한 번에 붙었다 벌어지지 않고 4단계로 천천히 모였다 벌어지고, 다리가 모일 때 몸이 1픽셀 올라가요. 옆·대각선 방향은 뒤에 있던 발이 들리면서 앞으로 넘어와요. 걷는 속도를 보폭에 맞춰서 발이 바닥에서 미끄러지지 않게 했어요.</li>
    <li><b>여자 걷기</b> 아직 서 있는 자세만 있어서, 관절 위치를 잡고 변형한 6프레임 걷기를 쓰고 있어요. 남자처럼 걸음 자세를 뽑아 주시면 같은 방식으로 바꿀게요.</li>
    <li><b>더 부드럽게 하려면</b> 지금은 걸음 자세가 방향마다 1장이라 4프레임이에요. 도구에서 걷기 애니메이션을 여러 프레임(6~8장)으로 뽑을 수 있으면 훨씬 부드러워져요.</li>
    <li><b>크기</b> 여자 캐릭터는 키 46픽셀, 남자 캐릭터는 62픽셀이고 지금 좀비는 37픽셀이에요. "게임 크기 맞춤"은 둘 다 44픽셀 정도로 맞춰요. 남자 캐릭터도 48×48로 다시 뽑으면 줄이지 않아도 돼서 더 선명해요.</li>
@@ -50,7 +50,7 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;border-rad
 <script>
 'use strict';
 const DIRS=['south','south-east','east','north-east','north','north-west','west','south-west'];
-const CHARS=[{id:'female',n:'여자 생존자',px:48,nf:6,fps:9},{id:'male',n:'남자 생존자',px:64,nf:4,fps:5.5}];
+const CHARS=[{id:'female',n:'여자 생존자',px:48,nf:6,fps:9,spd:30},{id:'male',n:'남자 생존자',px:64,nf:8,fps:12}];
 const CI=id=>CHARS.find(c=>c.id==id);
 const IMG={};let loaded=0;const total=CHARS.length*DIRS.length;
 const WALK={};CHARS.forEach(c=>{IMG[c.id]={};WALK[c.id]={};DIRS.forEach(d=>{const im=new Image();im.onload=()=>{loaded++};im.src='assets/players/'+c.id+'/'+d+'.png';IMG[c.id][d]=im;
@@ -90,7 +90,7 @@ let last=performance.now();
 function step(now){const dt=Math.min(.05,(now-last)/1000);last=now;const t=now/1000;
  let vx=0,vy=0;if(keys.arrowleft||keys.a)vx-=1;if(keys.arrowright||keys.d)vx+=1;if(keys.arrowup||keys.w)vy-=1;if(keys.arrowdown||keys.s)vy+=1;
  if(!vx&&!vy){let tg=target;if(!tg&&manual<=0){const a=AUTO[ai];tg={x:OX+a[0],y:OY+a[1]};}if(tg){const dx=tg.x-PL.x,dy=tg.y-PL.y,d=Math.hypot(dx,dy);if(d<2){if(target&&!ptr)target=null;else if(!target){ai=(ai+1)%AUTO.length}}else{vx=dx/d;vy=dy/d}}}
- manual-=dt;const m=Math.hypot(vx,vy);PL.moving=m>0;if(m){vx/=m;vy/=m;PL.x=Math.max(BX0,Math.min(BX1,PL.x+vx*42*dt));PL.y=Math.max(BY0,Math.min(BY1,PL.y+vy*42*dt));PL.dir=dirFrom(vx,vy);PL.walkT+=dt}
+ manual-=dt;const SPD=30;const m=Math.hypot(vx,vy);PL.moving=m>0;if(m){vx/=m;vy/=m;PL.x=Math.max(BX0,Math.min(BX1,PL.x+vx*SPD*dt));PL.y=Math.max(BY0,Math.min(BY1,PL.y+vy*SPD*dt));PL.dir=dirFrom(vx,vy);PL.walkT+=dt}
  render(t);requestAnimationFrame(step)}
 function render(t){const fr=(t*7|0)%4,sc=scaleOf(ST.char);
  /* turntable */
