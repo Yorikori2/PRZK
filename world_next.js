@@ -23,7 +23,7 @@ function buildMil2(c,r){const A=Bld('군부대',c,r,'mil');const WX=2*BW+RD,HY=B
  // mess hall
  const mN=(x0,x1,y,h)=>{const o=A.ox;R('#c9b48f',o+1320,y,380,h);R('#00000030',o+1320,y+h-3,380,3);[1360,1440,1520,1620].forEach(x=>winD(o+x,30,y,h))};
  shell(A,1320,64,1700,300,mN,[[1420,1470]]);vseg(A,1560,64,300,[[130,170]],34);
- [100,170,236].forEach(y=>A.o('longtable',1336,y,210,26));A.o('kitchen',1572,70,120,14);A.o('fridge',1672,110,20,14);A.o('fridge',1672,146,20,14);A.o('counter',1572,236,100,20,{fc:'#5a6440',logo:'bar'});A.o('sink',1580,190,60,12);
+ [100,170,236].forEach(y=>A.o('longtable',1340,y,176,26));A.o('kitchen',1572,70,120,14);A.o('fridge',1672,110,20,14);A.o('fridge',1672,146,20,14);A.o('counter',1572,236,100,20,{fc:'#5a6440',logo:'bar'});A.o('sink',1580,190,60,12);
  A.roof(1320,64,380,236,'metal','식당');
  // med station
  const meN=(x0,x1,y,h)=>{const o=A.ox;R('#e8e8e0',o+1740,y,140,h);R('#d33a3a',o+1800,y+6,6,14);R('#d33a3a',o+1795,y+10,16,6)};
@@ -120,7 +120,7 @@ function buildApts(c,r){const A=Bld('아파트',c,r,'apt');const L=48,RR=848,TP=
  A.dec(0,BT,BW,200,(ox,oy)=>{for(let x=60;x<=540;x+=60)R('#e8e8e0',ox+x,oy+BT+30,2,60);R('#e8e8e0',ox+60,oy+BT+30,480,2)});
  const n=(x0,x1,y,h)=>{const o=A.ox;R('#c9b48f',o+L,y,RR-L,h);for(let yy=y;yy<y+h;yy+=4)R('#b8a47f',o+L,yy,RR-L,1);R('#00000030',o+L,y+h-3,RR-L,3);[90,170,330,410,570,650,740].forEach(x=>winD(o+x,26,y,h))};
  A.hw(L-4,RR+4,TP,34,n);A.vw(L,TP,BT,34);A.vw(RR,TP,BT,34);hseg(A,L-4,RR+4,BT,[[400,460]]);
- [312,580].forEach(x=>A.vw(x,TP,HN,34));hseg(A,L,RR,HN,[[250,282],[516,548],[784,816]]);hseg(A,L,RR,HS,[[250,282],[400,460],[684,716]]);[340,520].forEach(x=>A.vw(x,HS,BT));
+ [312,580].forEach(x=>A.vw(x,TP,HN,34));hseg(A,L,RR,HN,[[250,282],[516,548],[784,816]]);hseg(A,L,RR,HS,[[250,282],[400,460],[732,764]]);[340,520].forEach(x=>A.vw(x,HS,BT));
  const unit=(x0,y0,v,flip)=>{const cs=['#6f9cc4','#c46f8a','#7fae6f','#c4a46f'];A.o('bed',x0+12,y0+8,30,54,{c:cs[v%4]});A.o('wardrobe',x0+52,y0+8,30,14);A.o('kitchen',x0+130,y0+6,120,14);A.o('fridge',x0+226,y0+40,20,14);A.o('tableset',x0+150,y0+80,56,40);A.o('sofa',x0+20,y0+140,84,18,{c:cs[(v+1)%4]});A.o('tv',x0+30,y0+100,40,8);A.o('rug',x0+20,y0+90,90,40,{v:v%3})};
  unit(L,TP,0);unit(312,TP,1);unit(580,TP,2);
  [[L,HS],[520,HS]].forEach(([x0,y0],i)=>{A.o('bed',x0+14,y0+10,30,54,{c:i?'#c4a46f':'#6f9cc4'});A.o('kitchen',x0+70,y0+8,120,14);A.o('tableset',x0+100,y0+60,56,40);A.o('sofa',x0+40,y0+164,100,18);A.o('toilet',x0+250,y0+12,16,16);A.o('tub',x0+230,y0+50,50,24);A.o('washer',x0+300,y0+12,20,12)});
@@ -138,7 +138,7 @@ function buildChurch(c,r){const A=Bld('교회',c,r,'church');const L=240,RR=680,
  const n=(x0,x1,y,h)=>{const o=A.ox;R('#c9b48f',o+L,y,RR-L,h);for(let yy=y;yy<y+h;yy+=4)R('#b8a47f',o+L,yy,RR-L,1);R('#00000030',o+L,y+h-3,RR-L,3);
   [280,340,440,500].forEach((x,i)=>{R('#1d1714',o+x-1,y+3,22,h-9);const cs=[['#c94f3a','#3a7bc9'],['#e0b03a','#4fa05a'],['#3a7bc9','#c94f3a'],['#4fa05a','#e0b03a']][i];for(let yy=0;yy<h-11;yy+=4)for(let xx=0;xx<20;xx+=4)R(((xx+yy)/4)%2?cs[0]:cs[1],o+x+xx,y+4+yy,4,4);R('#1d1714',o+x+9,y+4,2,h-11)});
   R('#1d1714',o+392,y+2,16,24);R('#e8e2d0',o+398,y+4,4,20);R('#e8e2d0',o+393,y+9,14,4)};
- A.hw(L-4,RR+4,TP,34,n);A.vw(L,TP,BT,34);A.vw(RR,TP,BT,34);hseg(A,L-4,RR+4,BT,[[376,424]]);vseg(A,560,TP,BT,[[300,340],[480,520]],34);hseg(A,560,RR,300);
+ A.hw(L-4,RR+4,TP,34,n);A.vw(L,TP,BT,34);A.vw(RR,TP,BT,34);hseg(A,L-4,RR+4,BT,[[376,424]]);vseg(A,560,TP,BT,[[196,236],[420,460]],34);hseg(A,560,RR,300);
  A.o('altar',360,90,80,22);A.o('piano',480,90,60,16);[290,500].forEach(x=>A.o('candle',x,100,8,6));
  for(let i=0;i<8;i++){A.o('pew',270,160+i*48,100,14);A.o('pew',430,160+i*48,100,14)}
  A.o('desk',580,90,80,18,{c:'#6b4426'});A.o('bookshelf',650,120,24,110);A.o('chair',606,74,12,8,{c:'#6b4426'});
