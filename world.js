@@ -64,7 +64,7 @@ function buildClinic(){const A=Bld('진료소',1,0,'clinic');const L=56,RR=840,T
  A.o('pillar',268,326,18,16);A.o('pillar',498,326,18,16);A.o('chair',356,334,12,8);A.o('chair',418,334,12,8);A.o('counter',332,350,124,24);
  [400,440,480].forEach(y=>A.o('chairs',258,y,120,12));A.o('vending',522,524,24,14);A.o('vending',496,524,24,14,{c:'#3a6ea8'});A.o('plant',238,532,20,12,{big:1});A.o('plant',526,326,20,12,{big:1});A.o('cooler',406,456,12,10);A.o('wetsign',436,506,10,6);A.o('wheelchair',456,534,22,12);
  // pharmacy / restroom / staff
- A.o('register',556,334,22,64);A.o('medshelf',668,302,24,116);A.o('medshelf',572,410,86,12);A.o('aisle',612,340,26,56);A.o('crate',580,350,22,16);
+ A.o('register',556,298,22,24);A.o('medshelf',668,302,24,116);A.o('medshelf',572,410,86,12);A.o('aisle',612,340,26,56);A.o('crate',580,350,22,16);
  A.o('sink',560,432,62,12,{n:2});A.o('stall',600,500,3,58);A.o('stall',640,500,3,58);[566,612,660].forEach(x=>A.o('toilet',x,540,16,16));
  A.o('fridge',702,300,20,14);A.o('kitchen',776,300,60,14,{cm:1});A.o('locker',814,316,24,100);A.o('rtable',728,440,40,22);A.o('ctable',736,504,48,10);A.o('sofa',722,530,84,18);A.o('plant',818,540,14,10);A.o('alarmbox',706,404,10,6);
  // outside
@@ -130,7 +130,7 @@ function buildSchool(){const A=Bld('학교',2,0,'school');const L=48,RR=848,TP=6
  A.o('desk',462,90,60,18);A.o('desk',536,90,60,18);A.o('desk',462,160,60,18);A.o('cabinet',540,200,50,10);A.o('cooler',580,140,12,10);A.o('alarmbox',470,208,10,6);A.o('sofa',470,230,70,14,{c:'#6a4a3a'});
  A.o('lockrow',60,268,130,12);A.o('lockrow',260,268,130,12);A.o('lockrow',690,268,140,12);A.o('extinguisher',440,300,8,6);A.o('bench',300,310,60,10);
  A.o('hoop',60,344,40,4);A.o('hoop',396,344,40,4);A.o('bleacher',100,566,280,20);A.o('crate',60,520,20,16);A.o('crate',410,520,24,16);
- [380,440,500].forEach(y=>A.o('longtable',470,y,200,26));A.o('kitchen',720,334,120,14);A.o('fridge',816,380,20,14);A.o('fridge',816,412,20,14);A.o('sink',724,520,50,12);A.o('counter',724,470,80,18,{fc:'#7a6a5a'});
+ [380,440,500].forEach(y=>A.o('longtable',470,y,200,26));A.o('kitchen',720,334,120,14);A.o('fridge',816,380,20,14);A.o('fridge',816,412,20,14);A.o('sink',724,520,50,12);A.o('counter',724,404,80,18,{fc:'#7a6a5a'});
  A.o('tree',20,620,26,14);A.o('tree',420,640,26,14);A.o('tree',840,620,26,14);A.o('bench',120,668,60,10);A.o('flag',500,620,6,6,{c:'#f4f4ee',c2:'#3a7bc9'});A.o('bush',600,640,24,14);A.o('bush',700,660,24,14);A.o('lamp',30,606,6,6);
  A.roof(L,TP,RR-L,BT-TP,'school','학교');A.ent(588,614,0,-1);A.ent(140,614,0,-1);
  [['1반 교실',148,92],['2반 교실',348,92],['교무실',528,92],['3반 교실',728,92],['복도',148,292],['체육관',248,370],['급식실',580,356],['조리실',780,356]].forEach(a=>A.room(...a));
@@ -215,13 +215,13 @@ function houseA(A,hx,hy,v){const p=HP[v%4],X=x=>hx+x,Y=y=>hy+y;
  A.dec(X(140),Y(240),30,90,(ox,oy)=>{R('#a8a49a',ox+X(122),oy+Y(244),26,84)});
  const n=(x0,x1,y,h)=>{const o=A.ox;R(['#c9b48f','#a9b8c4','#d1c3a3','#b7c4ad'][v%4],o+X(40),y,320,h);for(let x=o+X(46);x<o+X(360);x+=10)R('#ffffff20',x,y+2,1,h-12);R('#00000030',o+X(40),y+h-3,320,3);[X(70),X(250),X(310)].forEach(x=>winD(o+x,26,y,h))};
  A.hw(X(36),X(364),Y(40),30,n);A.vw(X(40),Y(40),Y(240),30);A.vw(X(360),Y(40),Y(240),30);A.hw(X(36),X(120),Y(240),8,p[0]);A.hw(X(150),X(364),Y(240),8,p[0]);
- hseg(A,X(40),X(360),Y(130),[[X(100),X(128)],[X(172),X(198)],[X(280),X(308)]]);A.vw(X(160),Y(40),Y(130));A.vw(X(220),Y(40),Y(130));vseg(A,X(240),Y(130),Y(240),[[Y(160),Y(196)]]);
+ hseg(A,X(40),X(360),Y(130),[[X(100),X(128)],[X(186),X(214)],[X(280),X(308)]]);A.vw(X(160),Y(40),Y(130));A.vw(X(220),Y(40),Y(130));vseg(A,X(240),Y(130),Y(240),[[Y(160),Y(196)]]);
  const c=['#6f9cc4','#c46f8a','#7fae6f','#c4a46f'][v%4];
  A.o('bed',X(50),Y(46),30,54,{c});A.o('wardrobe',X(120),Y(46),30,14);A.o('rug',X(60),Y(104),60,18,{v:v%3});
- A.o('sink',X(166),Y(44),26,12);A.o('toilet',X(198),Y(44),16,16);A.o('tub',X(166),Y(96),50,24);
+ A.o('tub',X(166),Y(44),50,24);A.o('toilet',X(166),Y(100),16,16);A.o('sink',X(202),Y(76),14,10);
  A.o('bed',X(230),Y(46),30,54,{c:'#a8b48a'});A.o('desk',X(296),Y(46),54,18);A.o('bookshelf',X(334),Y(80),20,44);
- A.o('tv',X(80),Y(134),48,10);A.o('rug',X(60),Y(160),130,50,{v:(v+1)%3});A.o('ctable',X(96),Y(182),56,12);A.o('sofa',X(46),Y(214),68,18,{c:['#5a6e8a','#8a5a5a','#6a7a4a','#7a6a5a'][v%4]});A.o('bookshelf',X(212),Y(202),22,32);A.o('plant',X(48),Y(140),14,10);
- A.o('kitchen',X(248),Y(134),104,14);A.o('fridge',X(336),Y(164),20,14);A.o('tableset',X(262),Y(178),60,40);
+ A.o('tv',X(44),Y(134),48,10);A.o('rug',X(56),Y(160),120,48,{v:(v+1)%3});A.o('ctable',X(70),Y(180),48,12);A.o('sofa',X(46),Y(214),68,18,{c:['#5a6e8a','#8a5a5a','#6a7a4a','#7a6a5a'][v%4]});A.o('bookshelf',X(212),Y(202),22,32);A.o('plant',X(220),Y(136),14,10);
+ A.o('fridge',X(248),Y(134),20,14);A.o('kitchen',X(316),Y(134),40,14);A.o('kitchen',X(342),Y(148),14,56,{stove:false});A.o('tableset',X(262),Y(176),56,40);
  A.o('bush',X(20),Y(250),24,14);A.o('bush',X(330),Y(250),24,14);A.o('tree',X(380),Y(40),26,14);
  A.roof(X(40),Y(40),320,200,p[2]);A.ent(X(135),Y(254),0,-1)}
 function houseB(A,hx,hy,v){const p=HP[(v+2)%4],X=x=>hx+x,Y=y=>hy+y;
@@ -229,10 +229,10 @@ function houseB(A,hx,hy,v){const p=HP[(v+2)%4],X=x=>hx+x,Y=y=>hy+y;
  A.dec(X(200),Y(210),30,110,(ox,oy)=>{R('#a8a49a',ox+X(206),oy+Y(214),26,104)});
  const n=(x0,x1,y,h)=>{const o=A.ox;R(['#d1c3a3','#b7c4ad','#c9b48f','#a9b8c4'][v%4],o+X(60),y,280,h);R('#00000030',o+X(60),y+h-3,280,3);[X(90),X(170)].forEach(x=>winD(o+x,30,y,h))};
  A.hw(X(56),X(344),Y(60),30,n);A.vw(X(60),Y(60),Y(210),30);A.vw(X(340),Y(60),Y(210),30);A.hw(X(56),X(204),Y(210),8,p[0]);A.hw(X(234),X(344),Y(210),8,p[0]);
- vseg(A,X(260),Y(60),Y(210),[[Y(150),Y(180)]]);hseg(A,X(260),X(340),Y(130),[[X(290),X(316)]]);
+ vseg(A,X(260),Y(60),Y(210),[[Y(150),Y(180)]]);hseg(A,X(260),X(340),Y(130),[[X(266),X(292)]]);
  A.o('bed',X(70),Y(66),54,30,{c:['#c46f8a','#6f9cc4','#7fae6f','#c4a46f'][v%4]});A.o('wardrobe',X(140),Y(66),30,14);A.o('kitchen',X(180),Y(64),74,14);A.o('fridge',X(232),Y(90),20,14);
- A.o('rug',X(80),Y(120),100,60,{v:v%3});A.o('tableset',X(170),Y(120),56,40);A.o('sofa',X(80),Y(186),84,18);A.o('tv',X(84),Y(110),40,8);A.o('plant',X(240),Y(190),14,10);
- A.o('toilet',X(268),Y(66),16,16);A.o('sink',X(300),Y(66),30,12);A.o('tool',X(270),Y(140),30,14);A.o('crate',X(310),Y(180),22,18);A.o('car',X(276),Y(240),56,28,{c:['#c9a42a','#3a6ea8','#8a8f95','#6b4a6b'][v%4],rust:1});
+ A.o('sofa',X(80),Y(124),84,18);A.o('rug',X(76),Y(148),96,42,{v:v%3});A.o('tv',X(96),Y(198),40,8);A.o('tableset',X(174),Y(112),56,40);A.o('plant',X(244),Y(190),14,10);
+ A.o('toilet',X(268),Y(66),16,16);A.o('sink',X(300),Y(66),30,12);A.o('tool',X(306),Y(136),30,14);A.o('crate',X(310),Y(180),22,18);A.o('car',X(276),Y(240),56,28,{c:['#c9a42a','#3a6ea8','#8a8f95','#6b4a6b'][v%4],rust:1});
  A.o('tree',X(20),Y(80),26,14);A.o('bush',X(360),Y(170),24,14);
  A.roof(X(60),Y(60),280,150,p[2]);A.ent(X(219),Y(224),0,-1)}
 function buildHouses(c,r,seed){const A=Bld('주택가',c,r,'houses');A.fl(0,0,BW,BH,'grass');
@@ -282,4 +282,5 @@ function drawGround(x0,y0,w,h){R('#3b5a30',x0,y0,w,h);
 function drawStatic(x0,y0,w,h){drawGround(x0,y0,w,h);const hit=(x,y,ww,hh2)=>x<x0+w&&x+ww>x0&&y<y0+h&&y+hh2>y0;
  for(const f of W0.fl)if(hit(f[0],f[1],f[2],f[3]))floor(...f);
  for(const d of W0.dec)if(hit(d.x,d.y,d.w,d.h))d.f();
+ for(const o of W0.objs)if(FLAT[o.t]&&hit(o.x-2,o.y-2,o.w+4,o.h+4))D[o.t](o);
  for(const v of W0.vw)if(hit(v.x-4,v.y0-50,8,v.y1-v.y0+50))vwallD(v.x,v.y0,v.y1,v.top)}

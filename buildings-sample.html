@@ -9,35 +9,40 @@ h1{font-size:18px;margin:4px 0 2px}p{margin:0 0 8px;color:var(--mut);font-size:1
 .row{display:flex;gap:6px;margin:8px 0 0;flex-wrap:wrap}button{font:inherit;color:var(--fg);background:#1d2328;border:1px solid #fff2;border-radius:8px;padding:6px 10px}button.on{background:#2d4a63}
 #desc{margin-top:8px;font-size:13px;color:var(--mut)}
 </style></head><body><main>
-<h1>건물 샘플 · 고해상도 도트</h1><p>게임에 들어갈 건물을 미리 보는 페이지입니다. 탭을 눌러 건물을 바꾸고, 화면을 드래그해서 둘러보세요.</p>
+<h1>가구 배치 샘플 · 건물 13곳</h1><p>모든 건물의 가구 배치를 고정하고 정리한 모습이에요. 문 앞을 막거나 벽에 박힌 가구를 옮겼고, 러그·헬기장·코트 라인·주차선은 바닥 장식이라 캐릭터가 위로 지나가요. 탭을 눌러 건물을 바꾸고 화면을 드래그해서 둘러보세요.</p>
 <div class="row" id="tabs"></div>
 <div id="wrap" style="margin-top:8px"><canvas id="v"></canvas></div>
 <div class="row"><button id="zf">전체</button><button id="z1" class="on">1배</button><button id="z2">2배</button><button id="lb" class="on">방 이름</button><button id="rf">지붕 보기</button><button id="lt">🌙 밤</button></div>
 <div class="row" id="lvrow" style="display:none"><span style="align-self:center;color:var(--mut)">거점 레벨</span><button data-lv="1" class="on">Lv1</button><button data-lv="2">Lv2</button><button data-lv="3">Lv3</button></div>
 <div id="desc"></div>
 </main>
-<script src="art.js"></script><script src="world.js"></script>
+<script src="art.js"></script><script src="world.js"></script><script src="world_next.js"></script>
 <script>
 buildWorld();
-const TABS=[['police','경찰서',0,0,'무기고 · 증거물 보관실 · 취조실 · 형사과 · 유치장(창살 3칸) · 민원실 · 탈의/휴게실. 앞에는 경찰차 주차장과 깃발.'],
- ['mil','군부대',0,2,'철조망과 감시탑 4개로 둘러싼 부대. 지휘소(통신 콘솔·작전 테이블·무기고·무전실), 막사(2층 침대 10개), 연병장(군용 텐트·트럭·헬기장·모래주머니 검문소).'],
- ['school','학교',2,0,'교실 3개(칠판·학생 책상 12개), 교무실, 사물함이 늘어선 복도, 농구 코트가 있는 체육관, 급식실과 조리실, 운동장.'],
- ['clinic','진료소',1,0,'지난번 샘플 2를 그대로 옮긴 진료소입니다.'],
- ['mart','편의점 · 주유소',2,1,'진열대와 음료 냉장고가 있는 편의점, 창고, 지붕 달린 주유소(주유기 6대), 매점.'],
- ['hard','철물점 · 식당',2,2,'목재 더미와 공구가 있는 철물점과 자재 창고, 식탁 6개와 주방이 있는 식당.'],
- ['houses','주택가',0,1,'구조가 다른 2종류 주택 4채(침실·욕실·거실·주방, 원룸+차고).'],
- ['base','거점',1,1,'플레이어 거점. 레벨을 바꿔 업그레이드 단계별 모습을 확인하세요. (본부·방벽·작업대·의무실·텃밭·물·발전기·포탑·감시탑)']];
+const TABS=[['police','경찰서',0,0,'무기고 · 증거물 보관실 · 취조실 · 형사과 · 유치장 · 민원실 · 탈의/휴게실. 휴게실 사물함을 옮겨 출입문을 열었어요.'],
+ ['clinic','진료소',1,0,'병동 · 수술실 · 엑스레이실 · 진료실 2개 · 로비 · 약국 · 화장실 · 직원 휴게실. 약국 계산대를 옆문 앞에서 구석으로 옮겼어요.'],
+ ['school','학교',2,0,'교실 3개 · 교무실 · 복도 사물함 · 체육관 · 급식실과 조리실. 조리실 배식대를 출입문 앞에서 옮겼어요.'],
+ ['houses','주택가',0,1,'구조가 다른 주택 2종류 × 2채. 거실: 소파와 TV가 서로 마주 보게, 문 앞을 막던 TV · 소파 · 책장 · 조리대 · 욕조 · 공구함을 벽 쪽으로 정리했어요. 러그는 바닥 장식이라 캐릭터가 위로 지나가요.'],
+ ['base','거점',1,1,'플레이어 거점. 레벨을 바꿔 업그레이드 단계별 모습을 확인하세요.'],
+ ['mart','편의점 · 주유소',2,1,'진열대와 음료 냉장고가 있는 편의점, 창고, 지붕 달린 주유소, 매점.'],
+ ['apt','아파트',0,2,'1층 원룸 3세대(101~103호), 2층 2세대, 계단과 우편함, 주차장, 놀이터. 냉장고는 조리대 옆, TV는 소파 맞은편 벽으로 정리했어요.'],
+ ['hard','철물점 · 식당',2,2,'목재 더미와 공구가 있는 철물점과 자재 창고, 식탁 6개와 주방. 주방 조리대를 문 앞에서 옮겼어요.'],
+ ['mil','대형 군부대 (2블록)',3,0,'지휘소 · 무기고 · 무전실 · 막사 2동 · 화장실 · 식당(통로 확보) · 연병장 · 헬기장 · 차량 · 감시탑.',2],
+ ['fire','소방서',3,1,'차고(소방차 2대) · 장비실 · 사무실 · 대기실과 주방. 주방 조리대를 출입문 앞에서 벽 쪽으로, TV는 소파 맞은편으로 옮겼어요.'],
+ ['church','교회',4,1,'예배당(신도석 16개) · 목양실 · 창고와 주방 · 묘지 · 종탑. 목양실에 문이 없던 문제를 고쳤어요.'],
+ ['ware','물류창고',3,2,'팔레트 랙 6줄 · 지게차 · 사무실 · 하역장 · 트레일러.'],
+ ['lab','연구소',4,2,'실험실 · 배양 탱크실 · 흄후드 · 제염실 · 사무실 · 보안 검색대.']];
 let tab=0,zoomMode=1,labels=true,roofs=false,baseLv=1,cx=0,cy=0;
 const view=document.getElementById('v'),vctx=view.getContext('2d'),wrap=document.getElementById('wrap');
 const scn=document.createElement('canvas'),sx=scn.getContext('2d'),stat=document.createElement('canvas');
 const PAD=64;let RX=0,RY=0,RW=BW+PAD*2,RH=BH+PAD*2;scn.width=stat.width=RW;scn.height=stat.height=RH;
 function lvMap(n){return{core:n,wall:n,bench:n,med:n,farm:n,water:n,gen:n,turret:n,tower:n}}
-function buildStat(){const[c,r]=[TABS[tab][2],TABS[tab][3]],[ox,oy]=bo(c,r);RX=ox-PAD;RY=oy-PAD;const x=stat.getContext('2d');x.setTransform(1,0,0,1,-RX,-RY);g=x;drawStatic(RX,RY,RW,RH);x.setTransform(1,0,0,1,0,0)}
+function buildStat(){const[c,r]=[TABS[tab][2],TABS[tab][3]],[ox,oy]=bo(c,r);RX=ox-PAD;RY=oy-PAD;const nb=TABS[tab][5]||1;RW=nb*BW+(nb-1)*RD+PAD*2;RH=BH+PAD*2;scn.width=stat.width=RW;scn.height=stat.height=RH;const x=stat.getContext('2d');x.setTransform(1,0,0,1,-RX,-RY);g=x;drawStatic(RX,RY,RW,RH);x.setTransform(1,0,0,1,0,0)}
 function render(){g=sx;sx.setTransform(1,0,0,1,-RX,-RY);sx.drawImage(stat,RX,RY);
  const inR=(x,y,w,h)=>x<RX+RW&&x+w>RX&&y<RY+RH&&y+h>RY,L=[];
  for(const h of W0.hw)if(inR(h.x0,h.y-50,h.x1-h.x0,60))L.push({y:h.y,f:()=>hwallD(h.x0,h.x1,h.y,h.h,h.face)});
  const objs=TABS[tab][0]=='base'?W0.objs.concat(baseProps(lvMap(baseLv))):W0.objs;
- for(const o of objs)if(inR(o.x-20,o.y-100,o.w+40,o.h+110))L.push({y:o.y+o.h,f:()=>D[o.t](o)});
+ for(const o of objs)if(!FLAT[o.t]&&inR(o.x-20,o.y-100,o.w+40,o.h+110))L.push({y:o.y+o.h,f:()=>D[o.t](o)});
  const t=performance.now()/1000;W0.zs.forEach((z,i)=>{if(!inR(z.x-20,z.y-40,40,44))return;const ph=(t*.8+i)%4,dir=['d','r','d','l'][(ph|0)],fr=((t*4)|0)%4;L.push({y:z.y,f:()=>drawChar(z.look,z.x+Math.sin(t*.7+i)*6,z.y,dir,fr,null)})});
  if(TABS[tab][0]=='base'){const b=W0.base;L.push({y:b.oy+400,f:()=>drawChar('player',b.ox+470,b.oy+400,'l',-1,baseLv>2?'rifle':'pistol')})}
  if(roofs)for(const r of W0.roofs)if(inR(r.x,r.y-50,r.w,r.h+60))L.push({y:r.y+r.h,f:()=>roofD(r,1)});

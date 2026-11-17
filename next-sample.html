@@ -35,7 +35,7 @@ function render(){g=sx;sx.setTransform(1,0,0,1,-RX,-RY);sx.drawImage(stat,RX,RY)
  const inR=(x,y,w,h)=>x<RX+RW&&x+w>RX&&y<RY+RH&&y+h>RY,L=[];
  for(const h of W0.hw)if(inR(h.x0,h.y-50,h.x1-h.x0,60))L.push({y:h.y,f:()=>hwallD(h.x0,h.x1,h.y,h.h,h.face)});
  const objs=W0.objs;
- for(const o of objs)if(inR(o.x-20,o.y-100,o.w+40,o.h+110))L.push({y:o.y+o.h,f:()=>D[o.t](o)});
+ for(const o of objs)if(!FLAT[o.t]&&inR(o.x-20,o.y-100,o.w+40,o.h+110))L.push({y:o.y+o.h,f:()=>D[o.t](o)});
  const t=performance.now()/1000;W0.zs.forEach((z,i)=>{if(!inR(z.x-20,z.y-40,40,44))return;const ph=(t*.8+i)%4,dir=['d','r','d','l'][(ph|0)],fr=((t*4)|0)%4;L.push({y:z.y,f:()=>drawChar(z.look,z.x+Math.sin(t*.7+i)*6,z.y,dir,fr,null,z.look=='heavy'?1.35:1)})});
  
  if(roofs)for(const r of W0.roofs)if(inR(r.x,r.y-50,r.w,r.h+60))L.push({y:r.y+r.h,f:()=>roofD(r,1)});

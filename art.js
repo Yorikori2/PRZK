@@ -214,6 +214,8 @@ P('washer','세탁기',['water','scrap'],o=>{const{x,y,w,h}=o;B3(x,y,w,h,18,'#f4
 P('slide','미끄럼틀',null,o=>{const{x,y,w,h}=o;R('#555',x+2,y-24,3,24+h);R('#555',x+12,y-24,3,24+h);R('#1d1714',x,y-28,18,6);R('#3a6ea8',x+1,y-27,16,4);for(let i=0;i<w-18;i++)R('#e0b03a',x+18+i,y-24+i*((24+h-4)/(w-18)),3,2)});
 P('swing','그네',null,o=>{const{x,y,w}=o;R('#c43c32',x,y-30,3,30);R('#c43c32',x+w-3,y-30,3,30);R('#c43c32',x,y-31,w,3);[[w*.3],[w*.65]].forEach(([a])=>{R('#9aa0a6',x+a,y-28,1,20);R('#2a2a2a',x+a-4,y-8,10,2)})},false);
 P('alarmbox','경보 장치',null,o=>{const{x,y}=o;R('#1d1714',x-1,y-23,12,15);R('#c9ccd0',x,y-22,10,13);const on=Math.sin(performance.now()/200)>0;R(on?'#ff3030':'#802020',x+3,y-19,4,3);R('#3a3f45',x+2,y-13,6,2);R('#555',x+4,y-9,2,9)},false);
+/* flat props are painted into the static floor layer, never y-sorted over characters */
+const FLAT={rug:1,helipad:1,court:1,stripes:1};
 const SPRC={};
 function sprite(key,w,h,draw){if(SPRC[key])return SPRC[key];const c=document.createElement('canvas');c.width=w;c.height=h;const o=g;g=c.getContext('2d');draw();g=o;
  const x=c.getContext('2d'),im=x.getImageData(0,0,w,h),d=im.data,out=new Uint8ClampedArray(d);

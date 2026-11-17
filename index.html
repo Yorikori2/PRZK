@@ -49,7 +49,7 @@ SOL.forEach(r=>{for(let gy=Math.max(0,r.y/GC|0);gy<=Math.min(GY-1,(r.y+r.h)/GC|0
 /* drawable grid (objects + walls) */
 const DC=256,DX=Math.ceil(WW/DC),DY=Math.ceil(WH/DC),DG=Array.from({length:DX*DY},()=>[]);
 const addD=(d,x,y,w,h)=>{for(let gy=Math.max(0,y/DC|0);gy<=Math.min(DY-1,(y+h)/DC|0);gy++)for(let gx=Math.max(0,x/DC|0);gx<=Math.min(DX-1,(x+w)/DC|0);gx++)DG[gy*DX+gx].push(d)};
-W0.hw.forEach(h=>addD({k:'h',r:h},h.x0,h.y-50,h.x1-h.x0,50));W0.objs.forEach(o=>addD({k:'o',r:o},o.x-20,o.y-110,o.w+40,o.h+110));
+W0.hw.forEach(h=>addD({k:'h',r:h},h.x0,h.y-50,h.x1-h.x0,50));W0.objs.forEach(o=>{if(!FLAT[o.t])addD({k:'o',r:o},o.x-20,o.y-110,o.w+40,o.h+110)});
 /* ===================== state ===================== */
 let W,H,dpr=1,zoom=1,zf=1,spd=1,S=null,Z=[],run=false,jx=0,jy=0,ky={},fx=[],dec=[],atk=false,camX=0,camY=0,lt=0,hc=0,BP=[],BSOL=[],ra=W0.roofs.map(()=>1);
 const MODS=[['core','🏕','거점 본부',['텐트','컨테이너 쉘터','요새 본부'],['보관함 · 휴식 시 회복','다른 시설 Lv2까지 · 회복 증가','다른 시설 Lv3까지 · 회복 크게 증가'],[null,{wood:12,scrap:10,cloth:4},{cement:10,scrap:25,elec:4,fuel:10}]],
