@@ -3,15 +3,20 @@
 const {chromium}=require('playwright');const OUT=process.argv[2]||'.';const url='file://'+require('path').resolve(__dirname,'..','index.html');
 const box=(p,id)=>p.evaluate(id=>{const r=document.getElementById(id).getBoundingClientRect();return{x:Math.round(r.left),y:Math.round(r.top),w:Math.round(r.width),h:Math.round(r.height)}},id);
 const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
-(async()=>{const b=await chromium.launch();const ctx=await b.newContext({viewport:{width:412,height:860}});const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
+let UIEw;(async()=>{const b=await chromium.launch();const ctx=await b.newContext({viewport:{width:412,height:860}});const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.goto(url);await p.waitForTimeout(300);await p.evaluate(()=>{localStorage.clear();start('S',false)});await p.waitForTimeout(500);
  const wc0=await box(p,'wc'),st0=await box(p,'st'),sd0=await box(p,'sd');
  const ub=await box(p,'uiE');await p.mouse.click(ub.x+ub.w/2,ub.y+ub.h/2);await p.waitForTimeout(200);
  ok(await p.evaluate(()=>UIE.on&&PAUSE&&document.body.classList.contains('uied')),'editor opens and pauses game');
  const t0=await p.evaluate(()=>S.t);await p.waitForTimeout(600);ok(await p.evaluate(t=>S.t==t,t0),'game clock frozen while editing');
+ const qkA=await box(p,'qk');
+ // a tap (tiny jitter) only selects: nothing moves, nothing saved
+ await p.mouse.move(wc0.x+30,wc0.y+20);await p.mouse.down();await p.mouse.move(wc0.x+33,wc0.y+22);await p.mouse.up();
+ {const w=await box(p,'wc'),q=await box(p,'qk');ok(w.x==wc0.x&&w.y==wc0.y&&q.y==qkA.y&&!Object.keys(UIEw=await p.evaluate(()=>UIE.work.p||{})).length,'tap selects without moving weapon card or quick slots')}
  // drag weapon card to the upper middle
  await p.mouse.move(wc0.x+20,wc0.y+15);await p.mouse.down();await p.mouse.move(150,300,{steps:8});await p.mouse.up();
  let wc1=await box(p,'wc');ok(Math.abs(wc1.x-130)<4&&Math.abs(wc1.y-285)<4,'weapon card dragged to '+wc1.x+','+wc1.y);
+ {const q=await box(p,'qk');ok(q.x==qkA.x&&q.y==qkA.y,'quick slots stay put when weapon card moves '+q.x+','+q.y)}
  // drag past screen edge clamps inside
  const qk0=await box(p,'qk');await p.mouse.move(qk0.x+5,qk0.y+5);await p.mouse.down();await p.mouse.move(405,855,{steps:6});await p.mouse.up();
  const qk1=await box(p,'qk');ok(qk1.x+qk1.w<=413&&qk1.y+qk1.h<=861,'quick slots clamped on screen '+JSON.stringify(qk1));
