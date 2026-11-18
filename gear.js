@@ -57,7 +57,14 @@ function reloadTick(p,dt){if(p.rl>0){p.rl-=dt;if(p.rl<=0){const id=p.rlw,w=wdef(
 const NZR=[0,160,320,520,720,950];
 function noise(x,y,lv){const r=NZR[Math.max(0,Math.min(5,lv|0))];if(!r)return;for(const q of Z)if(Math.hypot(q.x-x,q.y-y)<r){q.al=8;q.nx=x;q.ny=y}}
 function hitZ(q,dmg,dx,dy,n=3){q.hp-=dmg;blood(q.x,q.y,dx,dy,n)}
-function nearestTarget(p,r){let z=null,bd=1e9;for(const q of Z){const d=Math.hypot(q.x-p.x,q.y-p.y);if(d<bd&&d<r&&(d<46||los(p.x,p.y-12,q.x,q.y-12))){bd=d;z=q}}return[z,bd]}
+/* ---------- auto-targeting: keeps a locked target inside weapon range (line of sight, facing bonus, sticky) ---------- */
+const visible=(p,q,d)=>d<46||los(p.x,p.y-12,q.x,q.y-12);
+function scoreT(p,q,d){const f=((q.x-p.x)*p.fx+(q.y-p.y)*p.fy)/(d||1);return d*(1.25-.35*f)*(q.look=='screamer'?.85:1)}
+function updTarget(p){const w=wdef(actW(p)),r=w[4].r||42,cur=S.tg&&Z.includes(S.tg)&&S.tg.hp>0?S.tg:null;let best=null,bs=1e9;
+ for(const q of Z){const d=Math.hypot(q.x-p.x,q.y-p.y);if(d>r*1.35||!visible(p,q,d))continue;const sc=scoreT(p,q,d);if(sc<bs){bs=sc;best=q}}
+ if(cur){const d=Math.hypot(cur.x-p.x,cur.y-p.y);if(d<=r*1.35&&visible(p,cur,d)&&!(best&&best!==cur&&bs<scoreT(p,cur,d)*.6))best=cur}
+ S.tg=best;S.tgIn=!!best&&Math.hypot(best.x-p.x,best.y-p.y)<=r;return best}
+function nearestTarget(p,r){const t=updTarget(p);if(t){const d=Math.hypot(t.x-p.x,t.y-p.y);if(d<r)return[t,d]}return[null,1e9]}
 function cone(p,dx,dy,r,dot){return Z.filter(q=>{const d=Math.hypot(q.x-p.x,q.y-p.y)||1;return d<r&&((q.x-p.x)*dx+(q.y-p.y)*dy)/d>dot&&(d<46||los(p.x,p.y-12,q.x,q.y-12))}).sort((a,b)=>Math.hypot(a.x-p.x,a.y-p.y)-Math.hypot(b.x-p.x,b.y-p.y))}
 function boom(x,y,rad,dmg,fire){fx.push({k:'boom',x,y,r:rad,l:.45,m:.45});for(const q of Z){const d=Math.hypot(q.x-x,q.y-y);if(d<rad){hitZ(q,dmg*(1-d/rad*.6),(q.x-x)/(d||1),(q.y-y)/(d||1),6);if(fire)q.burn=4}}
  const p=S.p,dp=Math.hypot(p.x-x,p.y-y);if(dp<rad*.8&&!fire){p.hp-=Math.round(30*(1-dp/rad));msg('💥 폭발에 휘말렸습니다!')}noise(x,y,5)}
@@ -92,7 +99,16 @@ function gearUpd(dt){const p=S.p;reloadTick(p,dt);if(p.ac<=0&&p.st<100)p.st=Math
  S.lures=(S.lures||[]).filter(l=>{l.t-=dt;for(const q of Z)if(Math.hypot(q.x-l.x,q.y-l.y)<650){q.al=1;q.nx=l.x;q.ny=l.y}return l.t>0});
  S.flares=(S.flares||[]).filter(l=>{l.t-=dt;return l.t>0});
  for(const q of Z){if(q.burn>0){q.burn-=dt;q.hp-=dt*14;if(Math.random()<dt*6)fx.push({k:'ember',x:q.x+(Math.random()-.5)*10,y:q.y-10-Math.random()*16,l:.35})}if(q.bleed>0){q.bleed-=dt;q.hp-=dt*5}if(q.stun>0)q.stun-=dt}}
-function drawGearFx(){for(const t of S.thr||[]){const k=t.t/t.T,x=t.x0+(t.x-t.x0)*k,y=t.y0+(t.y-t.y0)*k-Math.sin(k*Math.PI)*30;R('#1d1714',x-2,y-2,5,5);R(t.id=='molotov'?'#e07a2a':t.id=='lure'?'#e0b03a':'#4f5a35',x-1,y-1,3,3)}
+let SHOWR=true;try{SHOWR=localStorage.getItem('pl_range')!=='0'}catch(e){}
+function toggleRange(){SHOWR=!SHOWR;try{localStorage.setItem('pl_range',SHOWR?'1':'0')}catch(e){}msg(SHOWR?'◎ 공격 사거리 표시 켜짐':'공격 사거리 표시 꺼짐');const b=document.getElementById('rng');if(b)b.classList.toggle('on',SHOWR)}
+function drawRange(){const p=S.p;if(S.dr||!SHOWR)return;const id=actW(p),w=wdef(id),r=w[4].r||42,cx=p.x,cy=p.y-4,hot=S.tgIn,t=performance.now()/1000;
+ g.save();g.globalAlpha=(hot?.14:.07)*(r>120?.35:1);g.fillStyle=hot?'#ff5a4a':'#ffffff';g.beginPath();g.arc(cx,cy,r,0,6.2832);g.fill();g.globalAlpha=hot?.75:.4;g.strokeStyle=hot?'#ff6a5a':'#ffffff';g.lineWidth=1;g.setLineDash([5,4]);g.lineDashOffset=-t*8;g.beginPath();g.arc(cx,cy,r,0,6.2832);g.stroke();g.setLineDash([]);
+ if(w[2]=='g'&&(w[4].pel)){const a0=Math.atan2(p.fy,p.fx);g.globalAlpha=.25;g.beginPath();g.moveTo(cx,cy);g.arc(cx,cy,r,a0-.45,a0+.45);g.closePath();g.fillStyle=hot?'#ff6a5a':'#fff';g.fill()}g.restore()}
+function drawReticle(){const z=S.tg;if(!z||!Z.includes(z)||S.dr)return;const sc=z.b?1.7:z.look=='heavy'?1.35:1,hw=11*sc,top=z.y-38*sc,bot=z.y+3,pul=Math.sin(performance.now()/120)*1.5,c=S.tgIn?'#ff4a3a':'#ffffffa0',k=5;
+ const x0=z.x-hw-pul,x1=z.x+hw+pul,y0=top-pul,y1=bot+pul;for(const[x,y,dx,dy]of[[x0,y0,1,1],[x1,y0,-1,1],[x0,y1,1,-1],[x1,y1,-1,-1]]){R(c,x,y,dx*k,1);R(c,x,y,1,dy*k)}
+ if(z.mhp){const f=Math.max(0,z.hp/z.mhp);R('#000000a0',z.x-12,top-6,24,3);R(f>.5?'#e05a4a':'#ff9a3a',z.x-12,top-6,24*f,3)}
+ if(S.tgIn){const p=S.p;g.globalAlpha=.35;ln(p.x,p.y-14,z.x,z.y-14,'#ff6a5a');g.globalAlpha=1}}
+function drawGearFx(){drawReticle();for(const t of S.thr||[]){const k=t.t/t.T,x=t.x0+(t.x-t.x0)*k,y=t.y0+(t.y-t.y0)*k-Math.sin(k*Math.PI)*30;R('#1d1714',x-2,y-2,5,5);R(t.id=='molotov'?'#e07a2a':t.id=='lure'?'#e0b03a':'#4f5a35',x-1,y-1,3,3)}
  for(const f of S.fires||[]){for(let i=0;i<14;i++){const a=i*2.4+performance.now()/300,r=f.r*(.3+.6*((i*37)%10)/10),x=f.x+Math.cos(a)*r,y=f.y+Math.sin(a)*r*.6;R(i%3?'#ff9a2e':'#ffd25a',x,y-((performance.now()/60+i*7)%8),2,3)}g.globalAlpha=.25;blob(f.x,f.y,f.r,f.r*.6,'#ff6a1a');g.globalAlpha=1}
  for(const l of S.lures||[]){const on=Math.sin(performance.now()/120)>0;R('#1d1714',l.x-4,l.y-8,8,8);R(on?'#ffd23f':'#806a1a',l.x-3,l.y-7,6,6)}
  for(const l of S.flares||[]){g.globalAlpha=.5;blob(l.x,l.y,6,4,'#ff4a3a');g.globalAlpha=1}

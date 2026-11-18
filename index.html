@@ -14,7 +14,7 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%}
 #tr{position:fixed;right:6px;top:calc(env(safe-area-inset-top,0px) + 6px);display:flex;flex-direction:column;align-items:flex-end;gap:5px}
 #mmw{width:96px;height:96px;border-radius:50%;overflow:hidden;border:2px solid #ffffff44;position:relative;background:#000}#mm2{width:100%;height:100%;image-rendering:pixelated}#mmw .n{position:absolute;top:2px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:700;color:#ffd36a;pointer-events:none}
 #tp{padding:4px 9px;font-size:11px;text-align:right}#tp b{font-size:12px}#tp .w{color:#f0a868;font-size:10.5px}
-#top{display:flex;gap:4px}#top button{padding:5px 8px;font-size:12px}
+#top{display:flex;gap:4px}#top button{padding:5px 8px;font-size:12px}#rng.on{background:#4a2a24;border-color:#ff6a5a88}
 button{font:inherit;color:var(--fg);background:var(--pn);border:1px solid #fff3;border-radius:10px;padding:8px 10px}
 button:disabled{opacity:.45}
 #sd{position:fixed;left:6px;bottom:calc(env(safe-area-inset-bottom,0px) + 150px);display:flex;flex-direction:column;gap:7px}.rb{width:44px;height:44px;border-radius:50%;padding:0;font-size:20px;display:grid;place-items:center}
@@ -72,7 +72,7 @@ button:disabled{opacity:.45}
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="st" class="g"></div><div id="dg" class="g" style="display:none"></div>
-<div id="tr"><div id="mmw" style="display:none"><canvas id="mm2" width="96" height="96"></canvas><span class="n">N</span></div><div id="tp" class="g"></div><div id="top"><button id="zm">🔍</button><button id="spd">x1</button><button id="skp">⏩</button></div></div>
+<div id="tr"><div id="mmw" style="display:none"><canvas id="mm2" width="96" height="96"></canvas><span class="n">N</span></div><div id="tp" class="g"></div><div id="top"><button id="rng" class="on" title="공격 사거리 (V)">◎</button><button id="zm">🔍</button><button id="spd">x1</button><button id="skp">⏩</button></div></div>
 <div id="msg" class="g"></div><div id="pr" class="g" style="display:none"></div><div id="jb"><div id="jk"></div></div>
 <div id="sd"><button class="g rb" id="bBag" title="가방 (I)">🎒</button><button class="g rb" id="cCr" title="제작 (C)">🛠</button><button class="g rb" id="bBd" title="바리케이드 (F)">🧱</button><button class="g rb" id="bse" style="display:none" title="거점 (B)">🏠</button></div>
 <div id="wc" class="g"></div><div id="qk" class="g"></div>
@@ -141,7 +141,7 @@ function takeAll(){const st=S.base.st;for(const k in st){if(st[k]>=1){invAdd(S.p
 /* ===================== gameplay ===================== */
 const HM=()=>({S:1,V:1.25,N:1.7})[S.d];
 const LOOKZ=['civ1','civ2','civ3'];
-function mk(x,y,o={}){const look=o.look||LOOKZ[Math.random()*3|0],hb={soldier:90,cop:60,runner:30,screamer:50,heavy:260,hazmat:60}[look]||40;Z.push({x,y,look,hp:(o.b?500:hb)*HM(),b:o.b,w:o.w,g:o.g,cd:0,dir:'d',ph:0,mv:0,al:0})}
+function mk(x,y,o={}){const look=o.look||LOOKZ[Math.random()*3|0],hb={soldier:90,cop:60,runner:30,screamer:50,heavy:260,hazmat:60}[look]||40;Z.push({x,y,look,hp:(o.b?500:hb)*HM(),mhp:(o.b?500:hb)*HM(),b:o.b,w:o.w,g:o.g,cd:0,dir:'d',ph:0,mv:0,al:0})}
 function fr(a,b){for(let i=0;i<40;i++){const r=a+Math.random()*(b-a),t=Math.random()*6.28,x=S.p.x+Math.cos(t)*r,y=S.p.y+Math.sin(t)*r;if(x>40&&y>40&&x<WW-40&&y<WH-40&&!blocker(x,y,8)&&!(S.base.lv.wall&&inBase(x,y)))return[x,y]}return null}
 function waveLook(n){const r=Math.random();if(n>=9&&r<.06)return'heavy';if(n>=6&&r<.14)return'screamer';if(n>=3&&r<.34)return'runner';return null}
 function specialFor(t){const r=Math.random();if(t>=4&&r<.12)return'heavy';if(t>=3&&r<.22)return'screamer';if(t>=2&&r<.5)return'runner';return null}
@@ -210,7 +210,7 @@ function upd(dt){const s=S,p=s.p,ds=dt*spd,dm=HM(),bl=s.base.lv;s.tt+=ds;s.t+=ds
  if(m>.1){const vx=jx/Math.hypot(jx,jy),vy=jy/Math.hypot(jx,jy);if(p.ac<=0||!atk){p.fx=vx;p.fy=vy}const sp=(s.dr?300:(p.bleed?85:110)*speedMul(p))*m;
   if(s.dr){const c=s.car;c.h=Math.abs(vx)>=Math.abs(vy);mv(c,vx*sp*dt,vy*sp*dt,15,'car');p.x=c.x;p.y=c.y;p.inv.fuel=Math.max(0,(p.inv.fuel||0)-dt*.15);if(p.inv.fuel<=0){delete p.inv.fuel;s.dr=0;msg("연료 소진")}for(const z of Z)if(Math.hypot(z.x-c.x,z.y-c.y)<30){z.hp-=90;blood(z.x,z.y,vx,vy,5)}}
   else{mv(p,vx*sp*dt,vy*sp*dt,7,'p');p.mv=1;p.ph=(p.ph||0)+dt*sp/18}}
- p.dir=dirOf(p.fx,p.fy,p.dir);if(atk)act();gearUpd(dt);
+ if(atk&&S.tg&&S.tgIn){const d=Math.hypot(S.tg.x-p.x,S.tg.y-p.y)||1;p.fx=(S.tg.x-p.x)/d;p.fy=(S.tg.y-p.y)/d}p.dir=dirOf(p.fx,p.fy,p.dir);updTarget(p);if(atk)act();gearUpd(dt);
  s.sa=(s.sa||0)-dt;if(s.sa<=0){s.sa=3;if(Z.filter(z=>!z.w&&!z.g).length<(nt?14:6)){const q=fr(380,560);if(q)mk(q[0],q[1],{look:nt&&Math.random()<.15?'runner':null})}}
  for(const z of Z){const dx=p.x-z.x,dy=p.y-z.y,d=Math.hypot(dx,dy)||1;z.cd-=dt;z.al-=dt;z.mv=0;if(z.stun>0)continue;
   const chs=z.w||d<(nt?420:280),tx=chs?p.x:z.al>0?z.nx:null,ty=chs?p.y:z.ny;
@@ -239,6 +239,7 @@ function draw(){const p=S.p,bw=buf.width,bh=buf.height;g=bctx;NIGHT=S.t>=1500||S
  const vis=(x,y,w,h)=>x<camX+bw&&x+w>camX&&y<camY+bh+20&&y+h>camY-20;
  for(const d of dec){if(!vis(d.x-16,d.y-10,32,20))continue;if(d.k=='b')R(d.c,d.x,d.y,d.s,d.s);else if(d.k=='p'){g.globalAlpha=.85;poolD(d.x,d.y,d.r);g.globalAlpha=1}}
  for(const d of dec)if(d.k=='c'&&vis(d.x-20,d.y-12,40,24))corpseD(d.x,d.y,d.look,d.f);
+ drawRange();
  const L=[],seen=new Set();
  for(let gy=Math.max(0,(camY-120)/DC|0);gy<=Math.min(DY-1,(camY+bh+120)/DC|0);gy++)for(let gx=Math.max(0,(camX-60)/DC|0);gx<=Math.min(DX-1,(camX+bw+60)/DC|0);gx++)for(const d of DG[gy*DX+gx]){if(seen.has(d))continue;seen.add(d);
   if(d.k=='h'){const h=d.r;if(vis(h.x0,h.y-50,h.x1-h.x0,52))L.push({y:h.y,f:()=>hwallD(h.x0,h.x1,h.y,h.h,h.face)})}else{const o=d.r;if(vis(o.x-20,o.y-110,o.w+40,o.h+112))L.push({y:o.y+o.h,f:()=>D[o.t](o)})}}
@@ -277,7 +278,7 @@ cv.addEventListener('pointerdown',e=>{if($('bm').style.display=='block'){closeBa
 cv.addEventListener('pointermove',e=>{if(e.pointerId!=jp)return;let dx=e.clientX-jo[0],dy=e.clientY-jo[1];const l=Math.hypot(dx,dy),m=Math.min(1,l/50);if(l>0){jx=dx/l*m;jy=dy/l*m}jk.style.transform='translate('+jx*30+'px,'+jy*30+'px)'});
 const up=e=>{if(e.pointerId==jp){jp=null;jx=jy=0;jb.style.display='none';jk.style.transform=''}};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
 const bn=(id,f)=>$(id).addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(run)f()});
-bn('act',()=>ia());bn('bBd',bd);bn('cCr',openCraft);bn('bse',openBase);bn('bBag',()=>openBag());
+bn('act',()=>ia());bn('rng',toggleRange);bn('bBd',bd);bn('cCr',openCraft);bn('bse',openBase);bn('bBag',()=>openBag());
 $('wc').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(!run)return;const a=e.target.closest('[data-a]');if(a&&a.dataset.a=='rl')reload(S.p);else cycleW();hud2()});
 $('qk').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();const q=e.target.closest('[data-q]');if(q&&run){useQuick(+q.dataset.q);hud2()}});
 $('mmw').addEventListener('pointerdown',e=>{e.preventDefault();MMBIG=!MMBIG});
@@ -285,14 +286,14 @@ $('atk').addEventListener('pointerdown',e=>{e.preventDefault();atk=true});['poin
 bn('zm',()=>{zf=zf==1?1.35:zf==1.35?.75:1;rs();msg('확대 '+zf+'배')});
 bn('spd',()=>{spd=spd==1?5:spd==5?20:1;$('spd').textContent='x'+spd});
 bn('skp',()=>{S.day=(S.day%5==0&&S.t<1500)?S.day:(Math.floor(S.day/5)+1)*5;S.t=1500;msg('테스트: 웨이브 밤으로 이동')});
-addEventListener('keydown',e=>{const k=e.key.toLowerCase();ky[k]=1;if(e.key==' ')atk=true;if(k=='e'&&run)ia();if(k=='b'&&run)($('bm').style.display=='block'?closeBase():openBase());if(!run)return;if(k=='r')reload(S.p);if(k=='q')cycleW();if(k=='i'||k=='tab'){e.preventDefault();$('bm').style.display=='block'?closeBase():openBag()}if(k=='c')openCraft();if(k=='f')bd();if('1234'.includes(k)&&k)useQuick(+k-1)});addEventListener('keyup',e=>{ky[e.key.toLowerCase()]=0;if(e.key==' ')atk=false});
+addEventListener('keydown',e=>{const k=e.key.toLowerCase();ky[k]=1;if(e.key==' ')atk=true;if(k=='e'&&run)ia();if(k=='b'&&run)($('bm').style.display=='block'?closeBase():openBase());if(!run)return;if(k=='r')reload(S.p);if(k=='v')toggleRange();if(k=='q')cycleW();if(k=='i'||k=='tab'){e.preventDefault();$('bm').style.display=='block'?closeBase():openBag()}if(k=='c')openCraft();if(k=='f')bd();if('1234'.includes(k)&&k)useQuick(+k-1)});addEventListener('keyup',e=>{ky[e.key.toLowerCase()]=0;if(e.key==' ')atk=false});
 /* ===================== start ===================== */
 function start(d,load){dec=[];closeBase();if(load){S=JSON.parse(localStorage.getItem(SAVE))}
  else S={d,t:300,day:1,tt:0,wv:0,lw:0,lo:{},ks:{},bar:[],pois:[],dr:0,kills:0,car:{x:W0.car.x+30,y:W0.car.y+15,h:true},
   base:{lv:{core:1,wall:0,bench:0,med:0,farm:0,water:0,gen:0,turret:0,tower:0},st:{wood:4,food:2,water:2,cloth:2},whp:{},acc:0},
   wv2:2,gv:2,p:{x:BL.ox+470,y:BL.oy+430,hp:100,food:80,water:80,bleed:0,fx:0,fy:1,dir:'d',ac:0,inv:{wood:4,scrap:3,food:2,water:2,bandage:1,knife:1}}};
  S.aoff=S.aoff||{};S.alarm=null;rebuildBase();if(S.gv!==2){migrateInv(S.p,S.base.st);S.gv=2}else gearInit(S.p);for(const id in S.p.inv)if(!S.p.inv[id])delete S.p.inv[id];if(!load)autoEquip(S.p,'knife',true);
- let mig=0;if(load&&S.wv2!==2){S.lo={};S.wv2=2;mig=1}if(blocker(S.p.x,S.p.y,8)){S.p.x=BL.ox+470;S.p.y=BL.oy+430}if(S.car&&blocker(S.car.x,S.car.y,8)){S.car.x=W0.car.x+30;S.car.y=W0.car.y+15}Z=[];fx=[];W0.zs.forEach(z=>{const t=z.b!=null?TIER[W0.b[z.b].kind]||1:1,r=Math.random();let look=z.look;if(look!='heavy'){if(t>=3&&r<.15)look='screamer';else if(t>=2&&r<.4)look='runner'}mk(z.x,z.y,{look,g:1})});$('menu').style.display='none';$('go').textContent='';run=true;hud2();
+ let mig=0;if(load&&S.wv2!==2){S.lo={};S.wv2=2;mig=1}if(blocker(S.p.x,S.p.y,8)){S.p.x=BL.ox+470;S.p.y=BL.oy+430}if(S.car&&blocker(S.car.x,S.car.y,8)){S.car.x=W0.car.x+30;S.car.y=W0.car.y+15}Z=[];fx=[];W0.zs.forEach(z=>{const t=z.b!=null?TIER[W0.b[z.b].kind]||1:1,r=Math.random();let look=z.look;if(look!='heavy'){if(t>=3&&r<.15)look='screamer';else if(t>=2&&r<.4)look='runner'}mk(z.x,z.y,{look,g:1})});$('menu').style.display='none';$('go').textContent='';run=true;hud2();$('rng').classList.toggle('on',SHOWR);
  msg(load?(mig?'이어하기 · 🗺 도시가 넓어졌어요! 동쪽에 큰 군부대·소방서·교회·물류창고·연구소가 생겼습니다':'이어하기'):'🏕 거점 텐트에서 시작합니다. 주변 건물에서 재료를 모아 거점을 업그레이드하세요!')}
 document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>start(b.dataset.d,false));
 $('ld').onclick=()=>start(0,true);try{if(localStorage.getItem(SAVE))$('ld').style.display='block'}catch(e){}
