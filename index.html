@@ -71,7 +71,11 @@ button:disabled{opacity:.45}
 #uiBar span{width:100%;text-align:center;font-size:12px;color:var(--mut)}#uiBar b{color:#ffd36a}#uiBar button{padding:6px 10px;font-size:12px}#uiBar .ok{background:#2d5a3a;border-color:#5fbf6a}
 body.uied [data-ul]{outline:2px dashed #ffd36a99;outline-offset:2px;pointer-events:auto!important;cursor:move;touch-action:none}
 body.uied [data-ul]::after{content:attr(data-ul);position:absolute;left:-2px;top:-2px;opacity:.92;font-size:10px;line-height:14px;background:#ffd36a;color:#111;padding:0 5px;border-radius:4px;white-space:nowrap;pointer-events:none;z-index:2}
-body.uied,body.uied #c{touch-action:none;overscroll-behavior:none}body.uied #dg::after{top:auto;bottom:-14px}body.uied .uisel{outline:2px solid #ffd36a}body.uied #c{filter:brightness(.55)}
+body.uied,body.uied #c{touch-action:none;overscroll-behavior:none}#uiBar .ur{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;align-items:center;width:100%}#uiBar i{font-style:normal;font-size:11px;color:var(--mut);margin-right:2px}#uiOp{width:min(46vw,180px);accent-color:#ffd36a}#uiOpV{min-width:38px;font-size:12px}
+#uiBar{transition:opacity .15s}body.uidrag #uiBar{opacity:.12;pointer-events:none}
+.uilift{box-shadow:0 14px 34px #000c,0 0 0 2px #ffd36a!important;z-index:8!important;transition:none!important}
+body.uileft #r{flex-direction:row-reverse}body.uileft #tr{align-items:flex-start}body.uileft #rc{align-items:flex-start}
+body.uied #dg::after{top:auto;bottom:-14px}body.uied .uisel{outline:2px solid #ffd36a}body.uied #c{filter:brightness(.55)}
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="st" class="g"></div><div id="dg" class="g" style="display:none"></div>
@@ -80,7 +84,11 @@ body.uied,body.uied #c{touch-action:none;overscroll-behavior:none}body.uied #dg:
 
 <div id="rc"><div id="qk" class="g"></div><div id="wc" class="g"></div></div><div id="sd"><button class="g rb" id="bBag" title="가방 (I)">🎒</button><button class="g rb" id="cCr" title="제작 (C)">🛠</button><button class="g rb" id="bBd" title="바리케이드 (F)">🧱</button><button class="g rb" id="bse" style="display:none" title="거점 (B)">🏠</button></div>
 <div id="r"><button class="big" id="act">상호<br>작용</button><button class="big" id="atk">공격</button></div>
-<div id="uiBar" style="display:none"><span>🎛 <b id="uiSel">요소를 눌러 선택</b></span><button onclick="uiScale(-.1)">－ 작게</button><button onclick="uiScale(.1)">＋ 크게</button><button onclick="uiReset(false)">선택 초기화</button><button onclick="uiReset(true)">모두 초기화</button><button onclick="uiBarMove()">↕ 이 창 옮기기</button><button class="ok" onclick="uiEdit(false)">완료</button></div>
+<div id="uiBar" style="display:none"><span>🎛 <b id="uiSel">요소를 눌러 선택</b> · 끄는 동안 이 창은 투명해져요</span>
+<div class="ur"><button onclick="uiScale(-.1)">－ 작게</button><button onclick="uiScale(.1)">＋ 크게</button><button onclick="uiReset(false)">선택 초기화</button><button onclick="uiReset(true)">모두 초기화</button></div>
+<div class="ur"><i>추천 배치</i><button onclick="uiPreset('def')">기본</button><button onclick="uiPreset('left')">✋ 왼손잡이</button><button onclick="uiPreset('wide')">🔭 넓은 시야</button></div>
+<div class="ur"><i>UI 투명도</i><input id="uiOp" type="range" min="50" max="100" step="5" value="100" oninput="uiOpacity(+this.value)"><b id="uiOpV">100%</b></div>
+<div class="ur"><button onclick="uiBarMove()">↕ 이 창 옮기기</button><button class="ok" onclick="uiEdit(false)">완료</button></div></div>
 <div id="bm"></div>
 <div id="menu"><h1>PROJECT LEGACY</h1><small>고해상도 탑다운 좀비 생존 RPG<br>왼쪽 화면 드래그: 이동 · 건물에 들어가면 지붕이 열립니다<br>거점을 업그레이드하며 살아남으세요</small>
 <button id="ld" style="display:none">이어하기</button>
@@ -101,7 +109,7 @@ const DC=256,DX=Math.ceil(WW/DC),DY=Math.ceil(WH/DC),DG=Array.from({length:DX*DY
 const addD=(d,x,y,w,h)=>{for(let gy=Math.max(0,y/DC|0);gy<=Math.min(DY-1,(y+h)/DC|0);gy++)for(let gx=Math.max(0,x/DC|0);gx<=Math.min(DX-1,(x+w)/DC|0);gx++)DG[gy*DX+gx].push(d)};
 W0.hw.forEach(h=>addD({k:'h',r:h},h.x0,h.y-50,h.x1-h.x0,50));W0.objs.forEach(o=>{if(!FLAT[o.t])addD({k:'o',r:o},o.x-20,o.y-110,o.w+40,o.h+110)});
 /* ===================== state ===================== */
-let PAUSE=false,W,H,dpr=1,zoom=1,zf=1,spd=1,S=null,Z=[],run=false,jx=0,jy=0,ky={},fx=[],dec=[],atk=false,camX=0,camY=0,lt=0,hc=0,BP=[],BSOL=[],ra=W0.roofs.map(()=>1);
+let PFR=0,PAUSE=false,W,H,dpr=1,zoom=1,zf=1,spd=1,S=null,Z=[],run=false,jx=0,jy=0,ky={},fx=[],dec=[],atk=false,camX=0,camY=0,lt=0,hc=0,BP=[],BSOL=[],ra=W0.roofs.map(()=>1);
 const MODS=[['core','🏕','거점 본부',['텐트','컨테이너 쉘터','요새 본부'],['보관함 · 휴식 시 회복','다른 시설 Lv2까지 · 회복 증가','다른 시설 Lv3까지 · 회복 크게 증가'],[null,{wood:12,scrap:10,cloth:4},{cement:10,scrap:25,elec:4,fuel:10}]],
  ['wall','🧱','방벽',['목책','철판 방벽','콘크리트 방벽'],['거점 둘레 방벽 + 정문 (내구 120)','내구 250','내구 450 · 철조망'],[{wood:15},{scrap:20,wood:6},{cement:15,scrap:20}]],
  ['bench','🛠','작업대',['기본 작업대','공구 작업대','공방'],['도끼 · 쇠파이프 · 활 · 산탄 제작','마체테 · 5.56 탄 제작 · 9mm 6→10','9mm 14 · 방탄복 제작'],[{wood:6,scrap:2},{scrap:10,elec:2},{milpart:3,elec:4,fuel:5}]],
@@ -275,7 +283,7 @@ function draw(){const p=S.p,bw=buf.width,bh=buf.height;g=bctx;NIGHT=S.t>=1500||S
 function hud(){hud2()}
 function loop(ts){requestAnimationFrame(loop);if(!run)return;const dt=Math.min(.05,(ts-lt)/1000||0);lt=ts;
  const k=ky;if(jp==null){jx=(k.d||k.arrowright?1:0)-(k.a||k.arrowleft?1:0);jy=(k.s||k.arrowdown?1:0)-(k.w||k.arrowup?1:0)}
- if(!PAUSE)upd(dt);if(!run)return;draw();hc+=dt;if(hc>.25){hc=0;hud()}}
+ if(!PAUSE)upd(dt);if(!run)return;if(!PAUSE||!(PFR=(PFR+1)%20))draw();hc+=dt;if(hc>.25){hc=0;if(!PAUSE)hud()}}
 /* ===================== input ===================== */
 let jp=null,jo=[0,0];const jb=$('jb'),jk=$('jk');
 cv.addEventListener('pointerdown',e=>{if(UIE.on)return;if($('bm').style.display=='block'){closeBase();return}if(jp==null&&e.clientX<innerWidth*.6){jp=e.pointerId;jo=[e.clientX,e.clientY];jb.style.cssText='display:block;left:'+jo[0]+'px;top:'+jo[1]+'px';cv.setPointerCapture(e.pointerId)}});
