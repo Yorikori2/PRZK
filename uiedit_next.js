@@ -51,7 +51,7 @@ function uiDragEnd(e,silent){const g=UIE.drag;if(!g||(e&&e.pointerId!==undefined
  document.body.classList.remove('uidrag');if(!g.go)return;g.el.classList.remove('uilift');g.el.style.willChange='';
  if(!silent&&UIE.work){uiCur()[g.id]={x:(g.L0+g.tx)/innerWidth,y:(g.T0+g.ty)/innerHeight,s:g.s};}uiApply()}
 document.addEventListener('pointerdown',e=>{if(!UIE.on)return;if(e.target.closest('#uiBar')){uiDragEnd();return}if(UIE.drag&&UIE.drag.pid!==e.pointerId)uiDragEnd();e.preventDefault();e.stopPropagation();const el=e.target.closest(uiSelector);
- if(!el){UIE.sel=null;uiMark();return}UIE.sel=el.id;uiMark();const r=el.getBoundingClientRect();UIE.drag={pid:e.pointerId,id:el.id,dx:e.clientX-r.left,dy:e.clientY-r.top,sx:e.clientX,sy:e.clientY,go:false,s:(uiCur()[el.id]||{}).s||1}},true);
+ if(!el){UIE.sel=null;uiMark();return}UIE.sel=el.id;uiMark();try{el.setPointerCapture(e.pointerId)}catch(_){} /* keep the touch on the panel even if its contents are re-rendered */const r=el.getBoundingClientRect();UIE.drag={pid:e.pointerId,id:el.id,dx:e.clientX-r.left,dy:e.clientY-r.top,sx:e.clientX,sy:e.clientY,go:false,s:(uiCur()[el.id]||{}).s||1}},true);
 document.addEventListener('pointermove',e=>{const g=UIE.drag;if(!UIE.on||!g||e.pointerId!==g.pid)return;if(e.pointerType=='mouse'&&!e.buttons){uiDragEnd();return}e.preventDefault();
  if(!g.go){if(Math.hypot(e.clientX-g.sx,e.clientY-g.sy)<8)return;uiDragStart(g)}
  const L=Math.max(0,Math.min(innerWidth-g.w,e.clientX-g.dx)),T=Math.max(0,Math.min(innerHeight-g.h,e.clientY-g.dy));g.tx=L-g.L0;g.ty=T-g.T0;

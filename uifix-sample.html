@@ -283,7 +283,7 @@ function draw(){const p=S.p,bw=buf.width,bh=buf.height;g=bctx;NIGHT=S.t>=1500||S
 function hud(){hud2()}
 function loop(ts){requestAnimationFrame(loop);if(!run)return;const dt=Math.min(.05,(ts-lt)/1000||0);lt=ts;
  const k=ky;if(jp==null){jx=(k.d||k.arrowright?1:0)-(k.a||k.arrowleft?1:0);jy=(k.s||k.arrowdown?1:0)-(k.w||k.arrowup?1:0)}
- if(!PAUSE)upd(dt);if(!run)return;if(!PAUSE||!(PFR=(PFR+1)%20))draw();hc+=dt;if(hc>.25){hc=0;hud()}}
+ if(!PAUSE)upd(dt);if(!run)return;if(!PAUSE||!(PFR=(PFR+1)%20))draw();hc+=dt;if(hc>.25){hc=0;if(!PAUSE)hud()}}
 /* ===================== input ===================== */
 let jp=null,jo=[0,0];const jb=$('jb'),jk=$('jk');
 cv.addEventListener('pointerdown',e=>{if(UIE.on)return;if($('bm').style.display=='block'){closeBase();return}if(jp==null&&e.clientX<innerWidth*.6){jp=e.pointerId;jo=[e.clientX,e.clientY];jb.style.cssText='display:block;left:'+jo[0]+'px;top:'+jo[1]+'px';cv.setPointerCapture(e.pointerId)}});
