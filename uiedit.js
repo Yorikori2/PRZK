@@ -27,9 +27,11 @@ function uiBarMove(){const b=document.getElementById('uiBar'),i=['50%','22%','78
 function uiPinGroup(id){const d=uiCur();for(const g of UIGRP)if(g.includes(id))for(const o of g)if(o!=id&&!d[o]){const r=document.getElementById(o).getBoundingClientRect();d[o]={x:r.left/innerWidth,y:r.top/innerHeight,s:1}}}
 function uiReset(all){const d=uiCur();if(all){UIE.work[uiKey()]={}}else if(UIE.sel)delete d[UIE.sel];uiApply()}
 const uiSelector=UIE.ids.map(i=>'#'+i[0]).join(',');
-document.addEventListener('pointerdown',e=>{if(!UIE.on||e.target.closest('#uiBar'))return;e.preventDefault();e.stopPropagation();const el=e.target.closest(uiSelector);
- if(!el){UIE.sel=null;uiMark();return}UIE.sel=el.id;uiMark();const r=el.getBoundingClientRect();UIE.drag={id:el.id,dx:e.clientX-r.left,dy:e.clientY-r.top,sx:e.clientX,sy:e.clientY,go:false,s:(uiCur()[el.id]||{}).s||1}},true);
-document.addEventListener('pointermove',e=>{const g2=UIE.drag;if(!UIE.on||!g2)return;e.preventDefault();if(!g2.go){if(Math.hypot(e.clientX-g2.sx,e.clientY-g2.sy)<8)return;g2.go=true;uiPinGroup(g2.id)}const d=uiCur();d[g2.id]={x:Math.max(0,(e.clientX-g2.dx))/innerWidth,y:Math.max(0,(e.clientY-g2.dy))/innerHeight,s:g2.s};uiApply()},true);
-document.addEventListener('pointerup',()=>{UIE.drag=null},true);
+document.addEventListener('pointerdown',e=>{if(!UIE.on)return;if(e.target.closest('#uiBar')){UIE.drag=null;return}if(UIE.drag&&UIE.drag.pid!==e.pointerId)UIE.drag=null;e.preventDefault();e.stopPropagation();const el=e.target.closest(uiSelector);
+ if(!el){UIE.sel=null;uiMark();return}UIE.sel=el.id;uiMark();const r=el.getBoundingClientRect();UIE.drag={pid:e.pointerId,id:el.id,dx:e.clientX-r.left,dy:e.clientY-r.top,sx:e.clientX,sy:e.clientY,go:false,s:(uiCur()[el.id]||{}).s||1}},true);
+document.addEventListener('pointermove',e=>{const g2=UIE.drag;if(!UIE.on||!g2||e.pointerId!==g2.pid)return;if(e.pointerType=='mouse'&&!e.buttons){UIE.drag=null;return}e.preventDefault();if(!g2.go){if(Math.hypot(e.clientX-g2.sx,e.clientY-g2.sy)<8)return;g2.go=true;uiPinGroup(g2.id)}const d=uiCur();d[g2.id]={x:Math.max(0,(e.clientX-g2.dx))/innerWidth,y:Math.max(0,(e.clientY-g2.dy))/innerHeight,s:g2.s};uiApply()},true);
+// a drag ends on lift, on a browser-cancelled touch (pointercancel) and when the window loses focus
+const uiEnd=e=>{if(UIE.drag&&(!e||e.pointerId===undefined||e.pointerId===UIE.drag.pid))UIE.drag=null};
+['pointerup','pointercancel','lostpointercapture'].forEach(t=>document.addEventListener(t,uiEnd,true));addEventListener('blur',()=>uiEnd());
 document.addEventListener('click',e=>{if(UIE.on&&!e.target.closest('#uiBar')){e.preventDefault();e.stopPropagation()}},true);
 addEventListener('resize',()=>uiApply());

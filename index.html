@@ -71,7 +71,7 @@ button:disabled{opacity:.45}
 #uiBar span{width:100%;text-align:center;font-size:12px;color:var(--mut)}#uiBar b{color:#ffd36a}#uiBar button{padding:6px 10px;font-size:12px}#uiBar .ok{background:#2d5a3a;border-color:#5fbf6a}
 body.uied [data-ul]{outline:2px dashed #ffd36a99;outline-offset:2px;pointer-events:auto!important;cursor:move;touch-action:none}
 body.uied [data-ul]::after{content:attr(data-ul);position:absolute;left:-2px;top:-2px;opacity:.92;font-size:10px;line-height:14px;background:#ffd36a;color:#111;padding:0 5px;border-radius:4px;white-space:nowrap;pointer-events:none;z-index:2}
-body.uied #dg::after{top:auto;bottom:-14px}body.uied .uisel{outline:2px solid #ffd36a}body.uied #c{filter:brightness(.55)}
+body.uied,body.uied #c{touch-action:none;overscroll-behavior:none}body.uied #dg::after{top:auto;bottom:-14px}body.uied .uisel{outline:2px solid #ffd36a}body.uied #c{filter:brightness(.55)}
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="st" class="g"></div><div id="dg" class="g" style="display:none"></div>
