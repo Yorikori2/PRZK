@@ -67,19 +67,25 @@ button:disabled{opacity:.45}
 }
 @media (orientation:portrait) and (max-width:390px){#st{width:44vw}#tp{max-width:150px;font-size:10px}#tp b{font-size:11px}#mmw{width:84px;height:84px}}
 @media (orientation:landscape) and (max-width:700px){#tp .w{display:none}#msg{max-width:60vw;top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 110px)}}
+#uiBar{position:fixed;left:50%;transform:translate(-50%,-50%);top:50%;z-index:9;display:flex;flex-wrap:wrap;gap:5px;align-items:center;justify-content:center;max-width:min(94vw,560px);padding:8px;border-radius:14px;background:#0d1114f2;border:1px solid #ffd36a88;box-shadow:0 6px 30px #000a}
+#uiBar span{width:100%;text-align:center;font-size:12px;color:var(--mut)}#uiBar b{color:#ffd36a}#uiBar button{padding:6px 10px;font-size:12px}#uiBar .ok{background:#2d5a3a;border-color:#5fbf6a}
+body.uied [data-ul]{outline:2px dashed #ffd36a99;outline-offset:2px;pointer-events:auto!important;cursor:move;touch-action:none}
+body.uied [data-ul]::after{content:attr(data-ul);position:absolute;left:-2px;top:-2px;opacity:.92;font-size:10px;line-height:14px;background:#ffd36a;color:#111;padding:0 5px;border-radius:4px;white-space:nowrap;pointer-events:none;z-index:2}
+body.uied #dg::after{top:auto;bottom:-14px}body.uied .uisel{outline:2px solid #ffd36a}body.uied #c{filter:brightness(.55)}
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="st" class="g"></div><div id="dg" class="g" style="display:none"></div>
-<div id="tr"><div id="mmw" style="display:none"><canvas id="mm2" width="96" height="96"></canvas><span class="n">N</span></div><div id="tp" class="g"></div><div id="top"><button id="rng" class="on" title="공격 사거리 (V)">◎</button><button id="zm">🔍</button><button id="spd">x1</button><button id="skp">⏩</button></div></div>
+<div id="tr"><div id="mmw" style="display:none"><canvas id="mm2" width="96" height="96"></canvas><span class="n">N</span></div><div id="tp" class="g"></div><div id="top"><button id="uiE" title="UI 위치 편집">⚙</button><button id="rng" class="on" title="공격 사거리 (V)">◎</button><button id="zm">🔍</button><button id="spd">x1</button><button id="skp">⏩</button></div></div>
 <div id="msg" class="g"></div><div id="pr" class="g" style="display:none"></div><div id="jb"><div id="jk"></div></div>
 
 <div id="rc"><div id="qk" class="g"></div><div id="wc" class="g"></div></div><div id="sd"><button class="g rb" id="bBag" title="가방 (I)">🎒</button><button class="g rb" id="cCr" title="제작 (C)">🛠</button><button class="g rb" id="bBd" title="바리케이드 (F)">🧱</button><button class="g rb" id="bse" style="display:none" title="거점 (B)">🏠</button></div>
 <div id="r"><button class="big" id="act">상호<br>작용</button><button class="big" id="atk">공격</button></div>
+<div id="uiBar" style="display:none"><span>🎛 <b id="uiSel">요소를 눌러 선택</b></span><button onclick="uiScale(-.1)">－ 작게</button><button onclick="uiScale(.1)">＋ 크게</button><button onclick="uiReset(false)">선택 초기화</button><button onclick="uiReset(true)">모두 초기화</button><button onclick="uiBarMove()">↕ 이 창 옮기기</button><button class="ok" onclick="uiEdit(false)">완료</button></div>
 <div id="bm"></div>
 <div id="menu"><h1>PROJECT LEGACY</h1><small>고해상도 탑다운 좀비 생존 RPG<br>왼쪽 화면 드래그: 이동 · 건물에 들어가면 지붕이 열립니다<br>거점을 업그레이드하며 살아남으세요</small>
 <button id="ld" style="display:none">이어하기</button>
 <button data-d="S">Survival – 사망 시 거점에서 부활</button><button data-d="V">Veteran – 영구 사망</button><button data-d="N">Nightmare – 고난이도 + 영구 사망</button><small id="go"></small></div>
-<script src="art.js"></script><script src="world.js"></script><script src="world_next.js"></script><script src="items.js"></script><script src="gear.js"></script>
+<script src="art.js"></script><script src="world.js"></script><script src="world_next.js"></script><script src="items.js"></script><script src="gear.js"></script><script src="uiedit.js"></script>
 <script>
 /* ===================== setup ===================== */
 const $=i=>document.getElementById(i),cv=$('c'),ctx=cv.getContext('2d'),buf=document.createElement('canvas'),bctx=buf.getContext('2d');
@@ -95,7 +101,7 @@ const DC=256,DX=Math.ceil(WW/DC),DY=Math.ceil(WH/DC),DG=Array.from({length:DX*DY
 const addD=(d,x,y,w,h)=>{for(let gy=Math.max(0,y/DC|0);gy<=Math.min(DY-1,(y+h)/DC|0);gy++)for(let gx=Math.max(0,x/DC|0);gx<=Math.min(DX-1,(x+w)/DC|0);gx++)DG[gy*DX+gx].push(d)};
 W0.hw.forEach(h=>addD({k:'h',r:h},h.x0,h.y-50,h.x1-h.x0,50));W0.objs.forEach(o=>{if(!FLAT[o.t])addD({k:'o',r:o},o.x-20,o.y-110,o.w+40,o.h+110)});
 /* ===================== state ===================== */
-let W,H,dpr=1,zoom=1,zf=1,spd=1,S=null,Z=[],run=false,jx=0,jy=0,ky={},fx=[],dec=[],atk=false,camX=0,camY=0,lt=0,hc=0,BP=[],BSOL=[],ra=W0.roofs.map(()=>1);
+let PAUSE=false,W,H,dpr=1,zoom=1,zf=1,spd=1,S=null,Z=[],run=false,jx=0,jy=0,ky={},fx=[],dec=[],atk=false,camX=0,camY=0,lt=0,hc=0,BP=[],BSOL=[],ra=W0.roofs.map(()=>1);
 const MODS=[['core','🏕','거점 본부',['텐트','컨테이너 쉘터','요새 본부'],['보관함 · 휴식 시 회복','다른 시설 Lv2까지 · 회복 증가','다른 시설 Lv3까지 · 회복 크게 증가'],[null,{wood:12,scrap:10,cloth:4},{cement:10,scrap:25,elec:4,fuel:10}]],
  ['wall','🧱','방벽',['목책','철판 방벽','콘크리트 방벽'],['거점 둘레 방벽 + 정문 (내구 120)','내구 250','내구 450 · 철조망'],[{wood:15},{scrap:20,wood:6},{cement:15,scrap:20}]],
  ['bench','🛠','작업대',['기본 작업대','공구 작업대','공방'],['도끼 · 쇠파이프 · 활 · 산탄 제작','마체테 · 5.56 탄 제작 · 9mm 6→10','9mm 14 · 방탄복 제작'],[{wood:6,scrap:2},{scrap:10,elec:2},{milpart:3,elec:4,fuel:5}]],
@@ -269,14 +275,14 @@ function draw(){const p=S.p,bw=buf.width,bh=buf.height;g=bctx;NIGHT=S.t>=1500||S
 function hud(){hud2()}
 function loop(ts){requestAnimationFrame(loop);if(!run)return;const dt=Math.min(.05,(ts-lt)/1000||0);lt=ts;
  const k=ky;if(jp==null){jx=(k.d||k.arrowright?1:0)-(k.a||k.arrowleft?1:0);jy=(k.s||k.arrowdown?1:0)-(k.w||k.arrowup?1:0)}
- upd(dt);if(!run)return;draw();hc+=dt;if(hc>.25){hc=0;hud()}}
+ if(!PAUSE)upd(dt);if(!run)return;draw();hc+=dt;if(hc>.25){hc=0;hud()}}
 /* ===================== input ===================== */
 let jp=null,jo=[0,0];const jb=$('jb'),jk=$('jk');
-cv.addEventListener('pointerdown',e=>{if($('bm').style.display=='block'){closeBase();return}if(jp==null&&e.clientX<innerWidth*.6){jp=e.pointerId;jo=[e.clientX,e.clientY];jb.style.cssText='display:block;left:'+jo[0]+'px;top:'+jo[1]+'px';cv.setPointerCapture(e.pointerId)}});
+cv.addEventListener('pointerdown',e=>{if(UIE.on)return;if($('bm').style.display=='block'){closeBase();return}if(jp==null&&e.clientX<innerWidth*.6){jp=e.pointerId;jo=[e.clientX,e.clientY];jb.style.cssText='display:block;left:'+jo[0]+'px;top:'+jo[1]+'px';cv.setPointerCapture(e.pointerId)}});
 cv.addEventListener('pointermove',e=>{if(e.pointerId!=jp)return;let dx=e.clientX-jo[0],dy=e.clientY-jo[1];const l=Math.hypot(dx,dy),m=Math.min(1,l/50);if(l>0){jx=dx/l*m;jy=dy/l*m}jk.style.transform='translate('+jx*30+'px,'+jy*30+'px)'});
 const up=e=>{if(e.pointerId==jp){jp=null;jx=jy=0;jb.style.display='none';jk.style.transform=''}};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
 const bn=(id,f)=>$(id).addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(run)f()});
-bn('act',()=>ia());bn('rng',toggleRange);bn('bBd',bd);bn('cCr',openCraft);bn('bse',openBase);bn('bBag',()=>openBag());
+bn('act',()=>ia());$('uiE').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(run&&!UIE.on){closeBase();uiEdit(true)}});bn('rng',toggleRange);bn('bBd',bd);bn('cCr',openCraft);bn('bse',openBase);bn('bBag',()=>openBag());
 $('wc').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(!run)return;const a=e.target.closest('[data-a]');if(a&&a.dataset.a=='rl')reload(S.p);else cycleW();hud2()});
 $('qk').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();const q=e.target.closest('[data-q]');if(q&&run){useQuick(+q.dataset.q);hud2()}});
 $('mmw').addEventListener('pointerdown',e=>{e.preventDefault();MMBIG=!MMBIG});
@@ -291,7 +297,7 @@ function start(d,load){dec=[];closeBase();if(load){S=JSON.parse(localStorage.get
   base:{lv:{core:1,wall:0,bench:0,med:0,farm:0,water:0,gen:0,turret:0,tower:0},st:{wood:4,food:2,water:2,cloth:2},whp:{},acc:0},
   wv2:2,gv:2,p:{x:BL.ox+470,y:BL.oy+430,hp:100,food:80,water:80,bleed:0,fx:0,fy:1,dir:'d',ac:0,inv:{wood:4,scrap:3,food:2,water:2,bandage:1,knife:1}}};
  S.aoff=S.aoff||{};S.alarm=null;rebuildBase();if(S.gv!==2){migrateInv(S.p,S.base.st);S.gv=2}else gearInit(S.p);for(const id in S.p.inv)if(!S.p.inv[id])delete S.p.inv[id];if(!load)autoEquip(S.p,'knife',true);
- let mig=0;if(load&&S.wv2!==2){S.lo={};S.wv2=2;mig=1}if(blocker(S.p.x,S.p.y,8)){S.p.x=BL.ox+470;S.p.y=BL.oy+430}if(S.car&&blocker(S.car.x,S.car.y,8)){S.car.x=W0.car.x+30;S.car.y=W0.car.y+15}Z=[];fx=[];W0.zs.forEach(z=>{const t=z.b!=null?TIER[W0.b[z.b].kind]||1:1,r=Math.random();let look=z.look;if(look!='heavy'){if(t>=3&&r<.15)look='screamer';else if(t>=2&&r<.4)look='runner'}mk(z.x,z.y,{look,g:1})});$('menu').style.display='none';$('go').textContent='';run=true;hud2();$('rng').classList.toggle('on',SHOWR);
+ let mig=0;if(load&&S.wv2!==2){S.lo={};S.wv2=2;mig=1}if(blocker(S.p.x,S.p.y,8)){S.p.x=BL.ox+470;S.p.y=BL.oy+430}if(S.car&&blocker(S.car.x,S.car.y,8)){S.car.x=W0.car.x+30;S.car.y=W0.car.y+15}Z=[];fx=[];W0.zs.forEach(z=>{const t=z.b!=null?TIER[W0.b[z.b].kind]||1:1,r=Math.random();let look=z.look;if(look!='heavy'){if(t>=3&&r<.15)look='screamer';else if(t>=2&&r<.4)look='runner'}mk(z.x,z.y,{look,g:1})});$('menu').style.display='none';$('go').textContent='';run=true;hud2();uiApply();$('rng').classList.toggle('on',SHOWR);
  msg(load?(mig?'이어하기 · 🗺 도시가 넓어졌어요! 동쪽에 큰 군부대·소방서·교회·물류창고·연구소가 생겼습니다':'이어하기'):'🏕 거점 텐트에서 시작합니다. 주변 건물에서 재료를 모아 거점을 업그레이드하세요!')}
 document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>start(b.dataset.d,false));
 $('ld').onclick=()=>start(0,true);try{if(localStorage.getItem(SAVE))$('ld').style.display='block'}catch(e){}

@@ -151,7 +151,7 @@ function hud2(){const s=S,p=s.p,t=s.t,h=(6+t/100)%24,am=armMul2(p),w=weight(p),c
  const nx=(s.day%5==0&&t<1500)?s.day:(Math.floor(s.day/5)+1)*5,left=(nx-s.day)*2400+1500-t;
  $('tp').innerHTML='<b>DAY '+s.day+' · '+String(h|0).padStart(2,'0')+':'+String((h%1)*60|0).padStart(2,'0')+(t>=1500||t<100?' 🌙':' ☀')+'</b><div class="w">🧟 '+(left>0?'웨이브까지 '+(left/2400|0? (left/2400|0)+'일 ':'')+Math.round((left%2400)/100)+'시간':'웨이브 진행 중')+' · 웨이브 '+s.wv+'</div>';
  let dg='';if(s.inb>=0&&W0.b[s.inb]){const b=W0.b[s.inb],tr=TIER[b.kind];if(tr)dg='📍 <b>'+b.name+' '+'★'.repeat(tr)+'</b>'+(ALR[b.kind]?' · 🚨 경보 '+Math.round(ALR[b.kind]*100)+'%'+((s.aoff[b.kind]||0)>=s.day?' (해제됨)':''):'')}
- if(s.alarm)dg='🚨 <b>'+W0.b[s.alarm.bi].name+' 경보 작동 중!</b>';$('dg').innerHTML=dg;$('dg').style.display=dg?'':'none';
+ if(s.alarm)dg='🚨 <b>'+W0.b[s.alarm.bi].name+' 경보 작동 중!</b>';if(!dg&&typeof UIE!='undefined'&&UIE.on)dg='📍 <b>건물 위험도</b> (건물 안에서만 표시)';$('dg').innerHTML=dg;$('dg').style.display=dg?'':'none';
  wcard();quick();$('bse').style.display=ib?'':'none'}
 function wcard(){const p=S.p,id=actW(p),w=wdef(id),s=w[4],r=RAR[w[3]];let a='';
  if(s.ammo){const mg=p.mag[id]|0,rs=p.inv[AMMO_ITEM(s.ammo)]|0;a='<div class="am">'+(p.rl>0?'<small>재장전…</small>':mg+'<small> / '+rs+'</small>')+'</div>'}
