@@ -17,15 +17,15 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%}
 #top{display:flex;gap:4px}#top button{padding:5px 8px;font-size:12px}#rng.on{background:#4a2a24;border-color:#ff6a5a88}
 button{font:inherit;color:var(--fg);background:var(--pn);border:1px solid #fff3;border-radius:10px;padding:8px 10px}
 button:disabled{opacity:.45}
-#sd{position:fixed;left:6px;bottom:calc(env(safe-area-inset-bottom,0px) + 150px);display:flex;flex-direction:column;gap:7px}.rb{width:44px;height:44px;border-radius:50%;padding:0;font-size:20px;display:grid;place-items:center}
-#wc{position:fixed;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);width:min(48vw,196px);padding:6px 8px;display:grid;grid-template-columns:44px 1fr;gap:3px 8px;align-items:center}
+#rc{position:fixed;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);display:flex;flex-direction:column;align-items:flex-end;gap:6px}#sd{display:flex;flex-direction:row;gap:6px}.rb{width:44px;height:44px;border-radius:50%;padding:0;font-size:20px;display:grid;place-items:center}
+#wc{width:min(48vw,196px);padding:6px 8px;display:grid;grid-template-columns:44px 1fr;gap:3px 8px;align-items:center}
 #wc .wi{width:44px;height:44px;image-rendering:pixelated;grid-row:1;font-size:28px;text-align:center;line-height:44px}#wc .wn{font-weight:700;font-size:13px}#wc .wr{font-size:10.5px}#wc .am{font-size:17px;font-weight:800}#wc .am small{font-size:11px;color:var(--mut);font-weight:500}
 #wc .wb{grid-column:1/3;display:flex;gap:4px}#wc .wb span{flex:1;text-align:center;font-size:11px;padding:4px;border-radius:8px;background:#ffffff10;border:1px solid #ffffff22}
 #qk{position:fixed;left:6px;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);display:flex;gap:4px;padding:4px}
 .qs{width:40px;height:40px;border-radius:9px;background:#ffffff0e;border:1px solid #ffffff22;position:relative;display:grid;place-items:center}.qs img{width:30px;height:30px;image-rendering:pixelated}.qs.off img{opacity:.3}.qs .k{position:absolute;left:3px;top:0;font-size:9px;color:var(--mut)}.qs .c{position:absolute;right:3px;bottom:0;font-size:10px;font-weight:700}
 #r{position:fixed;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);display:flex;gap:8px;align-items:flex-end}
 .big{width:74px;height:74px;border-radius:50%;font-weight:700;padding:0}#atk{background:radial-gradient(circle at 40% 35%,#c0443e,#7a1e1a);width:80px;height:80px}#act{background:radial-gradient(circle at 40% 35%,#3a6a8a,#1e3a4e);width:60px;height:60px;font-size:12px;line-height:1.15}
-#msg{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 150px);padding:6px 14px;border-radius:99px;opacity:0;transition:opacity .4s;text-align:center;max-width:86%;pointer-events:none;font-size:12.5px}
+#msg{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 196px);padding:6px 14px;border-radius:99px;opacity:0;transition:opacity .4s;text-align:center;max-width:86%;pointer-events:none;font-size:12.5px}
 #pr{position:fixed;transform:translate(-50%,-100%);padding:3px 9px;font-size:11.5px;border-radius:8px;white-space:nowrap;border-color:#ffd36a66;pointer-events:none}#pr b{color:#ffd36a}
 #jb{position:fixed;width:100px;height:100px;border:2px solid #fff4;border-radius:50%;display:none;margin:-50px 0 0 -50px;pointer-events:none}#jk{position:absolute;left:30px;top:30px;width:40px;height:40px;border-radius:50%;background:#fff6}
 /* bag sheet */
@@ -53,10 +53,9 @@ button:disabled{opacity:.45}
  #tr{right:max(6px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:auto auto;grid-template-areas:"tp mm" "top mm";gap:5px;align-items:start;justify-items:end}
  #mmw{grid-area:mm;width:84px;height:84px}#tp{grid-area:tp}#top{grid-area:top}
  #msg{top:calc(env(safe-area-inset-top,0px) + 64px);max-width:calc(100vw - 520px);min-width:200px}
- #sd{left:max(6px,env(safe-area-inset-left,0px));top:calc(env(safe-area-inset-top,0px) + 126px);bottom:auto;flex-direction:column;gap:6px}
  .rb{width:40px;height:40px;font-size:18px}
  #qk{left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 6px)}
- #wc{right:max(8px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 96px);width:186px}
+ #rc{right:max(8px,env(safe-area-inset-right,0px))}#wc{width:186px}
  #r{right:max(8px,env(safe-area-inset-right,0px))}
  #bm{left:auto;right:0;top:0;bottom:0;width:min(500px,58vw);max-height:none;border-radius:16px 0 0 16px;border-top:0;border-left:1px solid #fff2;padding:10px 12px calc(env(safe-area-inset-bottom,0px) + 10px) 12px}
  #bm .eq{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
@@ -64,8 +63,7 @@ button:disabled{opacity:.45}
 }
 @media (orientation:landscape) and (max-height:420px){
  #st{grid-template-columns:32px 1fr;padding:5px;gap:4px;width:200px}#st .av{width:32px;height:32px}
- #wc{bottom:calc(env(safe-area-inset-bottom,0px) + 88px)}.big{width:66px;height:66px}#atk{width:72px;height:72px}#act{width:54px;height:54px}
- #sd{top:calc(env(safe-area-inset-top,0px) + 104px);gap:5px}
+ #rc{bottom:calc(env(safe-area-inset-bottom,0px) + 86px);gap:4px}.rb{width:36px;height:36px;font-size:16px}.big{width:66px;height:66px}#atk{width:72px;height:72px}#act{width:54px;height:54px}
 }
 @media (orientation:portrait) and (max-width:390px){#st{width:44vw}#tp{max-width:150px;font-size:10px}#tp b{font-size:11px}#mmw{width:84px;height:84px}}
 @media (orientation:landscape) and (max-width:700px){#tp .w{display:none}#msg{max-width:60vw;top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 110px)}}
@@ -74,8 +72,8 @@ button:disabled{opacity:.45}
 <div id="st" class="g"></div><div id="dg" class="g" style="display:none"></div>
 <div id="tr"><div id="mmw" style="display:none"><canvas id="mm2" width="96" height="96"></canvas><span class="n">N</span></div><div id="tp" class="g"></div><div id="top"><button id="rng" class="on" title="공격 사거리 (V)">◎</button><button id="zm">🔍</button><button id="spd">x1</button><button id="skp">⏩</button></div></div>
 <div id="msg" class="g"></div><div id="pr" class="g" style="display:none"></div><div id="jb"><div id="jk"></div></div>
-<div id="sd"><button class="g rb" id="bBag" title="가방 (I)">🎒</button><button class="g rb" id="cCr" title="제작 (C)">🛠</button><button class="g rb" id="bBd" title="바리케이드 (F)">🧱</button><button class="g rb" id="bse" style="display:none" title="거점 (B)">🏠</button></div>
-<div id="wc" class="g"></div><div id="qk" class="g"></div>
+
+<div id="rc"><div id="sd"><button class="g rb" id="bBag" title="가방 (I)">🎒</button><button class="g rb" id="cCr" title="제작 (C)">🛠</button><button class="g rb" id="bBd" title="바리케이드 (F)">🧱</button><button class="g rb" id="bse" style="display:none" title="거점 (B)">🏠</button></div><div id="wc" class="g"></div></div><div id="qk" class="g"></div>
 <div id="r"><button class="big" id="act">상호<br>작용</button><button class="big" id="atk">공격</button></div>
 <div id="bm"></div>
 <div id="menu"><h1>PROJECT LEGACY</h1><small>고해상도 탑다운 좀비 생존 RPG<br>왼쪽 화면 드래그: 이동 · 건물에 들어가면 지붕이 열립니다<br>거점을 업그레이드하며 살아남으세요</small>

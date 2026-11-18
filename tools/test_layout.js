@@ -8,7 +8,7 @@ for(const[name,w,h]of SIZES){const p=await b.newPage({viewport:{width:w,height:h
  await p.evaluate(()=>{localStorage.clear();start('S',false);const P=S.p;give({ar:1,a556:60,pistol:1,a9mm:30,antenna:1,medkit:2,grenade:2,vest:1,helmet:1,bag2:1});P.quick=['bandage','medkit','grenade','food'];P.as='prim';P.mag.ar=30;P.bleed=1;
   const o=W0.objs.find(o=>o.t=='crate'&&o.b==W0.b.findIndex(b=>b.kind=='base'))||W0.objs.find(o=>LOOTT[o.t]);});
  await p.waitForTimeout(3200);
- const ov=await p.evaluate(()=>{const ids=['st','dg','tr','sd','wc','qk','r'];const rs=ids.map(id=>{const e=document.getElementById(id);if(!e||getComputedStyle(e).display=='none')return null;const r=e.getBoundingClientRect();return r.width&&r.height?{id,x:r.left,y:r.top,w:r.width,h:r.height}:null}).filter(Boolean);
+ const ov=await p.evaluate(()=>{const ids=['st','dg','tr','rc','qk','r'];const rs=ids.map(id=>{const e=document.getElementById(id);if(!e||getComputedStyle(e).display=='none')return null;const r=e.getBoundingClientRect();return r.width&&r.height?{id,x:r.left,y:r.top,w:r.width,h:r.height}:null}).filter(Boolean);
   const bad=[];for(let i=0;i<rs.length;i++)for(let j=i+1;j<rs.length;j++){const a=rs[i],c=rs[j];const ox=Math.min(a.x+a.w,c.x+c.w)-Math.max(a.x,c.x),oy=Math.min(a.y+a.h,c.y+c.h)-Math.max(a.y,c.y);if(ox>2&&oy>2)bad.push(a.id+'×'+c.id+' '+Math.round(ox)+'x'+Math.round(oy))}
   const off=rs.filter(r=>r.x<-1||r.y<-1||r.x+r.w>innerWidth+1||r.y+r.h>innerHeight+1).map(r=>r.id);
   const hud=rs.reduce((a,r)=>a+r.w*r.h,0)/(innerWidth*innerHeight);return{bad,off,hudCover:Math.round(hud*100)+'%'}});
