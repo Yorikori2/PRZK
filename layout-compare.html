@@ -1,0 +1,58 @@
+<title>가로 세로 화면</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* layout: header, device toggle chips, then a portrait/landscape pair per screen (HUD and bag), plus a short list of what moves where */
+:root{--bg:#101315;--panel:#181d21;--line:#ffffff1a;--fg:#e9ecee;--mut:#9ba5ac;--acc:#e0b03a;--por:#7fb2d4;--lan:#7fc98f;
+ --f-body:'Noto Sans KR',system-ui,sans-serif;--f-head:'Black Han Sans','Noto Sans KR',sans-serif;color-scheme:dark}
+html,body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;line-height:1.55}
+main{max-width:1100px;margin:0 auto;padding-block:16px 36px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:14px}
+h1{font-family:var(--f-head);font-weight:400;font-size:26px;margin:0;letter-spacing:.5px}
+.lead{margin:0;color:var(--mut);max-width:70ch}
+.row{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;font-size:13px;color:var(--fg);background:#22292e;border:1px solid #ffffff24;border-radius:8px;padding:5px 11px;cursor:pointer}
+button:hover{border-color:#ffffff55}button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}button.on{background:#4a3c14;border-color:var(--acc)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;display:grid;gap:10px;min-width:0}
+.panel h2{font-size:16px;margin:0}
+.pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2.1fr);gap:12px;align-items:start}
+@media(max-width:720px){.pair{grid-template-columns:1fr}}
+figure{margin:0;display:grid;gap:5px;min-width:0}
+figure img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line)}
+figure.p img{max-width:340px;margin:0 auto}
+figcaption{font-size:12px;color:var(--mut)}figcaption b{margin-right:6px}.p b{color:var(--por)}.l b{color:var(--lan)}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--mut);font-weight:500}
+.wrap{overflow-x:auto}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap">
+<main>
+ <h1>가로 · 세로 화면</h1>
+ <p class="lead">게임이 화면 방향을 보고 화면 배치를 자동으로 바꿔요. 폰을 세로로 들면 세로 배치, 가로로 돌리면 가로 배치예요. 아래는 실제 게임 화면을 찍은 비교예요.</p>
+ <div class="row" id="dev"><button data-d="phone" class="on">일반 폰</button><button data-d="small">작은 폰</button><button data-d="tablet">태블릿</button></div>
+ <section class="panel"><h2>게임 화면</h2>
+  <div class="pair"><figure class="p"><img id="ph" alt="세로 화면 게임 HUD"><figcaption id="phc"><b>세로</b></figcaption></figure><figure class="l"><img id="lh" alt="가로 화면 게임 HUD"><figcaption id="lhc"><b>가로</b></figcaption></figure></div>
+ </section>
+ <section class="panel"><h2>가방 열었을 때</h2>
+  <div class="pair"><figure class="p"><img id="pb" alt="세로 화면 가방"><figcaption><b>세로</b>아래에서 올라오는 창</figcaption></figure><figure class="l"><img id="lb" alt="가로 화면 가방"><figcaption><b>가로</b>오른쪽 패널 · 왼쪽은 게임 화면이 그대로 보임</figcaption></figure></div>
+ </section>
+ <section class="panel"><h2>무엇이 어디로 가나요</h2>
+  <div class="wrap"><table>
+   <tr><th>요소</th><th>세로</th><th>가로</th></tr>
+   <tr><td>상태창 (체력·허기·갈증·기력)</td><td>왼쪽 위</td><td>왼쪽 위 (작은 화면은 더 작게)</td></tr>
+   <tr><td>미니맵 · 시간 · 웨이브</td><td>오른쪽 위에 세로로</td><td>오른쪽 위에 가로로 나란히</td></tr>
+   <tr><td>건물 위험도</td><td>상태창 아래</td><td>상태창 오른쪽</td></tr>
+   <tr><td>가방 · 제작 · 바리케이드 · 거점 버튼</td><td>왼쪽 아래</td><td>상태창 아래 왼쪽 세로 줄</td></tr>
+   <tr><td>퀵슬롯</td><td>왼쪽 아래</td><td>아래 가운데</td></tr>
+   <tr><td>무기 카드 · 공격 · 상호작용</td><td>오른쪽 아래</td><td>오른쪽 아래</td></tr>
+   <tr><td>가방 · 제작 · 거점 창</td><td>아래에서 올라옴</td><td>오른쪽 절반 패널</td></tr>
+   <tr><td>시야</td><td>위아래로 넓게</td><td>좌우로 넓게 (확대 비율 자동)</td></tr>
+  </table></div>
+ </section>
+</main>
+<script>
+'use strict';
+const D={phone:['phone-portrait','phone-landscape','412×860','860×412'],small:['small-portrait','small-landscape','360×740','740×360'],tablet:['tablet-portrait','tablet-landscape','820×1180','1180×820']};
+function show(k){const[p,l,ps,ls]=D[k];document.getElementById('ph').src='assets/samples/layout/'+p+'-hud.jpg';document.getElementById('lh').src='assets/samples/layout/'+l+'-hud.jpg';
+ document.getElementById('pb').src='assets/samples/layout/'+p+'-bag.jpg';document.getElementById('lb').src='assets/samples/layout/'+l+'-bag.jpg';
+ document.getElementById('phc').innerHTML='<b>세로</b>'+ps;document.getElementById('lhc').innerHTML='<b>가로</b>'+ls;
+ document.querySelectorAll('#dev button').forEach(b=>b.classList.toggle('on',b.dataset.d==k))}
+document.querySelectorAll('#dev button').forEach(b=>b.onclick=()=>show(b.dataset.d));show('phone');
+</script>

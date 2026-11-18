@@ -45,6 +45,30 @@ button:disabled{opacity:.45}
 .mod button{padding:8px 12px;background:#2d5a3a}.pips{display:inline-flex;gap:3px;margin-left:6px;vertical-align:middle}.pips i{width:8px;height:8px;border-radius:2px;background:#fff2}.pips i.on{background:#e0b03a}
 .row2{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}.row2 button{padding:8px 10px}
 #stash{font-size:12px;color:#c9d2d8;margin:4px 0}
+
+/* ===== landscape: auto layout when the screen is wider than tall ===== */
+@media (orientation:landscape){
+ #st{width:210px;left:max(6px,env(safe-area-inset-left,0px))}
+ #dg{top:calc(env(safe-area-inset-top,0px) + 6px);left:calc(max(6px,env(safe-area-inset-left,0px)) + 218px);max-width:calc(100vw - 500px)}
+ #tr{right:max(6px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:auto auto;grid-template-areas:"tp mm" "top mm";gap:5px;align-items:start;justify-items:end}
+ #mmw{grid-area:mm;width:84px;height:84px}#tp{grid-area:tp}#top{grid-area:top}
+ #msg{top:calc(env(safe-area-inset-top,0px) + 64px);max-width:calc(100vw - 520px);min-width:200px}
+ #sd{left:max(6px,env(safe-area-inset-left,0px));top:calc(env(safe-area-inset-top,0px) + 126px);bottom:auto;flex-direction:column;gap:6px}
+ .rb{width:40px;height:40px;font-size:18px}
+ #qk{left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 6px)}
+ #wc{right:max(8px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 96px);width:186px}
+ #r{right:max(8px,env(safe-area-inset-right,0px))}
+ #bm{left:auto;right:0;top:0;bottom:0;width:min(500px,58vw);max-height:none;border-radius:16px 0 0 16px;border-top:0;border-left:1px solid #fff2;padding:10px 12px calc(env(safe-area-inset-bottom,0px) + 10px) 12px}
+ #bm .eq{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+ #menu small{max-width:520px}
+}
+@media (orientation:landscape) and (max-height:420px){
+ #st{grid-template-columns:32px 1fr;padding:5px;gap:4px;width:200px}#st .av{width:32px;height:32px}
+ #wc{bottom:calc(env(safe-area-inset-bottom,0px) + 88px)}.big{width:66px;height:66px}#atk{width:72px;height:72px}#act{width:54px;height:54px}
+ #sd{top:calc(env(safe-area-inset-top,0px) + 104px);gap:5px}
+}
+@media (orientation:portrait) and (max-width:390px){#st{width:44vw}#tp{max-width:150px;font-size:10px}#tp b{font-size:11px}#mmw{width:84px;height:84px}}
+@media (orientation:landscape) and (max-width:700px){#tp .w{display:none}#msg{max-width:60vw;top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 110px)}}
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="st" class="g"></div><div id="dg" class="g" style="display:none"></div>
