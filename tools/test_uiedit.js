@@ -1,6 +1,6 @@
 // HUD customisation check: open editor, game pauses, drag + resize panels, save per orientation, reload keeps it, reset restores
 // usage: node tools/test_uiedit.js <outdir>
-const {chromium}=require('playwright');const OUT=process.argv[2]||'.';const url='file://'+require('path').resolve(__dirname,'..','index.html');
+const {chromium}=require('playwright');const OUT=process.argv[2]||'.';const url='file://'+require('path').resolve(__dirname,'..',process.env.PG||'index.html');
 const box=(p,id)=>p.evaluate(id=>{const r=document.getElementById(id).getBoundingClientRect();return{x:Math.round(r.left),y:Math.round(r.top),w:Math.round(r.width),h:Math.round(r.height)}},id);
 const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
 let UIEw;(async()=>{const b=await chromium.launch();const ctx=await b.newContext({viewport:{width:412,height:860}});const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
