@@ -2,7 +2,7 @@
 // even while the HUD refreshes its contents every 0.25 s.  usage: node tools/test_uitouch.js [page.html]
 const {chromium}=require('playwright');const page=process.argv[2]||'index.html';
 (async()=>{const b=await chromium.launch();const ctx=await b.newContext({viewport:{width:412,height:860},hasTouch:true,isMobile:true});const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
- await p.goto('file://'+require('path').resolve(__dirname,'..',page));await p.waitForTimeout(300);await p.evaluate(()=>{localStorage.clear();start('S',false);uiEdit(true)});await p.waitForTimeout(300);
+ await p.goto('file://'+require('path').resolve(__dirname,'..',page));await p.waitForTimeout(300);await p.evaluate(()=>{localStorage.clear();start('S',false);if(typeof S!='undefined'&&S&&S.pg&&!S.pg.tr.length){S.pg.tr=['cop'];$('bm').dataset.m='';closeBase();PAUSE=false};uiEdit(true)});await p.waitForTimeout(300);
  const cdp=await ctx.newCDPSession(p);const T=(type,x,y)=>cdp.send('Input.dispatchTouchEvent',{type,touchPoints:type=='touchEnd'?[]:[{x,y,id:1}]});
  const r0=await p.evaluate(()=>{const r=document.getElementById('wc').querySelector('.wn').getBoundingClientRect(),c=document.getElementById('wc').getBoundingClientRect();return{x:r.left+5,y:r.top+5,cx:c.left,cy:c.top}});
  await T('touchStart',r0.x,r0.y);let worst=0,stuck=0,last=null;

@@ -4,9 +4,9 @@ const OUT=process.argv[2]||'.';
 (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1000,height:640}});const errs=[];
 p.on('pageerror',e=>errs.push('pageerror: '+e.message));p.on('console',m=>{if(m.type()=='error')errs.push('console: '+m.text())});
 await p.goto('file:///home/user/PRZK/index.html');await p.waitForTimeout(600);
-await p.evaluate(()=>{localStorage.clear();start('S',false)});await p.waitForTimeout(600);
+await p.evaluate(()=>{localStorage.clear();start('S',false);if(typeof S!='undefined'&&S&&S.pg&&!S.pg.tr.length){S.pg.tr=['cop'];$('bm').dataset.m='';closeBase();PAUSE=false}});await p.waitForTimeout(600);
 const R={};
-R.layout=await p.evaluate(()=>({WW,WH,NBX,NBY,buildings:W0.b.map(b=>b.name+'('+b.kind+')@'+b.c+','+b.r),objs:W0.objs.length,zombies:W0.zs.length,mm:[document.getElementById('mm').width,document.getElementById('mm').height]}));
+R.layout=await p.evaluate(()=>({WW,WH,NBX,NBY,buildings:W0.b.map(b=>b.name+'('+b.kind+')@'+b.c+','+b.r),objs:W0.objs.length,zombies:W0.zs.length,mm:[(document.getElementById('mm')||document.getElementById('mmw')).width,(document.getElementById('mm')||document.getElementById('mmw')).height]}));
 R.missingArt=await p.evaluate(()=>[...new Set(W0.objs.filter(o=>!D[o.t]).map(o=>o.t))]);
 R.lootKindsWithoutTable=await p.evaluate(()=>[...new Set(W0.b.map(b=>b.kind))].filter(k=>k!='base'&&!KL[k]));
 // overlap: buildings must stay inside their block, block rects must not overlap
@@ -33,7 +33,7 @@ for(const n of NEW){const pos=await p.evaluate(n=>{const bi=W0.b.findIndex(b=>b.
 R.loot=await p.evaluate(()=>{const out={};for(const n of['연구소','소방서','물류창고']){const bi=W0.b.findIndex(b=>b.name==n);const o=W0.objs.find(o=>o.b==bi&&LOOTT[o.t]);if(!o){out[n]='no container';continue}
  S.p.x=o.x+o.w/2;S.p.y=o.y+o.h+10;let k=0;while(blocker(S.p.x,S.p.y,7)&&k<20){S.p.y+=4;k++}const before=JSON.stringify(S.p.inv);ia();out[n]={obj:o.t,changed:JSON.stringify(S.p.inv)!=before,msg:document.getElementById('msg').textContent.slice(0,60)}}return out});
 // minimap with antenna
-await p.evaluate(()=>{S.p.inv.antenna=1});await p.waitForTimeout(400);await p.locator('#mm').screenshot({path:OUT+'/s1_mm.png'});
+await p.evaluate(()=>{S.p.inv.antenna=1});await p.waitForTimeout(400);await p.locator('#mmw').screenshot({path:OUT+'/s1_mm.png'});
 // save -> legacy save migration
 R.migration=await p.evaluate(()=>{save();const old=JSON.parse(localStorage.getItem(SAVE));delete old.wv2;old.lo={'5':1,'6':1};old.p.x=W0.b.find(b=>b.name=='아파트').ox+400;old.p.y=W0.b.find(b=>b.name=='아파트').oy+300;localStorage.setItem(SAVE,JSON.stringify(old));
  start('S',true);return{wv2:S.wv2,loCleared:Object.keys(S.lo).length==0,blocked:!!blocker(S.p.x,S.p.y,8),msg:document.getElementById('msg').textContent}});

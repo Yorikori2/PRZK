@@ -5,7 +5,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
 const box=(p,id)=>p.evaluate(id=>{const r=document.getElementById(id).getBoundingClientRect();return{x:Math.round(r.left),y:Math.round(r.top),w:Math.round(r.width),h:Math.round(r.height),r:Math.round(r.right),b:Math.round(r.bottom)}},id);
 (async()=>{const b=await chromium.launch();
 for(const[W,H]of[[412,860],[860,412]]){const tag=W<H?'세로':'가로';const p=await b.newPage({viewport:{width:W,height:H}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
- await p.goto(url);await p.waitForTimeout(300);await p.evaluate(()=>{localStorage.clear();start('S',false);uiEdit(true)});await p.waitForTimeout(300);
+ await p.goto(url);await p.waitForTimeout(300);await p.evaluate(()=>{localStorage.clear();start('S',false);if(typeof S!='undefined'&&S&&S.pg&&!S.pg.tr.length){S.pg.tr=['cop'];$('bm').dataset.m='';closeBase();PAUSE=false};uiEdit(true)});await p.waitForTimeout(300);
  // smooth drag: left/top untouched mid-drag, transform follows the finger, bar fades
  const wc0=await box(p,'wc');await p.mouse.move(wc0.x+30,wc0.y+20);await p.mouse.down();await p.mouse.move(wc0.x+20,wc0.y+5,{steps:3});
  const L0=await p.evaluate(()=>document.getElementById('wc').style.left);let maxDev=0;
@@ -39,7 +39,7 @@ for(const[W,H]of[[412,860],[860,412]]){const tag=W<H?'세로':'가로';const p=a
  ok(await p.evaluate(()=>getComputedStyle(document.getElementById('wc')).opacity=='0.6'&&document.getElementById('uiOpV').textContent=='60%'),tag+' opacity slider 60%');
  await p.evaluate(()=>uiEdit(false));await p.waitForTimeout(200);
  // saved and restored after reload, left-handed flag per orientation
- await p.evaluate(()=>{uiEdit(true);uiPreset('left');uiEdit(false)});await p.reload();await p.waitForTimeout(300);await p.evaluate(()=>start('S',false));await p.waitForTimeout(300);
+ await p.evaluate(()=>{uiEdit(true);uiPreset('left');uiEdit(false)});await p.reload();await p.waitForTimeout(300);await p.evaluate(()=>{start('S',false);if(typeof S!='undefined'&&S&&S.pg&&!S.pg.tr.length){S.pg.tr=['cop'];$('bm').dataset.m='';closeBase();PAUSE=false}});await p.waitForTimeout(300);
  const rel=await p.evaluate(()=>({op:getComputedStyle(document.getElementById('st')).opacity,left:document.body.classList.contains('uileft')}));ok(rel.op=='0.6'&&rel.left,tag+' opacity and left-handed layout persist after reload');
  const sdx=(await box(p,'sd')).x;ok(sdx>W/2,tag+' toolbar on the right after reload');
  ok(!errs.length,tag+' no page errors '+errs.join('|'));await p.close()}

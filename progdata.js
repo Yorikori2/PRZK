@@ -1,4 +1,4 @@
-/* PROJECT LEGACY — character progression data (levels, stats, skills, traits, perks) and gun parts, for the game build.
+/* PROJECT LEGACY — character progression data (levels, stats, skills, traits, perks) and gun parts, loaded by the game.
    Same data as progression.js with SLOTS renamed PSLOTS (gear.js already owns SLOTS). */
 'use strict';
 /* ================= levels ================= */

@@ -4,7 +4,7 @@ const {chromium}=require('playwright');const OUT=process.argv[2]||'.';const url=
 const box=(p,id)=>p.evaluate(id=>{const r=document.getElementById(id).getBoundingClientRect();return{x:Math.round(r.left),y:Math.round(r.top),w:Math.round(r.width),h:Math.round(r.height)}},id);
 const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
 let UIEw;(async()=>{const b=await chromium.launch();const ctx=await b.newContext({viewport:{width:412,height:860}});const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
- await p.goto(url);await p.waitForTimeout(300);await p.evaluate(()=>{localStorage.clear();start('S',false)});await p.waitForTimeout(500);
+ await p.goto(url);await p.waitForTimeout(300);await p.evaluate(()=>{localStorage.clear();start('S',false);if(typeof S!='undefined'&&S&&S.pg&&!S.pg.tr.length){S.pg.tr=['cop'];$('bm').dataset.m='';closeBase();PAUSE=false}});await p.waitForTimeout(500);
  const wc0=await box(p,'wc'),st0=await box(p,'st'),sd0=await box(p,'sd');
  const ub=await box(p,'uiE');await p.mouse.click(ub.x+ub.w/2,ub.y+ub.h/2);await p.waitForTimeout(200);
  ok(await p.evaluate(()=>UIE.on&&PAUSE&&document.body.classList.contains('uied')),'editor opens and pauses game');
@@ -37,7 +37,7 @@ let UIEw;(async()=>{const b=await chromium.launch();const ctx=await b.newContext
  await p.setViewportSize({width:860,height:412});await p.waitForTimeout(300);const wcL=await box(p,'wc');ok(wcL.x>600,'landscape keeps default weapon card '+wcL.x);
  await p.setViewportSize({width:412,height:860});await p.waitForTimeout(300);wc1=await box(p,'wc');ok(Math.abs(wc1.x-130)<4,'portrait layout returns after rotate');
  // reload: layout persists after start
- await p.reload();await p.waitForTimeout(300);await p.evaluate(()=>start('S',false));await p.waitForTimeout(400);
+ await p.reload();await p.waitForTimeout(300);await p.evaluate(()=>{start('S',false);if(typeof S!='undefined'&&S&&S.pg&&!S.pg.tr.length){S.pg.tr=['cop'];$('bm').dataset.m='';closeBase();PAUSE=false}});await p.waitForTimeout(400);
  const wc2=await box(p,'wc');ok(Math.abs(wc2.x-130)<4&&Math.abs(wc2.y-285)<4,'layout persists after reload');
  // play actions still work after customisation
  await p.evaluate(()=>{give({pistol:1,a9mm:20});});const bag=await box(p,'bBag');await p.mouse.click(bag.x+bag.w/2,bag.y+bag.h/2);await p.waitForTimeout(200);

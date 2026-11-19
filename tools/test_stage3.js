@@ -54,4 +54,17 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  r=await p.evaluate(()=>{const s=JSON.parse(localStorage.getItem(SAVE));delete s.pg;localStorage.setItem(SAVE,JSON.stringify(s));start(0,true);return{open:$('bm').dataset.m,lv:S.pg.lv}});ok(r.open=='traits'&&r.lv==1,'old save gets trait picker and starts at Lv 1');
  await p.setViewportSize({width:860,height:412});await p.evaluate(()=>{$('bm').dataset.m='';closeBase();PAUSE=false;S.pg.tr=['cop'];openChar('mod')});await p.waitForTimeout(150);await p.screenshot({path:OUT+'/s3-mod-land.png'});
  const fps=await p.evaluate(()=>new Promise(r=>{closeBase();let n=0;const t0=performance.now();(function f(){n++;if(performance.now()-t0<1500)requestAnimationFrame(f);else r(Math.round(n/1.5))})()}));ok(fps>40,'frame rate '+fps);
+ // duplicate parts: manual dismantle and auto toggle
+ r=await p.evaluate(()=>{const pg=S.pg,pl=S.p;pg.parts={comp:2};pg.mods={};pg.autoDis=0;const sc=pl.inv.scrap|0;MGUN=null;openChar('mod');document.querySelector('[data-dis="comp"]').click();const man={left:pg.parts.comp,scrap:(pl.inv.scrap|0)-sc};
+  const box=document.getElementById('autoDis');box.checked=true;box.dispatchEvent(new Event('change'));const on=pg.autoDis;const sc2=pl.inv.scrap|0;s3GotPart('comp');const auto={left:pg.parts.comp,scrap:(pl.inv.scrap|0)-sc2};pg.autoDis=0;s3GotPart('comp');return{man,on,auto,offKeeps:pg.parts.comp}});
+ ok(r.man.left==1&&r.man.scrap>=2,'manual dismantle turns a spare part into scrap '+JSON.stringify(r.man));
+ ok(r.on==1&&r.auto.left==1&&r.auto.scrap>=2,'auto dismantle ON: duplicate becomes materials '+JSON.stringify(r.auto));ok(r.offKeeps==2,'auto dismantle OFF: duplicates are kept');
+ // training manual resets skills
+ r=await p.evaluate(()=>{const pg=S.pg;pg.sk={combat0:2,surv0:1};const kp=pg.kp;give({manual:1});use2('manual');return{sk:Object.keys(pg.sk).length,dk:pg.kp-kp,left:S.p.inv.manual|0,name:NM2('manual')}});
+ ok(r.sk==0&&r.dk==3&&r.left==0&&r.name=='훈련 교범','training manual refunds 3 skill points '+JSON.stringify(r));
+ r=await p.evaluate(()=>{const pg=S.pg;let n=0;for(let i=0;i<2000;i++){const x={};s3Search({t:'locker'},'mil',5,x);if(x.manual)n++}return n});ok(r>20&&r<120,'manual drops rarely from military searches ('+r+'/2000)');
+ // perk alert on the character button
+ r=await p.evaluate(()=>{const pg=S.pg;pg.lv=10;pg.pk={};hud2();const on=$('bCh').classList.contains('perk')&&getComputedStyle($('bCh'),'::before').content.includes('보너스');pg.pk[10]='침착함';hud2();return{on,off:!$('bCh').classList.contains('perk')}});
+ ok(r.on&&r.off,'🧬 button glows with 보너스! until the perk is picked');
+ r=await p.evaluate(()=>{openChar('stat');return!!document.querySelector('.s3t')});ok(r==(PAGE!='index.html'),'sample-only helper buttons '+(PAGE=='index.html'?'hidden in the game':'shown in the sample'));
  ok(!errs.length,'no page errors '+errs.join(' | '));await b.close()})();

@@ -5,7 +5,7 @@ const SIZES=[['phone-portrait',412,860],['phone-landscape',860,412],['small-land
 (async()=>{const b=await chromium.launch();const R={};
 for(const[name,w,h]of SIZES){const p=await b.newPage({viewport:{width:w,height:h},deviceScaleFactor:2});const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.goto('file://'+require('path').resolve(__dirname,'..',process.env.PG||'index.html'));await p.waitForTimeout(400);
- await p.evaluate(()=>{localStorage.clear();start('S',false);if(typeof S!='undefined'&&S.pg&&$('bm').dataset.m=='traits'){S.pg.tr=['cop'];$('bm').dataset.m='';PAUSE=false;closeBase()}const P=S.p;give({ar:1,a556:60,pistol:1,a9mm:30,antenna:1,medkit:2,grenade:2,vest:1,helmet:1,bag2:1});P.quick=['bandage','medkit','grenade','food'];P.as='prim';P.mag.ar=30;P.bleed=1;
+ await p.evaluate(()=>{localStorage.clear();start('S',false);if(typeof S!='undefined'&&S&&S.pg&&!S.pg.tr.length){S.pg.tr=['cop'];$('bm').dataset.m='';closeBase();PAUSE=false}const P=S.p;give({ar:1,a556:60,pistol:1,a9mm:30,antenna:1,medkit:2,grenade:2,vest:1,helmet:1,bag2:1});P.quick=['bandage','medkit','grenade','food'];P.as='prim';P.mag.ar=30;P.bleed=1;
   const o=W0.objs.find(o=>o.t=='crate'&&o.b==W0.b.findIndex(b=>b.kind=='base'))||W0.objs.find(o=>LOOTT[o.t]);});
  await p.waitForTimeout(3200);
  const ov=await p.evaluate(()=>{const ids=['st','dg','tr','sd','rc','r'];const rs=ids.map(id=>{const e=document.getElementById(id);if(!e||getComputedStyle(e).display=='none')return null;const r=e.getBoundingClientRect();return r.width&&r.height?{id,x:r.left,y:r.top,w:r.width,h:r.height}:null}).filter(Boolean);

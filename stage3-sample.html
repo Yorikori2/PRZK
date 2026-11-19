@@ -93,7 +93,7 @@ body.uied #dg::after{top:auto;bottom:-14px}body.uied .uisel{outline:2px solid #f
 <div id="menu"><h1>PROJECT LEGACY</h1><small>고해상도 탑다운 좀비 생존 RPG<br>왼쪽 화면 드래그: 이동 · 건물에 들어가면 지붕이 열립니다<br>거점을 업그레이드하며 살아남으세요</small>
 <button id="ld" style="display:none">이어하기</button>
 <button data-d="S">Survival – 사망 시 거점에서 부활</button><button data-d="V">Veteran – 영구 사망</button><button data-d="N">Nightmare – 고난이도 + 영구 사망</button><small id="go"></small></div>
-<script src="art.js"></script><script src="world.js"></script><script src="world_next.js"></script><script src="items.js"></script><script src="prog_next.js"></script><script src="gear_next.js"></script><script src="uiedit.js"></script>
+<script src="art.js"></script><script src="world.js"></script><script src="world_next.js"></script><script src="items.js"></script><script src="progdata.js"></script><script src="gear.js"></script><script src="uiedit.js"></script>
 <script>
 /* ===================== setup ===================== */
 const $=i=>document.getElementById(i),cv=$('c'),ctx=cv.getContext('2d'),buf=document.createElement('canvas'),bctx=buf.getContext('2d');
@@ -311,4 +311,4 @@ document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>start(b.dataset.d
 $('ld').onclick=()=>start(0,true);try{if(localStorage.getItem(SAVE))$('ld').style.display='block'}catch(e){}
 requestAnimationFrame(loop);
 </script>
-<script src="stage3.js"></script></body></html>
+<script>window.S3_SAMPLE=1</script><script src="stage3.js"></script></body></html>

@@ -1,4 +1,4 @@
-/* PROJECT LEGACY — stage 2 systems: equipment slots, weight bag, typed ammo, weapons (melee durability,
+/* PROJECT LEGACY (stage 3 sample build: hooks for stats, skills and gun parts live in stage3.js) — stage 2 systems: equipment slots, weight bag, typed ammo, weapons (melee durability,
    magazines/reload, pellets, pierce, explosions, fire, stun, noise), throwables, quick slots, new HUD and bag sheet.
    Loaded after items.js; uses game globals (S, Z, fx, msg, $, blood, los, ...) only at call time. */
 'use strict';
@@ -35,22 +35,22 @@ function autoEquip(p,id,quiet){const sl=slotFor(id);if(!sl)return;const cur=p.eq
  const better=!cur||(sl=='body'?BODYMUL[id]<BODYMUL[cur]:sl=='bag'?BAGCAP[id]>BAGCAP[cur]:sl=='head'?false:wscore(id)>wscore(cur));
  if(better){p.eq[sl]=id;if(W_BY[id]&&W_BY[id][4].mag&&p.mag[id]==null)p.mag[id]=0;if(!quiet&&typeof msg=='function')setTimeout(()=>msg('🎽 '+SLOTN[sl]+' 장착: '+NM2(id)),900)}}
 function weight(p){let w=0;for(const id in p.inv)w+=wtOf(id)*(p.inv[id]||0);return w}
-const capacity=p=>20+(BAGCAP[p.eq.bag]||0);
-function armMul2(p){return(BODYMUL[p.eq.body]||1)*(p.eq.head=='helmet'?.9:1)}
-const speedMul=p=>{const w=weight(p),c=capacity(p);return w<=c?1:Math.max(.45,1-(w-c)/c)};
+const capacity=p=>20+(BAGCAP[p.eq.bag]||0)+(typeof s3Cap=='function'?s3Cap(p):0);
+function armMul2(p){return(typeof s3Arm=='function'?s3Arm():1)*(BODYMUL[p.eq.body]||1)*(p.eq.head=='helmet'?.9:1)}
+const speedMul=p=>{const w=weight(p),c=capacity(p);return(w<=c?1:Math.max(.45,1-(w-c)/c))*(typeof s3Spd=='function'?s3Spd(p):1)};
 /* ---------- active weapon ---------- */
 const ACT=['prim','sec','mel','thr'];
 function actW(p){if(p.as=='fist')return'fist';const id=p.eq[p.as];if(id&&has(p,id))return id;for(const s of ACT)if(p.eq[s]&&has(p,p.eq[s])){p.as=s;return p.eq[s]}return'fist'}
 const FIST=['fist','맨손','m','c',{d:10,cd:.45,r:42,nz:0,wt:0},'',''];
-const wdef=id=>id=='fist'?FIST:W_BY[id];
+const wdef=id=>id=='fist'?FIST:(typeof s3W=='function'?s3W(id):W_BY[id]);
 function cycleSlot(){const p=S.p,av=ACT.filter(s=>p.eq[s]&&has(p,p.eq[s]));if(!av.length){p.as='fist';return msg('⚔ 맨손')}const i=av.indexOf(p.as);p.as=av[(i+1)%av.length];p.rl=0;const id=actW(p);msg('⚔ '+NM2(id)+wInfo(p,id))}
 function wInfo(p,id){const w=wdef(id),s=w[4];if(s.ammo)return' · '+(p.mag[id]|0)+'/'+(p.inv[AMMO_ITEM(s.ammo)]|0);if(s.dur)return' · 내구 '+(p.dur[id]??s.dur)+'/'+s.dur;if(w[2]=='t')return' · '+(p.inv[id]|0)+'개';return''}
 function wpnOf2(p){const id=actW(p);if(id=='fist')return null;const w=W_BY[id];if(w[2]=='t')return null;if(w[2]=='m')return['axe','fireaxe','sledge','machete','chainsaw'].includes(id)?'axe':'bat';return PISTOLS.has(id)?'pistol':'rifle'}
 const RLT=id=>{const sb=SUB[id]||'';return id=='lmg'||id=='minigun'?3:sb=='저격'||id=='amr'?2.2:sb=='발사기'?2:sb=='산탄총'?1.8:sb=='소총'?1.6:sb=='기관단총'?1.4:id=='bow'||id=='crossbow'?.8:1.1};
 function reload(p,quiet){const id=actW(p),w=wdef(id),s=w[4];if(!s.ammo||!s.mag)return;const ai=AMMO_ITEM(s.ammo),need=s.mag-(p.mag[id]|0),have=p.inv[ai]|0;
  if(need<=0)return quiet||msg('탄창이 가득 찼습니다');if(have<=0)return quiet||msg('🔫 '+NM2(ai)+' 없음');if(p.rl>0)return;
- if(s.ammo=='fuel'){p.rlw=id;p.rl=RLT(id);p.rlA=1;p.rlN=s.mag-(p.mag[id]|0);return}
- p.rlw=id;p.rl=RLT(id);p.rlN=Math.min(need,have);p.rlA=p.rlN;msg('🔄 재장전 중…')}
+ if(s.ammo=='fuel'){p.rlw=id;p.rl=RLT(id)*(s.rlm||1);p.rlA=1;p.rlN=s.mag-(p.mag[id]|0);return}
+ p.rlw=id;p.rl=RLT(id)*(s.rlm||1);p.rlN=Math.min(need,have);p.rlA=p.rlN;msg('🔄 재장전 중…')}
 function reloadTick(p,dt){if(p.rl>0){p.rl-=dt;if(p.rl<=0){const id=p.rlw,w=wdef(id),s=w[4];if(actW(p)!=id)return;const ai=AMMO_ITEM(s.ammo);if(!has(p,ai))return;
   invTake(p,ai,p.rlA);p.mag[id]=(p.mag[id]|0)+p.rlN;if(p.mag[id]>s.mag)p.mag[id]=s.mag}}}
 /* ---------- combat ---------- */
@@ -145,7 +145,7 @@ const bar2=(v,c)=>'<div class="b2"><i style="width:'+Math.max(0,Math.min(100,v))
 const ICN={};const icon=id=>{if(!ICN[id])ICN[id]=iconCanvas(id,1).toDataURL();return ICN[id]};
 function hud2(){const s=S,p=s.p,t=s.t,h=(6+t/100)%24,am=armMul2(p),w=weight(p),cap=capacity(p),ib=inBase(p.x,p.y);
  const fxs=[];if(p.bleed)fxs.push('<span class="cr">🩸 출혈</span>');if(am<1)fxs.push('<span class="cg">🦺 방어 '+Math.round((1-am)*100)+'%</span>');if(w>cap)fxs.push('<span class="cr">🐢 과적</span>');if(s.dr)fxs.push('<span>🚗 운전</span>');if(ib)fxs.push('<span class="cg">🏠 거점</span>');if(p.st<15)fxs.push('<span class="cy">😮‍💨 지침</span>');
- $('st').innerHTML='<div class="av" id="avw"></div><div><div class="hl"><span>체력</span><b>'+Math.ceil(p.hp)+' / 100</b></div>'+bar2(p.hp,'linear-gradient(90deg,#b8322c,#e0574f)')+'<div class="hl"><span>무게 '+w.toFixed(1)+'/'+cap+'kg · 처치 '+s.kills+'</span></div></div>'+
+ $('st').innerHTML='<div class="av" id="avw"></div><div><div class="hl"><span>체력</span><b>'+Math.ceil(p.hp)+' / '+MHP(p)+'</b></div>'+bar2(p.hp/MHP(p)*100,'linear-gradient(90deg,#b8322c,#e0574f)')+'<div class="hl"><span>무게 '+w.toFixed(1)+'/'+cap+'kg · 처치 '+s.kills+'</span></div></div>'+
   '<div class="m3"><div>🍖 허기'+bar2(p.food,'#e0a030')+'</div><div>💧 갈증'+bar2(p.water,'#4aa0e0')+'</div><div>⚡ 기력'+bar2(p.st,'#8ad06a')+'</div></div>'+(fxs.length?'<div class="fxs">'+fxs.join('')+'</div>':'');
  $('avw').appendChild(avatar());
  const nx=(s.day%5==0&&t<1500)?s.day:(Math.floor(s.day/5)+1)*5,left=(nx-s.day)*2400+1500-t;
@@ -163,7 +163,7 @@ function quick(){const p=S.p;$('qk').innerHTML=p.quick.map((id,i)=>'<div class="
 function useQuick(i){const p=S.p,id=p.quick[i];if(!id)return msg('빈 퀵슬롯 · 가방에서 아이템을 등록하세요');if(!has(p,id))return msg(NM2(id)+' 없음');
  const w=W_BY[id];if(w&&w[2]=='t'){p.eq.thr=id;p.as='thr';return msg('🧨 '+NM2(id)+' 준비 · 공격 버튼으로 던지기')}if(catOf(id)=='c')return use2(id);msg(NM2(id))}
 function use2(k){const p=S.p;if(!has(p,k))return msg(NM2(k)+' 없음');invTake(p,k,1);if(k=='food')p.food=Math.min(100,p.food+35);if(k=='water')p.water=Math.min(100,p.water+40);
- if(k=='bandage'){p.bleed=0;p.hp=Math.min(100,p.hp+(S.base.lv.med>=3?25:10));msg('🩹 붕대 사용')}if(k=='medkit'){p.bleed=0;p.hp=Math.min(100,p.hp+50);msg('💊 구급상자 사용')}if(k=='pills'){p.hp=Math.min(100,p.hp+15);msg('💊 항생제 복용')}}
+ if(k=='bandage'){p.bleed=0;p.hp=Math.min(MHP(p),p.hp+s3Heal()*(S.base.lv.med>=3?25:10));msg('🩹 붕대 사용')}if(k=='medkit'){p.bleed=0;p.hp=Math.min(MHP(p),p.hp+s3Heal()*50);msg('💊 구급상자 사용')}if(k=='pills'){p.hp=Math.min(MHP(p),p.hp+s3Heal()*15);msg('💊 항생제 복용')}}
 function prompt2(){const p=S.p,el=$('pr');if(S.dr||$('bm').style.display=='block'){el.style.display='none';return}let t=null,x=0,y=0;
  if(Math.hypot(S.car.x-p.x,S.car.y-p.y)<46){t='🚗 <b>운전</b>'+((p.inv.fuel|0)>0?'':' · 연료 필요');x=S.car.x;y=S.car.y-30}
  const core=BP.find(o=>o.t=='tentS'||o.t=='container'||o.t=='hq');if(!t&&core&&rdist(core,p.x,p.y)<60){t='🏠 <b>거점 관리</b>';x=core.x+core.w/2;y=core.y-40}
@@ -192,7 +192,7 @@ function openBag(id){const b=$('bm'),p=S.p;b.dataset.m='bag';if(id)BSEL=id;const
  const eqv=Object.values(p.eq),ids=Object.keys(p.inv).filter(id=>p.inv[id]>0&&(BF=='all'||catOf(id)==BF)).sort((a,b)=>'waecm'.indexOf(catOf(a))-'waecm'.indexOf(catOf(b))||RW[itemRar(b)]-RW[itemRar(a)]);
  h+='<div class="grid">'+(ids.map(id=>'<div class="cell'+(id==BSEL?' sel':'')+'" data-i="'+id+'"><img src="'+icon(id)+'"><i class="r" style="background:'+RAR[itemRar(id)][1]+'"></i>'+(p.inv[id]>1?'<span class="c">'+(p.inv[id]|0)+'</span>':'')+(eqv.includes(id)?'<span class="e">E</span>':'')+'</div>').join('')||'<div class="empty">비어 있음</div>')+'</div>';
  if(BSEL&&has(p,BSEL)){const id=BSEL,wd=W_BY[id],it=I_BY[id],r=RAR[itemRar(id)],sl=slotFor(id),eqd=sl&&p.eq[sl]==id;
-  h+='<div class="det"><img src="'+icon(id)+'"><div><h3>'+NM2(id)+' <span class="badge" style="color:'+r[1]+';border-color:'+r[1]+'">'+r[0]+'</span></h3><div class="d">'+(wd?({m:'근접 무기',g:'총기 · '+NM2(AMMO_ITEM(wd[4].ammo||'9mm')),t:'투척 무기'}[wd[2]])+' · '+wd[5]:it?it[5]:'')+' · '+wtOf(id)+'kg × '+(p.inv[id]|0)+'</div>'+(wd?stats(wd,id):'')+'</div>'+
+  h+='<div class="det"><img src="'+icon(id)+'"><div><h3>'+NM2(id)+' <span class="badge" style="color:'+r[1]+';border-color:'+r[1]+'">'+r[0]+'</span></h3><div class="d">'+(wd?({m:'근접 무기',g:'총기 · '+NM2(AMMO_ITEM(wd[4].ammo||'9mm')),t:'투척 무기'}[wd[2]])+' · '+wd[5]:it?it[5]:'')+' · '+wtOf(id)+'kg × '+(p.inv[id]|0)+'</div>'+(wd?stats(wdef(id),id):'')+'</div>'+
    '<div class="ba">'+(sl?'<button data-b="eq">'+(eqd?'해제':'장착')+'</button>':'')+(catOf(id)=='c'?'<button data-b="use">사용</button>':'')+((catOf(id)=='c'||(wd&&wd[2]=='t'))?[0,1,2,3].map(i=>'<button data-b="q'+i+'">퀵'+(i+1)+'</button>').join(''):'')+'<button data-b="drop">버리기</button></div></div>'}
  b.innerHTML=h;b.style.display='block';
  b.querySelectorAll('[data-f]').forEach(c=>c.onclick=()=>{BF=c.dataset.f;openBag()});b.querySelectorAll('[data-i]').forEach(c=>c.onclick=()=>openBag(c.dataset.i));b.querySelectorAll('[data-s]').forEach(c=>c.onclick=()=>{if(c.dataset.s)openBag(c.dataset.s)});

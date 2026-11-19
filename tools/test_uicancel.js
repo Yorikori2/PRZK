@@ -1,7 +1,7 @@
 // touch drag that ends in pointercancel (no pointerup), then tap 완료: weapon card must stay where it was dropped
 const {chromium}=require('playwright');const page=process.argv[2]||'index.html';
 (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:412,height:860},hasTouch:true,isMobile:true});const errs=[];p.on('pageerror',e=>errs.push(e.message));
-await p.goto('file:///home/user/PRZK/'+page);await p.waitForTimeout(300);await p.evaluate(()=>{localStorage.clear();start('S',false);uiEdit(true)});await p.waitForTimeout(200);
+await p.goto('file:///home/user/PRZK/'+page);await p.waitForTimeout(300);await p.evaluate(()=>{localStorage.clear();start('S',false);if(typeof S!='undefined'&&S&&S.pg&&!S.pg.tr.length){S.pg.tr=['cop'];$('bm').dataset.m='';closeBase();PAUSE=false};uiEdit(true)});await p.waitForTimeout(200);
 const r=await p.evaluate(()=>{const ev=(t,id,x,y,el)=>(el||document.elementFromPoint(x,y)).dispatchEvent(new PointerEvent(t,{pointerId:id,pointerType:'touch',clientX:x,clientY:y,bubbles:true,cancelable:true,isPrimary:true}));
  const w=document.getElementById('wc').getBoundingClientRect();const sx=w.left+30,sy=w.top+20;
  ev('pointerdown',5,sx,sy);for(let i=1;i<=6;i++)ev('pointermove',5,sx-i*10,sy-i*20);ev('pointercancel',5,sx-60,sy-120);

@@ -1,7 +1,7 @@
 // Stage 2 behaviour checks
 const {chromium}=require('playwright');const fs=require('fs');const OUT=process.argv[2]||'.';
 (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:412,height:860}});const errs=[];p.on('pageerror',e=>errs.push(e.message));p.on('console',m=>{if(m.type()=='error')errs.push(m.text())});
-await p.goto('file:///home/user/PRZK/index.html');await p.waitForTimeout(400);await p.evaluate(()=>{localStorage.clear();start('S',false)});
+await p.goto('file:///home/user/PRZK/index.html');await p.waitForTimeout(400);await p.evaluate(()=>{localStorage.clear();start('S',false);if(typeof S!='undefined'&&S&&S.pg&&!S.pg.tr.length){S.pg.tr=['cop'];$('bm').dataset.m='';closeBase();PAUSE=false}});
 const R={};
 // fire every weapon once at a dummy zombie in front of the player (logic level)
 R.weapons=await p.evaluate(()=>{const P=S.p,out={};for(const w of WEAPONS){Z=[];P.x=BL.ox+470;P.y=BL.oy+430;P.fx=1;P.fy=0;P.ac=0;P.rl=0;P.st=100;

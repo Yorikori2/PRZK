@@ -1,6 +1,6 @@
 /* PROJECT LEGACY — stage 3: levels (max 50), stats, skills, traits, perks and gun parts.
    Loaded after the game script: wraps game functions (kill, die, start, cr, upgrade, hitZ, noise, boom, gearAct, gearUpd, hud2, drawGearFx)
-   and supplies the hooks gear_next.js / the page call (s3W, MHP, s3Heal, s3Spd, s3Cap, s3Arm, s3Hun, s3Tur, s3Prod, s3Bleed*, s3Search). */
+   and supplies the hooks gear.js / the page call (s3W, MHP, s3Heal, s3Spd, s3Cap, s3Arm, s3Hun, s3Tur, s3Prod, s3Bleed*, s3Search). */
 'use strict';
 /* ---------- descriptions matching what this build really does ---------- */
 {const SKD={surv2:'내 공격 소음이 퍼지는 범위 -15% / 랭크',tech2:'거점 업그레이드 재료 8% / 랭크 돌려받기',tech4:'폭발 피해 +20% / 랭크 (수류탄 · 유탄)',combat3:'치명타 확률 +5% / 랭크 (피해 2배)'};
@@ -10,6 +10,9 @@
  const PD={'침착함':'치명타 확률 +5%','전술가':'포탑 피해 +20%','재건자':'거점 식량·물 생산 2배','야행성':'밤에 모든 무기 사거리 +20%','전설의 생존자':'모든 능력치 +3','보물 사냥꾼':'희귀 이상 파츠가 나올 확률 +40%'};
  for(const L in PERKS)for(const k of PERKS[L])if(PD[k[0]])k[1]=PD[k[0]]}
 const SKB=['combat','surv','tech'],PERK_LV=[10,20,30,40,50];
+/* 훈련 교범: rare loot (military, lab, police) that refunds every skill point so skills can be picked again */
+if(!I_BY.manual){const it=['manual','훈련 교범','c','e',.4,'사용하면 배운 스킬을 모두 되돌려 스킬 포인트로 돌려받음'];ITEMS.push(it);I_BY.manual=it;
+ IC.manual=()=>{R('#1e2124',4,4,16,17);R('#3d5a2e',5,5,14,15);R('#4f7239',5,5,14,2);R('#2c4321',5,5,2,15);R('#e0c56a',9,9,7,2);R('#e0c56a',10,12,5,1);R('#e0c56a',10,14,5,1);R('#f4f0e0',17,6,2,14);R('#c9c2a8',17,6,1,14)}}
 const PG0=()=>({lv:1,xp:0,sp:0,kp:0,st:{str:5,agi:5,vit:5,aim:5,sur:5},sk:{},tr:[],pk:{},parts:{},mods:{},vis:{},seen:{},ld:-1,wd:-1});
 const S3={ctx:null,cc:0,mel:false,glcd:0,chain:0,lastK:0,fl:[],lvT:0,ver:0,cache:{}};
 function PGo(){if(!S)return PG0();if(!S.pg)S.pg=PG0();return S.pg}
@@ -47,7 +50,7 @@ function s3Float(x,y,t,c){S3.fl.push({x,y,t:1.3,txt:t,c:c||'#ffd36a'})}
 function s3Xp(n,src){const pg=PGo();if(pg.lv>=MAXLV||!n)return;pg.xp+=Math.round(n);const p=S.p;s3Float(p.x,p.y-40,'+'+Math.round(n)+' XP'+(src?' · '+src:''),'#9fe0ff');let up=0;
  while(pg.lv<MAXLV&&pg.xp>=xpNeed(pg.lv)){pg.xp-=xpNeed(pg.lv);pg.lv++;pg.sp++;if(pg.lv%2==0)pg.kp++;up=1}
  if(pg.lv>=MAXLV)pg.xp=0;
- if(up){S3.lvT=1.6;p.hp=MHP(p);msg('⬆ 레벨 '+pg.lv+'! '+LV_REW(pg.lv)+' · 🧬 버튼에서 사용');s3dirty()}
+ if(up){S3.lvT=1.6;p.hp=MHP(p);msg('⬆ 레벨 '+pg.lv+'! '+LV_REW(pg.lv)+(s3PerkPend().length?' · 🎁 레벨 보너스를 고를 수 있어요':'')+' · 🧬 버튼에서 사용');s3dirty()}
  if($('bm').style.display=='block'&&$('bm').dataset.m=='char')openChar()}
 const XPK={runner:15,screamer:25,heavy:60};
 /* ---------- parts from searching (only source of parts) ---------- */
@@ -57,9 +60,13 @@ function s3PartRoll(tier,ch){if(Math.random()>ch*(1+.1*s3sk('tech0'))*(s3T('mech
  if(s3P('보물 사냥꾼'))for(const k of['r','e','l'])if(T[k])T[k]*=1.4;let t=Math.random()*Object.values(T).reduce((a,b)=>a+b,0),rar='c';for(const k in T){t-=T[k];if(t<=0){rar=k;break}}
  const L=PARTS.filter(p=>p[3]==rar);const own=['prim','sec'].map(k=>S.p.eq[k]).filter(id=>id&&GCLASS[id]).map(id=>GCLASS[id]);
  const fit=L.filter(p=>p[4].some(c=>own.includes(c)));const pool=fit.length&&Math.random()<.6?fit:L;return pool[Math.random()*pool.length|0][0]}
-function s3GotPart(pid){const pg=PGo(),p=P_BY[pid];pg.parts[pid]=(pg.parts[pid]||0)+1;const nw=!pg.seen[pid];pg.seen[pid]=1;
+const DIS={c:{scrap:1},u:{scrap:2},r:{scrap:2,elec:1},e:{scrap:2,milpart:1},l:{milpart:2,elec:2}};
+function s3Dis(pid,n){const q=P_BY[pid],r={};for(const k in DIS[q[3]])r[k]=DIS[q[3]][k]*n;if(s3T('mech'))r.scrap=(r.scrap||0)+n;for(const k in r)invAdd(S.p,k,r[k]);return Object.entries(r).map(([k,v])=>NM2(k)+' '+v).join(', ')}
+function s3GotPart(pid){const pg=PGo(),p=P_BY[pid];
+ if(pg.autoDis&&(pg.parts[pid]||0)>=1){const got=s3Dis(pid,1);setTimeout(()=>msg('🔩 중복 파츠 자동 분해: '+p[1]+' → '+got),1300);return}
+ pg.parts[pid]=(pg.parts[pid]||0)+1;const nw=!pg.seen[pid];pg.seen[pid]=1;
  setTimeout(()=>{msg('🔩 파츠 발견: '+p[1]+' ('+RAR[p[3]][0]+')'+(nw?' · 새 파츠!':''));if(nw)s3Xp(25*(RORD.indexOf(p[3])+1),'새 파츠')},1300)}
-function s3Search(o,kind,tier,r){const pg=PGo();s3Xp(3*tier,'수색');
+function s3Search(o,kind,tier,r){const pg=PGo();s3Xp(3*tier,'수색');if(Math.random()<({mil:.03,lab:.03,police:.01})[kind])r.manual=(r.manual||0)+1;
  if(Math.random()<.08*s3sk('surv1')+.015*s3b('sur')){const x=roll(1,LOOTT[o.t]);for(const k in x)r[k]=(r[k]||0)+x[k]}
  const gun=GUNBOX.includes(o.t),pid=s3PartRoll(tier,gun?(kind=='police'||kind=='mil'?.45:.3):tier>=3?.05:.015);if(pid)s3GotPart(pid)}
 /* ---------- wrap game functions ---------- */
@@ -88,7 +95,7 @@ function s3Search(o,kind,tier,r){const pg=PGo();s3Xp(3*tier,'수색');
   g.save();g.textAlign='center';g.font='bold 12px system-ui,sans-serif';for(const f of S3.fl){g.globalAlpha=Math.min(1,f.t*1.5);g.fillStyle='#000a';g.fillText(f.txt,f.x+1,f.y+1);g.fillStyle=f.c;g.fillText(f.txt,f.x,f.y)}g.restore()}}
 {const _h=hud2;hud2=function(){if(S&&S.p&&S.pg&&S.p.hp>MHP(S.p))S.p.hp=MHP(S.p);_h();if(!S)return;const pg=PGo(),need=xpNeed(pg.lv),pend=pg.sp+pg.kp+s3PerkPend().length;
   const el=document.createElement('div');el.className='lvr';el.innerHTML='<b>Lv '+pg.lv+'</b><div class="xpb"><i style="width:'+(pg.lv>=MAXLV?100:Math.min(100,pg.xp/need*100))+'%"></i></div><span>'+(pg.lv>=MAXLV?'MAX':pg.xp+'/'+need)+'</span>';$('st').appendChild(el);
-  const b=$('bCh');if(b){b.classList.toggle('dot',pend>0);b.dataset.n=pend||''}}}
+  const b=$('bCh');if(b){b.classList.toggle('dot',pend>0);b.dataset.n=pend||'';b.classList.toggle('perk',s3PerkPend().length>0)}}}
 {const _st=start;start=function(d,load){const r=_st(d,load);s3dirty();S3.fl=[];const pg=PGo();if(!load||!pg.tr.length)openTraits(!load);return r}}
 const s3PerkPend=()=>{const pg=PGo();return PERK_LV.filter(L=>pg.lv>=L&&!pg.pk[L])};
 /* ---------- trait picker (new game, or an old save without traits) ---------- */
@@ -115,7 +122,7 @@ function openChar(tab){if(tab)CTAB=tab;const b=$('bm'),pg=PGo(),p=S.p;b.dataset.
  if(CTAB=='trait'){h+='<div class="s3h">내 특성</div><div class="tg">'+pg.tr.map(i=>{const t=TRAITS.find(t=>t[0]==i);return'<div class="tc on'+(t[3]<0?' neg':'')+'"><b>'+t[1]+'</b><span>'+t[2]+'</span></div>'}).join('')+'</div>';
   h+='<div class="s3h">레벨 보너스 · 10레벨마다 셋 중 하나</div>'+PERK_LV.map(L=>{const ch=pg.pk[L],can=pg.lv>=L&&!ch;return'<div class="pk'+(can?' can':'')+'"><b>Lv '+L+'</b><div class="po">'+PERKS[L].map(([n,d])=>'<div class="pc'+(ch==n?' on':'')+(ch&&ch!=n?' off':'')+(can?' pick':'')+'" data-p="'+L+'|'+n+'"><b>'+n+'</b><small>'+d+'</small></div>').join('')+'</div>'+(pg.lv<L?'<em>🔒 Lv '+L+'에 열림</em>':can?'<em class="go">하나를 고르세요</em>':'')+'</div>'}).join('')}
  if(CTAB=='mod')h+=modView();
- h+='<div class="s3t"><b>🧪 샘플 체험용</b><button data-x="xp">+1000 XP</button><button data-x="parts">파츠 한 세트</button><button data-x="guns">총 + 탄약</button></div>';
+ if(window.S3_SAMPLE)h+='<div class="s3t"><b>🧪 샘플 체험용</b><button data-x="xp">+1000 XP</button><button data-x="parts">파츠 한 세트</button><button data-x="guns">총 + 탄약</button></div>';
  b.innerHTML=h;b.style.display='block';
  b.querySelectorAll('[data-c]').forEach(c=>c.onclick=()=>openChar(c.dataset.c));
  b.querySelectorAll('[data-st]').forEach(c=>c.onclick=()=>{const k=c.dataset.st;if(pg.sp>0&&pg.st[k]<STAT_MAX){pg.sp--;pg.st[k]++;s3dirty();if(k=='vit')p.hp=Math.min(MHP(p),p.hp+4);hud2();openChar()}});
@@ -123,7 +130,7 @@ function openChar(tab){if(tab)CTAB=tab;const b=$('bm'),pg=PGo(),p=S.p;b.dataset.
   if(r>=3)return msg('이미 최고 랭크');if(pg.kp<=0)return msg('스킬 포인트가 없어요 (짝수 레벨마다 +1)');pg.kp--;pg.sk[id]=r+1;s3dirty();if(id=='surv3')p.hp=Math.min(MHP(p),p.hp+10);msg('⭐ '+SKILLS[br][1][i][0]+' '+(r+1)+'랭크');hud2();openChar()});
  b.querySelectorAll('[data-p]').forEach(c=>c.onclick=()=>{const[L,n]=c.dataset.p.split('|');if(pg.lv<+L||pg.pk[L])return;pg.pk[L]=n;s3dirty();p.hp=Math.min(p.hp,MHP(p));msg('🧬 레벨 보너스: '+n);hud2();openChar()});
  b.querySelectorAll('[data-x]').forEach(c=>c.onclick=()=>{const a=c.dataset.x;if(a=='xp')s3Xp(1000,'체험');if(a=='parts'){for(const r of['c','u','r','e','l']){const L=PARTS.filter(q=>q[3]==r);for(let i=0;i<3;i++){const q=L[Math.random()*L.length|0][0];pg.parts[q]=(pg.parts[q]||0)+1;pg.seen[q]=1}}msg('🔩 파츠 15개 지급 (체험용)')}
-  if(a=='guns'){give({ar:1,a556:120,sniper:1,a308:20,pump:1,a12g:24,pistol:1,a9mm:45,a40mm:6})}hud2();openChar()});
+  if(a=='guns'){give({ar:1,a556:120,sniper:1,a308:20,pump:1,a12g:24,pistol:1,a9mm:45,a40mm:6,manual:1})}hud2();openChar()});
  if(CTAB=='mod')bindMod(b)}
 /* ---------- gun mods ---------- */
 const FXN={dmg:['피해','%'],rng:['사거리','%'],acc:['정확도',''],rec:['반동','%'],rof:['연사','%'],mag:['장탄수','%'],rld:['재장전 시간','%'],nz:['소음',''],mov:['이동 속도','%'],night:['야간 사거리','단계'],gl:['유탄 발사','']};
@@ -142,17 +149,22 @@ function modView(){const pg=PGo(),p=S.p,guns=Object.keys(p.inv).filter(id=>p.inv
    (L.filter(q=>q[0]!=cur).map(q=>{const ok=RORD.indexOf(q[3])<=RORD.indexOf(cap),fr=partsFree(q[0]);return'<div class="pi"><b style="color:'+RAR[q[3]][1]+'">'+q[1]+'</b><small>'+RAR[q[3]][0]+' · 남은 '+fr+'개</small>'+fxTxt(q[5])+(ok?fr>0?'<button data-pu="'+q[0]+'">장착</button>':'<em>다른 총에 장착 중</em>':'<em>🔒 총기 개조 스킬 필요</em>')+'</div>'}).join('')||(!cur?'<div class="empty">이 슬롯에 맞는 파츠가 없어요. 총기 거치대 · 사물함 · 탄약 상자 · 경찰차 · 군용 트럭을 수색해 보세요.</div>':''))+'</div>'}
  return h+partList()}
 function partList(){const pg=PGo(),ids=Object.keys(pg.parts).filter(k=>pg.parts[k]>0).sort((a,b)=>RORD.indexOf(P_BY[b][3])-RORD.indexOf(P_BY[a][3]));
- return'<div class="s3h">모은 파츠 '+ids.reduce((a,k)=>a+pg.parts[k],0)+'개 · 무게 없음</div><div class="pg">'+(ids.map(k=>{const q=P_BY[k];return'<span style="border-color:'+RAR[q[3]][1]+'"><b style="color:'+RAR[q[3]][1]+'">'+q[1]+'</b> ×'+pg.parts[k]+'</span>'}).join('')||'<div class="empty">아직 없음</div>')+'</div>'}
+ return'<div class="s3h">모은 파츠 '+ids.reduce((a,k)=>a+pg.parts[k],0)+'개 · 무게 없음 · 장착하지 않은 파츠는 분해해서 재료로 바꿀 수 있어요</div>'+
+ '<label class="tgl"><input type="checkbox" id="autoDis"'+(pg.autoDis?' checked':'')+'><span></span><b>중복 파츠 자동 분해</b><small>'+(pg.autoDis?'켜짐 · 이미 가진 파츠를 또 찾으면 바로 재료로 바뀌어요':'꺼짐 · 같은 파츠도 모두 모아요')+'</small></label>'+
+ '<div class="pg">'+(ids.map(k=>{const q=P_BY[k],fr=partsFree(k);return'<span style="border-color:'+RAR[q[3]][1]+'"><b style="color:'+RAR[q[3]][1]+'">'+q[1]+'</b> ×'+pg.parts[k]+(fr>0?'<button data-dis="'+k+'" title="분해: '+Object.entries(DIS[q[3]]).map(([a,v])=>NM2(a)+' '+v).join(', ')+'">분해</button>':'')+'</span>'}).join('')||'<div class="empty">아직 없음</div>')+'</div>'}
 function modStats(id){const b=Object.assign({},W_BY[id][4]),cl=GCLASS[id],base=gunStats(id,{}),now=gunStats(id,PGo().mods[id]||{});const rows=[];
  for(const k of['피해','연사','사거리','정확도','반동','장탄수','재장전','소음','기동성']){const a=base[k][0],v=now[k][0],d=v-a,f=x=>k=='연사'||k=='재장전'?x.toFixed(1):Math.round(x);const good=LOWER_BETTER[k]?d<0:d>0;
   rows.push('<div><span>'+k+'</span><b>'+f(v)+(now[k][1]&&k!='피해'?now[k][1]:'')+(k=='피해'&&now[k][1]?' '+now[k][1]:'')+'</b>'+(Math.abs(d)>.001?'<i class="'+(good?'pos':'neg')+'">'+(d>0?'+':'')+f(d)+'</i>':'')+'</div>')}
  return rows.join('')+'<small class="nt">파츠만 반영한 수치예요. 능력치·스킬·특성 보너스는 실제 전투에서 추가돼요.</small>'}
-function bindMod(b){const pg=PGo();const c=$('bpc');if(c&&MGUN){const bp=blueprint(MGUN,pg.mods[MGUN]||{});c.width=bp.width*3;c.height=bp.height*3;const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.drawImage(bp,0,0,c.width,c.height)}
+function bindMod(b){const pg=PGo();const ad=$('autoDis');if(ad)ad.onchange=()=>{pg.autoDis=ad.checked?1:0;msg('🔩 중복 파츠 자동 분해 '+(pg.autoDis?'켜짐':'꺼짐'));openChar()};
+ b.querySelectorAll('[data-dis]').forEach(c=>c.onclick=()=>{const k=c.dataset.dis;if(partsFree(k)<=0)return;pg.parts[k]--;const got=s3Dis(k,1);msg('🔩 '+P_BY[k][1]+' 분해 → '+got);openChar()});const c=$('bpc');if(c&&MGUN){const bp=blueprint(MGUN,pg.mods[MGUN]||{});c.width=bp.width*3;c.height=bp.height*3;const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.drawImage(bp,0,0,c.width,c.height)}
  b.querySelectorAll('[data-g]').forEach(c=>c.onclick=()=>{MGUN=c.dataset.g;MSLOT=null;openChar()});
  b.querySelectorAll('[data-sl]').forEach(c=>c.onclick=()=>{MSLOT=MSLOT==c.dataset.sl?null:c.dataset.sl;openChar()});
  b.querySelectorAll('[data-pu]').forEach(c=>c.onclick=()=>{const m=pg.mods[MGUN]=pg.mods[MGUN]||{};m[MSLOT]=c.dataset.pu;s3dirty();s3MagFix(MGUN);msg('🔧 '+P_BY[c.dataset.pu][1]+' 장착');hud2();openChar()});
  b.querySelectorAll('[data-un]').forEach(c=>c.onclick=()=>{const m=pg.mods[MGUN]||{};const q=m[MSLOT];delete m[MSLOT];s3dirty();s3MagFix(MGUN);msg('🔧 '+P_BY[q][1]+' 해제');hud2();openChar()})}
 function s3MagFix(id){const p=S.p,s=wdef(id)[4];if(s.mag&&(p.mag[id]|0)>s.mag){const ex=(p.mag[id]|0)-s.mag;p.mag[id]=s.mag;invAdd(p,AMMO_ITEM(s.ammo),ex)}}
+{const _use=use2;use2=function(k){if(k!='manual')return _use.apply(this,arguments);const pg=PGo(),n=Object.values(pg.sk).reduce((a,b)=>a+b,0);
+  if(!n)return msg('📘 아직 배운 스킬이 없어요 · 교범은 그대로 둡니다');if(!has(S.p,'manual'))return msg('훈련 교범 없음');invTake(S.p,'manual',1);pg.sk={};pg.kp+=n;s3dirty();S.p.hp=Math.min(S.p.hp,MHP(S.p));msg('📘 훈련 교범: 스킬 '+n+'포인트를 돌려받았어요 · 🧬에서 다시 배우세요');hud2()}}
 /* ---------- button, key, styles ---------- */
 $('bCh').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(run&&!(typeof UIE!='undefined'&&UIE.on))($('bm').style.display=='block'&&$('bm').dataset.m=='char'?closeBase():openChar())});
 addEventListener('keydown',e=>{if(e.key.toLowerCase()=='k'&&run&&$('bm').dataset.m!='traits')($('bm').style.display=='block'&&$('bm').dataset.m=='char'?closeBase():openChar())});
@@ -177,5 +189,13 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 #bm .pg{display:flex;flex-wrap:wrap;gap:4px}#bm .pg span{font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid}
 #bm .s3t{margin-top:14px;padding:8px;border-radius:10px;border:1px dashed #ffffff33;display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12px}#bm .s3t button{padding:5px 10px;font-size:12px;max-width:none;width:auto}
 #bm .empty{color:var(--mut);font-size:12px;padding:6px}
+#bm .pg span{display:inline-flex;gap:5px;align-items:center}#bm .pg button{padding:1px 7px;font-size:10.5px;border-radius:8px;max-width:none;width:auto;background:#5a3a2a}
+#bm .tgl{display:grid;grid-template-columns:40px 1fr;gap:0 8px;align-items:center;padding:7px 9px;border-radius:10px;background:#ffffff08;margin-bottom:6px;cursor:pointer}#bm .tgl input{position:absolute;opacity:0;pointer-events:none}
+#bm .tgl span{grid-row:1/3;width:38px;height:22px;border-radius:12px;background:#ffffff26;position:relative;transition:background .15s}#bm .tgl span::after{content:'';position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#e8ecef;transition:left .15s}
+#bm .tgl input:checked+span{background:#4f9a5a}#bm .tgl input:checked+span::after{left:19px}#bm .tgl b{font-size:12.5px}#bm .tgl small{font-size:10.5px;color:var(--mut)}#bm .tgl input:focus-visible+span{outline:2px solid #ffd36a}
+@keyframes s3perk{0%,100%{box-shadow:0 0 0 0 #ffd36a00}50%{box-shadow:0 0 0 5px #ffd36a88}}
+.rb.perk{position:relative;animation:s3perk 1.3s ease-in-out infinite;border-color:#ffd36a}.rb.perk::before{content:'보너스!';position:absolute;left:calc(100% + 6px);top:50%;transform:translateY(-50%);background:#ffd36a;color:#111;font-size:10px;font-weight:700;padding:1px 7px;border-radius:9px;white-space:nowrap;pointer-events:none}
+body.uileft .rb.perk::before{left:auto;right:calc(100% + 6px)}
+@media (prefers-reduced-motion:reduce){.rb.perk{position:relative;animation:none}}
 @media (orientation:landscape) and (max-height:420px){#sd{display:grid;grid-template-columns:repeat(2,auto);top:calc(50% + 34px)}#st .lvr{font-size:9.5px}}
 </style>`);
