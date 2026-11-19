@@ -58,14 +58,14 @@ const NZR=[0,160,320,520,720,950];
 function noise(x,y,lv){const r=NZR[Math.max(0,Math.min(5,lv|0))];if(!r)return;for(const q of Z)if(Math.hypot(q.x-x,q.y-y)<r){q.al=8;q.nx=x;q.ny=y}}
 function hitZ(q,dmg,dx,dy,n=3){q.hp-=dmg;blood(q.x,q.y,dx,dy,n)}
 /* ---------- auto-targeting: keeps a locked target inside weapon range (line of sight, facing bonus, sticky) ---------- */
-const visible=(p,q,d)=>d<46||los(p.x,p.y-12,q.x,q.y-12);
+const visible=(p,q,d)=>typeof seeZ=='function'?seeZ(p,q):d<46||los(p.x,p.y-12,q.x,q.y-12);
 function scoreT(p,q,d){const f=((q.x-p.x)*p.fx+(q.y-p.y)*p.fy)/(d||1);return d*(1.25-.35*f)*(q.look=='screamer'?.85:1)}
 function updTarget(p){const w=wdef(actW(p)),r=w[4].r||42,cur=S.tg&&Z.includes(S.tg)&&S.tg.hp>0?S.tg:null;let best=null,bs=1e9;
  for(const q of Z){const d=Math.hypot(q.x-p.x,q.y-p.y);if(d>r*1.35||!visible(p,q,d))continue;const sc=scoreT(p,q,d);if(sc<bs){bs=sc;best=q}}
  if(cur){const d=Math.hypot(cur.x-p.x,cur.y-p.y);if(d<=r*1.35&&visible(p,cur,d)&&!(best&&best!==cur&&bs<scoreT(p,cur,d)*.6))best=cur}
  S.tg=best;S.tgIn=!!best&&Math.hypot(best.x-p.x,best.y-p.y)<=r;return best}
 function nearestTarget(p,r){const t=updTarget(p);if(t){const d=Math.hypot(t.x-p.x,t.y-p.y);if(d<r)return[t,d]}return[null,1e9]}
-function cone(p,dx,dy,r,dot){return Z.filter(q=>{const d=Math.hypot(q.x-p.x,q.y-p.y)||1;return d<r&&((q.x-p.x)*dx+(q.y-p.y)*dy)/d>dot&&(d<46||los(p.x,p.y-12,q.x,q.y-12))}).sort((a,b)=>Math.hypot(a.x-p.x,a.y-p.y)-Math.hypot(b.x-p.x,b.y-p.y))}
+function cone(p,dx,dy,r,dot){return Z.filter(q=>{const d=Math.hypot(q.x-p.x,q.y-p.y)||1;return d<r&&((q.x-p.x)*dx+(q.y-p.y)*dy)/d>dot&&(typeof seeZ=='function'?seeZ(p,q):d<46||los(p.x,p.y-12,q.x,q.y-12))}).sort((a,b)=>Math.hypot(a.x-p.x,a.y-p.y)-Math.hypot(b.x-p.x,b.y-p.y))}
 function boom(x,y,rad,dmg,fire){fx.push({k:'boom',x,y,r:rad,l:.45,m:.45});for(const q of Z){const d=Math.hypot(q.x-x,q.y-y);if(d<rad){hitZ(q,dmg*(1-d/rad*.6),(q.x-x)/(d||1),(q.y-y)/(d||1),6);if(fire)q.burn=4}}
  const p=S.p,dp=Math.hypot(p.x-x,p.y-y);if(dp<rad*.8&&!fire){p.hp-=Math.round(30*(1-dp/rad));msg('💥 폭발에 휘말렸습니다!')}noise(x,y,5)}
 function gearAct(){const p=S.p;if(p.ac>0||S.dr||p.rl>0)return;const id=actW(p),w=wdef(id),s=w[4],cat=w[2];

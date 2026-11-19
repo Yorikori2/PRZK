@@ -1,7 +1,7 @@
 // Auto-targeting + range ring checks (node tools/test_target.js <outdir>)
 const {chromium}=require('playwright');const fs=require('fs');const OUT=process.argv[2]||'.';
 (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:860,height:412},deviceScaleFactor:2});const errs=[];p.on('pageerror',e=>errs.push(e.message));
-await p.goto('file://'+require('path').resolve(__dirname,'..','index.html'));await p.waitForTimeout(400);await p.evaluate(()=>{localStorage.clear();start('S',false);if(typeof S!='undefined'&&S&&S.pg&&!S.pg.tr.length){S.pg.tr=['cop'];$('bm').dataset.m='';closeBase();PAUSE=false}});
+await p.goto('file://'+require('path').resolve(__dirname,'..',process.env.PG||'index.html'));await p.waitForTimeout(400);await p.evaluate(()=>{localStorage.clear();start('S',false);if(typeof S!='undefined'&&S&&S.pg&&!S.pg.tr.length){S.pg.tr=['cop'];$('bm').dataset.m='';closeBase();PAUSE=false}});
 const R={};const put=(o)=>p.evaluate(o=>{const P=S.p;P.x=BL.ox+470;P.y=BL.oy+430;P.fx=o.fx||1;P.fy=0;Z=[];S.tg=null;P.inv={};invAdd(P,o.w,1);const sl=slotFor(o.w);P.eq[sl]=o.w;P.as=sl;if(W_BY[o.w][4].ammo){invAdd(P,AMMO_ITEM(W_BY[o.w][4].ammo),100);P.mag[o.w]=W_BY[o.w][4].mag}
  o.z.forEach(([dx,dy,lk])=>mk(P.x+dx,P.y+dy,{look:lk||'civ1'}));Z.forEach(z=>z.stun=99);return true},o);
 // 1. nearest in front wins over slightly nearer behind

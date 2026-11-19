@@ -66,9 +66,12 @@ function s3GotPart(pid){const pg=PGo(),p=P_BY[pid];
  if(pg.autoDis&&(pg.parts[pid]||0)>=1){const got=s3Dis(pid,1);setTimeout(()=>msg('🔩 중복 파츠 자동 분해: '+p[1]+' → '+got),1300);return}
  pg.parts[pid]=(pg.parts[pid]||0)+1;const nw=!pg.seen[pid];pg.seen[pid]=1;
  setTimeout(()=>{msg('🔩 파츠 발견: '+p[1]+' ('+RAR[p[3]][0]+')'+(nw?' · 새 파츠!':''));if(nw)s3Xp(25*(RORD.indexOf(p[3])+1),'새 파츠')},1300)}
-function s3Search(o,kind,tier,r){const pg=PGo();s3Xp(3*tier,'수색');if(Math.random()<({mil:.03,lab:.03,police:.01})[kind])r.manual=(r.manual||0)+1;
+/* searching is split in two so a timed search can decide its loot first and pay out when it finishes */
+function s3SearchRoll(o,kind,tier,r){PGo();if(Math.random()<({mil:.03,lab:.03,police:.01})[kind])r.manual=(r.manual||0)+1;
  if(Math.random()<.08*s3sk('surv1')+.015*s3b('sur')){const x=roll(1,LOOTT[o.t]);for(const k in x)r[k]=(r[k]||0)+x[k]}
- const gun=GUNBOX.includes(o.t),pid=s3PartRoll(tier,gun?(kind=='police'||kind=='mil'?.45:.3):tier>=3?.05:.015);if(pid)s3GotPart(pid)}
+ const gun=GUNBOX.includes(o.t);return s3PartRoll(tier,gun?(kind=='police'||kind=='mil'?.45:.3):tier>=3?.05:.015)}
+function s3SearchDone(tier,pid){s3Xp(3*tier,'수색');if(pid)s3GotPart(pid)}
+function s3Search(o,kind,tier,r){s3SearchDone(tier,s3SearchRoll(o,kind,tier,r))}
 /* ---------- wrap game functions ---------- */
 {const _kill=kill;kill=function(z){_kill(z);if(!S)return;s3Xp((XPK[z.look]||10)+(z.w?5:0));const p=S.p;if(s3P('아드레날린'))p.st=Math.min(100,p.st+20);
   if(s3P('연쇄 처치')){if(S3.lastK>0){if(S3.chain<=0)s3dirty();S3.chain=3}S3.lastK=3}}}
