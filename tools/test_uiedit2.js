@@ -35,11 +35,11 @@ for(const[W,H]of[[412,860],[860,412]]){const tag=W<H?'세로':'가로';const p=a
   for(let i=0;i<rs.length;i++)for(let j=i+1;j<rs.length;j++){const a=rs[i][1],c=rs[j][1];if(Math.min(a.right,c.right)-Math.max(a.left,c.left)>2&&Math.min(a.bottom,c.bottom)-Math.max(a.top,c.top)>2)bad.push(rs[i][0]+'×'+rs[j][0])}out[k]=bad}return out});
  ok(!ov.left.length&&!ov.wide.length,tag+' presets have no overlaps '+JSON.stringify(ov));
  // opacity
- await p.evaluate(()=>{const o=document.getElementById('uiOp');o.value=60;o.dispatchEvent(new Event('input'))});
+ await p.evaluate(()=>{const o=document.getElementById('uiOp');o.value=60;o.dispatchEvent(new Event('input'))});await p.waitForTimeout(350);
  ok(await p.evaluate(()=>getComputedStyle(document.getElementById('wc')).opacity=='0.6'&&document.getElementById('uiOpV').textContent=='60%'),tag+' opacity slider 60%');
  await p.evaluate(()=>uiEdit(false));await p.waitForTimeout(200);
  // saved and restored after reload, left-handed flag per orientation
- await p.evaluate(()=>{uiEdit(true);uiPreset('left');uiEdit(false)});await p.reload();await p.waitForTimeout(300);await p.evaluate(()=>{start('S',false);if(typeof S!='undefined'&&S&&S.pg&&!S.pg.tr.length){S.pg.tr=['cop'];$('bm').dataset.m='';closeBase();PAUSE=false}});await p.waitForTimeout(300);
+ await p.evaluate(()=>{uiEdit(true);uiPreset('left');uiEdit(false)});await p.reload();await p.waitForTimeout(300);await p.evaluate(()=>{start('S',false);if(typeof S!='undefined'&&S&&S.pg&&!S.pg.tr.length){S.pg.tr=['cop'];$('bm').dataset.m='';closeBase();PAUSE=false}Z.length=0});await p.waitForTimeout(500);
  const rel=await p.evaluate(()=>({op:getComputedStyle(document.getElementById('st')).opacity,left:document.body.classList.contains('uileft')}));ok(rel.op=='0.6'&&rel.left,tag+' opacity and left-handed layout persist after reload');
  const sdx=(await box(p,'sd')).x;ok(sdx>W/2,tag+' toolbar on the right after reload');
  ok(!errs.length,tag+' no page errors '+errs.join('|'));await p.close()}
