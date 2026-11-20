@@ -76,7 +76,7 @@ function s4Upd(dt){const s=S,p=s.p,bes=s.bes=s.bes||{};S4.slow-=dt;S4.kd-=dt;S4.
  S4.warn=0;if(typeof SRCH!='undefined'&&SRCH){let near=1e9;for(const z of Z)if(z.hp>0&&!z.sleep){const d=Math.hypot(z.x-p.x,z.y-p.y);if(d<near&&seeZ(p,z))near=d}
   if(near<200){S4.warn=near<110?2:1;if(!SRCH.warned){SRCH.warned=1;msg('⚠ 좀비가 다가옵니다! 수색을 계속할지 정하세요')}}}
  const a=$('act');if(a)a.classList.toggle('warn',S4.warn>0)}
-{const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(S)s4Upd(dt)}}
+{const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(S){s4Upd(dt);for(const e of S4.dn)e.t-=dt}}}
 /* ---------- drawing ---------- */
 const ZSZ={};for(const q of ZOMBIES)ZSZ[q[0]]=q[7];
 function zDraw4(z){if(!NEWZ.includes(z.look))return false;const L=z.look,Sz=ZSZ[L]||48,fr=z.mv?(z.ph|0)%4:0,c=zs(L,fr,Sz),p=S.p,d=Math.hypot(p.x-z.x,p.y-z.y);
@@ -91,6 +91,8 @@ function zDraw4(z){if(!NEWZ.includes(z.look))return false;const L=z.look,Sz=ZSZ[
  if(z.ch>0||z.leap>0){g.globalAlpha=.35;blob(z.x-z.lx*12,z.y-z.ly*8-10,10,6,'#ffffff');g.globalAlpha=1}
  return true}
 {const _dfx=drawGearFx;drawGearFx=function(){_dfx();if(!S)return;const p=S.p,t=performance.now();
+  S4.dn=S4.dn.filter(e=>e.t>0);g.save();g.textAlign='center';for(const e of S4.dn){const k=1-e.t/.9,y=e.y-k*26;g.globalAlpha=Math.min(1,e.t*2.2);g.font=(e.crit?'900 15px':'800 12px')+' system-ui,sans-serif';
+   const tx=Math.round(e.v)+(e.crit?'!':'');g.lineWidth=3;g.strokeStyle='#000c';g.strokeText(tx,e.x,y);g.fillStyle=e.crit?'#ffd36a':e.v>=100?'#ff9a5a':'#ffffff';g.fillText(tx,e.x,y)}g.restore();g.globalAlpha=1;
   for(const q of S4.pud){g.globalAlpha=Math.min(.6,q.t/2);blob(q.x,q.y,q.r,q.r*.55,'#6fae2a');blob(q.x-3,q.y-1,q.r*.6,q.r*.3,'#9fe040');g.globalAlpha=1}
   for(const q of S4.gas){g.globalAlpha=Math.min(.35,q.t/6);blob(q.x,q.y-10,q.r,q.r*.7,'#9fc040');g.globalAlpha=1}
   for(const q of S4.proj){const k=q.t/q.T,x=q.x0+(q.x-q.x0)*k,y=q.y0+(q.y-q.y0)*k-Math.sin(k*Math.PI)*28;blob(x,y,3,3,'#9fe040')}
@@ -105,6 +107,18 @@ function zDraw4(z){if(!NEWZ.includes(z.look))return false;const L=z.look,Sz=ZSZ[
 document.body.insertAdjacentHTML('beforeend','<div id="bossbar" style="display:none"><b></b><div><i></i></div></div>');
 {const _h=hud2;hud2=function(){_h();if(!S)return;const b=Z.find(z=>BOSSZ.includes(z.look)&&z.hp>0&&Math.hypot(z.x-S.p.x,z.y-S.p.y)<700),el=$('bossbar');el.style.display=b?'':'none';
   if(b){el.querySelector('b').textContent=(b.look=='goliath'?'👹 ':'🪱 ')+ZN[b.look][1]+' · '+Math.ceil(b.hp)+' / '+Math.round(b.mhp);el.querySelector('i').style.width=Math.max(0,b.hp/b.mhp*100)+'%'}}}
+/* ================= ghost clicks ================= */
+/* sheets open on pointerdown; the click that follows the same tap must not press whatever just appeared under the finger */
+{let opened=0;new MutationObserver(()=>{const b=$('bm');if(b.style.display=='block'&&!b.dataset.open){b.dataset.open=1;opened=performance.now()}else if(b.style.display!='block')delete b.dataset.open}).observe($('bm'),{attributes:true,attributeFilter:['style']});
+ document.addEventListener('click',e=>{if(performance.now()-opened<450&&e.target.closest('#bm')&&!e.target.closest('.sh button')){e.preventDefault();e.stopPropagation()}},true)}
+/* ================= damage numbers ================= */
+/* every hit shows the real damage dealt over the zombie (pellets of one shot add up); crits are bigger and yellow */
+S4.dn=[];
+{const _hz=hitZ;hitZ=function(q,dmg,dx,dy,n){const h0=q.hp;const r=_hz(q,dmg,dx,dy,n);const dealt=h0-q.hp;if(dealt>0.05&&S){const now=performance.now(),crit=dealt>dmg*1.6&&dmg>0,last=S4.dn.find(e=>e.q===q&&now-e.t0<90);
+  if(last){last.v+=dealt;last.crit=last.crit||crit}else S4.dn.push({q,x:q.x+(Math.random()-.5)*10,y:q.y-34,v:dealt,t:.9,t0:now,crit})}return r}}
+/* the weapon card shows the gun's current damage (stats, skills, traits and parts included) */
+{const _wc=wcard;wcard=function(){_wc();if(!S)return;const p=S.p,id=actW(p),s=wdef(id)[4],el=$('wc');if(!el)return;const d=Math.round(s.d),rof=1/s.cd;
+  el.insertAdjacentHTML('beforeend','<div class="wdm"><b>⚔ '+d+(s.pel?'×'+s.pel:'')+'</b><span>'+(rof>=1?rof.toFixed(1)+'발/s':(s.cd).toFixed(1)+'초/발')+' · 사거리 '+Math.round(s.r||0)+'</span></div>')}}
 /* ================= bestiary + gun catalogue (tab in the 🧬 sheet) ================= */
 let DEXT='z',DEXSEL=null;
 const ZCV={};function zIcon(id,shadow){const k=id+(shadow?'s':'');if(!ZCV[k]){const q=ZN[id],c=zCanvas(id,0,q[7]);if(shadow){const x=c.getContext('2d');x.globalCompositeOperation='source-in';x.fillStyle='#1b2228';x.fillRect(0,0,c.width,c.height)}ZCV[k]=c.toDataURL()}return ZCV[k]}
@@ -128,7 +142,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 #act.warn{animation:s4w .5s steps(2) infinite;box-shadow:0 0 0 3px #ff4a3a}@keyframes s4w{50%{box-shadow:0 0 0 3px #ff4a3a00}}#act.srch.warn{background-image:conic-gradient(#ff6a5acc var(--k),#ffffff14 0)}
 #bossbar{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 140px);width:min(60vw,360px);z-index:4;pointer-events:none;text-align:center;font-size:12px;text-shadow:0 1px 2px #000}
 #bossbar div{height:8px;border-radius:5px;background:#000a;border:1px solid #ffffff33;overflow:hidden;margin-top:2px}#bossbar i{display:block;height:100%;background:linear-gradient(90deg,#a8221c,#e0574f)}
-#bm .flt{flex-wrap:wrap}#bm .dz{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:5px}#bm .dzc,#bm .dgc{padding:5px;border-radius:10px;border:1px solid #ffffff1a;background:#ffffff08;text-align:center;cursor:pointer}
+#bm .flt{flex-wrap:wrap}#wc .wdm{grid-column:1/3;display:flex;justify-content:space-between;gap:6px;font-size:10.5px;color:var(--mut);margin-top:-1px}#wc .wdm b{color:#ffb070;font-size:11.5px}#bm .dz{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:5px}#bm .dzc,#bm .dgc{padding:5px;border-radius:10px;border:1px solid #ffffff1a;background:#ffffff08;text-align:center;cursor:pointer}
 #bm .dzc img{width:56px;height:56px;image-rendering:pixelated;display:block;margin:0 auto}#bm .dzc b,#bm .dgc b{display:block;font-size:11.5px}#bm .dzc small{font-size:10px}#bm .dzc.un img{opacity:.8}#bm .dzc.on,#bm .dgc.on{border-color:#ffd36a}
 #bm .dg{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:4px}#bm .dgc img{width:100%;height:32px;object-fit:contain;image-rendering:pixelated}#bm .dgc.un img{filter:brightness(0) opacity(.35)}
 #bm .dzd{display:grid;grid-template-columns:96px 1fr;gap:10px;margin-top:8px;padding:9px;border-radius:12px;background:#ffffff0a;border:1px solid #ffffff1f}#bm .dzd img{width:96px;height:96px;image-rendering:pixelated;object-fit:contain}

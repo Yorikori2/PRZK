@@ -13,7 +13,7 @@ function openSpot(){const p=S.p,sx=p.x,sy=p.y;let best=null,bs=-1;
   let n=0;for(let k=0;k<16;k++)if(rayFree(x,y,k*Math.PI/8,300))n++;const sc=n*1000-Math.hypot(x-sx,y-sy)/10;if(n>=4&&sc>bs){bs=sc;best=[x,y]}}return best||[sx,sy]}
 let SPOT=null;
 function scReset(night){const p=S.p;if(!SPOT)SPOT=openSpot();p.inv={food:3,water:3,bandage:2,medkit:1};for(const k of['prim','sec','mel','thr'])p.eq[k]='';p.mag={};p.as='fist';p.rl=0;p.x=SPOT[0];p.y=SPOT[1];Z.length=0;S.alarm=null;p.hp=MHP(p);p.bleed=0;p.food=p.water=100;p.st=100;Object.assign(S4,{slow:0,kd:0,burn:0,proj:[],pud:[],gas:[]});
- if(typeof SRCH!='undefined')SRCH=null;S.t=night?1800:900;if(typeof s3dirty=='function')s3dirty();$('bm').dataset.m='';closeBase();PAUSE=false}
+ if(typeof SRCH!='undefined'){SRCH=null;actRing();$('act').classList.remove('warn')}S.t=night?1800:900;if(typeof s3dirty=='function')s3dirty();$('bm').dataset.m='';closeBase();PAUSE=false}
 function arm(gun,n){const p=S.p,w=W_BY[gun],ai=AMMO_ITEM(w[4].ammo),r={};r[gun]=1;r[ai]=Math.min(n||200,Math.max(10,(w[4].mag||1)*5));give(r);const sl=slotFor(gun);p.eq[sl]=gun;p.as=sl;p.mag[gun]=wdef(gun)[4].mag;S.gseen[gun]=1}
 function spawnAt(look,dist,ang){const p=S.p,want=ang==null?Math.random()*6.28:ang;let a=null,bd=9;for(let k=0;k<32;k++){const t=k*Math.PI/16;if(!rayFree(p.x,p.y,t,dist+10))continue;const d=Math.abs(Math.atan2(Math.sin(t-want),Math.cos(t-want)));if(d<bd){bd=d;a=t}}
  if(a==null)a=want;for(let r=dist;r>40;r-=20){const x=p.x+Math.cos(a)*r,y=p.y+Math.sin(a)*r;if(!blocker(x,y,8)){mk(x,y,{look});const z=Z[Z.length-1];z.al=8;z.nx=p.x;z.ny=p.y;return z}}}
@@ -42,7 +42,8 @@ function openScenes(){const b=$('bm');b.dataset.m='scene';PAUSE=true;
  b.querySelectorAll('[data-sc]').forEach(c=>c.onclick=()=>go(c.dataset.sc));b.querySelectorAll('[data-sz]').forEach(c=>c.onclick=()=>go('zom',c.dataset.sz));
  b.querySelectorAll('[data-sb]').forEach(c=>c.onclick=()=>go('boss',c.dataset.sb));b.querySelectorAll('[data-sg]').forEach(c=>c.onclick=()=>go('range',c.dataset.sg));$('scX').onclick=()=>{$('bm').dataset.m='';closeBase();PAUSE=false}}
 document.body.insertAdjacentHTML('beforeend','<button id="scB" title="장면 고르기">🎬 장면</button>');
-$('scB').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(run)openScenes()});
+/* opens on release (click), so the lifting finger cannot land on the list that just appeared */
+$('scB').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation()});$('scB').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(run)openScenes()});
 document.head.insertAdjacentHTML('beforeend',`<style>#scB{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 8px);z-index:4;padding:6px 14px;font-size:13px;border-radius:99px;background:#4a3c14;border-color:#e0b03a;width:auto;max-width:none}
 #bm .scl{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:5px;margin-top:8px}#bm .scc{padding:8px 10px;border-radius:10px;border:1px solid #ffffff1f;background:#ffffff0a;cursor:pointer}#bm .scc b{display:block;font-size:13px}#bm .scc small{font-size:11px;color:var(--mut)}
 #bm .scg{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:5px;align-items:center}#bm .scg i{font-style:normal;font-size:11px;color:var(--mut);width:52px}</style>`);

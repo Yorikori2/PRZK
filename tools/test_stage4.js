@@ -44,4 +44,17 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  r=await p.evaluate(()=>{openChar('stat');const a=document.querySelectorAll('.flt .chip').length;openChar('dex');const b=!!document.querySelector('.dz,.dg');openChar('mod');return{a,b,mod:!!document.querySelector('.s3h')}});ok(r.a==5&&r.b&&r.mod,'🧬 sheet: 능력치·스킬·특성·총기 개조·도감 tabs');
  await p.setViewportSize({width:860,height:412});await p.evaluate(()=>{closeBase();scene('dexz')});await p.waitForTimeout(200);await p.screenshot({path:OUT+'/s4-dexz-land.png'});
  const fps=await p.evaluate(()=>new Promise(res=>{scene('boss','brood');let n=0;const t0=performance.now();(function f(){n++;if(performance.now()-t0<1500)requestAnimationFrame(f);else res(Math.round(n/1.5))})()}));ok(fps>40,'boss fight frame rate '+fps);
+ // damage numbers + weapon card damage
+ await p.setViewportSize({width:412,height:860});
+ r=await p.evaluate(()=>{scene('range','pump');S4.dn=[];const pl=S.p;pl.ac=0;S.tg=null;updTarget(pl);const hp0=Z.map(z=>z.hp);gearAct();const lost=Z.reduce((a,z,i)=>a+(hp0[i]-z.hp),0),shown=S4.dn.reduce((a,e)=>a+e.v,0);hud2();
+  return{n:S4.dn.length,lost:Math.round(lost),shown:Math.round(shown),card:$('wc').querySelector('.wdm').textContent}});
+ ok(r.n>0&&r.lost==r.shown,'damage numbers match the HP taken (shotgun pellets add up per zombie) '+JSON.stringify(r));ok(/⚔ \d+×6/.test(r.card),'weapon card shows damage: '+r.card);
+ await p.waitForTimeout(150);await p.screenshot({path:OUT+'/s4-dmg.png'});
+ // phone: tapping 🎬 keeps the scene list open until something is chosen
+ const m=await b.newContext({viewport:{width:412,height:860},hasTouch:true,isMobile:true});const q=await m.newPage();q.on('pageerror',e=>errs.push(e.message));
+ await q.goto('file://'+require('path').resolve(__dirname,'..',PAGE));await q.waitForTimeout(1200);await q.evaluate(()=>{$('bm').dataset.m='';closeBase();PAUSE=false});
+ await q.tap('#scB');await q.waitForTimeout(600);r=await q.evaluate(()=>({open:$('bm').style.display,m:$('bm').dataset.m,z:Z.length}));
+ ok(r.open=='block'&&r.m=='scene','phone tap on 🎬 keeps the scene list open '+JSON.stringify(r));
+ await q.tap('[data-sz="dog"]');await q.waitForTimeout(400);r=await q.evaluate(()=>({open:$('bm').style.display,dogs:Z.filter(z=>z.look=='dog').length}));ok(r.open=='none'&&r.dogs==4,'choosing a scene closes it and starts the scene '+JSON.stringify(r));
+ await q.tap('#bBag');await q.waitForTimeout(500);r=await q.evaluate(()=>({open:$('bm').style.display,m:$('bm').dataset.m}));ok(r.open=='block'&&r.m=='bag','phone tap on 🎒 keeps the bag open (no ghost click) '+JSON.stringify(r));await m.close();
  ok(!errs.length,'no page errors '+errs.slice(0,3).join(' | '));await b.close()})();
