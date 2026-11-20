@@ -4,7 +4,7 @@ const SC_Z=[['crawler','크롤러','바닥을 기어 와 다리를 붙잡아요 
  ['dog','감염견','4마리 무리로 빠르게 추격'],['burner','불타는 좀비','물리면 화상 (3초)'],['shocker','감전 좀비','물리면 기절 · 근접 공격하면 감전'],['sleeper','잠복자','누워 있다가 다가가면 기습'],['brute','브루트','돌진해서 튕겨 냄 · 체력 600']];
 const SC_B=[['brood','번식체','크롤러를 계속 낳아요 · 체력 900'],['goliath','골리앗','땅 내려찍기 범위 공격 · 체력 1500']];
 const SCENES=[['warn','⚠ 수색 중 좀비 접근','전설급을 수색하는 중 좀비가 다가오면 진행 막대와 상호작용 버튼이 빨갛게 깜빡여요'],['zom','🧟 새 좀비 9종','하나를 골라 직접 싸워 보세요'],['boss','👹 보스전 2종','웨이브 5·10마다 나오는 보스'],
- ['dexz','📖 좀비 도감','본 좀비만 기록 · 능력·약점·출현 장소'],['dexg','🔫 총기 도감 71종','손에 넣은 총만 기록 · 획득처 힌트'],['range','🎯 사격장','71종 중 아무 총이나 골라 쏴 보기']];
+ ['dexz','📖 좀비 도감','본 좀비만 기록 · 능력·약점·출현 장소'],['dexg','🔫 총기 도감 71종','손에 넣은 총만 기록 · 획득처 힌트'],['range','🎯 사격장','71종 중 아무 총이나 골라 쏴 보기'],['mst','🏅 도감 숙련 보상','스피터 9마리 처치 상태 · 한 마리 더 잡으면 피해 +5%'],['col','🗂 총기 수집 보상','권총 13/14 · 마지막 한 자루를 줍는 순간 재장전 -15%']];
 let SCSUB=null;
 /* a spot with long clear lanes (roads, yards) so zombies can walk straight at you */
 const rayFree=(x,y,a,L)=>{for(let t=16;t<=L;t+=8)if(blocker(x+Math.cos(a)*t,y+Math.sin(a)*t,9))return false;return true};
@@ -32,6 +32,10 @@ function scene(k,sub){const p=S.p;SCSUB=sub||null;
  if(k=='range'){const gun=sub||'hpistol';scReset(false);arm(gun,300);if(W_BY[gun][4].ammo=='40mm'||W_BY[gun][4].ammo=='rocket')give({['a'+W_BY[gun][4].ammo]:20});
   for(let i=0;i<6;i++){const z=spawnAt('civ1',70+i*40,-Math.PI/2+(i-2.5)*.18);if(z){z.hp=z.mhp=400;z.stun=999;z.al=0}}
   const w=W_BY[gun],st=w[4];msg('🎯 '+w[1]+' · '+GINFO[gun].sub+' · 피해 '+Math.round(st.d)+(st.pel?'×'+st.pel:'')+' · 장탄 '+st.mag+' · '+NM2(AMMO_ITEM(st.ammo)))}
+ if(k=='mst'){scReset(false);S.bes={spitter:{s:1,k:9}};arm('ar',300);p.as='prim';for(let i=0;i<3;i++){const z=spawnAt('spitter',120+i*45,-Math.PI/2+(i-1)*.25);if(z){z.stun=999;z.al=0;z.cd4=99}}
+  msg('🏅 스피터 9마리 처치 · 한 마리를 더 잡으면 숙련 1단계 (피해 +5%) · 숫자가 바뀌는 걸 보세요')}
+ if(k=='col'){scReset(false);S.gseen={};GUN_IDS.forEach(i=>{if(G4[i][2]=='권총'&&i!='m500')S.gseen[i]=1});s3dirty();arm('pistol',60);
+  msg('🗂 권총 13/14 · 3초 뒤 마지막 권총(타이탄 .500)을 줍습니다');setTimeout(()=>{give({m500:1,a500:10});setTimeout(()=>{DEXT='g';DEXSEL='m500';openChar('dex');const el=document.querySelector('.gsh.done');if(el)el.scrollIntoView({block:'center'})},1600)},3000)}
  hud2()}
 function openScenes(){const b=$('bm');b.dataset.m='scene';PAUSE=true;
  let h='<div class="sh"><h2>🎬 4단계 장면</h2><div class="wt">바뀐 부분만 바로 볼 수 있는 장면이에요</div><button id="scX">✕</button></div><div class="scl">'+SCENES.map(([k,n,d])=>'<div class="scc" data-sc="'+k+'"><b>'+n+'</b><small>'+d+'</small></div>').join('')+'</div>';

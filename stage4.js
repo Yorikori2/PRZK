@@ -46,7 +46,7 @@ function blowUp(z){if(z.ex)return;z.ex=1;const p=S.p,x=z.x,y=z.y;fx.push({k:'boo
  const d=Math.hypot(p.x-x,p.y-y);if(d<70&&seeZ(z,p))hurtP(40*(1-d/140),'💥 부머가 터졌습니다! 독가스를 피하세요');for(const q of Z)if(q!==z&&!q.ex&&Math.hypot(q.x-x,q.y-y)<70)q.hp-=40;z.hp=0}
 function zBite4(z){const k=z.look;if(k=='crawler'){S4.slow=2;s4Msg('🦵 크롤러가 다리를 붙잡았습니다 · 이동 속도 절반')}if(k=='burner'){S4.burn=3;s4Msg('🔥 불이 옮겨 붙었습니다!')}
  if(k=='shocker'){S4.kd=Math.max(S4.kd,.8);S4.zapT=.3;s4Msg('⚡ 감전! 잠시 움직일 수 없습니다')}if(k=='brute')knock(z.x,z.y,26)}
-{const _k=kill;kill=function(z){if(z.look=='bloater')blowUp(z);_k(z);if(!S)return;const b=S.bes=S.bes||{},e=b[z.look]=b[z.look]||{};if(!e.k&&ZN[z.look]&&z.look!='civ1')setTimeout(()=>msg('📖 도감: '+ZN[z.look][1]+' 첫 처치!'),600);e.k=(e.k||0)+1;e.s=1}}
+{const _k=kill;kill=function(z){if(z.look=='bloater')blowUp(z);_k(z);if(!S)return;const b=S.bes=S.bes||{},e=b[z.look]=b[z.look]||{};if(!e.k&&ZN[z.look]&&z.look!='civ1')setTimeout(()=>msg('📖 도감: '+ZN[z.look][1]+' 첫 처치!'),600);e.k=(e.k||0)+1;e.s=1;if(ZN[z.look]&&(e.k==MST[0][0]||e.k==MST[1][0]))setTimeout(()=>msg('🏅 숙련 '+(e.k>=MST[1][0]?2:1)+'단계: '+ZN[z.look][1]+'에게 주는 피해 +'+Math.round(mstOf(z.look)*100)+'%'),900)}}
 if(typeof XPK!='undefined')for(const q of ZOMBIES)XPK[q[0]]=q[3].xp;
 {const _hz=hitZ;hitZ=function(q,dmg,dx,dy,n){if(q.look=='heavy'&&S3&&S3.ctx&&!S3.mel)dmg*=.7;if(q.look=='burner'&&S.fires&&!S3.ctx)dmg*=0;
   if(q.look=='shocker'&&S3&&S3.mel&&S4.shockT<=0){S4.shockT=.6;hurtP(5,'⚡ 감전 좀비를 맨손·근접으로 치면 감전됩니다');S4.zapT=.2}
@@ -71,7 +71,7 @@ function s4Upd(dt){const s=S,p=s.p,bes=s.bes=s.bes||{};S4.slow-=dt;S4.kd-=dt;S4.
  S4.pud=S4.pud.filter(q=>{q.t-=dt;if(Math.hypot(p.x-q.x,p.y-q.y)<q.r){p.hp-=10*dt;if(q.t>3.8)s4Msg('🟢 산성 웅덩이! 빨리 벗어나세요')}return q.t>0});
  S4.gas=S4.gas.filter(q=>{q.t-=dt;if(Math.hypot(p.x-q.x,p.y-q.y)<q.r)p.hp-=6*dt;return q.t>0});
  /* gun catalogue: guns you have held */
- for(const id in p.inv)if(p.inv[id]>0&&G4[id]&&!s.gseen[id]){s.gseen[id]=1}
+ for(const id in p.inv)if(p.inv[id]>0&&G4[id]&&!s.gseen[id])gotGun(id)
  /* search warning (opinion): a zombie closing in while you search */
  S4.warn=0;if(typeof SRCH!='undefined'&&SRCH){let near=1e9;for(const z of Z)if(z.hp>0&&!z.sleep){const d=Math.hypot(z.x-p.x,z.y-p.y);if(d<near&&seeZ(p,z))near=d}
   if(near<200){S4.warn=near<110?2:1;if(!SRCH.warned){SRCH.warned=1;msg('⚠ 좀비가 다가옵니다! 수색을 계속할지 정하세요')}}}
@@ -107,6 +107,16 @@ function zDraw4(z){if(!NEWZ.includes(z.look))return false;const L=z.look,Sz=ZSZ[
 document.body.insertAdjacentHTML('beforeend','<div id="bossbar" style="display:none"><b></b><div><i></i></div></div>');
 {const _h=hud2;hud2=function(){_h();if(!S)return;const b=Z.find(z=>BOSSZ.includes(z.look)&&z.hp>0&&Math.hypot(z.x-S.p.x,z.y-S.p.y)<700),el=$('bossbar');el.style.display=b?'':'none';
   if(b){el.querySelector('b').textContent=(b.look=='goliath'?'👹 ':'🪱 ')+ZN[b.look][1]+' · '+Math.ceil(b.hp)+' / '+Math.round(b.mhp);el.querySelector('i').style.width=Math.max(0,b.hp/b.mhp*100)+'%'}}}
+/* ================= collection rewards ================= */
+/* 도감 숙련: 10 kills of a kind = +5 % damage to that kind, 50 kills = +10 % */
+const MST=[[10,.05],[50,.1]];
+const mstOf=look=>{const e=S&&S.bes&&S.bes[look];const k=e&&e.k||0;return k>=MST[1][0]?MST[1][1]:k>=MST[0][0]?MST[0][1]:0};
+{const _hz=hitZ;hitZ=function(q,dmg,dx,dy,n){if(S3&&S3.ctx&&ZN[q.look])dmg*=1+mstOf(q.look);return _hz(q,dmg,dx,dy,n)}}
+/* 총기 수집: own every gun of a class once = that class reloads 15 % faster */
+const GSUBS=['권총','기관단총','산탄총','소총','저격','기관총','발사기','특수'];
+const subDone=sb=>!!S&&!!S.gseen&&GUN_IDS.every(i=>G4[i][2]!=sb||S.gseen[i]);
+{const _w=s3W;s3W=function(id){const w=_w(id);if(w&&w!==W_BY[id]&&!w._c4){w._c4=1;const sb=G4[id]&&G4[id][2];if(sb&&subDone(sb))w[4].rlm=(w[4].rlm||1)*.85}return w}}
+function gotGun(id){S.gseen[id]=1;const sb=G4[id][2];if(subDone(sb)){s3dirty();setTimeout(()=>msg('🗂 '+sb+' '+GUN_IDS.filter(i=>G4[i][2]==sb).length+'종 수집 완료! '+sb+' 재장전 -15%'),700)}}
 /* ================= ghost clicks ================= */
 /* sheets open on pointerdown; the click that follows the same tap must not press whatever just appeared under the finger */
 {let opened=0;new MutationObserver(()=>{const b=$('bm');if(b.style.display=='block'&&!b.dataset.open){b.dataset.open=1;opened=performance.now()}else if(b.style.display!='block')delete b.dataset.open}).observe($('bm'),{attributes:true,attributeFilter:['style']});
@@ -121,14 +131,14 @@ S4.dn=[];
   el.insertAdjacentHTML('beforeend','<div class="wdm"><b>⚔ '+d+(s.pel?'×'+s.pel:'')+'</b><span>'+(rof>=1?rof.toFixed(1)+'발/s':(s.cd).toFixed(1)+'초/발')+' · 사거리 '+Math.round(s.r||0)+'</span></div>')}}
 /* ================= bestiary + gun catalogue (tab in the 🧬 sheet) ================= */
 let DEXT='z',DEXSEL=null;
-const ZCV={};function zIcon(id,shadow){const k=id+(shadow?'s':'');if(!ZCV[k]){const q=ZN[id],c=zCanvas(id,0,q[7]);if(shadow){const x=c.getContext('2d');x.globalCompositeOperation='source-in';x.fillStyle='#1b2228';x.fillRect(0,0,c.width,c.height)}ZCV[k]=c.toDataURL()}return ZCV[k]}
+const ZCV={};function zIcon(id,shadow){const k=id+(shadow?'s':'');if(!ZCV[k]){const q=ZN[id],c=zCanvas(id,0,q[7]);if(shadow){const x=c.getContext('2d');x.globalCompositeOperation='source-in';x.fillStyle='#46525c';x.fillRect(0,0,c.width,c.height)}ZCV[k]=c.toDataURL()}return ZCV[k]}
 function dexView(){const s=S,b=s.bes||{};let h='<div class="flt"><span class="chip'+(DEXT=='z'?' on':'')+'" data-dx="z">🧟 좀비 도감 '+ZOMBIES.filter(q=>b[q[0]]&&b[q[0]].s).length+'/'+ZOMBIES.length+'</span><span class="chip'+(DEXT=='g'?' on':'')+'" data-dx="g">🔫 총기 도감 '+GUN_IDS.filter(i=>s.gseen[i]).length+'/'+GUN_IDS.length+'</span></div>';
- if(DEXT=='z'){h+='<div class="dz">'+ZOMBIES.map(q=>{const e=b[q[0]]||{},seen=e.s;return'<div class="dzc'+(seen?'':' un')+(DEXSEL==q[0]?' on':'')+'" data-zid="'+q[0]+'"><img src="'+zIcon(q[0],!seen)+'"><b>'+(seen?q[1]:'???')+'</b><small style="color:'+ZCAT[q[2]][1]+'">'+ZCAT[q[2]][0]+(e.k?' · 처치 '+e.k:'')+'</small></div>'}).join('')+'</div>';
+ if(DEXT=='z'){h+='<div class="dz">'+ZOMBIES.map(q=>{const e=b[q[0]]||{},seen=e.s;return'<div class="dzc'+(seen?'':' un')+(DEXSEL==q[0]?' on':'')+'" data-zid="'+q[0]+'"><img src="'+zIcon(q[0],!seen)+'"><b>'+(seen?q[1]:'???')+'</b><small style="color:'+ZCAT[q[2]][1]+'">'+ZCAT[q[2]][0]+(e.k?' · 처치 '+e.k:'')+'</small>'+(mstOf(q[0])?'<i class="mb">🏅'+(e.k>=50?2:1)+'</i>':'')+'</div>'}).join('')+'</div>';
   const q=DEXSEL&&ZN[DEXSEL],e=q&&b[q[0]]||{};
   if(q)h+=e.s?'<div class="dzd"><img src="'+zIcon(q[0])+'"><div><h3>'+q[1]+' <span class="badge" style="color:'+ZCAT[q[2]][1]+';border-color:'+ZCAT[q[2]][1]+'">'+ZCAT[q[2]][0]+'</span></h3>'+
    ['체력:hp:1500','속도:spd:140','공격:dmg:40'].map(t=>{const[n,k,m]=t.split(':');return'<div class="zb"><span>'+n+'</span>'+bar2(q[3][k]/m*100,k=='hp'?'#e0574f':k=='spd'?'#4aa0e0':'#e0a030')+'<b>'+q[3][k]+'</b></div>'}).join('')+
-   '<p><b>능력</b> '+q[4]+'</p><p><b>약점</b> '+q[5]+'</p><p><b>출현</b> '+q[6]+'</p><p class="mut">처치 '+(e.k||0)+' · 경험치 '+q[3].xp+' · 위험도 '+'★'.repeat(q[3].th)+'</p></div></div>':'<div class="dzd un"><div><h3>???</h3><p class="mut">아직 만나지 못한 좀비예요. 눈으로 확인하면 능력과 약점이 기록돼요.</p><p><b>출현</b> '+q[6]+'</p></div></div>'}
- else{const subs=['권총','기관단총','산탄총','소총','저격','기관총','발사기','특수'];for(const sb of subs){const L=GUN_IDS.filter(i=>G4[i][2]==sb);h+='<div class="s3h">'+sb+' '+L.filter(i=>s.gseen[i]).length+'/'+L.length+'</div><div class="dg">'+L.map(i=>{const seen=s.gseen[i],r=RAR[G4[i][3]];return'<div class="dgc'+(seen?'':' un')+(DEXSEL==i?' on':'')+'" data-gid="'+i+'"><img src="'+icon(i)+'"><b style="color:'+(seen?r[1]:'#ffffff55')+'">'+(seen?W_BY[i][1]:'???')+'</b></div>'}).join('')+'</div>'}
+   '<p><b>능력</b> '+q[4]+'</p><p><b>약점</b> '+q[5]+'</p><p><b>출현</b> '+q[6]+'</p><div class="mst4"><span>🏅 숙련 '+(e.k>=50?'2단계 (최고)':e.k>=10?'1단계':'없음')+' · 이 좀비에게 주는 피해 +'+Math.round(mstOf(q[0])*100)+'%</span>'+bar2(Math.min(100,(e.k||0)/(e.k>=10?50:10)*100),'#ffd36a')+'<small>'+(e.k>=50?'최고 단계 달성':'다음 단계까지 '+((e.k>=10?50:10)-(e.k||0))+'마리 · 10마리 +5% · 50마리 +10%')+'</small></div><p class="mut">처치 '+(e.k||0)+' · 경험치 '+q[3].xp+' · 위험도 '+'★'.repeat(q[3].th)+'</p></div></div>':'<div class="dzd un"><div><h3>???</h3><p class="mut">아직 만나지 못한 좀비예요. 눈으로 확인하면 능력과 약점이 기록돼요.</p><p><b>출현</b> '+q[6]+'</p></div></div>'}
+ else{const subs=['권총','기관단총','산탄총','소총','저격','기관총','발사기','특수'];for(const sb of subs){const L=GUN_IDS.filter(i=>G4[i][2]==sb);const dn=subDone(sb);h+='<div class="s3h gsh'+(dn?' done':'')+'">'+sb+' '+L.filter(i=>s.gseen[i]).length+'/'+L.length+(dn?' · <b>✓ 수집 완료 · 재장전 -15%</b>':' · 모두 모으면 재장전 -15%')+'</div><div class="dg">'+L.map(i=>{const seen=s.gseen[i],r=RAR[G4[i][3]];return'<div class="dgc'+(seen?'':' un')+(DEXSEL==i?' on':'')+'" data-gid="'+i+'"><img src="'+icon(i)+'"><b style="color:'+(seen?r[1]:'#ffffff55')+'">'+(seen?W_BY[i][1]:'???')+'</b></div>'}).join('')+'</div>'}
   const i=DEXSEL&&G4[DEXSEL]?DEXSEL:null;if(i){const w=W_BY[i],st=w[4],r=RAR[w[3]],seen=s.gseen[i];
    h+='<div class="dzd gun'+(seen?'':' un')+'"><img src="'+icon(i)+'"><div><h3>'+(seen?w[1]:'???')+' <span class="badge" style="color:'+r[1]+';border-color:'+r[1]+'">'+r[0]+'</span></h3>'+
    (seen?'<p class="mut">'+GINFO[i].sub+' · '+NM2(AMMO_ITEM(st.ammo))+' · '+w[5]+'</p><div class="gs4">'+[['피해',Math.round(st.d)+(st.pel?'×'+st.pel:'')],['연사',(1/st.cd).toFixed(1)+'/s'],['사거리',st.r],['장탄',st.mag],['소음',st.nz+'/5'],['무게',st.wt+'kg']].concat(st.pierce?[['관통',st.pierce]]:[]).concat(st.aoe?[['폭발',st.aoe]]:[]).map(([a,v])=>'<div><span>'+a+'</span><b>'+v+'</b></div>').join('')+'</div>':'<p class="mut">아직 손에 넣지 못한 총이에요.</p>')+'<p><b>획득처</b> '+w[6]+'</p></div></div>'}}
@@ -142,7 +152,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 #act.warn{animation:s4w .5s steps(2) infinite;box-shadow:0 0 0 3px #ff4a3a}@keyframes s4w{50%{box-shadow:0 0 0 3px #ff4a3a00}}#act.srch.warn{background-image:conic-gradient(#ff6a5acc var(--k),#ffffff14 0)}
 #bossbar{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 140px);width:min(60vw,360px);z-index:4;pointer-events:none;text-align:center;font-size:12px;text-shadow:0 1px 2px #000}
 #bossbar div{height:8px;border-radius:5px;background:#000a;border:1px solid #ffffff33;overflow:hidden;margin-top:2px}#bossbar i{display:block;height:100%;background:linear-gradient(90deg,#a8221c,#e0574f)}
-#bm .flt{flex-wrap:wrap}#wc .wdm{grid-column:1/3;display:flex;justify-content:space-between;gap:6px;font-size:10.5px;color:var(--mut);margin-top:-1px}#wc .wdm b{color:#ffb070;font-size:11.5px}#bm .dz{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:5px}#bm .dzc,#bm .dgc{padding:5px;border-radius:10px;border:1px solid #ffffff1a;background:#ffffff08;text-align:center;cursor:pointer}
+#bm .flt{flex-wrap:wrap}#bm .dzc{position:relative}#bm .dzc .mb{position:absolute;right:4px;top:3px;font-style:normal;font-size:10px}#bm .mst4{margin:6px 0;font-size:11.5px}#bm .mst4 small{display:block;color:var(--mut);font-size:10.5px}#bm .gsh.done{color:#9fe0a0}#bm .gsh b{color:#9fe0a0}#wc .wdm{grid-column:1/3;display:flex;justify-content:space-between;gap:6px;font-size:10.5px;color:var(--mut);margin-top:-1px}#wc .wdm b{color:#ffb070;font-size:11.5px}#bm .dz{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:5px}#bm .dzc,#bm .dgc{padding:5px;border-radius:10px;border:1px solid #ffffff1a;background:#ffffff08;text-align:center;cursor:pointer}
 #bm .dzc img{width:56px;height:56px;image-rendering:pixelated;display:block;margin:0 auto}#bm .dzc b,#bm .dgc b{display:block;font-size:11.5px}#bm .dzc small{font-size:10px}#bm .dzc.un img{opacity:.8}#bm .dzc.on,#bm .dgc.on{border-color:#ffd36a}
 #bm .dg{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:4px}#bm .dgc img{width:100%;height:32px;object-fit:contain;image-rendering:pixelated}#bm .dgc.un img{filter:brightness(0) opacity(.35)}
 #bm .dzd{display:grid;grid-template-columns:96px 1fr;gap:10px;margin-top:8px;padding:9px;border-radius:12px;background:#ffffff0a;border:1px solid #ffffff1f}#bm .dzd img{width:96px;height:96px;image-rendering:pixelated;object-fit:contain}

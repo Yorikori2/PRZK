@@ -50,6 +50,16 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
   return{n:S4.dn.length,lost:Math.round(lost),shown:Math.round(shown),card:$('wc').querySelector('.wdm').textContent}});
  ok(r.n>0&&r.lost==r.shown,'damage numbers match the HP taken (shotgun pellets add up per zombie) '+JSON.stringify(r));ok(/⚔ \d+×6/.test(r.card),'weapon card shows damage: '+r.card);
  await p.waitForTimeout(150);await p.screenshot({path:OUT+'/s4-dmg.png'});
+ // rewards: bestiary mastery and gun collection
+ r=await p.evaluate(()=>{scene('mst');const pl=S.p,shot=()=>{const z=Z.find(z=>z.look=='spitter'&&z.hp>0);z.hp=z.mhp=5000;S.tg=z;S.tgIn=true;pl.ac=0;pl.mag.ar=30;const h=z.hp;S3.cc=0;const old=Math.random;Math.random=()=>.99;gearAct();Math.random=old;return h-z.hp};
+  const d0=shot();const z=Z.find(z=>z.look=='spitter');z.hp=0;upd(1/60);const k=S.bes.spitter.k,d1=shot();S.bes.spitter.k=50;const d2=shot();return{d0:+d0.toFixed(2),d1:+d1.toFixed(2),d2:+d2.toFixed(2),k}});
+ ok(r.k==10&&Math.abs(r.d1/r.d0-1.05)<.01&&Math.abs(r.d2/r.d0-1.10)<.01,'bestiary mastery: 10 kills +5%, 50 kills +10% damage to that zombie '+JSON.stringify(r));
+ await p.evaluate(()=>{openChar('dex');DEXT='z';DEXSEL='spitter';openChar('dex')});r=await p.evaluate(()=>({m:document.querySelector('.mst4').textContent,badge:!!document.querySelector('.dzc .mb')}));ok(/2단계/.test(r.m)&&r.badge,'bestiary shows mastery level and badge: '+r.m.slice(0,40));
+ await p.screenshot({path:OUT+'/s4-mst.png'});
+ r=await p.evaluate(()=>{closeBase();scReset(false);S.gseen={};GUN_IDS.forEach(i=>{if(G4[i][2]=='권총'&&i!='m500')S.gseen[i]=1});s3dirty();const a=wdef('pistol')[4].rlm,ar0=wdef('ar')[4].rlm;give({m500:1});gearUpd(1/60);const b=wdef('pistol')[4].rlm,ar1=wdef('ar')[4].rlm;
+  DEXT='g';DEXSEL='m500';openChar('dex');return{a:+a.toFixed(3),b:+b.toFixed(3),rifleSame:ar0==ar1,done:document.querySelectorAll('.gsh.done').length,txt:document.querySelector('.gsh.done').textContent}});
+ ok(Math.abs(r.b/r.a-.85)<.001&&r.rifleSame&&r.done==1,'gun collection: all 14 pistols → pistols reload -15%, other classes unchanged '+JSON.stringify(r));
+ await p.evaluate(()=>{const el=document.querySelector('.gsh.done');el.scrollIntoView({block:'start'})});await p.waitForTimeout(100);await p.screenshot({path:OUT+'/s4-col.png'});await p.evaluate(()=>closeBase());
  // phone: tapping 🎬 keeps the scene list open until something is chosen
  const m=await b.newContext({viewport:{width:412,height:860},hasTouch:true,isMobile:true});const q=await m.newPage();q.on('pageerror',e=>errs.push(e.message));
  await q.goto('file://'+require('path').resolve(__dirname,'..',PAGE));await q.waitForTimeout(1200);await q.evaluate(()=>{$('bm').dataset.m='';closeBase();PAUSE=false});
