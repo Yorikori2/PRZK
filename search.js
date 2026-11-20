@@ -1,7 +1,8 @@
-/* PROJECT LEGACY — sample: timed searching and wall checks.
+/* PROJECT LEGACY — timed searching and wall checks.
    - Searching takes 1–4 s: the better the best thing inside (item or gun part), the longer it takes.
      Moving, getting hit, attacking or driving stops it; the loot stays put and the search resumes where it stopped.
    - Containers can only be searched when nothing solid is between you and them (no looting through walls).
+   - Opening epic / legendary loot makes noise that draws nearby zombies; the 손재주 skill cuts search time 10 % per rank.
    - Player attacks and zombie bites need a clear line too (no hitting through walls); walls are 6 px thick,
      so the line is checked every 3 px instead of every 8 px. */
 'use strict';
@@ -15,10 +16,13 @@ function seeObj(p,o){const nx=Math.max(o.x+2,Math.min(o.x+o.w-2,p.x)),ny=Math.ma
 const SRT={c:1,u:1.6,r:2.4,e:3.2,l:4};
 let SRCH=null;
 function srchTime(r,pid){let best='c';const up=k=>{if(k&&RORD.indexOf(k)>RORD.indexOf(best))best=k};const ids=Object.keys(r).filter(k=>r[k]>0);for(const k of ids)up(itemRar(k));if(pid)up(P_BY[pid][3]);
- return{best,T:Math.min(4,SRT[best]+.1*Math.max(0,ids.length-2))}}
+ const sk=typeof s3sk=='function'?s3sk('surv5'):0; // 손재주: -10 % per rank
+ return{best,T:+(Math.min(4,SRT[best]+.1*Math.max(0,ids.length-2))*(1-.1*sk)).toFixed(2)}}
 /* called by ia() once the loot is rolled; returns true when it took over */
 function srchBusy(o){if(SRCH){msg(SRCH.id==o.id?'🔍 수색 중…':'이미 다른 곳을 수색 중');return true}const pd=S.pend&&S.pend[o.id];if(!pd)return false;srchGo(o,pd,true);return true}
-function srchStart(o,ctx){ctx.pid=s3SearchRoll(o,ctx.kind,ctx.tier,ctx.r);const t=srchTime(ctx.r,ctx.pid);ctx.T=t.T;ctx.best=t.best;ctx.t=0;S.pend=S.pend||{};S.pend[o.id]=ctx;srchGo(o,ctx,false)}
+function srchStart(o,ctx){ctx.pid=s3SearchRoll(o,ctx.kind,ctx.tier,ctx.r);const t=srchTime(ctx.r,ctx.pid);ctx.T=t.T;ctx.best=t.best;ctx.t=0;S.pend=S.pend||{};S.pend[o.id]=ctx;srchGo(o,ctx,false);
+ /* prying open something valuable is loud: epic = small noise (160 px), legendary = loud (320 px) */
+ const nz={e:1,l:2}[t.best];if(nz){noise(S.p.x,S.p.y,nz);msg(nz>1?'🔊 쾅! 육중한 잠금장치를 여는 소리가 크게 울렸어요':'🔊 덜컹! 무거운 걸 여는 소리가 났어요')}}
 function srchGo(o,ctx,resume){const p=S.p;SRCH={id:o.id,o,ctx,x:p.x,y:p.y,hp:p.hp};if(resume)msg('🔍 수색 이어서 ('+Math.round(ctx.t/ctx.T*100)+'%)');actRing()}
 function actRing(){const a=$('act');if(!a)return;a.classList.toggle('srch',!!SRCH);if(SRCH)a.style.setProperty('--k',Math.min(100,SRCH.ctx.t/SRCH.ctx.T*100)+'%')}
 function srchStop(why){if(!SRCH)return;msg('✋ 수색 중단 · '+why+' (다시 누르면 이어서)');SRCH=null;actRing()}

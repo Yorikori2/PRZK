@@ -31,7 +31,7 @@ for(const n of NEW){const pos=await p.evaluate(n=>{const bi=W0.b.findIndex(b=>b.
  R.perf[n]=fps;const f=OUT+'/s1_'+NEW.indexOf(n)+'.png';await p.screenshot({path:f});R.shots.push(n+' -> '+f+' '+JSON.stringify(pos&&{x:Math.round(pos.x),y:Math.round(pos.y)}))}
 // loot one container in the lab and in the fire station via the game's own interaction
 R.loot=await p.evaluate(()=>{const out={};for(const n of['연구소','소방서','물류창고']){const bi=W0.b.findIndex(b=>b.name==n);const o=W0.objs.find(o=>o.b==bi&&LOOTT[o.t]);if(!o){out[n]='no container';continue}
- S.p.x=o.x+o.w/2;S.p.y=o.y+o.h+10;let k=0;while(blocker(S.p.x,S.p.y,7)&&k<20){S.p.y+=4;k++}const before=JSON.stringify(S.p.inv);ia();out[n]={obj:o.t,changed:JSON.stringify(S.p.inv)!=before,msg:document.getElementById('msg').textContent.slice(0,60)}}return out});
+ S.p.x=o.x+o.w/2;S.p.y=o.y+o.h+10;let k=0;while(blocker(S.p.x,S.p.y,7)&&k<20){S.p.y+=4;k++}const before=JSON.stringify(S.p.inv);Z.length=0;ia();let w=0;while(typeof SRCH!='undefined'&&SRCH&&w<200){gearUpd(.05);w++}out[n]={obj:o.t,changed:JSON.stringify(S.p.inv)!=before,msg:document.getElementById('msg').textContent.slice(0,60)}}return out});
 // minimap with antenna
 await p.evaluate(()=>{S.p.inv.antenna=1});await p.waitForTimeout(400);await p.locator('#mmw').screenshot({path:OUT+'/s1_mm.png'});
 // save -> legacy save migration

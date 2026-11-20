@@ -75,6 +75,8 @@ body.uied,body.uied #c{touch-action:none;overscroll-behavior:none}#uiBar .ur{dis
 #uiBar{transition:opacity .15s}body.uidrag #uiBar{opacity:.12;pointer-events:none}
 .uilift{box-shadow:0 14px 34px #000c,0 0 0 2px #ffd36a!important;z-index:8!important;transition:none!important}
 body.uileft #r{flex-direction:row-reverse}body.uileft #tr{align-items:flex-start}body.uileft #rc{align-items:flex-start}
+#st,#r,#wc,#qk,#tr,#sd,#dg{transition:opacity .25s}#uiBar .uck{font-size:12px;display:flex;gap:6px;align-items:center;cursor:pointer}#uiBar .uck small{color:var(--mut);font-size:10.5px}#uiBar .uck input{accent-color:#ffd36a;width:16px;height:16px}#uiLock.on{background:#5a4a1a;border-color:#ffd36a}
+body.uied .uilk{outline:2px solid #9aa3aa!important;cursor:not-allowed}body.uied .uilk::after{background:#c9ced3!important}
 body.uied #dg::after{top:auto;bottom:-14px}body.uied .uisel{outline:2px solid #ffd36a}body.uied #c{filter:brightness(.55)}
 </style></head><body>
 <canvas id="c"></canvas>
@@ -85,9 +87,10 @@ body.uied #dg::after{top:auto;bottom:-14px}body.uied .uisel{outline:2px solid #f
 <div id="rc"><div id="qk" class="g"></div><div id="wc" class="g"></div></div><div id="sd"><button class="g rb" id="bBag" title="가방 (I)">🎒</button><button class="g rb" id="bCh" title="캐릭터 (K)">🧬</button><button class="g rb" id="cCr" title="제작 (C)">🛠</button><button class="g rb" id="bBd" title="바리케이드 (F)">🧱</button><button class="g rb" id="bse" style="display:none" title="거점 (B)">🏠</button></div>
 <div id="r"><button class="big" id="act">상호<br>작용</button><button class="big" id="atk">공격</button></div>
 <div id="uiBar" style="display:none"><span>🎛 <b id="uiSel">요소를 눌러 선택</b> · 끄는 동안 이 창은 투명해져요</span>
-<div class="ur"><button onclick="uiScale(-.1)">－ 작게</button><button onclick="uiScale(.1)">＋ 크게</button><button onclick="uiReset(false)">선택 초기화</button><button onclick="uiReset(true)">모두 초기화</button></div>
+<div class="ur"><button onclick="uiScale(-.1)">－ 작게</button><button onclick="uiScale(.1)">＋ 크게</button><button onclick="uiReset(false)">선택 초기화</button><button onclick="uiReset(true)">모두 초기화</button><button id="uiLock" onclick="uiLock()">🔒 위치 잠금</button></div>
 <div class="ur"><i>추천 배치</i><button onclick="uiPreset('def')">기본</button><button onclick="uiPreset('left')">✋ 왼손잡이</button><button onclick="uiPreset('wide')">🔭 넓은 시야</button></div>
 <div class="ur"><i>UI 투명도</i><input id="uiOp" type="range" min="50" max="100" step="5" value="100" oninput="uiOpacity(+this.value)"><b id="uiOpV">100%</b></div>
+<div class="ur"><label class="uck"><input type="checkbox" id="uiCb" checked onchange="uiCombat(this.checked)"> ⚔ 위험할 때 진하게 <small>(좀비 근처 · 체력 35% 이하 · 경보)</small></label></div>
 <div class="ur"><button onclick="uiBarMove()">↕ 이 창 옮기기</button><button class="ok" onclick="uiEdit(false)">완료</button></div></div>
 <div id="bm"></div>
 <div id="menu"><h1>PROJECT LEGACY</h1><small>고해상도 탑다운 좀비 생존 RPG<br>왼쪽 화면 드래그: 이동 · 건물에 들어가면 지붕이 열립니다<br>거점을 업그레이드하며 살아남으세요</small>
@@ -170,14 +173,14 @@ function give(r){const p=S.p,s=[];for(const k in r){if(!r[k])continue;invAdd(p,k
 const avail=o=>S.lo[o.id]===undefined||(S.wv<300&&S.tt-S.lo[o.id]>2400);
 const rdist=(o,x,y)=>Math.hypot(Math.max(o.x-x,0,x-o.x-o.w),Math.max(o.y-y,0,y-o.y-o.h));
 const SPEC={police:{pistol:1,a9mm:16},mil:{a556:30},clinic:{bandage:5,food:2},school:{food:4,water:3},mart:{food:5,water:5},hard:{wood:10,scrap:6}};
-function nearObj(){const p=S.p;let best=null,bd=30;const gx=p.x/DC|0,gy=p.y/DC|0;for(let y=gy-1;y<=gy+1;y++)for(let x=gx-1;x<=gx+1;x++){if(x<0||y<0||x>=DX||y>=DY)continue;for(const d of DG[y*DX+x]){if(d.k!='o'||!LOOTT[d.r.t])continue;const dd=rdist(d.r,p.x,p.y);if(dd<bd){bd=dd;best=d.r}}}return best}
+function nearObj(){const p=S.p;let best=null,bd=30;const gx=p.x/DC|0,gy=p.y/DC|0;for(let y=gy-1;y<=gy+1;y++)for(let x=gx-1;x<=gx+1;x++){if(x<0||y<0||x>=DX||y>=DY)continue;for(const d of DG[y*DX+x]){if(d.k!='o'||!LOOTT[d.r.t])continue;const dd=rdist(d.r,p.x,p.y);if(dd<bd&&seeObj(p,d.r)){bd=dd;best=d.r}}}return best}
 function ia(){const p=S.p,s=S;if(s.dr){s.dr=0;p.y+=24;if(blocker(p.x,p.y,7,'car'))p.y-=48;return msg('하차')}
  if(Math.hypot(s.car.x-p.x,s.car.y-p.y)<46){if((p.inv.fuel||0)>0){s.dr=1;p.x=s.car.x;p.y=s.car.y;return msg('🚗 운전 (연료 '+(p.inv.fuel|0)+')')}return msg('연료가 필요합니다')}
  const core=BP.find(o=>o.t=='tentS'||o.t=='container'||o.t=='hq');if(core&&rdist(core,p.x,p.y)<60){openBase();return}
  for(const q of s.pois)if(q.on&&Math.hypot(q.x-p.x,q.y-p.y)<40){q.on=0;const r=roll(q.k=='drop'?7:q.k=='zone'?9:11);r.ammo=(r.ammo||0)+12;resolveAmmo(r,'mil');lootExtra(r,'mil',5);{const q=s3PartRoll(5,.6);if(q)s3GotPart(q)}r.bandage=(r.bandage||0)+2;if(q.k=='bunker')r.scrap=(r.scrap||0)+8;return give(r)}
  let ab=null;for(const d of W0.objs)if(d.t=='alarmbox'&&rdist(d,p.x,p.y)<34){ab=d;break}
  if(ab){const kd=W0.b[ab.b].kind;if((s.aoff[kd]||0)>=s.day)return msg('경보 장치는 이미 꺼져 있다');s.aoff[kd]=s.day+1;s3Xp(40,'경보 해제');if(s.alarm&&s.alarm.kind==kd)s.alarm=null;return msg('🔕 '+W0.b[ab.b].name+' 경보 장치 해제 (내일까지)')}
- const o=nearObj();if(o){if(!avail(o))return msg(s.wv>=300?'아이템 리스폰 중단됨':'이미 수색한 '+NM[o.t]);const first=s.lo[o.id]===undefined;
+ const o=nearObj();if(o){if(!avail(o))return msg(s.wv>=300?'아이템 리스폰 중단됨':'이미 수색한 '+NM[o.t]);const first=s.lo[o.id]===undefined;if(srchBusy(o))return;
   const b=W0.b[o.b],kind=b?b.kind:'',tier=TIER[kind]||1,r=roll(1+(Math.random()*3|0)+(tier>=3?1:0),LOOTT[o.t]);
   if(KL[kind]&&Math.random()<.4+tier*.07){const k=KL[kind][Math.random()*KL[kind].length|0];r[k]=(r[k]||0)+1+(Math.random()<tier*.1?1:0)}
   if(OBJM[o.t]&&Math.random()<.35)r[OBJM[o.t]]=(r[OBJM[o.t]]||0)+1;
@@ -186,7 +189,7 @@ function ia(){const p=S.p,s=S;if(s.dr){s.dr=0;p.y+=24;if(blocker(p.x,p.y,7,'car'
   if(SPEC[kind]&&!s.ks[kind]&&(kind!='police'&&kind!='mil'||['gunrack','locker','ammo'].includes(o.t))){s.ks[kind]=1;for(const k in SPEC[kind])r[k]=(r[k]||0)+SPEC[kind][k];if(kind=='mil'&&Math.random()<.3)r.ar=1}
   let note='';if(o.radio&&!s.ks.radio){if(Math.random()<.25){s.ks.radio=1;r.antenna=1}else note=' · 📻 쓸 만한 안테나는 없었다'}
   const gun=['gunrack','locker','ammo','pcar','truck'].includes(o.t);if(gun&&(kind=='police'||kind=='mil')){const ai=ammoFor(kind);r[ai]=(r[ai]||0)+amtOf(ai);if(Math.random()<.12){const wi=pickW(WLOOT[kind],tier);if(wi)r[wi]=(r[wi]||0)+1}}
-  s.lo[o.id]=s.tt;s3Search(o,kind,tier,r);give(r);if(note)msg($('msg').textContent+note);if(first&&ALR[kind]&&!s.alarm&&(s.aoff[kind]||0)<s.day&&Math.random()<ALR[kind])alarm(o.b);return}
+  srchStart(o,{r,kind,tier,note,first});return}
  msg('주변에 상호작용할 대상이 없음')}
 function use(k){return use2(k)}
 const RCP=RCP2;
@@ -229,7 +232,7 @@ function upd(dt){const s=S,p=s.p,ds=dt*spd,dm=HM(),bl=s.base.lv;s.tt+=ds;s.t+=ds
   if(tx!=null){const ex=tx-z.x,ey=ty-z.y,ed=Math.hypot(ex,ey)||1;if(ed>16){const sp=(nt?70:45)*(z.b?.8:1)*(z.look=='runner'?1.8:z.look=='heavy'?.65:1)*dt,bk=mv(z,ex/ed*sp,ey/ed*sp,7);z.mv=1;z.ph+=sp/10;z.dir=Math.abs(ex)>Math.abs(ey)?(ex<0?'l':'r'):(ey<0?'u':'d');
    if(bk&&z.cd<=0&&(bk.seg!==undefined||bk.hp!==undefined)){z.cd=1;const dmg=bk.seg!==undefined?(z.b?25:z.look=='heavy'?15:5):(z.b?30:z.look=='heavy'?24:8);if(bk.seg!==undefined){const mx=WHP[bl.wall],cur=(s.base.whp[bk.seg]??1)*mx-dmg;s.base.whp[bk.seg]=Math.max(0,cur/mx);if(cur<=0)msg('🧱 방벽이 무너졌습니다!');rebuildBase()}else{bk.hp-=dmg;if(bk.hp<=0){S.bar.splice(S.bar.indexOf(bk),1);msg('바리케이드 파괴됨')}}}}}
   if(z.look=='screamer'&&!z.scr&&d<300&&los(z.x,z.y-12,p.x,p.y-12))scream(z);
-  if(d<20&&z.cd<=0&&!s.dr){const am=armMul(p);p.hp-=(z.b?18:z.look=='heavy'?16:7)*dm*am;blood(p.x,p.y,-dx/d,-dy/d,2);if(Math.random()<.25*s3BleedCh()*dm*(p.eq.head=='helmet'?.5:1)*(am<.95?.6:1))p.bleed=1;z.cd=1}}
+  if(d<20&&z.cd<=0&&!s.dr&&seeZ(z,p)){const am=armMul(p);p.hp-=(z.b?18:z.look=='heavy'?16:7)*dm*am;blood(p.x,p.y,-dx/d,-dy/d,2);if(Math.random()<.25*s3BleedCh()*dm*(p.eq.head=='helmet'?.5:1)*(am<.95?.6:1))p.bleed=1;z.cd=1}}
  if(bl.turret){const dmg=[0,15,22,30][bl.turret]*s3Tur(),rate=(bl.gen>=2&&(s.base.pow||!nt))?.55:.85;for(const t of BP){if(t.t!='turret')continue;t.cd=(t.cd||0)-dt;const tx=t.x+t.w/2,ty=t.y+t.h/2-8;let best=null,bd=230;for(const z of Z){const d=Math.hypot(z.x-tx,z.y-ty);if(d<bd&&los(tx,ty,z.x,z.y-10,1)){bd=d;best=z}}
   if(best){t.a=Math.atan2(best.y-12-ty,best.x-tx);const ta=['a556','a762','a9mm'].find(k=>(s.base.st[k]||0)>=1);if(t.cd<=0&&ta){t.cd=rate;s.base.st[ta]--;best.hp-=dmg;fx.push({k:'tr',a:[tx+Math.cos(t.a)*14,ty+Math.sin(t.a)*14],b:[best.x,best.y-14],l:.06});blood(best.x,best.y,Math.cos(t.a),Math.sin(t.a),3)}}}}
  Z=Z.filter(z=>{if(z.hp<=0){s.kills++;kill(z);if(Math.random()<.2)invAdd(p,'scrap',1);return false}return z.w||z.g||Math.hypot(z.x-p.x,z.y-p.y)<1100});
@@ -311,4 +314,4 @@ document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>start(b.dataset.d
 $('ld').onclick=()=>start(0,true);try{if(localStorage.getItem(SAVE))$('ld').style.display='block'}catch(e){}
 requestAnimationFrame(loop);
 </script>
-<script src="stage3.js"></script></body></html>
+<script src="stage3.js"></script><script src="search.js"></script></body></html>

@@ -1,6 +1,7 @@
-// Timed searching + wall checks. Runs the same wall scenarios on the game (before) and the sample (after).
+// Timed searching (1–4 s, 손재주 skill, noise for epic/legendary) + wall checks (no looting / hitting / biting through walls).
+// usage: node tools/test_loot.js <outdir> [page]   (default page: index.html)
 // usage: node tools/test_loot.js <outdir>
-const {chromium}=require('playwright');const OUT=process.argv[2]||'.';const path=require('path');
+const {chromium}=require('playwright');const PAGE=process.argv[3]||'index.html';const OUT=process.argv[2]||'.';const path=require('path');
 const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
 const boot=`localStorage.clear();start('S',false);if(S.pg&&!S.pg.tr.length){S.pg.tr=['cop'];$('bm').dataset.m='';closeBase();PAUSE=false}`;
 // find a container that touches a wall, and spots on both sides of that wall
@@ -29,15 +30,14 @@ async function walls(b,page){const p=await b.newPage({viewport:{width:412,height
    return{d:Math.round(zy-py),lost:Math.round(100-pl.hp)}}return null});
  await p.close();return{...r,errs}}
 (async()=>{const b=await chromium.launch();
- const before=await walls(b,'index.html'),after=await walls(b,'loot-sample.html');
- console.log('scenario: '+before.o+' against a wall, zombie '+before.d+'px away across it');
- console.log('game now  : '+JSON.stringify(before));console.log('sample    : '+JSON.stringify(after));
- ok(before.outsideFinds&&!after.outsideFinds,'searching through the wall: game allows it, sample blocks it');ok(after.insideFinds,'sample: same container still searchable from inside');
- ok(!after.targets&&after.hit==0,'sample: no auto-target / hit on a zombie behind the wall (game: target '+before.targets+', hit '+Math.round(before.hit)+')');
- ok(before.bite&&before.bite.lost>0&&after.bite&&after.bite.lost==0,'zombie '+(after.bite||{}).d+'px away across a wall: game bites (-'+(before.bite||{}).lost+' HP), sample does not (-'+(after.bite||{}).lost+')');
+ const after=await walls(b,PAGE);
+ console.log('scenario: '+after.o+' against a wall, zombie '+after.d+'px away across it · '+JSON.stringify(after));
+ ok(!after.outsideFinds,'cannot search a container through the wall');ok(after.insideFinds,'same container still searchable from inside');
+ ok(!after.targets&&after.hit==0,'no auto-target / hit on a zombie behind the wall');
+ ok(after.bite&&after.bite.lost==0,'zombie '+(after.bite||{}).d+'px away across a wall cannot bite (-'+(after.bite||{}).lost+' HP)');
  // timed searching
  const p=await b.newPage({viewport:{width:412,height:860}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
- await p.goto('file://'+path.resolve(__dirname,'..','loot-sample.html'));await p.waitForTimeout(300);await p.evaluate(boot);
+ await p.goto('file://'+path.resolve(__dirname,'..',PAGE));await p.waitForTimeout(300);await p.evaluate(boot);
  let r=await p.evaluate(()=>({food:srchTime({food:1}).T,rare:srchTime({food:1,ar:1}).T,part:srchTime({food:1},'o_th').T,many:srchTime({food:1,water:1,scrap:2,wood:1,cloth:1,elec:1,cement:1,meds:1,bandage:1,pills:1,fuel:1,a9mm:1,a12g:1,a556:1}).T,arR:itemRar('ar')}));
  ok(r.food==1&&r.part==4&&r.rare>r.food&&r.many<=4,'search time 1–4 s by best item '+JSON.stringify(r));
  r=await p.evaluate(()=>{const o=W0.objs.find(o=>LOOTT[o.t]&&o.t=='fridge')||W0.objs.find(o=>LOOTT[o.t]);const pl=S.p;
@@ -51,4 +51,10 @@ async function walls(b,page){const p=await b.newPage({viewport:{width:412,height
  ok(r.done&&r.got&&r.lo&&!r.pend,'search finishes and gives the loot '+JSON.stringify(r));
  await p.evaluate(()=>{const o=W0.objs.find(o=>LOOTT[o.t]&&avail(o)&&o.t=='gunrack')||W0.objs.find(o=>LOOTT[o.t]&&avail(o)&&o.w>20);const pl=S.p;pl.x=o.x+o.w/2;pl.y=o.y+o.h+9;Z.length=0;srchStart(o,{r:{a9mm:12,pistol:1},kind:'police',tier:4,note:'',first:false});SRCH.ctx.t=SRCH.ctx.T*.55;camX=pl.x;camY=pl.y});
  await p.waitForTimeout(300);await p.screenshot({path:OUT+'/loot-search.png'});
- ok(!errs.length&&!before.errs.length&&!after.errs.length,'no page errors '+errs.concat(after.errs).join(' | '));await b.close()})();
+ r=await p.evaluate(()=>{const base=srchTime({ar:1}).T;S.pg.sk.surv5=3;const fast=srchTime({ar:1}).T;S.pg.sk.surv5=0;S.pg.lv=3;openChar('skill');const c=document.querySelector('[data-k="surv5"]');const lock=c.classList.contains('lock');S.pg.kp=1;c.click();return{base,fast,lock,rank:S.pg.sk.surv5|0}});
+ ok(r.fast<r.base&&Math.abs(r.fast-r.base*.7)<.02&&!r.lock&&r.rank==1,'손재주: learnable at Lv 3 without earlier tiers, rank 3 = -30% search time '+JSON.stringify(r));
+ r=await p.evaluate(()=>{closeBase();const pl=S.p,res={};for(const[k,item]of[['common',{food:1}],['epic',{ar:1}],['legend',{}]]){if(SRCH){SRCH=null}Z.length=0;mk(pl.x+250,pl.y,{look:'heavy'});mk(pl.x+130,pl.y,{look:'heavy'});for(const z of Z){z.al=0;z.stun=0}
+   const o=W0.objs.find(o=>LOOTT[o.t]&&avail(o)&&!(S.pend||{})[o.id]&&o.id!=res.last);res.last=o.id;const ctx={r:Object.assign({},item),kind:'police',tier:4,note:'',first:false};
+   const old=s3SearchRoll;if(k=='legend')s3SearchRoll=()=> 'o_th';else s3SearchRoll=()=>null;srchStart(o,ctx);s3SearchRoll=old;res[k]=Z.map(z=>z.al>0?1:0).join('');delete S.pend[o.id];SRCH=null}delete res.last;return res});
+ ok(r.common=='00'&&r.epic=='01'&&r.legend=='11','loot noise: none for common, 160px for epic, 320px for legendary (zombies alerted '+JSON.stringify(r)+')');
+ ok(!errs.length&&!after.errs.length,'no page errors '+errs.concat(after.errs).join(' | '));await b.close()})();
