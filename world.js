@@ -2,7 +2,7 @@
    Coordinates are world pixels. Each block is 896x704, roads are 128 wide. */
 'use strict';
 const TIER={houses:1,mart:1,school:2,hard:2,clinic:3,police:4,mil:5,fire:2,ware:2,apt:1,church:1,lab:5},ALR={school:.1,clinic:.2,police:.3,mil:.4,lab:.45};
-const BW=896,BH=704,RD=128;let NBX=5,NBY=3;const WW=(NBX+1)*RD+NBX*BW,WH=(NBY+1)*RD+NBY*BH;
+const BW=896,BH=704,RD=128;let NBX=(typeof MAPCFG!='undefined'&&MAPCFG&&MAPCFG.nbx)||5,NBY=(typeof MAPCFG!='undefined'&&MAPCFG&&MAPCFG.nby)||3;const WW=(NBX+1)*RD+NBX*BW,WH=(NBY+1)*RD+NBY*BH;
 const bo=(c,r)=>[RD+c*(BW+RD),RD+r*(BH+RD)];
 let W0;
 function newWorld(){W0={fl:[],hw:[],vw:[],objs:[],dec:[],roofs:[],rooms:[],ents:[],lights:[],zs:[],b:[],spawn:{},base:null,car:null};return W0}
@@ -28,7 +28,7 @@ const crossIcon=(x,y)=>{R('#d33a3a',x-2,y-6,4,12);R('#d33a3a',x-6,y-2,12,4)};
 const badgeIcon=(x,y)=>{R('#d9b52a',x-6,y-6,12,12);R('#34466a',x-3,y-3,6,6)};
 
 /* ================= CLINIC ================= */
-function buildClinic(){const A=Bld('진료소',1,0,'clinic');const L=56,RR=840,TP=56,CN=232,CS=296,MID=428,BT=560;
+function buildClinic(c=1,r=0){const A=Bld('진료소',c,r,'clinic');const L=56,RR=840,TP=56,CN=232,CS=296,MID=428,BT=560;
  A.fl(L,TP,304,CN-TP,'vinylG');A.fl(360,TP,328,CN-TP,'tileB');A.fl(688,TP,152,CN-TP,'tileP');A.fl(L,CN,RR-L,64,'hall');
  A.fl(L,CS,176,BT-CS,'vinylW');A.fl(232,CS,320,BT-CS,'stone');A.fl(552,CS,144,MID-CS,'grey');A.fl(552,MID,144,BT-MID,'small');A.fl(696,CS,144,BT-CS,'wood');
  A.fl(0,BT,BW,40,'walk');A.fl(0,600,BW,104,'asphalt');
@@ -76,7 +76,7 @@ function buildClinic(){const A=Bld('진료소',1,0,'clinic');const L=56,RR=840,T
  A.z('patient',258,186);A.z('doctor',476,212);A.z('nurse',400,280);A.z('civ1',244,492);A.z('patient',130,150)}
 
 /* ================= POLICE ================= */
-function buildPolice(){const A=Bld('경찰서',0,0,'police');const L=48,RR=848,TP=72,CN=240,CS=296,BT=520;
+function buildPolice(c=0,r=0){const A=Bld('경찰서',c,r,'police');const L=48,RR=848,TP=72,CN=240,CS=296,BT=520;
  A.fl(L,TP,184,CN-TP,'concrete');A.fl(232,TP,160,CN-TP,'grey');A.fl(392,TP,208,CN-TP,'check');A.fl(600,TP,248,CN-TP,'carpet');A.fl(L,CN,RR-L,56,'hall');
  A.fl(L,CS,256,BT-CS,'concrete');A.fl(304,CS,288,BT-CS,'stone');A.fl(592,CS,256,BT-CS,'wood');A.fl(0,BT,BW,40,'walk');A.fl(0,560,BW,144,'asphalt');
  A.dec(L,CN,RR-L,56,(ox,oy)=>{R('#2f4a7a',ox+L,oy+264,RR-L,3);R('#d9b52a',ox+L,oy+270,RR-L,2)});
@@ -115,7 +115,7 @@ function buildPolice(){const A=Bld('경찰서',0,0,'police');const L=48,RR=848,T
  A.z('cop',140,214);A.z('civ1',90,480);A.z('cop',460,400);A.z('cop',700,150);A.z('civ3',740,460)}
 
 /* ================= SCHOOL ================= */
-function buildSchool(){const A=Bld('학교',2,0,'school');const L=48,RR=848,TP=64,CN=264,CS=328,BT=600;
+function buildSchool(c=2,r=0){const A=Bld('학교',c,r,'school');const L=48,RR=848,TP=64,CN=264,CS=328,BT=600;
  A.fl(L,TP,560,CN-TP,'wood');A.fl(448,TP,160,CN-TP,'carpet');A.fl(608,TP,240,CN-TP,'wood');A.fl(L,CN,RR-L,64,'hall');A.fl(L,CS,400,BT-CS,'gym');A.fl(448,CS,264,BT-CS,'tileK');A.fl(712,CS,136,BT-CS,'small');
  A.fl(0,BT,BW,32,'walk');A.fl(60,640,330,58,'dirt');
  A.dec(80,350,340,220,(ox,oy)=>{const x=ox+80,y=oy+352,w=330,h=212;R('#f4f4ee',x,y,w,2);R('#f4f4ee',x,y+h-2,w,2);R('#f4f4ee',x,y,2,h);R('#f4f4ee',x+w-2,y,2,h);R('#f4f4ee',x+w/2-1,y,2,h);for(let a=0;a<6.28;a+=.05)R('#f4f4ee',x+w/2+Math.cos(a)*26,y+h/2+Math.sin(a)*26,2,2);[x+2,x+w-42].forEach(k=>{R('#c94f3a55',k,y+h/2-40,40,80)})});
@@ -167,7 +167,7 @@ function buildMilitary(){const A=Bld('군부대',0,2,'mil');
  [[140,480],[300,480],[600,540],[400,420],[660,300],[200,600]].forEach(([x,y])=>A.z('soldier',x,y));A.z('soldier',140,240);A.z('soldier',640,180)}
 
 /* ================= MART + GAS ================= */
-function buildMart(){const A=Bld('편의점 · 주유소',2,1,'mart');
+function buildMart(c=2,r=1){const A=Bld('편의점 · 주유소',c,r,'mart');
  A.fl(48,72,352,328,'tileK');A.fl(400,72,120,328,'concrete');A.fl(0,400,540,32,'walk');A.fl(24,432,516,260,'asphalt');A.fl(560,40,320,640,'asphalt');A.fl(740,400,120,120,'grey');
  A.dec(24,432,516,260,(ox,oy)=>{for(let x=60;x<=500;x+=56)R('#e8e8e0',ox+x,oy+470,2,60);R('#e8e8e0',ox+60,oy+470,440,2);for(let x=60;x<=500;x+=56)R('#e8e8e0',ox+x,oy+600,2,60);R('#e8e8e0',ox+60,oy+658,440,2)});
  A.dec(560,40,320,640,(ox,oy)=>{for(let i=0;i<5;i++)blob(ox+620+hh(i,3,3)*200,oy+120+hh(i,4,4)*260,8,4,'#2a2c30');R('#d9c35a',ox+560,oy+380,300,2)});
@@ -191,7 +191,7 @@ function buildMart(){const A=Bld('편의점 · 주유소',2,1,'mart');
  A.z('civ2',220,240);A.z('civ1',460,260);A.z('civ3',700,260);A.z('civ1',300,520)}
 
 /* ================= HARDWARE + RESTAURANT ================= */
-function buildHardware(){const A=Bld('철물점 · 식당',2,2,'hard');
+function buildHardware(c=2,r=2){const A=Bld('철물점 · 식당',c,r,'hard');
  A.fl(48,72,252,348,'concrete');A.fl(300,72,130,348,'concrete');A.fl(480,72,240,348,'woodD');A.fl(720,72,128,348,'tileK');A.fl(0,420,BW,32,'walk');A.fl(24,452,848,240,'asphalt');
  const hN=(x0,x1,y,h)=>{const o=A.ox;R('#8a7a6a',o+48,y,382,h);R('#d98a2a',o+48,y+h-12,382,6);R('#00000030',o+48,y+h-3,382,3);winD(o+100,30,y,h);winD(o+220,30,y,h)};
  shell(A,48,72,430,420,hN,[[140,200]]);vseg(A,300,72,420,[[300,340]],34);
@@ -262,7 +262,7 @@ function buildHouses(c,r,seed){const A=Bld('주택가',c,r,'houses');A.fl(0,0,BW
 
 /* ================= BASE LOT ================= */
 const BASE={x0:40,y0:48,x1:856,y1:664,gate:[400,496]};
-function buildBaseLot(){const A=Bld('거점',1,1,'base');A.fl(0,0,BW,BH,'gravel');
+function buildBaseLot(c=1,r=1){const A=Bld('거점',c,r,'base');A.fl(0,0,BW,BH,'gravel');
  A.dec(0,0,BW,BH,(ox,oy)=>{for(let x=120;x<800;x+=64)R('#e8e8e044',ox+x,oy+120,2,40);for(let i=0;i<10;i++)blob(ox+80+hh(i,9,1)*720,oy+80+hh(i,9,2)*560,10,5,'#7f7b72')});
  W0.base={ox:A.ox,oy:A.oy,...BASE};A.room('거점',448,26)}
 /* base modules -> props for current levels (lv: {core,wall,bench,med,farm,water,gen,turret,tower}) */
