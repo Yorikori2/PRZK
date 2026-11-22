@@ -21,8 +21,8 @@ let UIEw;(async()=>{const b=await chromium.launch();const ctx=await b.newContext
  const qk0=await box(p,'qk');await p.mouse.move(qk0.x+5,qk0.y+5);await p.mouse.down();await p.mouse.move(405,855,{steps:6});await p.mouse.up();
  const qk1=await box(p,'qk');ok(qk1.x+qk1.w<=413&&qk1.y+qk1.h<=861,'quick slots clamped on screen '+JSON.stringify(qk1));
  // drag toolbar
- await p.mouse.move(sd0.x+10,sd0.y+10);await p.mouse.down();await p.mouse.move(200,600,{steps:6});await p.mouse.up();
- const sd1=await box(p,'sd');ok(Math.abs(sd1.x-190)<4&&Math.abs(sd1.y-590)<4,'toolbar dragged to '+sd1.x+','+sd1.y);
+ await p.mouse.move(sd0.x+10,sd0.y+10);await p.mouse.down();await p.mouse.move(200,450,{steps:6});await p.mouse.up();
+ const sd1=await box(p,'sd');ok(Math.abs(sd1.x-190)<4&&Math.abs(sd1.y-440)<4,'toolbar dragged to '+sd1.x+','+sd1.y);
  // select status panel and enlarge
  await p.mouse.click(st0.x+60,st0.y+20);await p.evaluate(()=>{uiScale(.1);uiScale(.1)});const st1=await box(p,'st');
  ok(st1.w>st0.w*1.15,'status panel scaled '+st0.w+'→'+st1.w);ok(await p.evaluate(()=>document.getElementById('uiSel').textContent)=='상태창','selection label');
