@@ -18,7 +18,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  // ambience levels per scene
  const lv=async k=>{await p.evaluate(k=>scene6(k),k);await p.waitForTimeout(1600);return p.evaluate(()=>({cg:'cg' in AMB,rain:+AMB.rain.g.gain.value.toFixed(3),fire:/모닥불/.test(AT.mode)?1:0,muff:Math.round(AMB.muff.frequency.value),mode:AT.mode}))};
  const day=await lv('day'),night=await lv('night');await p.screenshot({path:OUT+'/at-night.png'});const rain=await lv('rain');await p.screenshot({path:OUT+'/at-rain.png'});const fire=await lv('fire');const indoor=await lv('indoor');
- ok(!night.cg&&!fire.cg,'no ringing insect tone at night or by the fire');ok(rain.rain>.05&&day.rain<.01,'rain layer on rainy days '+rain.rain);ok(fire.fire>.03&&day.fire<.01,'campfire loud near the base fire '+fire.fire);
+ ok(!night.cg&&!fire.cg,'no constant ringing tone at night or by the fire');ok(rain.rain>.05&&day.rain<.01,'rain layer on rainy days '+rain.rain);ok(fire.fire>.03&&day.fire<.01,'campfire loud near the base fire '+fire.fire);
  ok(indoor.muff<1000&&day.muff>10000&&/실내/.test(indoor.mode),'indoors the outside is muffled ('+indoor.muff+'Hz) · '+indoor.mode);
  r=await p.evaluate(()=>({d:AT.drops.length,r:rainNow()}));ok(r.d==0&&!r.r,'rain stops when another scene is picked');
  await p.evaluate(()=>scene6('rain'));await p.waitForTimeout(500);r=await p.evaluate(()=>AT.drops.length);ok(r>50,'rain draws falling drops: '+r);
@@ -26,7 +26,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  r=await p.evaluate(()=>{scene6('day');return !('wind' in AMB)});ok(r,'no constant wind noise layer');
  r=await p.evaluate(async()=>{const res={};for(const run of[false,true]){const sr=AC.sampleRate,oc=new OfflineAudioContext(1,sr*.3|0,sr);const ko=OUT,kb=BUS.step;delete BUS.step;const a0=acx;acx=()=>oc;OUT=oc.destination;
    try{stepSound(run,false)}finally{acx=a0;OUT=ko;BUS.step=kb}const x=(await oc.startRendering()).getChannelData(0);let pk=0;for(const v of x)pk=Math.max(pk,Math.abs(v));res[run?'run':'walk']=+pk.toFixed(3)}return res});
- ok(r.walk>.08&&r.run>r.walk*2,'footsteps are audible and running is louder (peak '+JSON.stringify(r)+')');
+ ok(r.walk>.05&&r.run>r.walk*2,'footsteps are audible and running is louder (peak '+JSON.stringify(r)+')');
  r=await p.evaluate(()=>{scene6('walk');S.p.mv=1;jp=-1;jx=1;jy=0;const dry=detMul();setRain(true);const wet=detMul();jp=null;jx=0;return{dry,wet:+wet.toFixed(2)}});ok(r.dry==1&&r.wet==.7,'rain: zombies notice you from 70% as far '+JSON.stringify(r));
  await p.evaluate(()=>scene6('rainwalk'));await p.waitForTimeout(8200);r=await p.evaluate(()=>$('atmo').textContent);await p.screenshot({path:OUT+'/at-rainrun.png'});ok(/112px/.test(r),'rain: running footsteps reach only 112px · '+r);
  r=await p.evaluate(()=>{let n=0;const s0=setRain;setRain=(...a)=>{n++;return s0(...a)};for(let d=0;d<200;d++){S.wx=null;S.day++;gearUpd(1/60)}setRain=s0;S.wx=null;return n});ok(r>35&&r<85,'about 30% of days start rainy: '+r+'/200');
@@ -35,4 +35,10 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  r=await p.evaluate(()=>new Promise(res=>{closeBase();const b=$('snd');const was=SND;b.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true}));setTimeout(()=>{b.dispatchEvent(new PointerEvent('pointerup',{bubbles:true}));const tap=SND!==was;SND=was;
    b.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true}));setTimeout(()=>{b.dispatchEvent(new PointerEvent('pointerup',{bubbles:true}));res({tap,hold:$('bm').dataset.m})},650)},100)}));
  ok(r.tap&&r.hold=='mixer','🔊 tap toggles, hold opens the mixer '+JSON.stringify(r));
+ // crickets: chirp pattern at night only, quiet when a zombie is close
+ r=await p.evaluate(()=>new Promise(res=>{scene6('night');Z.length=0;AMB.chirps=0;AMB.quiet=0;const a=AC;let pulses=0;const oc=a.createOscillator.bind(a);a.createOscillator=()=>{pulses++;return oc()};
+   setTimeout(()=>{const night=AMB.chirps,np=pulses;scene6('day');AMB.chirps=0;setTimeout(()=>{const day=AMB.chirps;scene6('night');Z.length=0;AMB.chirps=0;mk(S.p.x+120,S.p.y,{look:'civ1'});Z[Z.length-1].stun=99;
+     setTimeout(()=>{a.createOscillator=oc;res({night,perSec:+(night/3).toFixed(1),pulsesPerChirp:+(np/Math.max(1,night)).toFixed(1),day,nearZombie:AMB.chirps})},2500)},2000)},3000)}));
+ ok(r.night>=6&&r.perSec<=8&&r.pulsesPerChirp>=3&&r.pulsesPerChirp<=4.2,'crickets at night: 4 crickets, each about 1 chirp/s of 3-4 pulses '+JSON.stringify(r));
+ ok(r.day==0,'no crickets by day');ok(r.nearZombie==0,'crickets fall silent while a zombie is close');
  ok(!errs.length,'no page errors '+errs.join(' | '));await b.close()})();

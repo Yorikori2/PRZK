@@ -1,7 +1,7 @@
 /* PROJECT LEGACY — sample: footsteps, ambience, weather and a sound mixer.
    Footsteps: walking (stick part way) is quiet and zombies notice you from 55 % as far; running is loud and every step
    pulls zombies within 160 px. Indoor tap / outdoor scuff, in the 0.8–3 kHz band so phone speakers play them.
-   Ambience (no wind bed, no insect tone): day birds, a quiet night, rain, base campfire crackle, muffled outside + drips indoors.
+   Ambience (no wind bed): day birds, night crickets (synthesized chirps, go quiet when zombies are close), rain, base campfire crackle, muffled outside + drips indoors.
    Weather: a day can be rainy — zombies hear 30 % less and the edges of the view get darker.
    Mixer: tap 🔊 = on/off, hold 🔊 = separate volumes for guns, zombies, footsteps, ambience (saved in this browser).
    Needs gunfeel.js (audio, SND) and zsound.js. */
@@ -41,7 +41,7 @@ const moveMag=()=>Math.min(1,Math.hypot(jx,jy));
 const isRun=()=>!!S&&!!S.p.mv&&!S.dr&&moveMag()>.75;
 /* how far zombies notice you (used by the page's chase rule): walk 55 %, stand 70 %, run 100 %; rain ×0.7 */
 function detMul(){if(!S||S.dr)return 1;const m=!S.p.mv?.7:isRun()?1:.55;return m*(rainNow()?.7:1)}
-function stepSound(run,indoor){viaBus('step',()=>{const a=acx();if(!a)return;const t=a.currentTime,v=run?.75:.3;
+function stepSound(run,indoor){viaBus('step',()=>{const a=acx();if(!a)return;const t=a.currentTime,v=run?.85:.26;
  if(indoor){nz(a,t,{f:1500+Math.random()*400,q:3,v:v,d:.06});nz(a,t+.005,{f:900,q:2,v:v*.6,d:.05})}
  else{nz(a,t,{f:1100+Math.random()*500,q:1.2,v:v,d:run?.11:.08});nz(a,t+.03,{f:2600+Math.random()*600,q:1.5,v:v*.45,d:.06})}})}
 function stepTick(){if(!S)return;const p=S.p;if(!p.mv||S.dr){AT.lastPh=p.ph||0;return}const ph=p.ph||0;if(Math.floor(ph/2.2)==Math.floor(AT.lastPh/2.2))return;AT.lastPh=ph;
@@ -51,7 +51,13 @@ let AMB=null;
 function ambInit(){const a=acx();if(!a)return null;if(AMB)return AMB;const ab=bus('amb');
  const muff=a.createBiquadFilter();muff.type='lowpass';muff.frequency.value=20000;const bed=a.createGain();bed.connect(muff).connect(ab);
  const rainS=a.createBufferSource();rainS.buffer=NB;rainS.loop=true;const rh=a.createBiquadFilter();rh.type='bandpass';rh.frequency.value=3500;rh.Q.value=.6;const rg=a.createGain();rg.gain.value=0;rainS.connect(rh).connect(rg).connect(bed);rainS.start();
- AMB={a,bed,muff,rain:{g:rg},next:{bird:0,drip:0,crack:0,drop:0}};return AMB}
+ /* 4 crickets around the player: each chirp = 3-4 short sine pulses (~30 ms) at 4.3-5.2 kHz, one chirp every 0.6-1.1 s */
+ const crk=[0,1,2,3].map(i=>({f:4300+Math.random()*900,pulses:3+(i%2),gap:.6+Math.random()*.5,v:.012+Math.random()*.01,pan:[-.8,-.3,.35,.85][i],next:0}));
+ AMB={a,bed,muff,rain:{g:rg},crk,quiet:0,next:{bird:0,drip:0,crack:0,drop:0}};return AMB}
+function chirp(A,c,t){const a=A.a;let dest=A.bed;if(a.createStereoPanner){const pn=a.createStereoPanner();pn.pan.value=c.pan;pn.connect(A.bed);dest=pn}
+ for(let i=0;i<c.pulses;i++){const tt=t+i*.048,o=a.createOscillator(),g2=a.createGain();o.type='sine';o.frequency.setValueAtTime(c.f,tt);o.frequency.linearRampToValueAtTime(c.f*.985,tt+.03);
+  g2.gain.setValueAtTime(.0001,tt);g2.gain.linearRampToValueAtTime(c.v,tt+.008);g2.gain.linearRampToValueAtTime(c.v*.7,tt+.022);g2.gain.exponentialRampToValueAtTime(.0001,tt+.032);o.connect(g2).connect(dest);o.start(tt);o.stop(tt+.04)}
+ AMB.chirps=(AMB.chirps||0)+1}
 const lvl=(node,v,a)=>node.gain.setTargetAtTime(v,a.currentTime,.4);
 function baseFire(){const c=BP.find(o=>o.t=='tentS'||o.t=='container'||o.t=='hq');return c?{x:c.x+c.w/2,y:c.y+c.h+24}:null}
 function ambTick(dt){if(!SND||!S){if(AMB)lvl(AMB.rain.g,0,AMB.a);return}const A=ambInit();if(!A)return;const a=A.a,t=a.currentTime,p=S.p;
@@ -60,6 +66,9 @@ function ambTick(dt){if(!SND||!S){if(AMB)lvl(AMB.rain.g,0,AMB.a);return}const A=
  A.muff.frequency.setTargetAtTime(indoor?700:20000,t,.3);lvl(A.rain.g,rain?(indoor?.05:.09):0,a);
  const N=A.next,now=performance.now(),bed=A.bed,go=f=>viaBus('amb',f);
  if(!night&&!rain&&now>N.bird){N.bird=now+1800+Math.random()*4000;const n=2+Math.random()*3|0,b0=2400+Math.random()*900;for(let i=0;i<n;i++){const s=a.createOscillator(),g2=a.createGain(),tt=t+i*.13;s.type='sine';s.frequency.setValueAtTime(b0,tt);s.frequency.exponentialRampToValueAtTime(b0*1.35,tt+.07);g2.gain.setValueAtTime(.0008,tt);g2.gain.linearRampToValueAtTime(indoor?.01:.035,tt+.01);g2.gain.exponentialRampToValueAtTime(.0008,tt+.09);s.connect(g2).connect(bed);s.start(tt);s.stop(tt+.1)}}
+ /* crickets: night, not raining; they fall silent while a zombie is within 220 px and start again a few seconds later */
+ if(Z.some(z=>z.hp>0&&Math.hypot(z.x-p.x,z.y-p.y)<220))A.quiet=now+4000;
+ if(night&&!rain&&now>A.quiet)for(const c of A.crk){if(now>c.next){if(c.next)chirp(A,c,t+Math.random()*.05);c.next=now+(c.gap+Math.random()*.25)*1000}}
  if(indoor&&now>N.drip){N.drip=now+1500+Math.random()*3500;go(()=>tone(a,t,{f0:1500+Math.random()*600,f1:700,d:.08,v:.06}))}
  if(fd<500&&now>N.crack){N.crack=now+50+Math.random()*200;const k=Math.pow(1-fd/500,1.5);go(()=>nz(a,t,{f:1800+Math.random()*2200,q:4,v:.22*k,d:.03}))}
  if(rain&&now>N.drop){N.drop=now+50+Math.random()*120;go(()=>nz(a,t,{f:3000+Math.random()*3000,q:6,v:.035,d:.02}))}}
