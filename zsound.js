@@ -1,4 +1,4 @@
-/* PROJECT LEGACY — sample: zombie voices and positional sound.
+/* PROJECT LEGACY — zombie voices and positional sound.
    Every sound that happens in the world gets quieter with distance (silent past 1000 px) and is panned left/right by where it is,
    so danger off-screen can be heard before it is seen. The player's own guns stay full volume and centred.
    Needs gunfeel.js (audio context, SND switch). */

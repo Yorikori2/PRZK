@@ -109,8 +109,13 @@ function zDraw4(z){if(!NEWZ.includes(z.look))return false;const L=z.look,Sz=ZSZ[
 {const _dr=draw;draw=function(){if(S4.shake>0){const k=S4.shake*14;ctx.save();ctx.translate((Math.random()-.5)*k,(Math.random()-.5)*k);_dr();ctx.restore()}else _dr()}}
 /* boss bar */
 document.body.insertAdjacentHTML('beforeend','<div id="bossbar" style="display:none"><b></b><div><i></i></div></div>');
-{const _h=hud2;hud2=function(){_h();if(!S)return;const b=Z.find(z=>BOSSZ.includes(z.look)&&z.hp>0&&Math.hypot(z.x-S.p.x,z.y-S.p.y)<700),el=$('bossbar');el.style.display=b?'':'none';
-  if(b){el.querySelector('b').textContent=(b.look=='goliath'?'👹 ':'🪱 ')+ZN[b.look][1]+' · '+Math.ceil(b.hp)+' / '+Math.round(b.mhp);el.querySelector('i').style.width=Math.max(0,b.hp/b.mhp*100)+'%'}}}
+/* top health bar: bosses within 700 px, otherwise the nearest elite (or wave boss) within 320 px */
+const ELITEZ=['brute','heavy','stalker','shocker'];
+function topFoe(){const p=S.p;let best=null,bd=1e9;for(const z of Z){if(z.hp<=0||z.sleep)continue;const d=Math.hypot(z.x-p.x,z.y-p.y),boss=BOSSZ.includes(z.look),el=ELITEZ.includes(z.look)||z.b;
+  if(!(boss&&d<700)&&!(el&&d<320))continue;const sc=d-(boss?5000:0);if(sc<bd){bd=sc;best=z}}return best}
+{const _h=hud2;hud2=function(){_h();if(!S)return;const b=topFoe(),el=$('bossbar');el.style.display=b?'':'none';
+  if(b){const boss=BOSSZ.includes(b.look),q=ZN[b.look],cat=boss?'보스':'엘리트',nm=q?q[1]:'거대 좀비',ic=boss?(b.look=='goliath'?'👹':'🪱'):'⚠';
+   el.classList.toggle('elite',!boss);el.querySelector('b').textContent=ic+' '+cat+' · '+nm+' · '+Math.ceil(b.hp)+' / '+Math.round(b.mhp);el.querySelector('i').style.width=Math.max(0,b.hp/b.mhp*100)+'%'}}}
 /* ================= collection rewards ================= */
 /* 도감 숙련: 10 kills of a kind = +5 % damage to that kind, 50 kills = +10 % */
 const MST=[[10,.05],[50,.1]];
@@ -155,7 +160,7 @@ function bindDex(b){b.querySelectorAll('[data-dx]').forEach(c=>c.onclick=()=>{DE
 document.head.insertAdjacentHTML('beforeend',`<style>
 #act.warn{animation:s4w .5s steps(2) infinite;box-shadow:0 0 0 3px #ff4a3a}@keyframes s4w{50%{box-shadow:0 0 0 3px #ff4a3a00}}#act.srch.warn{background-image:conic-gradient(#ff6a5acc var(--k),#ffffff14 0)}
 #bossbar{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 140px);width:min(60vw,360px);z-index:4;pointer-events:none;text-align:center;font-size:12px;text-shadow:0 1px 2px #000}
-#bossbar div{height:8px;border-radius:5px;background:#000a;border:1px solid #ffffff33;overflow:hidden;margin-top:2px}#bossbar i{display:block;height:100%;background:linear-gradient(90deg,#a8221c,#e0574f)}
+#bossbar div{height:8px;border-radius:5px;background:#000a;border:1px solid #ffffff33;overflow:hidden;margin-top:2px}#bossbar i{display:block;height:100%;background:linear-gradient(90deg,#a8221c,#e0574f)}#bossbar.elite{width:min(46vw,260px)}#bossbar.elite i{background:linear-gradient(90deg,#6a3aa8,#b06ae0)}#bossbar.elite div{height:6px}
 #bm .flt{flex-wrap:wrap}#bm .dzc{position:relative}#bm .dzc .mb{position:absolute;right:4px;top:3px;font-style:normal;font-size:10px}#bm .mst4{margin:6px 0;font-size:11.5px}#bm .mst4 small{display:block;color:var(--mut);font-size:10.5px}#bm .gsh.done{color:#9fe0a0}#bm .gsh b{color:#9fe0a0}#wc .wdm{grid-column:1/3;display:flex;justify-content:space-between;gap:6px;font-size:10.5px;color:var(--mut);margin-top:-1px}#wc .wdm b{color:#ffb070;font-size:11.5px}#bm .dz{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:5px}#bm .dzc,#bm .dgc{padding:5px;border-radius:10px;border:1px solid #ffffff1a;background:#ffffff08;text-align:center;cursor:pointer}
 #bm .dzc img{width:56px;height:56px;image-rendering:pixelated;display:block;margin:0 auto}#bm .dzc b,#bm .dgc b{display:block;font-size:11.5px}#bm .dzc small{font-size:10px}#bm .dzc.un img{opacity:.8}#bm .dzc.on,#bm .dgc.on{border-color:#ffd36a}
 #bm .dg{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:4px}#bm .dgc img{width:100%;height:32px;object-fit:contain;image-rendering:pixelated}#bm .dgc.un img{filter:brightness(0) opacity(.35)}
