@@ -93,6 +93,6 @@ function shotFeel(id){const p=S.p,pr=GP[id],k=FLASH[pr]??1,mx=p.x+p.fx*16,my=p.y
 {const _wc=wcard;wcard=function(){_wc();if(!S)return;const id=actW(S.p),tr=GT[id];const el=$('wc');if(tr&&el&&GTR[tr])el.insertAdjacentHTML('beforeend','<div class="wtr">✦ '+GTR[tr][0]+' <span>'+GTR[tr][1]+'</span></div>')}}
 {const _dv=dexView;dexView=function(){let h=_dv();if(DEXT=='g'&&DEXSEL&&GT[DEXSEL]&&S.gseen[DEXSEL]){const t=GTR[GT[DEXSEL]];h=h.replace('<p><b>획득처</b>','<p><b>특징</b>✦ '+t[0]+' · '+t[1]+'</p><p><b>획득처</b>')}return h}}
 /* sound on/off */
-$('top').insertAdjacentHTML('afterbegin','<button id="snd" title="효과음">'+(SND?'🔊':'🔇')+'</button>');
+$('sd').insertAdjacentHTML('beforeend','<button class="g rb" id="snd" title="효과음 켜기·끄기">'+(SND?'🔊':'🔇')+'</button>');
 $('snd').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();SND=!SND;try{localStorage.setItem('pl_snd',SND?'1':'0')}catch(_){}$('snd').textContent=SND?'🔊':'🔇';if(SND){acx();gunSound('pistol')}msg(SND?'🔊 효과음 켜짐':'🔇 효과음 꺼짐')});
-document.head.insertAdjacentHTML('beforeend','<style>#wc .wtr{grid-column:1/3;font-size:10.5px;color:#9fe0ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#wc .wtr span{color:var(--mut)}</style>');
+document.head.insertAdjacentHTML('beforeend','<style>#wc .wtr{grid-column:1/3;font-size:10.5px;color:#9fe0ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#wc .wtr span{color:var(--mut)}@media (orientation:landscape) and (max-height:420px){#wc .wtr{display:none}}</style>');

@@ -39,7 +39,7 @@ function z4Init(z){const d=ZN[z.look][3];z.hp=z.mhp=d.hp*(typeof HM=='function'?
 {const _w=wave;wave=function(n){_w(n);if(n%5==0){const q=fr(420,620);if(q){mk(q[0],q[1],{w:1,look:n%10==0?'goliath':'brood'});msg((n%10==0?'👹 골리앗':'🪱 번식체')+'이(가) 웨이브와 함께 나타났습니다!')}}}}
 const BZ={houses:['crawler','sleeper'],apt:['crawler','sleeper','dog'],mart:['bloater','crawler'],school:['stalker','sleeper'],clinic:['spitter','bloater'],police:['dog','shocker'],mil:['brute','dog','burner'],fire:['burner'],church:['stalker','sleeper'],lab:['spitter','shocker','bloater'],ware:['crawler','bloater'],hard:['burner','crawler']};
 {const _st=start;start=function(d,load){const r=_st(d,load);if(!S)return r;S.bes=S.bes||{};S.gseen=S.gseen||{};
-  for(const z of Z.slice()){if(!z.g)continue;const b=W0.b.find(b=>z.x>b.x&&z.x<b.x+b.w&&z.y>b.y&&z.y<b.y+b.h);const L=b&&BZ[b.kind];if(L&&Math.random()<.22){z.look=L[Math.random()*L.length|0];z4Init(z)}}
+  for(const z of Z.slice()){if(!z.g)continue;const rf=W0.roofs.find(r=>z.x>r.x&&z.x<r.x+r.w&&z.y>r.y&&z.y<r.y+r.h),b=rf&&W0.b[rf.bi];const L=b&&BZ[b.kind];if(L&&Math.random()<.22){z.look=L[Math.random()*L.length|0];z4Init(z)}}
   if(typeof hud2=='function')hud2();return r}}
 /* ---------- behaviour ---------- */
 const am4=()=>typeof armMul=='function'?armMul(S.p):1;
@@ -124,7 +124,7 @@ function gotGun(id){S.gseen[id]=1;const sb=G4[id][2];if(subDone(sb)){s3dirty();s
 /* ================= ghost clicks ================= */
 /* sheets open on pointerdown; the click that follows the same tap must not press whatever just appeared under the finger */
 {let opened=0;new MutationObserver(()=>{const b=$('bm');if(b.style.display=='block'&&!b.dataset.open){b.dataset.open=1;opened=performance.now()}else if(b.style.display!='block')delete b.dataset.open}).observe($('bm'),{attributes:true,attributeFilter:['style']});
- document.addEventListener('click',e=>{if(performance.now()-opened<450&&e.target.closest('#bm')&&!e.target.closest('.sh button')){e.preventDefault();e.stopPropagation()}},true)}
+ document.addEventListener('click',e=>{if(e.isTrusted&&performance.now()-opened<450&&e.target.closest('#bm')&&!e.target.closest('.sh button')){e.preventDefault();e.stopPropagation()}},true)}
 /* ================= damage numbers ================= */
 /* every hit shows the real damage dealt over the zombie (pellets of one shot add up); crits are bigger and yellow */
 S4.dn=[];

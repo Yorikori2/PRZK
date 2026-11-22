@@ -34,7 +34,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  await p.screenshot({path:OUT+'/s3-mod.png'});
  r=await p.evaluate(()=>{S.pg.parts.m_ext=1;MGUN='ar';openChar('mod');return document.querySelector('.pg').textContent});ok(/확장 탄창/.test(r),'parts list shows collected parts');
  // combat: damage, crit, grenade launcher part
- r=await p.evaluate(()=>{Z.length=0;const pl=S.p;mk(pl.x+60,pl.y,{look:'heavy'});const z=Z[0];z.hp=z.mhp=5000;pl.mag.ar=30;pl.ac=0;pl.rl=0;S.tg=null;updTarget(pl);const h0=z.hp;gearAct();return{dealt:h0-z.hp,exp:wdef('ar')[4].d}});
+ r=await p.evaluate(()=>{Z.length=0;const pl=S.p;mk(pl.x+60,pl.y,{look:'civ1'});const z=Z[0];z.hp=z.mhp=5000;pl.mag.ar=30;pl.ac=0;pl.rl=0;S.tg=null;updTarget(pl);const h0=z.hp;gearAct();return{dealt:h0-z.hp,exp:wdef('ar')[4].d}});
  ok(r.dealt>=r.exp*.99,'rifle shot deals boosted damage '+JSON.stringify(r));
  r=await p.evaluate(()=>{const pl=S.p,pg=S.pg;pg.sk.tech1=3;pg.mods.ar.under='u_gl';s3dirty();const z=Z[0];z.hp=5000;S3.glcd=0;pl.ac=0;pl.mag.ar=30;const a=pl.inv.a40mm|0;updTarget(pl);gearAct();return{used:a-(pl.inv.a40mm|0),cd:S3.glcd>0}});
  ok(r.used==1&&r.cd,'under-barrel grenade launcher fires and uses 40mm ammo '+JSON.stringify(r));

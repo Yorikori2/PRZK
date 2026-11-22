@@ -229,10 +229,10 @@ function upd(dt){const s=S,p=s.p,ds=dt*spd,dm=HM(),bl=s.base.lv;s.tt+=ds;s.t+=ds
  s.sa=(s.sa||0)-dt;if(s.sa<=0){s.sa=3;if(Z.filter(z=>!z.w&&!z.g).length<(nt?14:6)){const q=fr(380,560);if(q)mk(q[0],q[1],{look:nt&&Math.random()<.15?'runner':null})}}
  for(const z of Z){const dx=p.x-z.x,dy=p.y-z.y,d=Math.hypot(dx,dy)||1;z.cd-=dt;z.al-=dt;z.mv=0;if(z.stun>0)continue;
   const chs=z.w||d<(nt?420:280),tx=chs?p.x:z.al>0?z.nx:null,ty=chs?p.y:z.ny;
-  if(tx!=null){const ex=tx-z.x,ey=ty-z.y,ed=Math.hypot(ex,ey)||1;if(ed>16){const sp=(nt?70:45)*(z.b?.8:1)*(z.look=='runner'?1.8:z.look=='heavy'?.65:1)*dt,bk=mv(z,ex/ed*sp,ey/ed*sp,7);z.mv=1;z.ph+=sp/10;z.dir=Math.abs(ex)>Math.abs(ey)?(ex<0?'l':'r'):(ey<0?'u':'d');
+  if(tx!=null){const ex=tx-z.x,ey=ty-z.y,ed=Math.hypot(ex,ey)||1;if(ed>16){const sp=(nt?70:45)*(z.b?.8:1)*(z.look=='runner'?1.8:z.look=='heavy'?.65:1)*(z.sm||1)*dt,bk=mv(z,ex/ed*sp,ey/ed*sp,7);z.mv=1;z.ph+=sp/10;z.dir=Math.abs(ex)>Math.abs(ey)?(ex<0?'l':'r'):(ey<0?'u':'d');
    if(bk&&z.cd<=0&&(bk.seg!==undefined||bk.hp!==undefined)){z.cd=1;const dmg=bk.seg!==undefined?(z.b?25:z.look=='heavy'?15:5):(z.b?30:z.look=='heavy'?24:8);if(bk.seg!==undefined){const mx=WHP[bl.wall],cur=(s.base.whp[bk.seg]??1)*mx-dmg;s.base.whp[bk.seg]=Math.max(0,cur/mx);if(cur<=0)msg('🧱 방벽이 무너졌습니다!');rebuildBase()}else{bk.hp-=dmg;if(bk.hp<=0){S.bar.splice(S.bar.indexOf(bk),1);msg('바리케이드 파괴됨')}}}}}
   if(z.look=='screamer'&&!z.scr&&d<300&&los(z.x,z.y-12,p.x,p.y-12))scream(z);
-  if(d<20&&z.cd<=0&&!s.dr&&seeZ(z,p)){const am=armMul(p);p.hp-=(z.b?18:z.look=='heavy'?16:7)*dm*am;blood(p.x,p.y,-dx/d,-dy/d,2);if(Math.random()<.25*s3BleedCh()*dm*(p.eq.head=='helmet'?.5:1)*(am<.95?.6:1))p.bleed=1;z.cd=1}}
+  if(d<20&&z.cd<=0&&!s.dr&&seeZ(z,p)){const am=armMul(p);p.hp-=(z.dmg!=null?z.dmg:z.b?18:z.look=='heavy'?16:7)*dm*am;blood(p.x,p.y,-dx/d,-dy/d,2);if(Math.random()<.25*s3BleedCh()*dm*(p.eq.head=='helmet'?.5:1)*(am<.95?.6:1))p.bleed=1;z.cd=1;if(typeof zBite4=='function')zBite4(z)}}
  if(bl.turret){const dmg=[0,15,22,30][bl.turret]*s3Tur(),rate=(bl.gen>=2&&(s.base.pow||!nt))?.55:.85;for(const t of BP){if(t.t!='turret')continue;t.cd=(t.cd||0)-dt;const tx=t.x+t.w/2,ty=t.y+t.h/2-8;let best=null,bd=230;for(const z of Z){const d=Math.hypot(z.x-tx,z.y-ty);if(d<bd&&los(tx,ty,z.x,z.y-10,1)){bd=d;best=z}}
   if(best){t.a=Math.atan2(best.y-12-ty,best.x-tx);const ta=['a556','a762','a9mm'].find(k=>(s.base.st[k]||0)>=1);if(t.cd<=0&&ta){t.cd=rate;s.base.st[ta]--;best.hp-=dmg;fx.push({k:'tr',a:[tx+Math.cos(t.a)*14,ty+Math.sin(t.a)*14],b:[best.x,best.y-14],l:.06});blood(best.x,best.y,Math.cos(t.a),Math.sin(t.a),3)}}}}
  Z=Z.filter(z=>{if(z.hp<=0){s.kills++;kill(z);if(Math.random()<.2)invAdd(p,'scrap',1);return false}return z.w||z.g||Math.hypot(z.x-p.x,z.y-p.y)<1100});
@@ -263,7 +263,7 @@ function draw(){const p=S.p,bw=buf.width,bh=buf.height;g=bctx;NIGHT=S.t>=1500||S
  W0.roofs.forEach((r,i)=>{if(vis(r.x-6,r.y-46,r.w+12,r.h+60))L.push({y:r.y+r.h,f:()=>roofD(r,ra[i])})});
  for(const q of S.pois)if(vis(q.x-20,q.y-30,40,40))L.push({y:q.y,f:()=>{const x=q.x-10,y=q.y-8;if(q.k=='drop'){R('#ffffffaa',x-6,y-24,32,6);ln(x-4,y-18,x+2,y-6,'#ddd');ln(x+24,y-18,x+18,y-6,'#ddd');B3(x,y,20,14,12,'#3b7fd1','#2a5c9a');R('#fff',x+9,y-12,2,26)}else if(q.k=='zone'){B3(x,y,10,8,14,'#6bbf3b','#3f7a20');B3(x+12,y+4,10,8,14,'#6bbf3b','#3f7a20');R('#d33',x+6,y-26,6,6)}else{B3(x-4,y,28,18,4,'#6a6f75','#3a3f45');for(let i=0;i<24;i+=6)R('#d9b52a',x-4+i,y-4,3,3);R('#3a3f45',x+4,y,12,8)}}});
  const c=S.car;if(vis(c.x-40,c.y-30,80,60))L.push({y:c.y+15,f:()=>c.h!==false?carD(c.x-30,c.y-15,60,30,'#c43c32'):carD(c.x-15,c.y-30,30,60,'#c43c32')});
- for(const z of Z)if(vis(z.x-30,z.y-60,60,64))L.push({y:z.y,f:()=>drawChar(z.look,z.x,z.y,z.dir,z.mv?(z.ph|0)%4:-1,null,z.b?1.7:z.look=='heavy'?1.35:1)});
+ for(const z of Z)if(vis(z.x-30,z.y-60,60,64))L.push({y:z.y,f:()=>(typeof zDraw4=='function'&&zDraw4(z))||drawChar(z.look,z.x,z.y,z.dir,z.mv?(z.ph|0)%4:-1,null,z.b?1.7:z.look=='heavy'?1.35:1)});
  if(!S.dr)L.push({y:p.y,f:()=>drawChar('player',p.x,p.y,p.dir,p.mv?(p.ph|0)%4:-1,wpnOf(p))});
  L.sort((a,b)=>a.y-b.y).forEach(o=>o.f());
  drawGearFx();
@@ -314,4 +314,4 @@ document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>start(b.dataset.d
 $('ld').onclick=()=>start(0,true);try{if(localStorage.getItem(SAVE))$('ld').style.display='block'}catch(e){}
 requestAnimationFrame(loop);
 </script>
-<script src="stage3.js"></script><script src="search.js"></script></body></html>
+<script src="stage3.js"></script><script src="search.js"></script><script src="guns4.js"></script><script src="zombies.js"></script><script src="stage4.js"></script><script src="gunfeel.js"></script></body></html>
