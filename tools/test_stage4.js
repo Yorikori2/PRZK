@@ -51,7 +51,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  ok(r.n>0&&r.lost==r.shown,'damage numbers match the HP taken (shotgun pellets add up per zombie) '+JSON.stringify(r));ok(/⚔ \d+×6/.test(r.card),'weapon card shows damage: '+r.card);
  await p.waitForTimeout(150);await p.screenshot({path:OUT+'/s4-dmg.png'});
  // rewards: bestiary mastery and gun collection
- r=await p.evaluate(()=>{scene('mst');const pl=S.p,shot=()=>{const z=Z.find(z=>z.look=='spitter'&&z.hp>0);z.hp=z.mhp=5000;S.tg=z;S.tgIn=true;pl.ac=0;pl.mag.ar=30;const h=z.hp;S3.cc=0;const old=Math.random;Math.random=()=>.99;gearAct();Math.random=old;return h-z.hp};
+ r=await p.evaluate(()=>{scene('mst');const pl=S.p,shot=()=>{const z=Z.find(z=>z.look=='spitter'&&z.hp>0);z.hp=z.mhp=5000;S.tg=z;S.tgIn=true;pl.ac=0;pl.mag.ar=30;const h=z.hp;S3.cc=0;if(typeof S5!='undefined')S5.chainQ=null;const old=Math.random;Math.random=()=>.99;gearAct();Math.random=old;return h-z.hp};
   const d0=shot();const z=Z.find(z=>z.look=='spitter');z.hp=0;upd(1/60);const k=S.bes.spitter.k,d1=shot();S.bes.spitter.k=50;const d2=shot();return{d0:+d0.toFixed(2),d1:+d1.toFixed(2),d2:+d2.toFixed(2),k}});
  ok(r.k==10&&Math.abs(r.d1/r.d0-1.05)<.01&&Math.abs(r.d2/r.d0-1.10)<.01,'bestiary mastery: 10 kills +5%, 50 kills +10% damage to that zombie '+JSON.stringify(r));
  await p.evaluate(()=>{openChar('dex');DEXT='z';DEXSEL='spitter';openChar('dex')});r=await p.evaluate(()=>({m:document.querySelector('.mst4').textContent,badge:!!document.querySelector('.dzc .mb')}));ok(/2단계/.test(r.m)&&r.badge,'bestiary shows mastery level and badge: '+r.m.slice(0,40));
