@@ -1,4 +1,4 @@
-// Stage 4 sample checks: 71 guns registered + all fire, new ammo/loot, 11 new zombies do their thing, bosses, bestiary, gun catalogue,
+// Stage 4 sample checks: 66 guns registered (5 held back) + all fire, new ammo/loot, 11 new zombies do their thing, bosses, bestiary, gun catalogue,
 // search warning, screenshots of every scene.  usage: node tools/test_stage4.js <outdir> [page]
 const {chromium}=require('playwright');const OUT=process.argv[2]||'.';const PAGE=process.argv[3]||'stage4-sample.html';
 const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
@@ -7,13 +7,13 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  await p.screenshot({path:OUT+'/s4-menu.png'});
  let r=await p.evaluate(()=>{const G=WEAPONS.filter(w=>w[2]=='g'),names=new Set(G.map(w=>w[1]));const badAmmo=G.filter(w=>{const a=AMMO_ITEM(w[4].ammo);return!I_BY[a]&&a!='fuel'}).map(w=>w[0]);
   const badIcon=G.filter(w=>{try{return icon(w[0]).length<200}catch(e){return true}}).map(w=>w[0]);const inLoot=G.filter(w=>Object.values(WLOOT).some(L=>L.includes(w[0]))).length;
-  return{n:G.length,uniq:names.size,badAmmo,badIcon,inLoot,ar:W_BY.ar[1],pistol:W_BY.pistol[1],newAmmo:['a45','a38','a500','a57','a46','a545','a338'].filter(a=>I_BY[a]).length,parts:G.filter(w=>GCLASS[w[0]]).length}});
- ok(r.n==71&&r.uniq==71,'71 guns with unique fictional names ('+r.ar+', '+r.pistol+' …)');ok(!r.badAmmo.length,'every gun has an ammo item '+r.badAmmo);ok(!r.badIcon.length,'every gun has an icon '+r.badIcon);
- ok(r.newAmmo==7,'7 new ammo types');ok(r.inLoot>=60,'guns found in building loot tables: '+r.inLoot+'/71');ok(r.parts>=55,'guns that take parts: '+r.parts);
+  return{n:G.length,uniq:names.size,badAmmo,badIcon,inLoot,ar:W_BY.ar[1],pistol:W_BY.pistol[1],newAmmo:['a45','a57'].filter(a=>I_BY[a]).length,later:['a38','a500','a46','a545','a338'].filter(a=>I_BY[a]).length+['m10','m500','mp7','ak74','awm'].filter(i=>W_BY[i]).length,parts:G.filter(w=>GCLASS[w[0]]).length}});
+ ok(r.n==66&&r.uniq==66,'66 guns with unique fictional names ('+r.ar+', '+r.pistol+' …)');ok(!r.badAmmo.length,'every gun has an ammo item '+r.badAmmo);ok(!r.badIcon.length,'every gun has an icon '+r.badIcon);
+ ok(r.newAmmo==2&&r.later==0,'2 new ammo types; the 5 one-gun calibres and their guns are held back');ok(r.inLoot>=60,'guns found in building loot tables: '+r.inLoot+'/66');ok(r.parts>=55,'guns that take parts: '+r.parts);
  // every gun fires and hurts a target
  r=await p.evaluate(()=>{const bad=[];for(const id of GUN_IDS){scene('range',id);const pl=S.p;let h0=Z.reduce((a,z)=>a+z.hp,0);for(let i=0;i<40;i++){pl.ac=0;pl.rl=0;S.tg=null;updTarget(pl);gearAct();gearUpd(1/30);if(pl.mag[id]<=0)pl.mag[id]=wdef(id)[4].mag}
    for(let i=0;i<30;i++)gearUpd(1/30);const h1=Z.reduce((a,z)=>a+Math.max(0,z.hp),0);if(!(h1<h0))bad.push(id)}return bad});
- ok(!r.length,'all 71 guns hit the range targets '+r);
+ ok(!r.length,'all 66 guns hit the range targets '+r);
  await p.evaluate(()=>scene('range','amr'));await p.waitForTimeout(500);await p.screenshot({path:OUT+'/s4-range.png'});
  // zombies: run each scene in real time-steps and watch for its behaviour
  const Zs={crawler:'S4.slow>0',spitter:'S4.pud.length>0||S4.proj.length>0',bloater:'S4.gas.length>0',stalker:'S4.kd>0',dog:"Z.filter(z=>z.look=='dog').length>=4",burner:'S4.burn>0',shocker:'S4.kd>0',
@@ -38,7 +38,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  await p.evaluate(()=>scene('dexz'));await p.waitForTimeout(200);r=await p.evaluate(()=>({cards:document.querySelectorAll('.dzc').length,un:document.querySelectorAll('.dzc.un').length,det:!!document.querySelector('.dzd h3')&&document.querySelector('.dzd h3').textContent}));
  ok(r.cards==14&&r.un==4&&/스피터/.test(r.det),'bestiary: 14 entries, unseen hidden, detail '+JSON.stringify(r));await p.screenshot({path:OUT+'/s4-dexz.png'});
  await p.evaluate(()=>scene('dexg'));await p.waitForTimeout(200);r=await p.evaluate(()=>({cards:document.querySelectorAll('.dgc').length,un:document.querySelectorAll('.dgc.un').length,det:document.querySelector('.dzd h3').textContent}));
- ok(r.cards==71&&r.un>20&&/그리폰/.test(r.det),'gun catalogue: 71 entries, unfound silhouetted '+JSON.stringify(r));await p.screenshot({path:OUT+'/s4-dexg.png'});
+ ok(r.cards==66&&r.un>20&&/그리폰/.test(r.det),'gun catalogue: 66 entries, unfound silhouetted '+JSON.stringify(r));await p.screenshot({path:OUT+'/s4-dexg.png'});
  r=await p.evaluate(()=>{closeBase();scReset(false);S.gseen={};give({k2:1});gearUpd(1/60);return!!S.gseen.k2});ok(r,'picking up a gun records it in the catalogue');
  // tabs keep working
  r=await p.evaluate(()=>{openChar('stat');const a=document.querySelectorAll('.flt .chip').length;openChar('dex');const b=!!document.querySelector('.dz,.dg');openChar('mod');return{a,b,mod:!!document.querySelector('.s3h')}});ok(r.a==5&&r.b&&r.mod,'🧬 sheet: 능력치·스킬·특성·총기 개조·도감 tabs');
@@ -56,9 +56,9 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  ok(r.k==10&&Math.abs(r.d1/r.d0-1.05)<.01&&Math.abs(r.d2/r.d0-1.10)<.01,'bestiary mastery: 10 kills +5%, 50 kills +10% damage to that zombie '+JSON.stringify(r));
  await p.evaluate(()=>{openChar('dex');DEXT='z';DEXSEL='spitter';openChar('dex')});r=await p.evaluate(()=>({m:document.querySelector('.mst4').textContent,badge:!!document.querySelector('.dzc .mb')}));ok(/2단계/.test(r.m)&&r.badge,'bestiary shows mastery level and badge: '+r.m.slice(0,40));
  await p.screenshot({path:OUT+'/s4-mst.png'});
- r=await p.evaluate(()=>{closeBase();scReset(false);S.gseen={};GUN_IDS.forEach(i=>{if(G4[i][2]=='권총'&&i!='m500')S.gseen[i]=1});s3dirty();const a=wdef('pistol')[4].rlm,ar0=wdef('ar')[4].rlm;give({m500:1});gearUpd(1/60);const b=wdef('pistol')[4].rlm,ar1=wdef('ar')[4].rlm;
-  DEXT='g';DEXSEL='m500';openChar('dex');return{a:+a.toFixed(3),b:+b.toFixed(3),rifleSame:ar0==ar1,done:document.querySelectorAll('.gsh.done').length,txt:document.querySelector('.gsh.done').textContent}});
- ok(Math.abs(r.b/r.a-.85)<.001&&r.rifleSame&&r.done==1,'gun collection: all 14 pistols → pistols reload -15%, other classes unchanged '+JSON.stringify(r));
+ r=await p.evaluate(()=>{closeBase();scReset(false);S.gseen={};GUN_IDS.forEach(i=>{if(G4[i][2]=='권총'&&i!='fn57')S.gseen[i]=1});s3dirty();const a=wdef('pistol')[4].rlm,ar0=wdef('ar')[4].rlm;give({fn57:1});gearUpd(1/60);const b=wdef('pistol')[4].rlm,ar1=wdef('ar')[4].rlm;
+  DEXT='g';DEXSEL='fn57';openChar('dex');return{a:+a.toFixed(3),b:+b.toFixed(3),rifleSame:ar0==ar1,done:document.querySelectorAll('.gsh.done').length,txt:document.querySelector('.gsh.done').textContent}});
+ ok(Math.abs(r.b/r.a-.85)<.001&&r.rifleSame&&r.done==1,'gun collection: all 12 pistols → pistols reload -15%, other classes unchanged '+JSON.stringify(r));
  await p.evaluate(()=>{const el=document.querySelector('.gsh.done');el.scrollIntoView({block:'start'})});await p.waitForTimeout(100);await p.screenshot({path:OUT+'/s4-col.png'});await p.evaluate(()=>closeBase());
  // phone: tapping 🎬 keeps the scene list open until something is chosen
  const m=await b.newContext({viewport:{width:412,height:860},hasTouch:true,isMobile:true});const q=await m.newPage();q.on('pageerror',e=>errs.push(e.message));

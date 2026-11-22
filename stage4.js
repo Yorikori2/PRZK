@@ -1,4 +1,4 @@
-/* PROJECT LEGACY — stage 4: 71 fictional firearms, 11 new special zombies with their own behaviour, bestiary + gun catalogue,
+/* PROJECT LEGACY — stage 4: 66 fictional firearms (5 more waiting in G4_LATER), 11 new special zombies with their own behaviour, bestiary + gun catalogue,
    and the search warning (a zombie closing in while you search). Loaded after stage3.js / search.js; needs guns4.js + zombies.js.
    Page hooks: z.sm (speed), z.dmg (bite), zBite4(z) after a bite, zDraw4(z) for drawing. */
 'use strict';
@@ -8,12 +8,16 @@ const GREMAP={pistol:'glock17',spistol:'p226',smg:'mp5',pump:'r870',dbarrel:'dbl
  taser:'x26',flare:'flareg',nailgun:'nailg',ssmg:'mp5sd',pdw:'uzi',sawnoff:'sawn',autosg:'benelli',hunting:'r700',carbine:'m4a1',battle:'ak47',dmr:'svd',amr:'m82',minigun:'m134',gl:'m79',rpg:'rpg7',bow:'cbow'};
 const G_OF={};for(const o in GREMAP)G_OF[GREMAP[o]]=o; // design id -> game id
 const CALMAP={'762s':'762','762r':'762','50ae':'50','50bmg':'50'};
-const NEWAMMO=[['45','.45 ACP','u',.02,'#5a4a3a','#d9a84a',[6,12]],['38','.38 스페셜','c',.015,'#6a5a4a','#c9ced3',[6,12]],['500','.500 매그넘','e',.05,'#3a3f45','#e0b050',[2,4]],
+/* 나중에 추가: guns whose ammo would be used by that one gun only. Their data stays in guns4.js;
+   take an id out of this list (and its calibre out of AMMO_LATER) to bring it into the game. */
+const G4_LATER=['m10','m500','mp7','ak74','awm'],AMMO_LATER=['38','500','46','545','338'];
+const NEWAMMO_ALL=[['45','.45 ACP','u',.02,'#5a4a3a','#d9a84a',[6,12]],['38','.38 스페셜','c',.015,'#6a5a4a','#c9ced3',[6,12]],['500','.500 매그넘','e',.05,'#3a3f45','#e0b050',[2,4]],
  ['57','5.7mm 탄','r',.01,'#3a3f45','#7fd0ff',[10,20]],['46','4.6mm 탄','r',.01,'#2a2f35','#9fe0b0',[10,20]],['545','5.45mm 탄','u',.015,'#4a5434','#c9a46a',[10,20]],['338','.338 매그넘','l',.06,'#2a2f35','#f0c84a',[2,4]]];
+const NEWAMMO=NEWAMMO_ALL.filter(a=>!AMMO_LATER.includes(a[0]));
 for(const[k,n,r,wt,c1,c2,am]of NEWAMMO){AMMO[k]=n;const id='a'+k;if(!I_BY[id]){const it=[id,n,'a',r,wt,'새 총기용 탄약'];ITEMS.push(it);I_BY[id]=it;I(id,()=>ammoBox(c1,c2))}AMN[id]=am}
 const WHERE={경찰:'police',군부대:'mil',주택:'houses',교회:'church',연구소:'lab',철물점:'hard',소방서:'fire',학교:'school',은신처:'apt',주차장:'mart',사냥꾼:'houses',헬기:'mil',주유소:'mart',진료소:'clinic'};
 const G4={};// game id -> design row
-for(const row of GUNS){const[did,n,sub,rar,cal,org,s,desc,where,ic]=row;const gid=G_OF[did]||did,old=W_BY[gid];
+for(const row of GUNS){const[did,n,sub,rar,cal,org,s,desc,where,ic]=row;if(G4_LATER.includes(did))continue;const gid=G_OF[did]||did,old=W_BY[gid];
  const ammo=old&&old[2]=='g'?old[4].ammo:(CALMAP[cal]||cal),st={...s,cd:1/s.rps,ammo};delete st.rps;delete st.burst;
  if(old){old[1]=n;old[3]=rar;old[4]=Object.assign({},st,{nz:gid=='spistol'?1:st.nz});old[5]=desc;old[6]=where}
  else{const w=[gid,n,'g',rar,st,desc,where];WEAPONS.splice(WEAPONS.findIndex(x=>x[2]=='t'),0,w);W_BY[gid]=w;SUB[gid]=sub=='기관총'?'기관총':sub;
