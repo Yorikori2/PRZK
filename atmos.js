@@ -1,4 +1,4 @@
-/* PROJECT LEGACY — sample: footsteps, ambience, weather and a sound mixer.
+/* PROJECT LEGACY — footsteps, ambience, weather and a sound mixer.
    Footsteps: walking (stick part way) is quiet and zombies notice you from 55 % as far; running is loud and every step
    pulls zombies within 160 px. Indoor tap / outdoor scuff, in the 0.8–3 kHz band so phone speakers play them.
    Ambience (no wind bed): day birds, night crickets (synthesized chirps, go quiet when zombies are close), rain, base campfire crackle, muffled outside + drips indoors.

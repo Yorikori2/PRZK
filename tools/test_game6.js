@@ -1,0 +1,19 @@
+// Game checks for footsteps / ambience / weather / mixer.  usage: node tools/test_game6.js <outdir>
+const {chromium}=require('playwright');const OUT=process.argv[2]||'.';
+const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
+(async()=>{const b=await chromium.launch({args:['--autoplay-policy=no-user-gesture-required']});const p=await b.newPage({viewport:{width:412,height:860}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+ await p.goto('file://'+require('path').resolve(__dirname,'..','index.html'));await p.waitForTimeout(600);
+ await p.evaluate(()=>{localStorage.clear();start('S',false);S.pg.tr=['cop'];$('bm').dataset.m='';closeBase();PAUSE=false;Z.length=0});
+ let r=await p.evaluate(()=>{const pl=S.p;mk(pl.x+200,pl.y,{look:'civ1'});const z=Z[0];z.x=pl.x+200;z.y=pl.y;z.al=0;pl.mv=1;jp=-1;jx=.5;jy=0;S.sa=1e9;upd(1/60);const walkChase=z.mv;
+  Z.length=0;mk(pl.x+200,pl.y,{look:'civ1'});const z2=Z[0];z2.x=pl.x+200;z2.y=pl.y;z2.al=0;jx=1;upd(1/60);const runChase=z2.mv;jp=null;jx=0;return{walkChase,runChase,det:detMul()}});
+ ok(!r.walkChase&&r.runChase,'in the game: walking past a zombie at 200px goes unnoticed, running does not '+JSON.stringify(r));
+ r=await p.evaluate(()=>{acx();ambInit();return{amb:!!AMB,crk:AMB.crk.length,noCg:!('cg' in AMB),mixer:typeof openMixer=='function',bus:!!bus('zom')}});ok(r.amb&&r.crk==4&&r.noCg&&r.mixer&&r.bus,'ambience, 4 crickets, no ringing tone, mixer buses '+JSON.stringify(r));
+ r=await p.evaluate(()=>{let n=0;for(let d=0;d<300;d++){S.wx=null;S.day++;gearUpd(1/60);if(rainNow())n++}S.wx=null;return n});ok(r>60&&r<120,'weather: about 30% of days start rainy ('+r+'/300)');
+ r=await p.evaluate(()=>{setRain(true);const pl=S.p;pl.mv=1;jp=-1;jx=1;const m=detMul();jp=null;jx=0;S.wx=null;return m});ok(Math.abs(r-.7)<.01,'rain: zombies notice you from 70% as far');
+ r=await p.evaluate(()=>new Promise(res=>{const b=$('snd');b.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true}));setTimeout(()=>{b.dispatchEvent(new PointerEvent('pointerup',{bubbles:true}));res($('bm').dataset.m)},600)}));ok(r=='mixer','hold 🔊 opens the sound mixer');
+ r=await p.evaluate(()=>{closeBase();S.p.mv=1;jp=-1;jx=1;gearUpd(1/60);const t=$('atmo').textContent,rc=$('atmo').getBoundingClientRect(),wc=$('wc').getBoundingClientRect(),q=$('r').getBoundingClientRect();jp=null;jx=0;
+  const ov=(a,b)=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>1&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>1;return{t,bottom:Math.round(innerHeight-rc.bottom),hitR:ov(rc,q),hitWc:ov(rc,wc)}});
+ ok(/달리기/.test(r.t)&&r.bottom<30&&!r.hitR&&!r.hitWc,'walk/run chip sits at the bottom centre without covering buttons '+JSON.stringify(r));await p.screenshot({path:OUT+'/g6.png'});
+ await p.setViewportSize({width:740,height:360});await p.waitForTimeout(200);r=await p.evaluate(()=>{const rc=$('atmo').getBoundingClientRect(),q=$('r').getBoundingClientRect(),sd=$('sd').getBoundingClientRect();const ov=(a,b)=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>1&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>1;return{hitR:ov(rc,q),hitSd:ov(rc,sd)}});
+ ok(!r.hitR&&!r.hitSd,'small landscape: chip clear of buttons and toolbar '+JSON.stringify(r));
+ ok(!errs.length,'no page errors '+errs.join(' | '));await b.close()})();
