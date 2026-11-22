@@ -20,8 +20,8 @@ function scene5(k,sub){const p=S.p;
  if(k=='dist'){reset5(false);const ds=[120,350,600,850];ds.forEach((d,i)=>later(600+i*1500,()=>{const a=i%2?0:Math.PI,x=p.x+Math.cos(a)*d,y=p.y;fx.push({k:'boom',x,y,r:60,l:.45,m:.45});ev3('boom',x,y,1,80);msg('💥 '+d+'px '+(i%2?'오른쪽':'왼쪽')+' 폭발')}));
   const z=put('civ1',800,-Math.PI/2,{al:8,nx:p.x,ny:p.y});msg('📏 같은 폭발을 점점 멀리서 터뜨립니다 · 위쪽에서 일반 좀비가 신음하며 다가와요')}
  if(k=='act'){reset5(true);const sl=put('sleeper',95,-Math.PI/2,{al:0});msg('⚡ 1) 잠복자 옆으로 다가갑니다');later(1500,()=>{if(sl){p.y=sl.y+55;p.x=sl.x}});
-  later(4500,()=>{Z.length=0;put('stalker',160,0,{cd4:0,al:8});msg('⚡ 2) 스토커 도약 (밤)')});later(8500,()=>{Z.length=0;S4.kd=0;put('brute',200,Math.PI,{cd4:0,al:8});msg('⚡ 3) 브루트 돌진')})}
- if(k=='boss'){reset5(false);give({lmg:1,a556:400});p.eq.prim='lmg';p.mag.lmg=100;put('goliath',420,-Math.PI/2,{al:8});msg('👹 골리앗 등장 · 가까이 오면 내려찍기 소리')}
+  later(4500,()=>{Z.length=0;put('stalker',160,0,{cd4:0,w:1});msg('⚡ 2) 스토커 도약 (밤)')});later(8500,()=>{Z.length=0;S4.kd=0;put('brute',200,Math.PI,{cd4:0,w:1});msg('⚡ 3) 브루트 돌진')})}
+ if(k=='boss'){reset5(false);delete p.inv.ar;p.inv.a556=0;give({lmg:1,a556:200});p.eq.prim='lmg';p.mag.lmg=100;put('goliath',320,-Math.PI/2,{w:1});msg('👹 골리앗 등장 · 위쪽에서 다가와요 · 가까이 오면 내려찍기 소리')}
  hud2()}
 function open5(){const b=$('bm');b.dataset.m='scene';PAUSE=true;
  let h='<div class="sh"><h2>🔊 소리 장면</h2><div class="wt">소리를 켜고(무음 모드 해제) 보세요 · 이어폰이면 좌우가 더 잘 들려요</div><button id="s5X">✕</button></div><div class="scl">'+SC5.map(([k,n,d])=>'<div class="scc" data-s5="'+k+'"><b>'+n+'</b><small>'+d+'</small></div>').join('')+'</div>';
