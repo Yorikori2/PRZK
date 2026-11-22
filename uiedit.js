@@ -50,7 +50,7 @@ function uiPreset(k){const old=JSON.parse(JSON.stringify(UIE.work[uiKey()]||{}))
 function uiCombat(on){UIE.work.cb=on?1:0;if(on)delete UIE.work.cb;else UIE.work.cb=0;msg(on?'⚔ 위험할 때 상태창·무기·공격 버튼이 진해져요':'⚔ 위험할 때 진하게: 꺼짐');uiApply()}
 function uiOpacity(v){UIE.work.op=Math.max(.5,Math.min(1,v/100));if(UIE.work.op==1)delete UIE.work.op;uiApply()}
 /* smooth drag: only the grabbed panel moves, via transform on the next animation frame; layout is written once on release */
-const uiSelector=UIE.ids.map(i=>'#'+i[0]).join(',');
+const uiSel=()=>UIE.ids.map(i=>'#'+i[0]).join(',');
 function uiDragStart(g){g.go=true;uiPinGroup(g.id);const d=uiCur();const el=document.getElementById(g.id);
  if(!d[g.id]){const r=el.getBoundingClientRect();d[g.id]={x:r.left/innerWidth,y:r.top/innerHeight,s:g.s}}uiApply();
  const r=el.getBoundingClientRect();g.el=el;g.L0=r.left;g.T0=r.top;g.w=r.width;g.h=r.height;g.c=d[g.id];g.tx=g.ty=0;el.style.willChange='transform';
@@ -59,7 +59,7 @@ function uiFrame(){UIE.raf=0;const g=UIE.drag;if(g&&g.go)g.el.style.transform=ui
 function uiDragEnd(e,silent){const g=UIE.drag;if(!g||(e&&e.pointerId!==undefined&&e.pointerId!==g.pid))return;UIE.drag=null;if(UIE.raf){cancelAnimationFrame(UIE.raf);UIE.raf=0}
  document.body.classList.remove('uidrag');if(!g.go)return;g.el.classList.remove('uilift');g.el.style.willChange='';
  if(!silent&&UIE.work){uiCur()[g.id]={x:(g.L0+g.tx)/innerWidth,y:(g.T0+g.ty)/innerHeight,s:g.s};}uiApply()}
-document.addEventListener('pointerdown',e=>{if(!UIE.on)return;if(e.target.closest('#uiBar')){uiDragEnd();return}if(UIE.drag&&UIE.drag.pid!==e.pointerId)uiDragEnd();e.preventDefault();e.stopPropagation();const el=e.target.closest(uiSelector);
+document.addEventListener('pointerdown',e=>{if(!UIE.on)return;if(e.target.closest('#uiBar')){uiDragEnd();return}if(UIE.drag&&UIE.drag.pid!==e.pointerId)uiDragEnd();e.preventDefault();e.stopPropagation();const el=e.target.closest(uiSel());
  if(!el){UIE.sel=null;uiMark();return}UIE.sel=el.id;uiMark();try{el.setPointerCapture(e.pointerId)}catch(_){} /* keep the touch on the panel even if its contents are re-rendered */const r=el.getBoundingClientRect();UIE.drag={pid:e.pointerId,id:el.id,dx:e.clientX-r.left,dy:e.clientY-r.top,sx:e.clientX,sy:e.clientY,go:false,s:(uiCur()[el.id]||{}).s||1}},true);
 document.addEventListener('pointermove',e=>{const g=UIE.drag;if(!UIE.on||!g||e.pointerId!==g.pid)return;if(e.pointerType=='mouse'&&!e.buttons){uiDragEnd();return}e.preventDefault();
  if(!g.go){if(Math.hypot(e.clientX-g.sx,e.clientY-g.sy)<8)return;if(uiLk(g.id)){if(!g.warn){g.warn=1;msg('🔒 잠긴 요소예요 · 편집 창에서 잠금을 푸세요')}return}uiDragStart(g)}

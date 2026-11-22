@@ -20,9 +20,9 @@ for(const[W,H]of[[412,860],[860,412]]){const tag=W<H?'세로':'가로';const p=a
  await p.mouse.move(wc1.x+10,wc1.y+10);await p.mouse.down();await p.mouse.move(W+50,H+50,{steps:10});await p.mouse.up();await p.waitForTimeout(200);const wc2=await box(p,'wc');
  ok(wc2.r<=W+1&&wc2.b<=H+1,tag+' clamped to screen '+JSON.stringify(wc2));
  // presets
- const def={};await p.evaluate(()=>uiPreset('def'));for(const id of['st','tr','sd','wc','qk','r'])def[id]=await box(p,id);
- await p.evaluate(()=>uiPreset('left'));await p.waitForTimeout(100);const L={};for(const id of['st','tr','sd','wc','qk','r'])L[id]=await box(p,id);
- ok(['st','tr','sd','wc','r'].every(id=>Math.abs(L[id].x-(W-def[id].r))<3&&Math.abs(L[id].y-def[id].y)<3),tag+' left-handed mirrors every panel');
+ const def={};await p.evaluate(()=>uiPreset('def'));const TBID=await p.evaluate(()=>(document.getElementById('tbH')&&getComputedStyle(document.getElementById('tbH')).display!='none'?'tbH':'sd'));for(const id of['st','tr',TBID,'wc','qk','r'])def[id]=await box(p,id);
+ await p.evaluate(()=>uiPreset('left'));await p.waitForTimeout(100);const L={};for(const id of['st','tr',TBID,'wc','qk','r'])L[id]=await box(p,id);
+ ok(['st','tr',TBID,'wc','r'].every(id=>Math.abs(L[id].x-(W-def[id].r))<3&&Math.abs(L[id].y-def[id].y)<3),tag+' left-handed mirrors every panel');
  const atkL=await p.evaluate(()=>{const a=document.getElementById('atk').getBoundingClientRect(),c=document.getElementById('act').getBoundingClientRect();return a.left<c.left});ok(atkL,tag+' left-handed: attack button on the outer (left) side');
  await p.screenshot({path:OUT+'/s2-left-'+(W<H?'p':'l')+'.png'});
  await p.evaluate(()=>uiPreset('wide'));await p.waitForTimeout(100);const Wd={};for(const id of['st','tr','wc','qk','r'])Wd[id]=await box(p,id);
@@ -31,7 +31,7 @@ for(const[W,H]of[[412,860],[860,412]]){const tag=W<H?'세로':'가로';const p=a
  ok(Wd.qk.b<=Wd.wc.y+1&&Wd.wc.y-Wd.qk.b<12,tag+' wide view: quick slots sit just above weapon card');
  await p.screenshot({path:OUT+'/s2-wide-'+(W<H?'p':'l')+'.png'});
  // overlap check for presets
- const ov=await p.evaluate(()=>{const out={};for(const k of['left','wide']){uiPreset(k);const rs=['st','tr','sd','qk','wc','r'].map(id=>[id,document.getElementById(id).getBoundingClientRect()]);const bad=[];
+ const ov=await p.evaluate(()=>{const out={};for(const k of['left','wide']){uiPreset(k);const rs=['st','tr',(document.getElementById('tbH')&&getComputedStyle(document.getElementById('tbH')).display!='none'?'tbH':'sd'),'qk','wc','r'].map(id=>[id,document.getElementById(id).getBoundingClientRect()]);const bad=[];
   for(let i=0;i<rs.length;i++)for(let j=i+1;j<rs.length;j++){const a=rs[i][1],c=rs[j][1];if(Math.min(a.right,c.right)-Math.max(a.left,c.left)>2&&Math.min(a.bottom,c.bottom)-Math.max(a.top,c.top)>2)bad.push(rs[i][0]+'×'+rs[j][0])}out[k]=bad}return out});
  ok(!ov.left.length&&!ov.wide.length,tag+' presets have no overlaps '+JSON.stringify(ov));
  // opacity
@@ -41,6 +41,6 @@ for(const[W,H]of[[412,860],[860,412]]){const tag=W<H?'세로':'가로';const p=a
  // saved and restored after reload, left-handed flag per orientation
  await p.evaluate(()=>{uiEdit(true);uiPreset('left');uiEdit(false)});await p.reload();await p.waitForTimeout(300);await p.evaluate(()=>{start('S',false);if(typeof S!='undefined'&&S&&S.pg&&!S.pg.tr.length){S.pg.tr=['cop'];$('bm').dataset.m='';closeBase();PAUSE=false}Z.length=0});await p.waitForTimeout(500);
  const rel=await p.evaluate(()=>({op:getComputedStyle(document.getElementById('st')).opacity,left:document.body.classList.contains('uileft')}));ok(rel.op=='0.6'&&rel.left,tag+' opacity and left-handed layout persist after reload');
- const sdx=(await box(p,'sd')).x;ok(sdx>W/2,tag+' toolbar on the right after reload');
+ const sdx=(await box(p,await p.evaluate(()=>(document.getElementById('tbH')&&getComputedStyle(document.getElementById('tbH')).display!='none'?'tbH':'sd')))).x;ok(sdx>W/2,tag+' toolbar on the right after reload');
  ok(!errs.length,tag+' no page errors '+errs.join('|'));await p.close()}
 await b.close()})();
