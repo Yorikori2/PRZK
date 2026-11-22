@@ -1,0 +1,22 @@
+// 📚 특성 사전 checks: every section lists everything, what you have is highlighted.  usage: node tools/test_codex.js <outdir> [page]
+const {chromium}=require('playwright');const OUT=process.argv[2]||'.';const PAGE=process.argv[3]||'index.html';
+const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
+(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:412,height:860}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+ await p.goto('file://'+require('path').resolve(__dirname,'..',PAGE));await p.waitForTimeout(800);
+ await p.evaluate(()=>{localStorage.clear();start('S',false);const pg=S.pg;pg.tr=['soldier','glut'];$('bm').dataset.m='';closeBase();PAUSE=false;pg.lv=22;pg.pk={10:'침착함',20:'탄약 절약'};pg.sk={combat0:2,surv5:1};pg.st.aim=8;
+  give({ar:1,a556:30,pistol:1});S.p.eq.prim='ar';S.p.as='prim';gearUpd(1/60);S.bes={spitter:{s:1,k:12}};s3dirty()});
+ const tab=async k=>p.evaluate(k=>{CXT=k;openChar('codex');const b=$('bm');return{rows:b.querySelectorAll('.cxr').length,on:b.querySelectorAll('.cxr.on').length,groups:b.querySelectorAll('.cxg').length,txt:b.textContent}},k);
+ let r=await p.evaluate(()=>{openChar('stat');return[...document.querySelectorAll('#bm .flt .chip')].map(c=>c.textContent)});ok(r.some(t=>/사전/.test(t))&&r.some(t=>/도감/.test(t)),'🧬 sheet has 📖 도감 and 📚 사전 tabs: '+r.join(' / '));
+ r=await tab('me');ok(/전직 군인/.test(r.txt)&&/대식가/.test(r.txt)&&/침착함/.test(r.txt)&&/탄약 절약/.test(r.txt)&&/근접 숙련/.test(r.txt)&&/손재주/.test(r.txt)&&/연속 명중/.test(r.txt)&&/스피터/.test(r.txt),'내 캐릭터: job, weakness, perks, skills, gun trait, mastery all listed');
+ await p.screenshot({path:OUT+'/cx-me.png'});
+ r=await tab('job');ok(r.rows==12&&r.on==2,'직업·약점: 12 listed, 2 mine highlighted '+r.rows+'/'+r.on);
+ r=await tab('perk');ok(r.rows==15&&r.on==2,'레벨 보너스: 15 listed, 2 chosen '+r.rows+'/'+r.on);
+ r=await tab('skill');ok(r.rows==16&&r.on==2,'스킬: 16 listed, 2 learned '+r.rows+'/'+r.on);
+ r=await tab('stat');ok(r.rows==5&&r.on==1,'능력치: 5 listed, raised one highlighted '+r.rows+'/'+r.on);
+ r=await p.evaluate(()=>{CXT='gun';openChar('codex');const b=$('bm');return{groups:b.querySelectorAll('.cxg').length,guns:b.querySelectorAll('.cxgun span').length,have:b.querySelectorAll('.cxgun span.have').length,cur:(b.querySelector('.cxg.cur h4')||{}).textContent}});
+ ok(r.groups==19&&r.guns==66&&r.have>=2&&/연속 명중/.test(r.cur),'총기 특징: 19 traits covering all 66 guns, owned guns bold, current one marked '+JSON.stringify(r));await p.screenshot({path:OUT+'/cx-gun.png'});
+ r=await tab('rew');ok(r.rows==14+8&&r.on>=1,'보상: 14 mastery rows + 8 collection classes '+r.rows+'/'+r.on);
+ r=await p.evaluate(()=>{CXT='job';openChar('codex');document.querySelector('[data-cx="perk"]').click();return document.querySelectorAll('#bm .cxr').length});ok(r==15,'section chips switch sections');
+ r=await p.evaluate(()=>{openChar('dex');const a=!!document.querySelector('.dz,.dg');openChar('skill');return{a,sk:!!document.querySelector('.skg')}});ok(r.a&&r.sk,'other tabs still work');
+ await p.setViewportSize({width:860,height:412});await p.evaluate(()=>{CXT='me';openChar('codex')});await p.waitForTimeout(100);await p.screenshot({path:OUT+'/cx-land.png'});
+ ok(!errs.length,'no page errors '+errs.join(' | '));await b.close()})();

@@ -41,7 +41,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  ok(r.cards==66&&r.un>20&&/그리폰/.test(r.det),'gun catalogue: 66 entries, unfound silhouetted '+JSON.stringify(r));await p.screenshot({path:OUT+'/s4-dexg.png'});
  r=await p.evaluate(()=>{closeBase();scReset(false);S.gseen={};give({k2:1});gearUpd(1/60);return!!S.gseen.k2});ok(r,'picking up a gun records it in the catalogue');
  // tabs keep working
- r=await p.evaluate(()=>{openChar('stat');const a=document.querySelectorAll('.flt .chip').length;openChar('dex');const b=!!document.querySelector('.dz,.dg');openChar('mod');return{a,b,mod:!!document.querySelector('.s3h')}});ok(r.a==5&&r.b&&r.mod,'🧬 sheet: 능력치·스킬·특성·총기 개조·도감 tabs');
+ r=await p.evaluate(()=>{openChar('stat');const a=document.querySelectorAll('.flt .chip').length;openChar('dex');const b=!!document.querySelector('.dz,.dg');openChar('mod');return{a,b,mod:!!document.querySelector('.s3h')}});ok(r.a>=5&&r.b&&r.mod,'🧬 sheet: 능력치·스킬·특성·총기 개조·도감 tabs ('+r.a+')');
  await p.setViewportSize({width:860,height:412});await p.evaluate(()=>{closeBase();scene('dexz')});await p.waitForTimeout(200);await p.screenshot({path:OUT+'/s4-dexz-land.png'});
  const fps=await p.evaluate(()=>new Promise(res=>{scene('boss','brood');let n=0;const t0=performance.now();(function f(){n++;if(performance.now()-t0<1500)requestAnimationFrame(f);else res(Math.round(n/1.5))})()}));ok(fps>40,'boss fight frame rate '+fps);
  // damage numbers + weapon card damage
