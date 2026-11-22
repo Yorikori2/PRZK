@@ -51,11 +51,11 @@ let AMB=null;
 function ambInit(){const a=acx();if(!a)return null;if(AMB)return AMB;const ab=bus('amb');
  const muff=a.createBiquadFilter();muff.type='lowpass';muff.frequency.value=20000;const bed=a.createGain();bed.connect(muff).connect(ab);
  const rainS=a.createBufferSource();rainS.buffer=NB;rainS.loop=true;const rh=a.createBiquadFilter();rh.type='bandpass';rh.frequency.value=3500;rh.Q.value=.6;const rg=a.createGain();rg.gain.value=0;rainS.connect(rh).connect(rg).connect(bed);rainS.start();
- /* 4 crickets around the player: each chirp = 3-4 short sine pulses (~30 ms) at 4.3-5.2 kHz, one chirp every 0.6-1.1 s */
- const crk=[0,1,2,3].map(i=>({f:4300+Math.random()*900,pulses:3+(i%2),gap:.6+Math.random()*.5,v:.012+Math.random()*.01,pan:[-.8,-.3,.35,.85][i],next:0}));
+ /* 4 crickets around the player: each chirp = 3-4 short sine pulses (~30 ms) at 4.3-5.2 kHz, one chirp every 1.6-2.6 s, and now and then a skipped chirp */
+ const crk=[0,1,2,3].map(i=>({f:4300+Math.random()*900,pulses:3+(i%2),gap:1.6+Math.random()*.6,v:.012+Math.random()*.01,pan:[-.8,-.3,.35,.85][i],next:0}));
  AMB={a,bed,muff,rain:{g:rg},crk,quiet:0,next:{bird:0,drip:0,crack:0,drop:0}};return AMB}
 function chirp(A,c,t){const a=A.a;let dest=A.bed;if(a.createStereoPanner){const pn=a.createStereoPanner();pn.pan.value=c.pan;pn.connect(A.bed);dest=pn}
- for(let i=0;i<c.pulses;i++){const tt=t+i*.048,o=a.createOscillator(),g2=a.createGain();o.type='sine';o.frequency.setValueAtTime(c.f,tt);o.frequency.linearRampToValueAtTime(c.f*.985,tt+.03);
+ for(let i=0;i<c.pulses;i++){const tt=t+i*.065,o=a.createOscillator(),g2=a.createGain();o.type='sine';o.frequency.setValueAtTime(c.f,tt);o.frequency.linearRampToValueAtTime(c.f*.985,tt+.03);
   g2.gain.setValueAtTime(.0001,tt);g2.gain.linearRampToValueAtTime(c.v,tt+.008);g2.gain.linearRampToValueAtTime(c.v*.7,tt+.022);g2.gain.exponentialRampToValueAtTime(.0001,tt+.032);o.connect(g2).connect(dest);o.start(tt);o.stop(tt+.04)}
  AMB.chirps=(AMB.chirps||0)+1}
 const lvl=(node,v,a)=>node.gain.setTargetAtTime(v,a.currentTime,.4);
@@ -68,7 +68,7 @@ function ambTick(dt){if(!SND||!S){if(AMB)lvl(AMB.rain.g,0,AMB.a);return}const A=
  if(!night&&!rain&&now>N.bird){N.bird=now+1800+Math.random()*4000;const n=2+Math.random()*3|0,b0=2400+Math.random()*900;for(let i=0;i<n;i++){const s=a.createOscillator(),g2=a.createGain(),tt=t+i*.13;s.type='sine';s.frequency.setValueAtTime(b0,tt);s.frequency.exponentialRampToValueAtTime(b0*1.35,tt+.07);g2.gain.setValueAtTime(.0008,tt);g2.gain.linearRampToValueAtTime(indoor?.01:.035,tt+.01);g2.gain.exponentialRampToValueAtTime(.0008,tt+.09);s.connect(g2).connect(bed);s.start(tt);s.stop(tt+.1)}}
  /* crickets: night, not raining; they fall silent while a zombie is within 220 px and start again a few seconds later */
  if(Z.some(z=>z.hp>0&&Math.hypot(z.x-p.x,z.y-p.y)<220))A.quiet=now+4000;
- if(night&&!rain&&now>A.quiet)for(const c of A.crk){if(now>c.next){if(c.next)chirp(A,c,t+Math.random()*.05);c.next=now+(c.gap+Math.random()*.25)*1000}}
+ if(night&&!rain&&now>A.quiet)for(const c of A.crk){if(now>c.next){if(c.next&&Math.random()>.25)chirp(A,c,t+Math.random()*.05);c.next=now+(c.gap+Math.random()*.4)*1000}}
  if(indoor&&now>N.drip){N.drip=now+1500+Math.random()*3500;go(()=>tone(a,t,{f0:1500+Math.random()*600,f1:700,d:.08,v:.06}))}
  if(fd<500&&now>N.crack){N.crack=now+50+Math.random()*200;const k=Math.pow(1-fd/500,1.5);go(()=>nz(a,t,{f:1800+Math.random()*2200,q:4,v:.22*k,d:.03}))}
  if(rain&&now>N.drop){N.drop=now+50+Math.random()*120;go(()=>nz(a,t,{f:3000+Math.random()*3000,q:6,v:.035,d:.02}))}}

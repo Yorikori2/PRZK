@@ -38,7 +38,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  // crickets: chirp pattern at night only, quiet when a zombie is close
  r=await p.evaluate(()=>new Promise(res=>{scene6('night');Z.length=0;AMB.chirps=0;AMB.quiet=0;const a=AC;let pulses=0;const oc=a.createOscillator.bind(a);a.createOscillator=()=>{pulses++;return oc()};
    setTimeout(()=>{const night=AMB.chirps,np=pulses;scene6('day');AMB.chirps=0;setTimeout(()=>{const day=AMB.chirps;scene6('night');Z.length=0;AMB.chirps=0;mk(S.p.x+120,S.p.y,{look:'civ1'});Z[Z.length-1].stun=99;
-     setTimeout(()=>{a.createOscillator=oc;res({night,perSec:+(night/3).toFixed(1),pulsesPerChirp:+(np/Math.max(1,night)).toFixed(1),day,nearZombie:AMB.chirps})},2500)},2000)},3000)}));
- ok(r.night>=6&&r.perSec<=8&&r.pulsesPerChirp>=3&&r.pulsesPerChirp<=4.2,'crickets at night: 4 crickets, each about 1 chirp/s of 3-4 pulses '+JSON.stringify(r));
+     setTimeout(()=>{a.createOscillator=oc;res({night,perSec:+(night/6).toFixed(1),pulsesPerChirp:+(np/Math.max(1,night)).toFixed(1),day,nearZombie:AMB.chirps})},2500)},2000)},6000)}));
+ ok(r.night>=3&&r.perSec>=.5&&r.perSec<=2.5&&r.pulsesPerChirp>=3&&r.pulsesPerChirp<=4.2,'crickets at night: spaced out, about 1-2 chirps/s in total, 3-4 pulses each '+JSON.stringify(r));
  ok(r.day==0,'no crickets by day');ok(r.nearZombie==0,'crickets fall silent while a zombie is close');
  ok(!errs.length,'no page errors '+errs.join(' | '));await b.close()})();
