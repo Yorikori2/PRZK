@@ -1,4 +1,4 @@
-/* PROJECT LEGACY — sample: rainy-day water and sound visualisation settings.
+/* PROJECT LEGACY — rainy-day water and sound visualisation settings.
    - Rain doubles what the base's rain-water module (빗물통/물탱크/급수탑) collects; the base sheet says so.
    - The 🎚 sound settings sheet gets three switches: off-screen sound arrows, the running footstep ring, and sound captions
      (short text such as "→ 오른쪽 멀리 · 감염견 짖음") so players with the sound off get the same information.
@@ -33,6 +33,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 #bm .vsr{display:grid;grid-template-columns:24px 1fr;gap:8px;align-items:center;padding:7px 9px;border-radius:10px;background:#ffffff08;margin-top:5px;cursor:pointer}#bm .vsr input{width:18px;height:18px;accent-color:#5fbf6a}#bm .vsr b{display:block;font-size:12.5px}#bm .vsr small{font-size:10.5px;color:var(--mut)}
 #scap{position:fixed;left:max(10px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 40px);z-index:3;pointer-events:none;display:flex;flex-direction:column-reverse;gap:3px;align-items:flex-start;max-width:52vw}
 #scap div{font-size:11.5px;padding:3px 9px;max-width:52vw;overflow:hidden;text-overflow:ellipsis;border-radius:8px;background:#000c;border:1px solid #ffffff22;white-space:nowrap}#scap div.hot{border-color:#ff6a5a;color:#ffb0a0}
+@media (orientation:landscape) and (max-height:420px){#scap{left:calc(max(10px,env(safe-area-inset-left,0px)) + 100px);max-width:40vw}#scap div{max-width:40vw}}
 
 </style>`);
 visApply();

@@ -217,7 +217,7 @@ function upd(dt){const s=S,p=s.p,ds=dt*spd,dm=HM(),bl=s.base.lv;s.tt+=ds;s.t+=ds
  const nt=s.t>=1500,ib=inBase(p.x,p.y);
  if(nt&&s.lw!=s.day&&s.day%5==0){s.lw=s.day;wave(s.day/5)}
  if(bl.tower>=3&&s.day%5==0&&s.t>1300&&s.t<1500&&s.ww!=s.day){s.ww=s.day;msg('📻 감시탑: 오늘 밤 웨이브가 옵니다!')}
- s.base.acc=(s.base.acc||0)+ds;while(s.base.acc>=200){s.base.acc-=200;const st=s.base.st;if(bl.farm)st.food=(st.food||0)+bl.farm*s3Prod();if(bl.water)st.water=(st.water||0)+bl.water*s3Prod()}
+ s.base.acc=(s.base.acc||0)+ds;while(s.base.acc>=200){s.base.acc-=200;const st=s.base.st;if(bl.farm)st.food=(st.food||0)+bl.farm*s3Prod();if(bl.water)st.water=(st.water||0)+bl.water*s3Prod()*(typeof rainMul=='function'?rainMul():1)}
  if(nt&&s.pw!=s.day){s.pw=s.day;s.base.pow=0;if(bl.gen>=3)s.base.pow=1;else if(bl.gen&&(s.base.st.fuel||0)>=1){s.base.st.fuel--;s.base.pow=1}else if(bl.gen)msg('⚡ 보관함에 연료가 없어 발전기가 멈췄습니다')}
  p.food=Math.max(0,p.food-ds/18*s3Hun('f'));p.water=Math.max(0,p.water-ds/12*s3Hun('w'));p.ac-=dt;
  if(p.food<=0||p.water<=0)p.hp-=ds*.05;if(p.bleed){if(ib&&bl.med>=2)p.bleed=0;else p.hp-=ds*.12*s3BleedD()}
@@ -315,4 +315,4 @@ document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>start(b.dataset.d
 $('ld').onclick=()=>start(0,true);try{if(localStorage.getItem(SAVE))$('ld').style.display='block'}catch(e){}
 requestAnimationFrame(loop);
 </script>
-<script src="stage3.js"></script><script src="search.js"></script><script src="guns4.js"></script><script src="zombies.js"></script><script src="stage4.js"></script><script src="gunfeel.js"></script><script src="codex.js"></script><script src="zsound.js"></script><script src="atmos.js"></script></body></html>
+<script src="stage3.js"></script><script src="search.js"></script><script src="guns4.js"></script><script src="zombies.js"></script><script src="stage4.js"></script><script src="gunfeel.js"></script><script src="codex.js"></script><script src="zsound.js"></script><script src="atmos.js"></script><script src="soundvis.js"></script></body></html>
