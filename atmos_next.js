@@ -1,7 +1,7 @@
 /* PROJECT LEGACY — sample: footsteps, ambience, weather and a sound mixer.
    Footsteps: walking (stick part way) is quiet and zombies notice you from 55 % as far; running is loud and every step
    pulls zombies within 160 px. Indoor tap / outdoor scuff, in the 0.8–3 kHz band so phone speakers play them.
-   Ambience (no wind bed): day birds, night crickets, rain, base campfire crackle, muffled outside + drips indoors.
+   Ambience (no wind bed, no insect tone): day birds, a quiet night, rain, base campfire crackle, muffled outside + drips indoors.
    Weather: a day can be rainy — zombies hear 30 % less and the edges of the view get darker.
    Mixer: tap 🔊 = on/off, hold 🔊 = separate volumes for guns, zombies, footsteps, ambience (saved in this browser).
    Needs gunfeel.js (audio, SND) and zsound.js. */
@@ -51,16 +51,13 @@ let AMB=null;
 function ambInit(){const a=acx();if(!a)return null;if(AMB)return AMB;const ab=bus('amb');
  const muff=a.createBiquadFilter();muff.type='lowpass';muff.frequency.value=20000;const bed=a.createGain();bed.connect(muff).connect(ab);
  const rainS=a.createBufferSource();rainS.buffer=NB;rainS.loop=true;const rh=a.createBiquadFilter();rh.type='bandpass';rh.frequency.value=3500;rh.Q.value=.6;const rg=a.createGain();rg.gain.value=0;rainS.connect(rh).connect(rg).connect(bed);rainS.start();
- const cr=a.createOscillator();cr.frequency.value=4400;const c1=a.createGain(),c2=a.createGain(),cg=a.createGain();c1.gain.value=0;c2.gain.value=0;cg.gain.value=0;
- const f1=a.createOscillator();f1.type='square';f1.frequency.value=14;const f1g=a.createGain();f1g.gain.value=.5;f1.connect(f1g).connect(c1.gain);const f2=a.createOscillator();f2.type='square';f2.frequency.value=.7;const f2g=a.createGain();f2g.gain.value=.5;f2.connect(f2g).connect(c2.gain);
- cr.connect(c1).connect(c2).connect(cg).connect(bed);cr.start();f1.start();f2.start();
- AMB={a,bed,muff,rain:{g:rg},cg,next:{bird:0,drip:0,crack:0,drop:0}};return AMB}
+ AMB={a,bed,muff,rain:{g:rg},next:{bird:0,drip:0,crack:0,drop:0}};return AMB}
 const lvl=(node,v,a)=>node.gain.setTargetAtTime(v,a.currentTime,.4);
 function baseFire(){const c=BP.find(o=>o.t=='tentS'||o.t=='container'||o.t=='hq');return c?{x:c.x+c.w/2,y:c.y+c.h+24}:null}
-function ambTick(dt){if(!SND||!S){if(AMB){lvl(AMB.rain.g,0,AMB.a);lvl(AMB.cg,0,AMB.a)}return}const A=ambInit();if(!A)return;const a=A.a,t=a.currentTime,p=S.p;
+function ambTick(dt){if(!SND||!S){if(AMB)lvl(AMB.rain.g,0,AMB.a);return}const A=ambInit();if(!A)return;const a=A.a,t=a.currentTime,p=S.p;
  const night=S.t>=1500||S.t<100,indoor=S.inb>=0,rain=rainNow(),fp=baseFire(),fd=fp?Math.hypot(fp.x-p.x,fp.y-p.y):1e9;
  AT.mode=(indoor?'실내':'실외')+' · '+(night?'밤':'낮')+(rain?' · 🌧 비':'')+(fd<500?' · 모닥불':'');
- A.muff.frequency.setTargetAtTime(indoor?700:20000,t,.3);lvl(A.rain.g,rain?(indoor?.05:.09):0,a);lvl(A.cg,night&&!rain?.03:0,a);
+ A.muff.frequency.setTargetAtTime(indoor?700:20000,t,.3);lvl(A.rain.g,rain?(indoor?.05:.09):0,a);
  const N=A.next,now=performance.now(),bed=A.bed,go=f=>viaBus('amb',f);
  if(!night&&!rain&&now>N.bird){N.bird=now+1800+Math.random()*4000;const n=2+Math.random()*3|0,b0=2400+Math.random()*900;for(let i=0;i<n;i++){const s=a.createOscillator(),g2=a.createGain(),tt=t+i*.13;s.type='sine';s.frequency.setValueAtTime(b0,tt);s.frequency.exponentialRampToValueAtTime(b0*1.35,tt+.07);g2.gain.setValueAtTime(.0008,tt);g2.gain.linearRampToValueAtTime(indoor?.01:.035,tt+.01);g2.gain.exponentialRampToValueAtTime(.0008,tt+.09);s.connect(g2).connect(bed);s.start(tt);s.stop(tt+.1)}}
  if(indoor&&now>N.drip){N.drip=now+1500+Math.random()*3500;go(()=>tone(a,t,{f0:1500+Math.random()*600,f1:700,d:.08,v:.06}))}

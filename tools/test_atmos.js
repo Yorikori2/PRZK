@@ -16,9 +16,9 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  r=await p.evaluate(()=>{const a=acx();const ob=a.createBiquadFilter.bind(a);const fs=[];a.createBiquadFilter=()=>{const f=ob();fs.push(f);return f};stepSound(false,true);const ind=fs.map(f=>Math.round(f.frequency.value/100));fs.length=0;stepSound(true,false);const out=fs.map(f=>Math.round(f.frequency.value/100));a.createBiquadFilter=ob;return{ind,out}});
  ok(r.ind.join()!=r.out.join(),'indoor and outdoor steps use different sounds '+JSON.stringify(r));
  // ambience levels per scene
- const lv=async k=>{await p.evaluate(k=>scene6(k),k);await p.waitForTimeout(1600);return p.evaluate(()=>({rain:+AMB.rain.g.gain.value.toFixed(3),crick:+AMB.cg.gain.value.toFixed(3),fire:/모닥불/.test(AT.mode)?1:0,muff:Math.round(AMB.muff.frequency.value),mode:AT.mode}))};
+ const lv=async k=>{await p.evaluate(k=>scene6(k),k);await p.waitForTimeout(1600);return p.evaluate(()=>({cg:'cg' in AMB,rain:+AMB.rain.g.gain.value.toFixed(3),fire:/모닥불/.test(AT.mode)?1:0,muff:Math.round(AMB.muff.frequency.value),mode:AT.mode}))};
  const day=await lv('day'),night=await lv('night');await p.screenshot({path:OUT+'/at-night.png'});const rain=await lv('rain');await p.screenshot({path:OUT+'/at-rain.png'});const fire=await lv('fire');const indoor=await lv('indoor');
- ok(day.crick<.005&&night.crick>.02,'crickets at night only '+day.crick+' / '+night.crick);ok(rain.rain>.05&&day.rain<.01,'rain layer on rainy days '+rain.rain);ok(fire.fire>.03&&day.fire<.01,'campfire loud near the base fire '+fire.fire);
+ ok(!night.cg&&!fire.cg,'no ringing insect tone at night or by the fire');ok(rain.rain>.05&&day.rain<.01,'rain layer on rainy days '+rain.rain);ok(fire.fire>.03&&day.fire<.01,'campfire loud near the base fire '+fire.fire);
  ok(indoor.muff<1000&&day.muff>10000&&/실내/.test(indoor.mode),'indoors the outside is muffled ('+indoor.muff+'Hz) · '+indoor.mode);
  r=await p.evaluate(()=>({d:AT.drops.length,r:rainNow()}));ok(r.d==0&&!r.r,'rain stops when another scene is picked');
  await p.evaluate(()=>scene6('rain'));await p.waitForTimeout(500);r=await p.evaluate(()=>AT.drops.length);ok(r>50,'rain draws falling drops: '+r);
