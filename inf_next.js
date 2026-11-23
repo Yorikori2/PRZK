@@ -27,19 +27,21 @@ function infTick(){if(!INF||!S||!S.inf)return;const p=S.p,c=Math.floor((p.x-RD/2
 function infGoto(gx,gy){const p=S.p;const[c,r]=[(NBX-1)/2|0,(NBY-1)/2|0];const dc=gx-c-OGX,dr=gy-r-OGY;Z.length=0;infShift(dc,dr,true);const[ox,oy]=bo(c,r);p.x=ox-RD/2;p.y=oy-RD/2+8;infZoneCheck()}
 /* ---------- danger zones ---------- */
 let ZLAST=null;
-function infZoneCheck(quiet){if(!S)return;const[gx,gy]=gOf(S.p.x,S.p.y),z=zoneOf(gx,gy);if(ZLAST!=null&&z!=ZLAST&&!quiet){const up=z>ZLAST,t=up?'⚠ '+z+'구역 진입 · 좀비 체력 ×'+(1+zoneHp()*z).toFixed(2)+' · 더 좋은 보상':'🛡 '+z+'구역으로 돌아왔어요 · 좀비가 약해져요';if(!$('zoneb'))msg(t);zoneBanner(z,up);if(typeof onZoneAlert=='function')onZoneAlert(z,up,t)}if(z!=ZLAST)document.body.dataset.zone=Math.min(4,z);ZLAST=z}
+/* zone strength: HP ×2 / ×4 / ×6 / ×8 at zones 1-4 (then +2 per zone), attack +30% per zone */
+const ZHP=[1,2,4,6,8];const zHpMul=z=>z<=0?1:z<=4?ZHP[z]:8+2*(z-4),zAtkMul=z=>1+.3*Math.max(0,z);
+function infZoneCheck(quiet){if(!S)return;const[gx,gy]=gOf(S.p.x,S.p.y),z=zoneOf(gx,gy);if(ZLAST!=null&&z!=ZLAST&&!quiet){const up=z>ZLAST,t=up?'⚠ '+z+'구역 진입 · 좀비 체력 ×'+zHpMul(z)+' · 더 좋은 보상':'🛡 '+z+'구역으로 돌아왔어요 · 좀비가 약해져요';if(!$('zoneb'))msg(t);zoneBanner(z,up);if(typeof onZoneAlert=='function')onZoneAlert(z,up,t)}if(z!=ZLAST)document.body.dataset.zone=Math.min(4,z);ZLAST=z}
 /* big centred banner when the zone changes (stays 3 s, coloured by zone) */
 let ZBT;function zoneBanner(z,up){const el=$('zoneb');if(!el)return;const c=['#7fd07f','#ffd36a','#ff9a5a','#ff6a5a','#ff4a4a'][Math.min(4,z)];
- el.innerHTML=up?'<b style="color:'+c+'">⚠ '+z+'구역 진입</b><small>좀비 체력 ×'+(1+zoneHp()*z).toFixed(2)+' · 공격 ×'+(1+.15*z).toFixed(2)+' · 보상 등급 +'+z+'</small>':'<b style="color:'+c+'">🛡 '+z+'구역으로 돌아옴</b><small>좀비가 약해져요</small>';
+ el.innerHTML=up?'<b style="color:'+c+'">⚠ '+z+'구역 진입</b><small>좀비 체력 ×'+zHpMul(z)+' · 공격 ×'+zAtkMul(z).toFixed(1)+' · 보상 등급 +'+z+'</small>':'<b style="color:'+c+'">🛡 '+z+'구역으로 돌아옴</b><small>좀비가 약해져요</small>';
  el.style.borderColor=c;el.classList.remove('on');void el.offsetWidth;el.classList.add('on');clearTimeout(ZBT);ZBT=setTimeout(()=>el.classList.remove('on'),3000);try{if(up&&navigator.vibrate)navigator.vibrate([80,60,80])}catch(e){}}
 {const _mk=mk;mk=function(x,y,o={}){if(!INF||!S)return _mk(x,y,o);const[gx,gy]=gOf(x,y),zn=zoneOf(gx,gy);
   if(!o.look&&!o.b&&zn>0&&Math.random()<Math.min(.5,.06*zn)){const L=zn>=2?['runner','spitter','dog','burner','crawler','stalker','shocker','brute']:['runner','crawler','dog','spitter'];o=Object.assign({},o,{look:L[Math.random()*L.length|0]})}
-  _mk(x,y,o);const z=Z[Z.length-1];if(!z||!zn)return;const k=1+zoneHp()*zn;z.hp*=k;z.mhp*=k;z.dmg=(z.dmg!=null?z.dmg:z.b?18:z.look=='heavy'?16:7)*(1+.15*zn);z.sm=(z.sm||1)*Math.min(1.5,1+.05*zn);z.zone=zn}}
+  _mk(x,y,o);const z=Z[Z.length-1];if(!z||!zn)return;const k=zHpMul(zn);z.hp*=k;z.mhp*=k;z.dmg=(z.dmg!=null?z.dmg:z.b?18:z.look=='heavy'?16:7)*zAtkMul(zn);z.sm=(z.sm||1)*Math.min(1.5,1+.05*zn);z.zone=zn}}
 /* ---------- hooks ---------- */
 if(INF){
  {const _st=start;start=function(d,load){const r=_st(d,load);if(!S)return r;if(!load||!S.inf){S.inf={seed:MAPCFG.seed,ogx:OGX,ogy:OGY,zv:{},bv:{}};for(const z of W0.zs)S.inf.zv[z.gk]=1}S.map={nbx:NBX,nby:NBY,inf:1,seed:MAPCFG.seed,ogx:OGX,ogy:OGY};ZLAST=null;W0.b.forEach(b=>{if(b.gk)b.zone=zoneOf(b.gx,b.gy)});infZoneCheck(true);return r}}
  {const _sv=save;save=function(){if(S&&S.inf)S.map={nbx:NBX,nby:NBY,inf:1,seed:MAPCFG.seed,ogx:OGX,ogy:OGY};return _sv.apply(this,arguments)}}
- {const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(!S)return;infTick();const[gx,gy]=gOf(S.p.x,S.p.y),zn=zoneOf(gx,gy),el=$('zonec');if(el)el.innerHTML='📍 블록 ('+gx+', '+gy+') · <b>'+zn+'구역</b>'+(zn?' · 좀비 ×'+(1+zoneHp()*zn).toFixed(2):' · 안전')+' <small>다음 구역까지 '+(zoneStep()*(zn-(S.d=='N'?1:0)+1)-Math.max(Math.abs(gx),Math.abs(gy)))+'블록</small>'}}
+ {const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(!S)return;infTick();const[gx,gy]=gOf(S.p.x,S.p.y),zn=zoneOf(gx,gy),el=$('zonec');if(el)el.innerHTML='📍 블록 ('+gx+', '+gy+') · <b>'+zn+'구역</b>'+(zn?' · 좀비 체력 ×'+zHpMul(zn):' · 안전')+' <small>다음 구역까지 '+(zoneStep()*(zn-(S.d=='N'?1:0)+1)-Math.max(Math.abs(gx),Math.abs(gy)))+'블록</small>'}}
  document.body.insertAdjacentHTML('beforeend','<div id="zonec"></div><div id="zoneb"></div>');
  document.head.insertAdjacentHTML('beforeend',`<style>#zonec{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 118px);z-index:3;pointer-events:none;font-size:12px;padding:3px 10px;border-radius:99px;background:#000b;border:1px solid #ffffff2a;white-space:nowrap}#zonec small{color:var(--mut);margin-left:4px}
  body[data-zone="1"] #zonec{border-color:#e0b03a}body[data-zone="1"] #zonec b{color:#ffd36a}body[data-zone="2"] #zonec{border-color:#e07a3a}body[data-zone="2"] #zonec b{color:#ff9a5a}body[data-zone="3"] #zonec,body[data-zone="4"] #zonec{border-color:#e0574f}body[data-zone="3"] #zonec b,body[data-zone="4"] #zonec b{color:#ff6a5a}

@@ -18,7 +18,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  // danger zones
  r=await p.evaluate(()=>{const o={};for(const g of[0,14,15,30,45,60]){infGoto(g,0);Z.length=0;mk(S.p.x+80,S.p.y,{look:'civ1'});o[g]=[zoneOf(g,0),Math.round(Z[0].mhp)]}let sp=0;infGoto(45,0);for(let i=0;i<400;i++){Z.length=0;mk(S.p.x+80,S.p.y,{});if(Z[0].look&&!LOOKZ.includes(Z[0].look))sp++}return{o,special45:sp/400}});
  ok(r.o[0][0]==0&&r.o[14][0]==0&&r.o[15][0]==1&&r.o[30][0]==2&&r.o[45][0]==3&&r.o[60][0]==4,'zone goes up every 15 blocks '+JSON.stringify(r.o));
- ok(r.o[45][1]==Math.round(r.o[0][1]*1.75)&&r.o[60][1]==r.o[0][1]*2,'zombie HP ×1.75 in zone 3, ×2 in zone 4');ok(r.special45>.12,'more special zombies far out ('+Math.round(r.special45*100)+'% in zone 3)');
+ ok(r.o[15][1]==r.o[0][1]*2&&r.o[30][1]==r.o[0][1]*4&&r.o[45][1]==r.o[0][1]*6&&r.o[60][1]==r.o[0][1]*8,'zombie HP ×2 / ×4 / ×6 / ×8 in zones 1-4 '+JSON.stringify(r.o));ok(r.special45>.12,'more special zombies far out ('+Math.round(r.special45*100)+'% in zone 3)');
  r=await p.evaluate(()=>{infGoto(45,0);return W0.b.every(b=>b.zone==zoneOf(b.gx,b.gy))&&W0.b.find(b=>b.gx==45).zone==3&&W0.b.find(b=>b.gx==43).zone==2});ok(r,'buildings carry their zone (loot tier goes up with it)');
  // diagonal: the farther axis decides
  r=await p.evaluate(()=>[zoneOf(16,-3),zoneOf(-2,31),zoneOf(-46,-46)]);ok(r.join()=='1,2,3','zone uses the farther of x and y '+r);
