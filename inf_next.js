@@ -27,8 +27,8 @@ function infTick(){if(!INF||!S||!S.inf)return;const p=S.p,c=Math.floor((p.x-RD/2
 function infGoto(gx,gy){const p=S.p;const[c,r]=[(NBX-1)/2|0,(NBY-1)/2|0];const dc=gx-c-OGX,dr=gy-r-OGY;Z.length=0;infShift(dc,dr,true);const[ox,oy]=bo(c,r);p.x=ox-RD/2;p.y=oy-RD/2+8;infZoneCheck()}
 /* ---------- danger zones ---------- */
 let ZLAST=null;
-/* zone strength: HP ×2 / ×4 / ×6 / ×8 at zones 1-4 (then +2 per zone), attack +30% per zone */
-const ZHP=[1,2,4,6,8];const zHpMul=z=>z<=0?1:z<=4?ZHP[z]:8+2*(z-4),zAtkMul=z=>1+.3*Math.max(0,z);
+/* zone strength: HP ×3 / ×6 / ×9 / ×12 … (3 × zone), attack +30% per zone */
+const zHpMul=z=>z<=0?1:3*z,zAtkMul=z=>1+.3*Math.max(0,z);
 function infZoneCheck(quiet){if(!S)return;const[gx,gy]=gOf(S.p.x,S.p.y),z=zoneOf(gx,gy);if(ZLAST!=null&&z!=ZLAST&&!quiet){const up=z>ZLAST,t=up?'⚠ '+z+'구역 진입 · 좀비 체력 ×'+zHpMul(z)+' · 더 좋은 보상':'🛡 '+z+'구역으로 돌아왔어요 · 좀비가 약해져요';if(!$('zoneb'))msg(t);zoneBanner(z,up);if(typeof onZoneAlert=='function')onZoneAlert(z,up,t)}if(z!=ZLAST)document.body.dataset.zone=Math.min(4,z);ZLAST=z}
 /* big centred banner when the zone changes (stays 3 s, coloured by zone) */
 let ZBT;function zoneBanner(z,up){const el=$('zoneb');if(!el)return;const c=['#7fd07f','#ffd36a','#ff9a5a','#ff6a5a','#ff4a4a'][Math.min(4,z)];

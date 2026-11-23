@@ -5,7 +5,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  await p.goto(PAGE);await p.evaluate(()=>{try{localStorage.clear()}catch(e){}});await p.reload();await p.waitForTimeout(1500);await p.evaluate(()=>{stop9()});
  // HP and attack per zone
  let r=await p.evaluate(()=>{const o=[];for(const g of[0,15,30,45,60,75]){infGoto(g,0);Z.length=0;mk(S.p.x+80,S.p.y,{look:'civ1'});o.push([Math.round(Z[0].mhp),+(Z[0].dmg||7).toFixed(1)])}Z.length=0;return o});
- ok(r.map(x=>x[0]/r[0][0]).join()=='1,2,4,6,8,10','zombie HP ×1/2/4/6/8 (+2 per zone after) '+JSON.stringify(r));ok(r[4][1]==+(7*2.2).toFixed(1),'zone 4 attack ×2.2 ('+r[4][1]+')');
+ ok(r.map(x=>x[0]/r[0][0]).join()=='1,3,6,9,12,15','zombie HP ×1/3/6/9/12/15 '+JSON.stringify(r));ok(r[4][1]==+(7*2.2).toFixed(1),'zone 4 attack ×2.2 ('+r[4][1]+')');
  // warning one block before the edge, not before
  r=await p.evaluate(()=>{const n0=S.enW|0;infGoto(12,0);gearUpd(1/60);const a=(S.enW|0)-n0;infGoto(14,0);gearUpd(1/60);const b=(S.enW|0)-n0;return[a,b,$('zoneb').textContent]});
  ok(r[0]==0&&r[1]==1&&/다음 블록부터 1구역/.test(r[2]),'warning appears at block 14, not at 12: '+r[2]);
@@ -33,6 +33,8 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  r=await p.evaluate(()=>{const pg=EP();pg.ench.ar=['rn_hunt4'];infGoto(60,0);Z.length=0;mk(S.p.x+100,S.p.y,{look:'civ1'});const z=Z[0],h=z.hp;S3.ctx='ar';hitZ(z,10,1,0,0);S3.ctx=null;return h-z.hp});ok(Math.abs(r-26)<.6||r>=26,'zone hunter Ⅳ in zone 4: 10 damage → '+r.toFixed(1));
  // drops: zone zombies drop stones sometimes
  r=await p.evaluate(()=>{infGoto(60,0);const n0=['enh1','enh2','enh3'].reduce((a,k)=>a+(S.p.inv[k]|0),0);for(let i=0;i<300;i++){Z.length=0;mk(S.p.x+200,S.p.y,{look:'civ1'});kill(Z[0])}Z.length=0;return['enh1','enh2','enh3'].reduce((a,k)=>a+(S.p.inv[k]|0),0)-n0});ok(r>=10&&r<=50,'300 kills in zone 4 drop '+r+' stones (~10%)');
+ r=await p.evaluate(()=>{const rows=cmpRows();closeBase();return rows});console.log(JSON.stringify(r));ok(r.length==6&&r[4][1]==r[0][1]*12&&r[4][3][1]==Math.ceil(r[4][1]/33),'comparison table rows');
+ await p.evaluate(()=>scene9('cmp'));await p.waitForTimeout(400);await p.screenshot({path:OUT+'/enh-cmp.png'});
  // the window renders, scenes run
  await p.evaluate(()=>scene9('ench'));await p.waitForTimeout(300);await p.evaluate(()=>doEnch('rn_hunt4'));await p.waitForTimeout(400);await p.screenshot({path:OUT+'/enh-panel.png'});
  await p.evaluate(()=>scene9('fight'));await p.waitForTimeout(1500);await p.screenshot({path:OUT+'/enh-fight.png'});
