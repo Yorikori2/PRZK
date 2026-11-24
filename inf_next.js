@@ -18,7 +18,10 @@ function infShift(dc,dr,quiet){if(!dc&&!dr)return;const dx=dc*PX,dy=dr*PY,s=S,p=
  for(const f of fx){if(f.a){f.a[0]-=dx;f.a[1]-=dy}if(f.b){f.b[0]-=dx;f.b[1]-=dy}}
  Z=Z.filter(z=>z.x>-PX&&z.y>-PY&&z.x<WW+PX&&z.y<WH+PY);dec=dec.filter(d=>d.x>0&&d.y>0&&d.x<WW&&d.y<WH);
  /* zombies of blocks seen for the first time */
- for(const z of W0.zs){if(s.inf.zv[z.gk])continue;const t=TIER[(W0.b[z.b]||{}).kind]||1;let look=z.look;if(look!='heavy'&&Math.random()<(t>=3?.15:t>=2?.3:0))look=t>=3?'screamer':'runner';mk(z.x,z.y,{look,g:1})}
+ for(const z of W0.zs){if(s.inf.zv[z.gk])continue;const t=TIER[(W0.b[z.b]||{}).kind]||1,[zx,zy]=gOf(z.x,z.y),zn=zoneOf(zx,zy),P=zProf(zn);const n=Math.floor(P.dens)+(Math.random()<P.dens%1?1:0);
+  for(let i=0;i<n;i++){let look=z.look;const sp=zn?zPick(zn):null;if(sp&&look!='heavy')look=sp;else if(look!='heavy'&&Math.random()<(t>=3?.15:t>=2?.3:0))look=t>=3?'screamer':'runner';mk(z.x+(i?(Math.random()-.5)*40:0),z.y+(i?(Math.random()-.5)*30:0),{look,g:1})}}
+ /* zone 4+: a boss may roam the block (once per block) */
+ s.inf.bb=s.inf.bb||{};W0.b.forEach(b=>{if(!b.gk||s.inf.bb[b.gk])return;s.inf.bb[b.gk]=1;const zn=zoneOf(b.gx,b.gy),P=zProf(zn);if(P.boss&&Math.random()<P.boss){const[ox,oy]=bo(b.gx-OGX,b.gy-OGY);mk(ox-RD/2,oy-RD/2,{look:Math.random()<.5?'goliath':'brood',g:1});s.inf.bn=(s.inf.bn||0)+1}});
  for(const z of W0.zs)s.inf.zv[z.gk]=1;
  if(pg){pg.vis={};W0.b.forEach((b,i)=>{if(s.inf.bv[b.gk])pg.vis[i]=1})}
  infZoneCheck(quiet)}
@@ -28,6 +31,11 @@ function infGoto(gx,gy){const p=S.p;const[c,r]=[(NBX-1)/2|0,(NBY-1)/2|0];const d
 /* ---------- danger zones ---------- */
 let ZLAST=null;
 /* zone strength: HP ×3 / ×6 / ×9 / ×12 … (3 × zone), attack +30% per zone */
+/* zone profile: what changes for zombies in each zone (late zones keep getting harder) */
+const ZSP=[[],['runner','crawler','dog','spitter','sleeper'],['bloater','burner'],['screamer'],[]],ZEL=[[],[],['heavy','stalker'],['shocker'],['brute']];
+const zList=(T,zn)=>T.slice(0,Math.min(T.length,zn+1)).flat();
+function zProf(zn){zn=Math.max(0,zn);return{hp:zHpMul(zn),ehp:1+(zHpMul(zn)-1)*.5,bhp:1+.5*zn,atk:zAtkMul(zn),spd:Math.min(1.5,1+.05*zn),sp:zn?Math.min(.4,.02+.08*zn):0,el:zn>=2?Math.min(.25,.04*(zn-1)):0,dens:Math.min(2.5,1+.25*zn),boss:zn>=4?Math.min(.35,.1+.05*(zn-4)):0}}
+function zPick(zn){const P=zProf(zn),r=Math.random();if(r<P.el){const L=zList(ZEL,zn);return L[Math.random()*L.length|0]}if(r<P.el+P.sp){const L=zList(ZSP,zn);return L[Math.random()*L.length|0]}return null}
 const zHpMul=z=>z<=0?1:3*z,zAtkMul=z=>1+.3*Math.max(0,z);
 function infZoneCheck(quiet){if(!S)return;const[gx,gy]=gOf(S.p.x,S.p.y),z=zoneOf(gx,gy);if(ZLAST!=null&&z!=ZLAST&&!quiet){const up=z>ZLAST,t=up?'⚠ '+z+'구역 진입 · 좀비 체력 ×'+zHpMul(z)+' · 더 좋은 보상':'🛡 '+z+'구역으로 돌아왔어요 · 좀비가 약해져요';if(!$('zoneb'))msg(t);zoneBanner(z,up);if(typeof onZoneAlert=='function')onZoneAlert(z,up,t)}if(z!=ZLAST)document.body.dataset.zone=Math.min(4,z);ZLAST=z}
 /* big centred banner when the zone changes (stays 3 s, coloured by zone) */
@@ -35,8 +43,8 @@ let ZBT;function zoneBanner(z,up){const el=$('zoneb');if(!el)return;const c=['#7
  el.innerHTML=up?'<b style="color:'+c+'">⚠ '+z+'구역 진입</b><small>좀비 체력 ×'+zHpMul(z)+' · 공격 ×'+zAtkMul(z).toFixed(1)+' · 보상 등급 +'+z+'</small>':'<b style="color:'+c+'">🛡 '+z+'구역으로 돌아옴</b><small>좀비가 약해져요</small>';
  el.style.borderColor=c;el.classList.remove('on');void el.offsetWidth;el.classList.add('on');clearTimeout(ZBT);ZBT=setTimeout(()=>el.classList.remove('on'),3000);try{if(up&&navigator.vibrate)navigator.vibrate([80,60,80])}catch(e){}}
 {const _mk=mk;mk=function(x,y,o={}){if(!INF||!S)return _mk(x,y,o);const[gx,gy]=gOf(x,y),zn=zoneOf(gx,gy);
-  if(!o.look&&!o.b&&zn>0&&Math.random()<Math.min(.5,.06*zn)){const L=zn>=2?['runner','spitter','dog','burner','crawler','stalker','shocker','brute']:['runner','crawler','dog','spitter'];o=Object.assign({},o,{look:L[Math.random()*L.length|0]})}
-  _mk(x,y,o);const z=Z[Z.length-1];if(!z||!zn)return;const k=zHpMul(zn);z.hp*=k;z.mhp*=k;z.dmg=(z.dmg!=null?z.dmg:z.b?18:z.look=='heavy'?16:7)*zAtkMul(zn);z.sm=(z.sm||1)*Math.min(1.5,1+.05*zn);z.zone=zn}}
+  if(!o.look&&!o.b&&zn>0){const L=zPick(zn);if(L)o=Object.assign({},o,{look:L})}
+  _mk(x,y,o);const z=Z[Z.length-1];if(!z||!zn)return;const P=zProf(zn),k=BOSSZ.includes(z.look)?P.bhp:(ELITEZ.includes(z.look)||z.b)?P.ehp:P.hp;z.hp*=k;z.mhp*=k;z.dmg=(z.dmg!=null?z.dmg:z.b?18:z.look=='heavy'?16:7)*zAtkMul(zn);z.sm=(z.sm||1)*P.spd;z.zone=zn}}
 /* ---------- hooks ---------- */
 if(INF){
  {const _st=start;start=function(d,load){const r=_st(d,load);if(!S)return r;if(!load||!S.inf){S.inf={seed:MAPCFG.seed,ogx:OGX,ogy:OGY,zv:{},bv:{}};for(const z of W0.zs)S.inf.zv[z.gk]=1}S.map={nbx:NBX,nby:NBY,inf:1,seed:MAPCFG.seed,ogx:OGX,ogy:OGY};ZLAST=null;W0.b.forEach(b=>{if(b.gk)b.zone=zoneOf(b.gx,b.gy)});infZoneCheck(true);return r}}

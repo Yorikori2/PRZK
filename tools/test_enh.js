@@ -30,11 +30,22 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  ok(r.s4=='rn_fire2'&&r.s5=='rn_fire2,rn_hunt4','one rune slot below +5 (new rune replaces), two at +5 '+r.s4+' | '+r.s5);
  ok(r.keep==r.s5,'a lower rune of the same kind does not replace a higher one');ok(r.burn&&r.hit>=10,'fire rune sets the zombie on fire (hit '+r.hit.toFixed(1)+' with zone hunter)');
  r.slow=Math.round(r.slow*100)/100;ok(r.slow==.75&&r.back==1,'ice rune slows 25% for 2 s then wears off ('+r.slow+','+r.back+')');
- r=await p.evaluate(()=>{const pg=EP();pg.ench.ar=['rn_hunt4'];infGoto(60,0);Z.length=0;mk(S.p.x+100,S.p.y,{look:'civ1'});const z=Z[0],h=z.hp;S3.ctx='ar';hitZ(z,10,1,0,0);S3.ctx=null;return h-z.hp});ok(Math.abs(r-26)<.6||r>=26,'zone hunter Ⅳ in zone 4: 10 damage → '+r.toFixed(1));
+ r=await p.evaluate(()=>{const pg=EP();pg.ench.ar=['rn_hunt4'];infGoto(60,0);Z.length=0;mk(S.p.x+100,S.p.y,{look:'civ1'});const z=Z[0],h=z.hp;S3.ctx='ar';hitZ(z,10,1,0,0);S3.ctx=null;return h-z.hp});ok(Math.abs(r-19.6)<.3,'zone hunter Ⅳ in zone 4: 10 damage → '+r.toFixed(1)+' (+6% × 4 × 4)');
+ r=await p.evaluate(()=>[huntMul(4,4),huntMul(4,6),huntMul(2,1)]);ok(r[0]==r[1]&&Math.abs(r[2]-1.12)<1e-9,'zone hunter stops growing after zone 4 '+r);
  // drops: zone zombies drop stones sometimes
  r=await p.evaluate(()=>{infGoto(60,0);const n0=['enh1','enh2','enh3'].reduce((a,k)=>a+(S.p.inv[k]|0),0);for(let i=0;i<300;i++){Z.length=0;mk(S.p.x+200,S.p.y,{look:'civ1'});kill(Z[0])}Z.length=0;return['enh1','enh2','enh3'].reduce((a,k)=>a+(S.p.inv[k]|0),0)-n0});ok(r>=10&&r<=50,'300 kills in zone 4 drop '+r+' stones (~10%)');
- r=await p.evaluate(()=>{const rows=cmpRows();closeBase();return rows});console.log(JSON.stringify(r));ok(r.length==6&&r[4][1]==r[0][1]*12&&r[4][3][1]==Math.ceil(r[4][1]/33),'comparison table rows');
+ r=await p.evaluate(()=>{const rows=cmpRows();closeBase();return rows});console.log(JSON.stringify(r));ok(r.length==7&&r[6][3][5]>r[4][3][5]&&r[4][1]==r[0][1]*12&&r[4][3][1]==Math.ceil(r[4][1]/33),'comparison table rows');
  await p.evaluate(()=>scene9('cmp'));await p.waitForTimeout(400);await p.screenshot({path:OUT+'/enh-cmp.png'});
+ // zone 0 stone drops raised (6% per kill)
+ r=await p.evaluate(()=>{infGoto(0,0);const n0=S.p.inv.enh1|0;for(let i=0;i<1000;i++){Z.length=0;mk(S.p.x+200,S.p.y,{look:'civ1'});kill(Z[0])}Z.length=0;return(S.p.inv.enh1|0)-n0});ok(r>=35&&r<=90,'zone 0: 1000 kills drop '+r+' low stones (~6%)');
+ // zone profile: specials, elites, density, roaming bosses, scaled-down boss HP
+ r=await p.evaluate(()=>{const o={};for(const zn of[1,3,5]){let sp=0,el=0;for(let i=0;i<2000;i++){const k=zPick(zn);if(k&&ELITEZ.includes(k))el++;else if(k)sp++}o[zn]=[sp/2000,el/2000]}
+  const cnt=g=>{S.inf.zv={};S.inf.bb={};infGoto(g,0);infGoto(g+5,0);const n=Z.length;return n};const z0=cnt(3),z4=cnt(63);let bn0=S.inf.bn|0;for(let i=0;i<6;i++){infGoto(70+i*5,0)}const bosses=(S.inf.bn|0)-bn0;
+  Z.length=0;infGoto(60,0);Z.length=0;mk(S.p.x+300,S.p.y,{look:'goliath'});const gh=Z[0].mhp;Z.length=0;mk(S.p.x+300,S.p.y,{look:'brute'});const bh=Z[0].mhp;Z.length=0;return{o,z0,z4,bosses,gh,bh}});
+ ok(r.o[1][1]==0&&r.o[3][1]>.05&&r.o[5][0]>r.o[1][0],'specials and elites rise with the zone '+JSON.stringify(r.o));ok(r.z4>r.z0*1.6,'zone 4 blocks hold about twice the zombies ('+r.z0+' → '+r.z4+')');
+ ok(r.bosses>=1,'roaming bosses appear past zone 4 ('+r.bosses+' in 30 new blocks)');ok(r.gh==1500*3&&r.bh==600*6.5,'boss HP ×3 and elite HP ×6.5 in zone 4 (goliath '+r.gh+', brute '+r.bh+')');
+ const fps=await p.evaluate(()=>{stop9();S.inf.zv={};S.inf.bb={};infGoto(80,0);S.p.hp=1e9;S.p.mhp=1e9;return new Promise(res=>{let n=0;const t0=performance.now();(function f(){n++;if(performance.now()-t0<3000)requestAnimationFrame(f);else res([Math.round(n/3),Z.length])})()})});ok(fps[0]>40,'zone 5 crowd: '+fps[1]+' zombies at '+fps[0]+'fps');
+ await p.evaluate(()=>{Z.length=0;S.p.hp=100;scene9('prof')});await p.waitForTimeout(300);await p.screenshot({path:OUT+'/enh-prof.png'});
  // the window renders, scenes run
  await p.evaluate(()=>scene9('ench'));await p.waitForTimeout(300);await p.evaluate(()=>doEnch('rn_hunt4'));await p.waitForTimeout(400);await p.screenshot({path:OUT+'/enh-panel.png'});
  await p.evaluate(()=>scene9('fight'));await p.waitForTimeout(1500);await p.screenshot({path:OUT+'/enh-fight.png'});

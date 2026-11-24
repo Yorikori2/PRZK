@@ -7,7 +7,7 @@ const ENS=[['enh1','하급 강화석','u','+1 ~ +3 강화에 사용 · 0~1구역
  ['enhg','보호 부적','e','+6 이상 강화가 실패해도 단계가 내려가지 않아요 (1회)','#ffd36a']];
 const RUNES={fire:['🔥','화염','명중하면 불이 붙어 초당 (8×등급) 피해 · 2초','#ff8a3a'],ice:['❄','냉기','명중하면 2초 동안 느려져요 (15%+10%×등급)','#8fd8ff'],
  shock:['⚡','감전','(10%+5%×등급) 확률로 주변 2마리에게 번개 (피해 40%)','#ffe45a'],leech:['🩸','흡혈','준 피해의 (2%×등급)만큼 체력 회복','#ff5a6a'],
- hunt:['☠','구역 사냥꾼','구역 좀비에게 피해 +(10%×등급×구역) · 4등급이면 4구역에서 +160%','#c07aff'],exec:['🎯','처형','체력 30% 이하 좀비에게 피해 +(25%×등급)','#ff6a5a']};
+ hunt:['☠','구역 사냥꾼','구역 좀비에게 피해 +(6%×등급×구역) · 4구역까지만 늘어나요 · 4등급이면 4구역 이후 +96%','#c07aff'],exec:['🎯','처형','체력 30% 이하 좀비에게 피해 +(25%×등급)','#ff6a5a']};
 const RK=Object.keys(RUNES),ROM=['','Ⅰ','Ⅱ','Ⅲ','Ⅳ'],RGR=['','u','r','e','l'];
 {const add=(id,nm,rar,wt,ds,draw)=>{if(I_BY[id])return;const it=[id,nm,'c',rar,wt,ds];ITEMS.push(it);I_BY[id]=it;IC[id]=draw};
  const gem=c=>()=>{R('#1d2226',6,5,12,15);R(c,7,6,10,13);R('#ffffff88',8,7,3,3);R('#00000044',7,15,10,4);R('#ffffff33',13,8,2,7)};
@@ -21,12 +21,14 @@ const ENH={max:10,per:.15,rate:[100,100,95,90,80,70,60,50,40,30,20],
 const EP=()=>{const pg=PGo();pg.enh=pg.enh||{};pg.ench=pg.ench||{};return pg};
 const enhLv=id=>(S&&S.pg&&S.pg.enh&&S.pg.enh[id])|0,enchOf=id=>(S&&S.pg&&S.pg.ench&&S.pg.ench[id])||[];
 const enhMul=id=>1+ENH.per*enhLv(id);
+/* zone hunter: +6% × grade × zone, counted up to zone 4 only (zone 5+ keeps getting harder) */
+const huntMul=(g,zn)=>1+.06*g*Math.min(4,Math.max(0,zn));
 const enchG=(id,k)=>{let g=0;for(const r of enchOf(id))if(r&&r.slice(3,-1)==k)g=Math.max(g,+r.slice(-1));return g};
 /* weapon damage on the card and in combat: enhancement level */
 {const _w=s3W;s3W=function(id){const w=_w(id);if(w&&w!==W_BY[id]&&!w._e9){w._e9=1;w[4].d*=enhMul(id)}return w}}
 /* hits from the player's weapon: rune effects */
 {const _hz=hitZ;hitZ=function(q,dmg,dx,dy,n){const id=S3&&S3.ctx;if(!id||!S||!enchOf(id).length)return _hz(q,dmg,dx,dy,n);
-  const gh=enchG(id,'hunt'),ge=enchG(id,'exec');if(gh&&q.zone>0)dmg*=1+.1*gh*q.zone;if(ge&&q.hp<q.mhp*.3)dmg*=1+.25*ge;
+  const gh=enchG(id,'hunt'),ge=enchG(id,'exec');if(gh&&q.zone>0)dmg*=huntMul(gh,q.zone);if(ge&&q.hp<q.mhp*.3)dmg*=1+.25*ge;
   _hz(q,dmg,dx,dy,n);const p=S.p,gf=enchG(id,'fire'),gi=enchG(id,'ice'),gs=enchG(id,'shock'),gl=enchG(id,'leech');
   if(gf){q.enB=2;q.enBd=8*gf}
   if(gi){if(!(q.frz>0))q.enSm=q.sm||1;q.frz=2;q.sm=q.enSm*(1-(.15+.1*gi))}
@@ -40,10 +42,10 @@ const enchG=(id,k)=>{let g=0;for(const r of enchOf(id))if(r&&r.slice(3,-1)==k)g=
 const stoneFor=z=>z<=1?'enh1':z<=2?'enh2':z==3?(Math.random()<.3?'enh3':'enh2'):'enh3';
 const runeFor=z=>'rn_'+RK[Math.random()*RK.length|0]+Math.max(1,Math.min(4,z));
 {const _k=kill;kill=function(z){_k(z);if(!S||typeof INF=='undefined'||!INF)return;const zn=z.zone|0,r={};
-  if(Math.random()<.02+.02*zn)r[stoneFor(zn)]=1;if(zn&&Math.random()<.006*zn*(z.b?5:1))r[runeFor(zn)]=1;
+  if(Math.random()<(zn?.02+.02*zn:.06))r[stoneFor(zn)]=1;if(zn&&Math.random()<.006*zn*(z.b?5:1))r[runeFor(zn)]=1;
   for(const k in r){invAdd(S.p,k,r[k]);s3Float(z.x,z.y-30,'💎 '+NM2(k),RAR[I_BY[k][3]][1])}}}
 {const _sr=s3SearchRoll;s3SearchRoll=function(o,kind,tier,r){const pid=_sr(o,kind,tier,r);if(typeof INF!='undefined'&&INF){const[gx,gy]=gOf(o.x,o.y),zn=zoneOf(gx,gy);
-  if(Math.random()<.06+.05*zn)r[stoneFor(zn)]=(r[stoneFor(zn)]||0)+1;if(zn&&Math.random()<.02*zn)r[runeFor(zn)]=1}return pid}}
+  if(Math.random()<(zn?.06+.05*zn:.12))r[stoneFor(zn)]=(r[stoneFor(zn)]||0)+1;if(zn&&Math.random()<.02*zn)r[runeFor(zn)]=1}return pid}}
 /* ---------- idea 1: warning one block before the next zone ---------- */
 let EWB=null;
 function enhWarn(){const[gx,gy]=gOf(S.p.x,S.p.y),k=gx+','+gy;if(k==EWB)return;EWB=k;const d=Math.max(Math.abs(gx),Math.abs(gy)),z=zoneOf(d,0),nz=zoneOf(d+1,0);
