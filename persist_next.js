@@ -21,7 +21,7 @@ function decStore(gk,list){if(!S.inf)return;const st=S.inf.dec=S.inf.dec||{};con
   /* blocks that came back into the window: put their marks back; bodies left long enough get up */
   const st=S.inf.dec||{};let rose=0;for(let gy=OGY;gy<OGY+NBY;gy++)for(let gx=OGX;gx<OGX+NBX;gx++){if(wasW(gx,gy))continue;const gk=gx+','+gy,L=st[gk];if(!L)continue;delete st[gk];const[ox,oy]=bo(gx-OGX,gy-OGY);
    for(const o of L){const d=Object.assign({},o,{x:ox+o.x,y:oy+o.y});if(d.k=='c'&&d.rz&&(S.tt||0)-(d.tt||0)>=120){mk(d.x,d.y,{look:zlook(d.look)});rose++;dec.push({k:'p',x:d.x,y:d.y,r:7});continue}dec.push(d)}}
-  if(rose&&!q)msg('🧟 전에 쓰러뜨린 약탈자 '+rose+'명이 감염되어 좀비로 일어났어요');S.risen=(S.risen||0)+rose}}
+  S.risen=(S.risen||0)+rose}}
 /* ---------- explosive countdown chip ---------- */
 document.body.insertAdjacentHTML('beforeend','<div id="boomc"></div>');
 document.head.insertAdjacentHTML('beforeend',`<style>#boomc{display:none;position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 146px);z-index:3;pointer-events:none;font-size:12px;padding:3px 10px;border-radius:99px;background:#3a0a0acc;border:1px solid #ff6a5a;white-space:nowrap;color:#ffd0c8}#boomc b{display:inline-block;color:#ff8a7a;margin-right:4px}</style>`);
