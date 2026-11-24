@@ -3,7 +3,7 @@
 const T9=[];const at9=(ms,f)=>T9.push(setTimeout(f,ms));
 /* keep the endless-city game saved every few seconds so reopening the sample continues where you were */
 setInterval(()=>{if(run&&S&&S.inf)try{save()}catch(e){}},8000);
-function stop9(){T9.forEach(clearTimeout);T9.length=0;jp=null;jx=jy=0;$('bm').dataset.m='';closeBase();PAUSE=false;const p=S.p;p.hp=MHP(p);p.food=p.water=100}
+function stop9(){if(typeof DM!='undefined')DM=null;if(typeof DUN!='undefined'&&DUN)dunExit();window.DSPEED=1;T9.forEach(clearTimeout);T9.length=0;jp=null;jx=jy=0;$('bm').dataset.m='';closeBase();PAUSE=false;const p=S.p;p.hp=MHP(p);p.food=p.water=100}
 /* zone alert log shown in the corner while the tour runs */
 let ZLOG=null;function onZoneAlert(z,up,t){if(!ZLOG)return;ZLOG.push((up?'⚠ ':'🛡 ')+z+'구역 '+(up?'진입':'복귀')+' ✓');const el=$('zlog');if(el)el.innerHTML='<b>알림 기록</b>'+ZLOG.map(x=>'<div>'+x+'</div>').join('')}
 function runAcross(g,dir,t0){at9(t0,()=>{infGoto(g,0);Z.length=0;S.sa=1e9;const p=S.p,[ox]=bo((NBX-1)/2|0,0);p.x=dir>0?ox+BW-60:ox+20});at9(t0+1500,()=>{jp=-1;jx=dir;jy=0});at9(t0+5400,()=>{jp=null;jx=0})}
@@ -12,6 +12,12 @@ function kindsHere(){return W0.b.map(b=>b.gk+'='+b.kind).sort().join('|')}
 function scene9(k){stop9();const p=S.p;ZLOG=null;const zl=$('zlog');if(zl)zl.remove();
  if(k=='tour'){infGoto(0,0);ZLOG=[];document.body.insertAdjacentHTML('beforeend','<div id="zlog"><b>알림 기록</b><div style="color:var(--mut)">아직 없음</div></div>');msg('🚨 0구역 → 4구역까지 경계 4곳을 차례로 넘어가요 (약 25초)');
   S.inf.fz={};[14,29,44,59].forEach((g,i)=>runAcross(g,1,800+i*7000));runAcross(60,-1,800+4*7000);at9(800+5*7000,()=>{msg('✅ 알림 '+ZLOG.length+'번: '+ZLOG.join(' · '))});return hud2()}
+ if(k=='dtools'){setTimeout(demoSheet,50);return}
+ if(k=='small'){const r=goInside(['houses','apt'],{dt1:1});if(!r)return msg('주택가를 찾지 못했어요');msg('🏠 '+r.b.name+' 안 · 철거 해머 지급 · 잠시 뒤 철거를 시작해요');at9(1500,demoTry);return hud2()}
+ if(k=='block'){const r=goInside(['clinic','police'],{dt3:1});if(!r)return;at9(1200,()=>{demoTry();msg($('msg').textContent)});return hud2()}
+ if(k=='big'){const r=goInside(['clinic','police'],{dt3:1});if(!r)return;Z=Z.filter(z=>!inBld(r.bi,z.x,z.y));window.DSPEED=.5;S.p.hp=MHP(S.p);msg('🏥 '+r.b.name+' 안 좀비를 모두 처치한 상태 · 폭약 세트로 철거를 시작해요');at9(1500,demoTry);return hud2()}
+ if(k=='shelter'){const r=goInside(['houses','apt'],{dt1:1});if(!r)return;Z.length=0;DM={bi:r.bi,gk:r.b.gk,kind:r.b.kind,name:r.b.name,need:1,gx:r.b.gx,gy:r.b.gy};demoDone('shelter');const h=W0.objs.find(o=>o.t=='hatch');if(h){S.p.x=h.x+26;S.p.y=h.y+70}return hud2()}
+ if(k=='bunker'){const r=goInside(['police','mil'],{dt3:1});if(!r)return;Z.length=0;DM={bi:r.bi,gk:r.b.gk,kind:r.b.kind,name:r.b.name,need:3,gx:r.b.gx,gy:r.b.gy};demoDone('bunker');const h=W0.objs.find(o=>o.t=='hatch');if(h){S.p.x=h.x+26;S.p.y=h.y+70;at9(1200,()=>dunEnter(h))}return hud2()}
  if(k=='cmp'){infGoto(0,0);setTimeout(openCmp,50);return}
  if(k=='prof'){setTimeout(openProf,50);return}
  if(k=='late'){giveDemo();const pg=EP();pg.enh.ar=10;pg.ench.ar=['rn_hunt4','rn_fire3','rn_shock3'];s3dirty();ZLAST=null;S.inf.zv={};S.inf.bb={};infGoto(75,0);S.sa=1;at9(1500,()=>{const c={};for(const z of Z){const k=ZN[z.look]?ZN[z.look][1]:'일반';c[k]=(c[k]||0)+1}msg('☠ 5구역 · 주변 좀비 '+Z.length+'마리: '+Object.entries(c).sort((a,b)=>b[1]-a[1]).map(([k,v])=>k+' '+v).join(' · ')+' · +10 소총 ☠Ⅳ🔥Ⅲ⚡Ⅲ')});return hud2()}
@@ -45,9 +51,19 @@ function openProf(){const R=[];for(let zn=0;zn<=6;zn++){const P=zProf(zn),pc=x=>
  sheet('👹 구역별 좀비 변화','생존 난이도 기준 · 체력은 각 좀비의 원래 체력에 곱해요',
  '<div style="overflow-x:auto"><table class="cmpT zp"><tr><th>구역</th><th>일반<br>체력</th><th>엘리트<br>체력</th><th>보스<br>체력</th><th>공격</th><th>속도</th><th>특수<br>비율</th><th>엘리트<br>비율</th><th>좀비 수</th><th>떠돌이<br>보스</th><th>새로 나오는 좀비</th></tr>'+R.join('')+'</table></div>'+
  '<p class="mut" style="font-size:11.5px">특수·엘리트 비율 = 블록 좀비 중 바뀌는 몫 · 좀비 수 = 블록당 좀비 배수 · 떠돌이 보스 = 4구역부터 블록마다 보스가 있을 확률 · 엘리트는 체력 증가를 절반만, 보스는 구역당 +50%만 받아요 (안 그러면 4구역 골리앗이 체력 18000)</p>')}
-const SC9=[['prof','👹 구역별 좀비 변화표','체력·공격·속도·특수·엘리트·수·보스 (0~6구역)'],['cmp','📊 의견 1·3 적용 비교표','구역 사냥꾼 +6% · 0구역 강화석 증가'],['late','☠ 5구역 직접 보기','75블록 · 특수·엘리트가 섞인 무리'],['tour','🚨 1→4구역 경계 알림','체력 ×3 · ×6 · ×9 · ×12 · 예고 + 첫 진입 보급까지 (약 35초)'],['warn','⚠ 경계 1블록 전 예고','13 → 14블록 · "다음 블록부터 1구역"'],['bonus','🎁 구역 첫 진입 보급','15블록 첫 진입 · 강화석·룬·경험치'],['zone','👹 구역별 좀비 체력','0 · 15 · 30 · 45 · 60블록 같은 좀비 비교'],['enh','🔨 무기 강화 +1~+10','강화석으로 강화 · 성공률 · 보호 부적'],['ench','✨ 인챈트 (룬 새기기)','룬 6종 × 4등급 · +5에서 칸 2개'],['fight','⚔ 4구역에서 시험','+8 돌격소총 + 구역 사냥꾼 Ⅳ · 화염 Ⅲ']];
+/* ---------- demolition sample helpers ---------- */
+function findKind(L,from=1){for(let d=from;d<60;d++)for(let a=-d;a<=d;a++)for(const[gx,gy]of[[a,-d],[a,d],[-d,a],[d,a]])if(L.includes(kindAt(gx,gy)))return[gx,gy];return null}
+function goInside(L,tools){const f=findKind(L);if(!f)return null;const[gx,gy]=f;stop9();infGoto(gx,gy);Z.length=0;const p=S.p,bi=W0.b.findIndex(b=>b.gk==gx+','+gy&&DLV[b.kind]);if(bi<0)return null;
+ const rs=W0.roofs.filter(r=>r.bi==bi).sort((a,b)=>b.w*b.h-a.w*a.h),rf=rs[0];for(let i=0;i<400;i++){const x=rf.x+40+Math.random()*(rf.w-80),y=rf.y+40+Math.random()*(rf.h-80);if(!blocker(x,y,9)){p.x=x;p.y=y;break}}
+ give(tools);for(const z of W0.zs)if(z.b==bi||(W0.b[z.b]&&W0.b[z.b].gk==gx+','+gy))mk(z.x,z.y,{look:z.look});return{bi,b:W0.b[bi]}}
+function demoSheet(){const row=(lv,L)=>'<tr><td><b>Lv'+lv+'</b><br><small>'+NM2('dt'+lv)+'</small></td><td style="text-align:left;white-space:normal">'+L+'</td><td>'+DTIME[lv]+'초</td><td>'+['','1블록','2블록','3블록'][lv]+'</td><td>'+Object.entries(DREW[lv]).map(([k,v])=>NM2(k)+' '+v).join(' · ')+'</td></tr>';
+ sheet('🏚 철거 도구 3단계','도구 단계보다 낮은 건물은 모두 철거할 수 있어요 · 대형(Lv2·3)은 건물 안 좀비를 모두 처치해야 시작돼요',
+ '<div style="overflow-x:auto"><table class="cmpT"><tr><th>도구</th><th>건물</th><th>시간</th><th>소음</th><th>얻는 재료</th></tr>'+row(1,'주택가 · 아파트 · 교회 · 편의점')+row(2,'학교 · 철물점 · 소방서 · 물류창고')+row(3,'진료소(병원) · 경찰서 · 군부대 · 연구소')+'</table></div>'+
+ '<h4>잔해 아래 지하 발견 확률</h4><table class="cmpT"><tr><th>건물</th><th>🕳 지하 대피소</th><th>🪖 지하 벙커</th></tr><tr><td>주택가 · 아파트 · 교회 · 편의점</td><td>15%</td><td>—</td></tr><tr><td>학교 · 철물점 · 소방서 · 물류창고</td><td>25%</td><td>—</td></tr><tr><td>진료소 · 경찰서</td><td>20%</td><td>15%</td></tr><tr><td>군부대 · 연구소</td><td>—</td><td>50%</td></tr></table>'+
+ '<p class="mut" style="font-size:11.5px">대피소: 크롤러 · 잠복자 · 가장 깊은 방에 부머와 보급품 · 벙커: 군인 좀비 · 중무장 · 가장 깊은 방에 브루트와 무기고 · 지하에서는 강화석 30% · 룬 8% · 파츠가 더 잘 나와요</p>')}
+const SC9=[['dtools','🏚 철거 도구 3단계 표','도구별 건물 · 시간 · 소음 · 재료 · 지하 발견 확률'],['small','🏠 작은 건물 철거 (Lv1)','20초 · 소음을 듣고 좀비가 몰려와요'],['block','🚫 대형 건물: 좀비가 남아 있으면','진료소 안 좀비를 모두 처치해야 시작'],['big','🏥 대형 건물 철거 (Lv3)','지하에서 좀비가 올라옴 + 주변 좀비 · 샘플은 시간 절반'],['shelter','🕳 지하 대피소 발견','철거 후 입구 → 내려가기'],['bunker','🪖 지하 벙커 탐험','어두운 벙커 · 가장 깊은 방에 브루트']];
 function open9(){const b=$('bm');b.dataset.m='scene';PAUSE=true;
- b.innerHTML='<div class="sh"><h2>♾ 무한 지형</h2><div class="wt">시드 #'+MAPCFG.seed+' · 거점에서 '+zoneStep()+'블록마다 구역이 올라가요</div><button id="s9X">✕</button></div><div class="scl">'+SC9.map(([k,n,d])=>'<div class="scc" data-s9="'+k+'"><b>'+n+'</b><small>'+d+'</small></div>').join('')+'</div>';
+ b.innerHTML='<div class="sh"><h2>🏚 철거 · 지하 대피소</h2><div class="wt">시드 #'+MAPCFG.seed+' · 거점에서 '+zoneStep()+'블록마다 구역이 올라가요</div><button id="s9X">✕</button></div><div class="scl">'+SC9.map(([k,n,d])=>'<div class="scc" data-s9="'+k+'"><b>'+n+'</b><small>'+d+'</small></div>').join('')+'</div>';
  b.style.display='block';b.querySelectorAll('[data-s9]').forEach(c=>c.onclick=()=>scene9(c.dataset.s9));$('s9X').onclick=()=>{$('bm').dataset.m='';closeBase();PAUSE=false}}
 document.body.insertAdjacentHTML('beforeend','<button id="scB">♾ 장면</button>');
 $('scB').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation()});$('scB').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(run)open9()});
