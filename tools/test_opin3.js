@@ -1,0 +1,16 @@
+// Trade vouchers and raiders going for the airdrop (endless city sample). usage: node tools/test_opin3.js <outdir>
+const {chromium}=require('playwright');const OUT=process.argv[2]||'.';const PAGE='file://'+require('path').resolve(__dirname,'..','inf-sample.html');
+const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
+(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:412,height:860}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+ await p.goto(PAGE);await p.evaluate(()=>{try{localStorage.clear()}catch(e){}});await p.reload();await p.waitForTimeout(1500);await p.evaluate(()=>stop9());
+ let r=await p.evaluate(()=>{scene9('tk');const m=Z.find(z=>z.npc);openMer(m);const t0=S.p.inv.tkn|0,s0=S.p.inv.scrap|0,k=Object.keys(m.st).find(x=>m.st[x].pr<=t0);const pr=m.st[k].pr;merBuy(k);const t1=S.p.inv.tkn|0,s1=S.p.inv.scrap|0;merSell('scrap');const t2=S.p.inv.tkn|0,s2=S.p.inv.scrap|0;merSell('pistol');const t3=S.p.inv.tkn|0;const txt=$('bm').textContent;closeBase();PAUSE=false;
+  return{buy:t0-t1==pr&&s1==s0,scrap:[s1-s2,t2-t1],pistol:t3>t2,txt:/교환권/.test(txt),w:wtOf('tkn')}});
+ ok(r.buy,'buying spends vouchers, not scrap');ok(r.scrap[0]==10&&r.scrap[1]==1,'10 scrap sells for 1 voucher');ok(r.pistol&&r.txt&&r.w==0,'loot sells for vouchers; vouchers weigh nothing');
+ r=await p.evaluate(()=>{Z.length=0;const t=S.p.inv.tkn|0;const L=rSpawn(S.p.x+200,S.p.y,2);L.forEach(q=>q.hp=0);return new Promise(res=>setTimeout(()=>res((S.p.inv.tkn|0)-t),300))});ok(r>=3,'raiders drop vouchers (+'+r+')');
+ // raiders go for the airdrop in zone 3
+ r=await p.evaluate(()=>{stop9();infGoto(3*zoneStep()+1,0);Z.length=0;S.sa=1e9;S.p.hp=1e6;const e=evStart('air');for(let i=0;i<60*8;i++)gearUpd(1/60);S.p.x=e.x;S.p.y=e.y+50;airHack(e);for(let i=0;i<60*6;i++){gearUpd(1/60);S.p.hp=1e6}const r0=Z.filter(z=>z.raider).length;
+  const sq=Z.filter(z=>z.raider&&z.grp&&z.grp.goal&&z.grp.goal.air);const d0=Math.min(...sq.map(z=>Math.hypot(z.x-e.x,z.y-e.y)));let dmin=d0;for(let i=0;i<60*62;i++){gearUpd(1/60);S.p.x=e.x;S.p.y=e.y+285;S.p.hp=1e6;for(const z of Z)if(!z.raider)z.hp=0;for(const z of sq)if(z.hp>0)dmin=Math.min(dmin,Math.hypot(z.x-e.x,z.y-e.y))}return{r0,chp:Math.round(e.chp),robbed:!!e.robbed,ph:e.ph,d0:Math.round(d0),dmin:Math.round(dmin)}});
+ ok(r.r0>=3,'in zone 3 a raider squad comes for the container ('+r.r0+')');ok(r.chp<100||r.dmin<r.d0*.5,'raiders head for the container and break it down (closest '+r.d0+' → '+r.dmin+' px, container HP '+r.chp+(r.robbed?', robbed':'')+')');
+ r=await p.evaluate(()=>{const e=WEV.find(x=>x.k=='air');e.robbed=1;e.ph='open';e.opened=0;S.p.x=e.x;S.p.y=e.y+40;const a0=S.p.inv.a556|0,t0=S.p.inv.tkn|0;const q=dmCtx().find(q=>/컨테이너 열기/.test(q.t));q&&q.f();return{a:(S.p.inv.a556|0)-a0,t:(S.p.inv.tkn|0)-t0}});ok(r.a>0&&r.a<=Math.floor((60+15*3)/2)&&r.t==6,'a robbed container gives half (5.56: '+r.a+', vouchers '+r.t+')');
+ await p.evaluate(()=>{stop9();scene9('eair3')});await p.waitForTimeout(16000);await p.screenshot({path:OUT+'/eair3.png'});await p.evaluate(()=>{stop9();scene9('tk')});await p.waitForTimeout(500);await p.evaluate(()=>openMer(Z.find(z=>z.npc)));await p.waitForTimeout(300);await p.screenshot({path:OUT+'/tk.png'});
+ ok(!errs.length,'no page errors '+errs.join(' | '));await b.close()})();

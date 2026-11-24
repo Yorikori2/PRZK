@@ -4,9 +4,9 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
 (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:412,height:860}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.goto(PAGE);await p.evaluate(()=>{try{localStorage.clear()}catch(e){}});await p.reload();await p.waitForTimeout(1500);await p.evaluate(()=>stop9());
  // merchant: trade, never a target, walks
- let r=await p.evaluate(()=>{scene9('m1');const m=Z.find(z=>z.npc);const c=dmCtx().map(q=>q.t).join('|');openMer(m);const s0=S.p.inv.scrap|0,k=Object.keys(m.st).find(x=>m.st[x].pr<=s0);const pr=m.st[k].pr;merBuy(k);const s1=S.p.inv.scrap|0;merSell('pistol');const s2=S.p.inv.scrap|0;closeBase();PAUSE=false;
+ let r=await p.evaluate(()=>{scene9('m1');const m=Z.find(z=>z.npc);const c=dmCtx().map(q=>q.t).join('|');openMer(m);const cur=typeof I_BY.tkn!='undefined'&&I_BY.tkn?'tkn':'scrap';give({[cur]:300});const s0=S.p.inv[cur]|0,k=Object.keys(m.st).find(x=>m.st[x].pr<=s0);const pr=m.st[k].pr;merBuy(k);const s1=S.p.inv[cur]|0;merSell('pistol');const s2=S.p.inv[cur]|0;closeBase();PAUSE=false;
   const tg=updTarget(S.p);return{c,paid:s0-s1==pr,sold:s2>s1,tgt:tg===m,hi:m.st.enh3!=null||m.st.milarmor!=null}});
- ok(/상인과 거래/.test(r.c)&&r.paid&&r.sold,'trade with the merchant: buy for scrap, sell loot for scrap');ok(!r.tgt&&r.hi,'the merchant is never auto-targeted; a zone 3 merchant sells high-tier goods');
+ ok(/상인과 거래/.test(r.c)&&r.paid&&r.sold,'trade with the merchant: buy and sell for the trade currency');ok(!r.tgt&&r.hi,'the merchant is never auto-targeted; a zone 3 merchant sells high-tier goods');
  r=await p.evaluate(()=>{const m=Z.find(z=>z.npc);S.p.x-=400;const x0=m.x,y0=m.y;return new Promise(res=>setTimeout(()=>res({moved:Math.hypot(m.x-x0,m.y-y0)>20,ph:m.ph>0}),5000))});ok(r.moved&&r.ph,'the merchant walks the roads');
  // flare merchant waits, then leaves
  r=await p.evaluate(()=>{stop9();for(const e of WEV.slice())evEnd(e);const e=evStart('merf');const m=e.m;for(let i=0;i<60*20;i++){gearUpd(1/60)}const waited=m.wait>0;m.life=0.01;gearUpd(.1);return{waited,gone:m.hp<0}});ok(r.waited&&r.gone,'a flare merchant waits on the spot and later leaves');
