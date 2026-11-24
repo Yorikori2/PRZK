@@ -32,7 +32,8 @@ function rDir(dx,dy,prev){return typeof dirOf=='function'?dirOf(dx,dy,prev):Math
 function rShoot(r,tx,ty,tgt,isP){const d=Math.hypot(tx-r.x,ty-r.y),w=r.w;fx.push({k:'fl',x:r.x+(tx-r.x)/d*14,y:r.y-17+(ty-r.y)/d*14,l:.06});noise(r.x,r.y,w.k=='rifle'||w.k=='pistol'?4:1);
  const hit=Math.random()<Math.min(.95,w.acc*1.1)*(1-d/w.rng*.35);const ex=hit?tx:tx+(Math.random()-.5)*60,ey=hit?ty:ty+(Math.random()-.5)*60;fx.push({k:'tr',a:[r.x,r.y-17],b:[ex,ey-12],l:.08});if(!hit)return;
  const dmg=r.dmg*(w.pel&&d<70?w.pel:1);if(isP){const p=S.p;p.hp-=dmg*(typeof armMul=='function'?armMul(p):1);blood(p.x,p.y,(tx-r.x)/d,(ty-r.y)/d,2);S.rHitP=(S.rHitP||0)+1;if(!S.rWarn||S.t-S.rWarn>60){S.rWarn=S.t;msg('🔫 '+r.nm+'의 사격! 엄폐하세요')}}else hitZ(tgt,dmg*1.5,0,0,2)}
-function rThink(r,dt){rThink0(r,dt);if(r.mv)r.ph=(r.ph||0)+dt*9}
+/* the zombie loop clears .mv every frame after this runs, so walking is remembered in .walk for drawing */
+function rThink(r,dt){rThink0(r,dt);r.walk=r.mv?.15:Math.max(0,(r.walk||0)-dt);if(r.mv)r.ph=(r.ph||0)+dt*r.spd/18}
 function rThink0(r,dt){const p=S.p,g=r.grp;r.cd-=dt;r.stun=1e9;r.mv=0;r.hurt=Math.max(0,(r.hurt||0)-dt);
  if(g.fled){const dx=r.x-p.x,dy=r.y-p.y,d=Math.hypot(dx,dy)||1;mv(r,dx/d*r.spd*1.2*dt,dy/d*r.spd*1.2*dt,7);r.mv=1;r.dir=rDir(dx,dy);r.flee=(r.flee||0)+dt;if(r.flee>7)r.hp=-1e-9,r.gone=1;return}
  /* who to fight: the player if seen, else the nearest zombie close by, else head for the goal / mill about */
@@ -60,7 +61,7 @@ function rZombies(dt){for(const z of Z){if(z.raider||z.hp<=0||z.stun>0)continue;
 function rNades(dt){if(!S.rNade)return;S.rNade=S.rNade.filter(n=>{n.t-=dt;if(n.t<=0){boom(n.x,n.y,70,40);return false}return true})}
 {const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(!S)return;let any=false;for(const r of Z)if(r.raider&&r.hp>0){any=true;rThink(r,dt)}if(any)rZombies(dt);rNades(dt)}}
 /* drawing: people, not zombies — with a health bar, a name and a sniper's laser */
-{const _zd=zDraw4;zDraw4=function(z){if(!z.raider)return _zd(z);const fr=z.mv?(z.ph|0)%4:-1;drawChar(z.look,z.x,z.y,z.d8||z.dir,fr,z.w.k);
+{const _zd=zDraw4;zDraw4=function(z){if(!z.raider)return _zd(z);const fr=z.walk>0?(typeof F8=='function'?F8(z.ph||0):(z.ph|0)%4):-1;drawChar(z.look,z.x,z.y,z.d8||z.dir,fr,z.w.k);
   if(z.hurt>0){g.globalAlpha=.5;R('#ff3a2a',z.x-9,z.y-36,18,34);g.globalAlpha=1}const w=26,f=Math.max(0,z.hp/z.mhp);R('#000a',z.x-w/2-1,z.y-48,w+2,5);R(z.lead?'#ff6a5a':'#e0b03a',z.x-w/2,z.y-47,w*f,3);
   g.font='9px sans-serif';g.textAlign='center';g.fillStyle=z.lead?'#ff9a8a':'#ffe0a0';g.fillText(z.nm,z.x,z.y-52);if(z.wid=='sniper'&&z.aim>0){g.strokeStyle='rgba(255,40,40,'+Math.min(.9,z.aim)+')';g.lineWidth=1;g.beginPath();g.moveTo(z.x,z.y-17);g.lineTo(S.p.x,S.p.y-12);g.stroke()}return true}}
 OVL.push((g2,sx,sy,k)=>{for(const n of S.rNade||[]){g2.strokeStyle='#ff4a3a';g2.lineWidth=2;g2.beginPath();g2.arc(sx(n.x),sy(n.y),70*k*(1-n.t/1.3*.4),0,7);g2.stroke();g2.fillStyle='#ff4a3a22';g2.fill()}});
