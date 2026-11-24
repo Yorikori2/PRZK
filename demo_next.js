@@ -108,7 +108,7 @@ function dRise(bi,n){const rs=W0.roofs.filter(r=>r.bi==bi);for(let i=0;i<n;i++){
 /* the building is gone → rubble lot, maybe something underneath */
 function dCollapse(d,keep,force){const ch=DSH[d.kind]||[0,0],r=Math.random();let sh=force==='none'?0:(force||(r<ch[1]?'bunker':r<ch[0]+ch[1]?'shelter':0));
  if(keep){const tot={};for(const t of dTargets(d.bi)){const q=tgtDrop(t);for(const k in q)tot[k]=(tot[k]||0)+q[k]}const g={};for(const k in tot){const n=Math.round(tot[k]*keep);if(n)g[k]=n}if(Object.keys(g).length)give(g)}
- const D=DM0();D[d.gk]={k:d.kind,sh,day:S.day};if(d.kind=='mil')D[(d.gx+1)+','+d.gy]={k:'milR',sh:0,day:S.day};
+ const D=DM0();D[d.gk]={k:d.kind,sh,day:S.day};if(S.inf.dis){delete S.inf.dis[d.gk];if(d.kind=='mil')delete S.inf.dis[(d.gx+1)+','+d.gy]}if(d.kind=='mil')D[(d.gx+1)+','+d.gy]={k:'milR',sh:0,day:S.day};
  s3Xp(40*(DLV[d.kind]||1),'철거');infRebuild();S.demoN=(S.demoN||0)+1;
  setTimeout(()=>msg(sh?(sh=='bunker'?'🪖 잔해 아래에서 지하 벙커를 발견했어요! · 입구로 내려가 보세요':'🕳 잔해 아래에서 지하 대피소를 발견했어요! · 입구로 내려가 보세요'):'🏚 '+d.name+' 철거 완료 · 빈터가 생겼어요 (전초기지를 지을 수 있어요)'),900);return sh}
 /* ---------- whole building at once: explosives / bulldozer ---------- */
