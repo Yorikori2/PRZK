@@ -36,7 +36,7 @@ const F8=ph=>((ph*2)|0)%8;
 /* zombies (and raiders) face the way they actually move */
 {const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(!S)return;for(const z of Z){if(z.lx!=null){const dx=z.x-z.lx,dy=z.y-z.ly;if(Math.abs(dx)+Math.abs(dy)>.05)z.d8=dir8(dx,dy,z.d8);else if(z.raider&&z.fx!=null)z.d8=dir8(z.fx,z.fy,z.d8)}z.lx=z.x;z.ly=z.y}}}
 const ZD4_BASE=zDraw4;
-{const _zd=zDraw4;zDraw4=function(z){if(NEWZ.includes(z.look)&&!z.sleep)return zDraw8(z);if(z.raider||NEWZ.includes(z.look))return _zd(z);return drawChar(z.look,z.x,z.y,z.d8||z.dir,z.mv?F8(z.ph||0):-1,null,z.b?1.7:z.look=='heavy'?1.35:1)||true}}
+{const _zd=zDraw4;zDraw4=function(z){if(NEWZ.includes(z.look)&&!z.sleep)return zDraw8(z);if(z.raider||NEWZ.includes(z.look))return _zd(z);return drawChar(z.look,z.x,z.y,z.d8||z.dir,z.mv?F8(z.ph||0):-1,null,z.b?1.7:z.look=='heavy'?1.35:z.elite?1.25:1)||true}}
 
 /* ---------- special zombies and bosses in 8 directions ----------
    people-shaped ones (spitter, burner, shocker) are redrawn per facing; creatures drawn side-on (dog, crawler, stalker)

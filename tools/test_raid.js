@@ -6,7 +6,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  let r=await p.evaluate(()=>{const o={};for(const zn of[1,2,3,4,5,7]){infGoto(zn*zoneStep()+1,0);Z.length=0;const L=rSpawn(S.p.x+300,S.p.y,zn);o[zn]={n:L.length,hp:L.map(q=>q.mhp),arm:L[0].arm,w:L.map(q=>q.wid).join(','),lead:L.some(q=>q.lead)}}Z.length=0;return o});
  ok(r[1].w.split(',').every(w=>['pipe','machete','bat'].includes(w))&&r[1].arm==1&&r[1].hp[0]==100,'zone 1: melee only, no armour, 100 HP (as much as the player) '+r[1].w);
  ok(/pistol|pump/.test(r[2].w)&&r[2].arm==.85&&r[3].arm==.75&&r[4].arm==.65,'zones 2-4: guns and better armour '+[r[2].w,r[3].w,r[4].w].join(' | '));
- ok(/sniper/.test(r[4].w)&&r[5].lead&&/lmg/.test(r[5].w)&&r[7].hp[0]==r[5].hp[0],'zone 4 brings a sniper, zone 5+ a machine gun and a leader');
+ ok(/sniper/.test(r[4].w)&&r[5].lead&&/lmg/.test(r[5].w)&&r[7].hp[0]>r[5].hp[0],'zone 4 brings a sniper, zone 5+ a machine gun and a leader, and zone 7 is tougher than 5');
  // fight: they shoot the player, armour cuts damage, kills drop loot
  r=await p.evaluate(()=>{stop9();infGoto(2*zoneStep()+1,0);Z.length=0;S.sa=1e9;const pl=S.p;pl.hp=1e5;const L=rSpawn(pl.x+170,pl.y,2);const q=L[0];const h0=q.hp;hitZ(q,100,1,0,1);const took=h0-q.hp;return{took}});
  ok(Math.abs(r.took-85)<1,'armour: 100 damage → '+r.took+' on a zone 2 raider');
