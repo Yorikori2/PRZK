@@ -169,7 +169,7 @@ function dozerD(cx,cy,dir){const a=Math.round(dir/(Math.PI/4))*(Math.PI/4);shd(c
  R('#1d1714',21,-4,8,8);R('#5a5f66',22,-3,6,6);R('#1d1714',28,-27,10,54);R('#8a9096',29,-26,8,52);R('#b8bec4',34,-26,3,52);g.restore()}
 let DOZ=null;const DZSPD=.42;
 function dozerObj(){return W0.objs.find(o=>o.t=='dozer')}
-function dozerBoard(){const o=dozerObj(),p=S.p;if(!o)return;if(!(p.inv.dx2>0))return msg('🚜 불도저 열쇠가 필요해요');if((p.inv.fuel|0)<=0)return msg('🚜 연료가 필요해요');
+function dozerBoard(){const o=dozerObj(),p=S.p;if(!o)return;if(!(p.inv.dx2>0))return msg('🚜 불도저 열쇠가 필요해요');if((p.inv.fuel||0)<=0)return msg('🚜 연료가 필요해요');
  const i=W0.objs.indexOf(o);W0.objs.splice(i,1);infDerived();delete S.inf.dz;DOZ={car:S.car,x:o.x+o.w/2,y:o.y+o.h/2,dir:o.dir||0,lx:0,ly:0,cd:0};S.car={x:DOZ.x,y:DOZ.y,w:60,h:30,c:'#d9a52a',dz:1};S.dr=1;p.x=DOZ.x;p.y=DOZ.y;DOZ.lx=p.x;DOZ.ly=p.y;
  msg('🚜 불도저 운전 · 벽과 가구를 향해 밀고 들어가면 무너뜨려요 (재료 절반) · 내리려면 [상호작용]')}
 function dozerPark(){const c=S.car,[gx,gy]=gOf(c.x,c.y),[ox,oy]=bo(gx-OGX,gy-OGY);S.inf.dz={gk:gx+','+gy,rx:Math.round(c.x-ox),ry:Math.round(c.y-oy),dir:DOZ.dir};S.car=DOZ.car;DOZ=null;infRebuild();msg('🚜 불도저에서 내렸어요')}
