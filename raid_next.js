@@ -38,7 +38,7 @@ function rThink0(r,dt){const p=S.p,g=r.grp;r.cd-=dt;r.stun=1e9;r.mv=0;r.hurt=Mat
  if(g.fled){const dx=r.x-p.x,dy=r.y-p.y,d=Math.hypot(dx,dy)||1;mv(r,dx/d*r.spd*1.2*dt,dy/d*r.spd*1.2*dt,7);r.mv=1;r.dir=rDir(dx,dy);r.flee=(r.flee||0)+dt;if(r.flee>7)r.hp=-1e-9,r.gone=1;return}
  /* who to fight: the player if seen, else the nearest zombie close by, else head for the goal / mill about */
  const dp=Math.hypot(p.x-r.x,p.y-r.y);let tgt=null,isP=false,td=1e9;if(!S.dr&&dp<(r.state=='fight'?460:320)&&rSee(r,p)){tgt=p;isP=true;td=dp;r.state='fight'}
- for(const z of Z){if(z.raider||z.hp<=0)continue;const d=Math.hypot(z.x-r.x,z.y-r.y);if(d<180&&d<td*.7&&rSee(r,z)){tgt=z;isP=false;td=d}}
+ for(const z of Z){if(z.raider||z.npc||z.hp<=0)continue;const d=Math.hypot(z.x-r.x,z.y-r.y);if(d<180&&d<td*.7&&rSee(r,z)){tgt=z;isP=false;td=d}}
  if(!tgt){if(g.goal){const dx=g.goal.x-r.x,dy=g.goal.y-r.y,d=Math.hypot(dx,dy);if(d>90){mv(r,dx/d*r.spd*dt,dy/d*r.spd*dt,7);r.mv=1;r.dir=rDir(dx,dy)}else if(g.goal.hit)g.goal.hit(dt)}
   else{r.gT-=dt;if(r.gT<=0){r.gT=3+Math.random()*4;r.tx=r.hx+(Math.random()-.5)*200;r.ty=r.hy+(Math.random()-.5)*160}if(r.tx!=null){const dx=r.tx-r.x,dy=r.ty-r.y,d=Math.hypot(dx,dy);if(d>12){mv(r,dx/d*r.spd*.5*dt,dy/d*r.spd*.5*dt,7);r.mv=1;r.dir=rDir(dx,dy)}}}return}
  const dx=tgt.x-r.x,dy=tgt.y-r.y,d=Math.hypot(dx,dy)||1,w=r.w;r.dir=rDir(dx,dy);r.fx=dx/d;r.fy=dy/d;
@@ -50,7 +50,7 @@ function rThink0(r,dt){const p=S.p,g=r.grp;r.cd-=dt;r.stun=1e9;r.mv=0;r.hurt=Mat
  /* grenades from zone 3 */
  if(RT[r.raider].gren&&isP&&d<230&&d>70&&!r.lead){r.gc=(r.gc||5+Math.random()*4)-dt;if(r.gc<=0){r.gc=9+Math.random()*4;const gx=p.x,gy=p.y;S.rNade=(S.rNade||[]).concat([{x:gx,y:gy,t:1.3}]);msg('💣 수류탄! 피하세요')}}}
 /* zombies go for raiders they bump into */
-function rZombies(dt){for(const z of Z){if(z.raider||z.hp<=0||z.stun>0)continue;let best=null,bd=1e9;for(const r of Z){if(!r.raider||r.hp<=0)continue;const d=Math.hypot(r.x-z.x,r.y-z.y);if(d<bd){bd=d;best=r}}
+function rZombies(dt){for(const z of Z){if(z.raider||z.npc||z.hp<=0||z.stun>0)continue;let best=null,bd=1e9;for(const r of Z){if(!r.raider||r.hp<=0)continue;const d=Math.hypot(r.x-z.x,r.y-z.y);if(d<bd){bd=d;best=r}}
   if(!best)continue;const dp=Math.hypot(S.p.x-z.x,S.p.y-z.y);if(bd<140&&bd<dp){z.al=2;z.nx=best.x;z.ny=best.y}if(bd<22){z.rcd=(z.rcd||0)-dt;if(z.rcd<=0){z.rcd=1;best.hp-=(z.dmg!=null?z.dmg:7)*best.arm;blood(best.x,best.y,0,0,2);best.state='fight'}}}}
 /* loot and the leader */
 {const _k=kill;kill=function(z){if(!z.raider)return _k(z);if(z.gone)return;dec.push({k:'p',x:z.x,y:z.y+2,r:8});blood(z.x,z.y,0,0,8);const T=RT[z.raider],r={};
