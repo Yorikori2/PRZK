@@ -31,3 +31,9 @@ if(typeof GLOOT!='undefined'){GLOOT.mil=(GLOOT.mil||[]).concat(['dx1']);GLOOT.wa
 function nearBench(){const p=S.p;if(typeof inBase=='function'&&inBase(p.x,p.y)&&(S.base.lv.bench|0)>=1)return true;return W0.objs.some(o=>o.t=='bench3'&&o.op!=null&&Math.hypot(o.x+o.w/2-p.x,o.y+o.h/2-p.y)<120)}
 {const _u=use2;use2=function(k){if(k&&(k.startsWith('rn_')||k.startsWith('enh'))){if(!nearBench())return msg('🔨 강화 · 인챈트는 거점 작업대(Lv1 이상)나 전초기지 작업대에서 할 수 있어요');return openEnh()}return _u.apply(this,arguments)}}
 {const _ob=openBase;openBase=function(){_ob.apply(this,arguments);if(!S||$('enhOpen'))return;const h=$('bm').querySelector('h2');if(h&&(S.base.lv.bench|0)>=1)h.insertAdjacentHTML('afterend','<button id="enhOpen" style="float:right;padding:4px 10px;font-size:12px;width:auto" onclick="openEnh()">🔨 강화 · 인챈트</button>')}}
+
+/* ---------- world events and wandering merchants in the endless game ---------- */
+let GDAY=null;
+{const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(!S||!S.inf||!run||typeof evDay!='function')return;if(GDAY==null){GDAY=S.day;return}if(S.day!=GDAY){GDAY=S.day;try{evDay(false)}catch(e){}}}}
+{const _sh=infShift;infShift=function(dc,dr,q){_sh(dc,dr,q);if(q||!S||!S.inf||(typeof DUN!='undefined'&&DUN)||typeof merSpawn!='function')return;const[gx,gy]=gOf(S.p.x,S.p.y);
+  if(zoneOf(gx,gy)>=3&&!Z.some(z=>z.npc=='mer')&&Math.random()<.04){const c=(NBX-1)/2|0,r=(NBY-1)/2|0,[ox,oy]=bo(c+Math.sign(dc||0),r+Math.sign(dr||0));merSpawn(ox-RD/2,oy-RD/2,{life:300});msg('💰 떠돌이 상인이 근처를 지나가요')}}}
