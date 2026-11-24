@@ -1,0 +1,19 @@
+// Sample: quick special-ammo switch on the weapon card, and the mine's 2nd and 3rd floors.
+const {chromium}=require('playwright');const path=require('path');const PAGE='file://'+path.resolve(__dirname,'..','inf-sample.html');
+const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
+(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:412,height:860}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+ await p.goto(PAGE);await p.evaluate(()=>localStorage.clear());await p.reload();await p.waitForTimeout(1800);await p.evaluate(()=>{closeBase();PAUSE=false;stop9()});
+ let r=await p.evaluate(()=>{scene9('aq1');hud2();const P=S.p,chip=document.querySelector('#wc .aq'),t0=chip&&chip.textContent;aqNext();for(let i=0;i<200&&P.rl>0;i++)reloadTick(P,.05);hud2();const t1=document.querySelector('#wc .aq').textContent;
+  return{t0,t1,mag:P.mag.ar,magT:P.magT.ar,plain:P.inv.a556|0}});
+ ok(r.t0&&/일반/.test(r.t0)&&/철갑/.test(r.t1)&&r.magT=='a556_ap'&&r.mag==30,'tap the chip: next kind loads at once ('+r.t0+' → '+r.t1+')');ok(r.plain==60+30,'the plain rounds that were in the magazine go back to the bag');
+ r=await p.evaluate(()=>{aqList();const n=document.querySelectorAll('#aqPop [data-k]').length;const bt=document.querySelector('#aqPop [data-k="a556_inc"]');bt.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true}));const P=S.p;for(let i=0;i<200&&P.rl>0;i++)reloadTick(P,.05);return{n,t:P.magT.ar}});
+ ok(r.n==5&&r.t=='a556_inc','hold: a list of the 5 kinds you carry, pick incendiary');
+ r=await p.evaluate(()=>{scene9('md1');const P=S.p,a=dmCtx().find(q=>/2층으로 파/.test(q.t));if(!a)return{a:false};a.f();for(let i=0;i<500;i++)gearUpd(1/60);const lv=mLv(),n=W0.objs.filter(o=>o.t=='mtile'),kinds=[...new Set(n.map(o=>ORE_BY[o.m]?'ore':o.m))].join(','),z=Z.length;return{a:true,lv,kinds,z,lad:dmCtx().map(q=>q.t).join('|')}});
+ ok(r.a&&r.lv==2&&/hrock/.test(r.kinds)&&!/dirt/.test(r.kinds)&&r.z>=6,'dig down from deep on 1층 to 2층: hard rock, caves with zombies '+JSON.stringify(r).slice(0,160));ok(/1층으로/.test(r.lad)&&!/지상으로/.test(r.lad),'2층 ladder goes up to 1층');
+ r=await p.evaluate(()=>{const P=S.p;MINE=null;delete P.inv.pick3;delete P.inv.pick2;P.inv.pick1=1;const L=mUp(2),o=W0.objs.find(q=>q.t=='mtile'&&q.m=='hrock');const t=o;P.x=o.x+16;P.y=o.y+TS+20;startDig(t);const blocked=!MINE;delete P.inv.pick1;P.inv.pick2=1;startDig(t);for(let i=0;i<200;i++){if(MINE){MINE.x=P.x;MINE.y=P.y}gearUpd(1/60)}return{blocked,gone:!W0.objs.includes(t),stone:P.inv.stone|0}});
+ ok(r.blocked&&r.gone&&r.stone>=2,'hard rock needs a Lv2 pickaxe and gives 2 stone '+JSON.stringify(r));
+ r=await p.evaluate(()=>{let o2=0,o1=0,l3a=0,l3b=0;const M=MINE0();DUN.lv=2;for(let c=0;c<MCOLS;c++)for(let rr=0;rr<MROWS;rr++){const m=mCell(c,rr);if(ORE_BY[m]){o2++;if(ORE_BY[m][2]==3)l3b++}}DUN.lv=1;for(let c=0;c<MCOLS;c++)for(let rr=0;rr<MROWS;rr++){const m=mCell(c,rr);if(ORE_BY[m]){o1++;if(ORE_BY[m][2]==3)l3a++}}DUN.lv=2;return{o1,o2,l3a,l3b}});
+ ok(r.o2>r.o1*1.3&&r.l3b>r.l3a,'2층 has much more ore and more Lv3 ore '+JSON.stringify(r));
+ r=await p.evaluate(()=>{scene9('md3');const P=S.p,gas=W0.objs.filter(o=>o.m=='gasr').length,boss=Z.some(z=>z.look=='brood'),d=darkLv();P.eq.spec='';S.mgas=[{x:P.x,y:P.y,t:5}];P.hp=100;for(let i=0;i<60;i++)gearUpd(1/60);const hurt=100-P.hp;P.eq.spec='gasmask';P.hp=100;S.mgas=[{x:P.x,y:P.y,t:5}];for(let i=0;i<60;i++)gearUpd(1/60);const hurt2=100-P.hp;dunExit();return{lv:DUN,gas,boss,d,hurt,hurt2,base:BP.length>0}});
+ ok(r.gas>0&&r.boss&&r.d>=.9,'3층: gas pockets, a brood nest, darkest ('+r.gas+' pockets)');ok(r.hurt>4&&r.hurt2<r.hurt/3,'gas hurts unless you wear a gas mask ('+r.hurt.toFixed(1)+' vs '+r.hurt2.toFixed(1)+')');ok(r.lv==null&&r.base,'climbing out returns to the base');
+ ok(!errs.length,'no page errors '+errs.slice(0,3).join(' | '));await b.close()})();

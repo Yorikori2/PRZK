@@ -10,6 +10,20 @@ function runAcross(g,dir,t0){at9(t0,()=>{infGoto(g,0);Z.length=0;S.sa=1e9;const 
 function giveDemo(){const p=S.p,T={pistol:1,a9mm:60,ar:1,a556:120,enh1:6,enh2:6,enh3:6,enhg:2,scrap:20};for(const k in T)if((p.inv[k]|0)<T[k])invAdd(p,k,T[k]-(p.inv[k]|0));p.eq.prim='ar';p.eq.sec='pistol';p.as='prim';s3dirty();p.mag.ar=wdef('ar')[4].mag}
 function kindsHere(){return W0.b.map(b=>b.gk+'='+b.kind).sort().join('|')}
 function scene9(k){stop9();const p=S.p;ZLOG=null;const zl=$('zlog');if(zl)zl.remove();
+ if(k=='aq1'||k=='aq2'){const p=S.p;if(DUN)dunExit();infGoto(2,1);Z.length=0;S.t=600;S.sa=1e9;const sh=k=='aq2',gun=sh?'pump':'ar',cal=sh?'12g':'556';const L=sh?['a12g','a12g_slug','a12g_fl','a12g_db','a12g_bean']:['a556','a556_ap','a556_hp','a556_inc','a556_shk'];
+  give(Object.fromEntries(L.map(x=>[x,sh?18:60]).concat([[gun,1]])));p.eq.prim=gun;p.as='prim';p.aSel=p.aSel||{};delete p.aSel[cal];p.mag[gun]=W_BY[gun][4].mag;delete (p.magT||{})[gun];
+  for(let i=0;i<5;i++)mk(p.x+130+i*26,p.y-50+(i%3)*45,{look:i==2?'heavy':'civ1'});for(const z of Z)z.stun=1e9;closeBase();PAUSE=false;
+  msg('🔫 오른쪽 아래 무기 카드의 탄 버튼 · 누르면 다음 탄으로 바꾸고 바로 재장전 · 꾹 누르면 가진 탄 목록');setTimeout(()=>{const c=document.querySelector('#wc .aq');if(c){c.style.outline='2px solid #ffd36a';setTimeout(()=>c.style.outline='',2500)}},300);return hud2()}
+ if(k=='md1'||k=='md2'||k=='md3'){const p=S.p;if(DUN)dunExit();infGoto(0,0);Z.length=0;const M=MINE0();M.hole=1;M.dug={};M.dugF={};M.down={};S.t=600;rebuildBase();for(const id of['pick1','pick2','pick3'])delete p.inv[id];
+  p.inv[k=='md1'?'pick2':'pick3']=1;p.inv.headlamp=1;p.eq.spec='headlamp';p.inv.gasmask=1;
+  let c=MLAD[0],r=MLAD[1]+2;const path=[];while(c<MCOLS-6||r<MROWS-6){if(r<MROWS-6&&(c>=MCOLS-6||(path.length%3)!=0))r++;else c++;M.dug[c+','+r]=1;path.push([c,r])}const end=path[path.length-1];
+  p.x=BL.ox+MSPOT[0]+28;p.y=BL.oy+MSPOT[1]+60;mineEnter();const[ox,oy]=bo((NBX-1)/2|0,(NBY-1)/2|0);
+  if(k=='md1'){p.x=ox+end[0]*TS+16;p.y=oy+end[1]*TS+24;msg('⛏ 1층 깊은 곳 (사다리에서 10칸 이상) · [⬇ 여기서 2층으로 파 내려가기] (곡괭이 Lv2 · 8초)')}
+  else{M.down[1]=end;if(k=='md3'){M.down[2]=[Math.max(2,end[0]-8),Math.max(2,end[1]-9)];const d2=M.dugF[2]=M.dugF[2]||{};let cc=end[0],rr=end[1];while(cc>M.down[2][0]||rr>M.down[2][1]){if(rr>M.down[2][1])rr--;else cc--;d2[cc+','+rr]=1}mineGo(3,M.down[2])}else mineGo(2,end)}
+  closeBase();PAUSE=false;return hud2()}
+ if(k=='mdT'){const t=(h,rows)=>'<div style="overflow-x:auto"><table class="cmpT"><tr>'+h.map(x=>'<th>'+x+'</th>').join('')+'</tr>'+rows.map(r=>'<tr>'+r.map(x=>'<td style="white-space:normal">'+x+'</td>').join('')+'</tr>').join('')+'</table></div>';
+  sheet('⛏ 광산 깊은 층','1층 → 2층 → 3층',t(['','1층 광산','2층 깊은 갱도','3층 심층'],[['가는 법','거점 입구에서 사다리','1층 사다리에서 10칸 이상 떨어진 곳에서 파 내려가기 (곡괭이 Lv2 · 8초)','2층에서 같은 방법 (곡괭이 Lv3)'],['바위','흙 · 돌 (Lv1)','단단한 암반 (Lv2) · 돌 2개','심층암 (Lv3) · 돌 2개 · 석탄'],['광석','기본 · Lv3는 14칸부터','1층의 2배 · Lv3는 5칸부터 · 2개 나올 확률 45%','1층의 3배 · 희귀 광석 위주 · 2개 확률 60%'],
+   ['좀비','팔 때 5% 크롤러','천연 동굴 4곳 (크롤러 · 잠복자) · 팔 때 8%','동굴 5곳 (브루트 · 크롤러) · 가장 깊은 동굴에 번식체 둥지 · 팔 때 12%'],['위험','어두움','더 어두움','가장 어두움 · 가스 주머니 (깨면 10초 독가스 · 초당 6 · 방독면으로 막음)'],['경험치','광석 Lv × 5','× 2','× 3']])+'<div class="sub">판 길과 내려가는 구멍은 층마다 그대로 남아요 · 층 사이는 사다리 / 구멍으로 오가요</div>');return}
  if(k=='ecap'){const t=(h,rows)=>'<div style="overflow-x:auto"><table class="cmpT"><tr>'+h.map(x=>'<th>'+x+'</th>').join('')+'</tr>'+rows.map(r=>'<tr>'+r.map(x=>'<td style="white-space:normal">'+x+'</td>').join('')+'</tr>').join('')+'</table></div>';
   const fz0=S.inf.fz;const cap=z=>{S.inf.fz={};for(let i=1;i<=z;i++)S.inf.fz[i]=1;return enhCap()};const rows=[0,3,5,6,8,9,12,15].map(z=>[z+'구역까지',' +'+cap(z)]);S.inf.fz=fz0;
   const rr=[11,12,13,14,15,16,18].map(l=>['+'+l,ENH.rate[l]+'%',costTxt(ENH.cost(l))]);
@@ -207,9 +221,9 @@ function wield(id){const p=S.p;if(!(p.inv[id]>0))give({[id]:1});p.eq.mel=id;p.as
 function mkLot(L){const r=goInside(L,{});if(!r)return null;Z.length=0;DMODE={bi:r.bi,gk:r.b.gk,kind:r.b.kind,name:r.b.name,gx:r.b.gx,gy:r.b.gy};demoDone('none');const[ox,oy]=bo((NBX-1)/2|0,(NBY-1)/2|0);S.p.x=ox+BW/2;S.p.y=oy+BH/2+190;return r.b.gk}
 function mkOp(L,o){const gk=mkLot(L);if(!gk)return null;give({wood:10,scrap:10,cloth:4});opBuild();Object.assign(OP0()[gk],o||{});infRebuild();return gk}
 function fillBox(box){Object.assign(box,{food:6,water:5,bandage:8,medkit:2,a9mm:120,a12g:24,a556:90,scrap:34,wood:22,cloth:9,elec:7,cement:4,fuel:3,enh1:4,enh2:2,rn_fire2:1,rn_hunt3:1,pistol:1,pump:1,vest:1,helmet:1,bag2:1,dt1:1})}
-const SC9=[['ecap','🔨 강화 한도 (구역마다)','의견 1번 (나) · 적용됨'],['wv1','🧟 첫 웨이브 +30%','의견 2번 · 적용됨'],['aov','🛡 넘친 방어 → 출혈·넘어짐','의견 3번 · 적용됨'],['merA','💰 구역별 탄약 할인','의견 4번 · 적용됨'],['amT','🔫 특수탄 29종 표','의견 6번 · 샘플'],['amF','⚒ 탄약 제작대에서 만들기','구경별 탭'],['amTry','🔫 소총 특수탄 써 보기','철갑 · 소이 · 충격…'],['amSh','🔫 산탄 5종 써 보기','슬러그 · 드래곤 브레스…']];
+const SC9=[['aq1','🔫 빠른 탄 전환 (소총)','무기 카드 탄 버튼'],['aq2','🔫 빠른 탄 전환 (산탄총)','슬러그 · 드래곤…'],['mdT','⛏ 광산 깊은 층 표','1층 · 2층 · 3층'],['md1','⛏ 1층에서 파 내려가기','곡괭이 Lv2'],['md2','⛏ 2층 깊은 갱도','단단한 암반 · 동굴'],['md3','⛏ 3층 심층','가스 주머니 · 번식체 둥지']];
 function open9(){const b=$('bm');b.dataset.m='scene';PAUSE=true;
- b.innerHTML='<div class="sh"><h2>⚖ 밸런스 (적용) · 🔫 특수탄 (샘플)</h2><div class="wt">시드 #'+MAPCFG.seed+' · 거점에서 '+zoneStep()+'블록마다 구역이 올라가요</div><button id="s9X">✕</button></div><div class="scl">'+SC9.map(([k,n,d])=>'<div class="scc" data-s9="'+k+'"><b>'+n+'</b><small>'+d+'</small></div>').join('')+'</div>';
+ b.innerHTML='<div class="sh"><h2>🔫 빠른 탄 전환 · ⛏ 광산 깊은 층</h2><div class="wt">시드 #'+MAPCFG.seed+' · 거점에서 '+zoneStep()+'블록마다 구역이 올라가요</div><button id="s9X">✕</button></div><div class="scl">'+SC9.map(([k,n,d])=>'<div class="scc" data-s9="'+k+'"><b>'+n+'</b><small>'+d+'</small></div>').join('')+'</div>';
  b.style.display='block';b.querySelectorAll('[data-s9]').forEach(c=>c.onclick=()=>scene9(c.dataset.s9));$('s9X').onclick=()=>{$('bm').dataset.m='';closeBase();PAUSE=false}}
 document.body.insertAdjacentHTML('beforeend','<button id="scB">♾ 장면</button>');
 $('scB').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation()});$('scB').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(run)open9()});
