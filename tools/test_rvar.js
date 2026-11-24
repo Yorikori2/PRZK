@@ -1,0 +1,20 @@
+// Raider roles and raider camps (endless city sample). usage: node tools/test_rvar.js <outdir>
+const {chromium}=require('playwright');const OUT=process.argv[2]||'.';const PAGE='file://'+require('path').resolve(__dirname,'..','inf-sample.html');
+const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
+(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:412,height:860}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+ await p.goto(PAGE);await p.evaluate(()=>{try{localStorage.clear()}catch(e){}});await p.reload();await p.waitForTimeout(1500);await p.evaluate(()=>stop9());
+ let r=await p.evaluate(()=>{infGoto(46,0);Z.length=0;S.sa=1e9;const q=rSpawn(S.p.x+150,S.p.y,3)[0];rRole(q,'shield');q.fx=-1;q.fy=0;const h=q.hp;hitZ(q,100,1,0,1);const front=h-q.hp;q.fx=1;const h2=q.hp;hitZ(q,100,1,0,1);return{front:Math.round(front),back:Math.round(h2-q.hp)}});
+ ok(r.front<r.back*.4,'riot shield: front '+r.front+' vs back '+r.back+' damage');
+ r=await p.evaluate(()=>{Z.length=0;const L=rSpawn(S.p.x+200,S.p.y,3);rRole(L[1],'medic');L[0].hp=L[0].mhp*.3;const h=L[0].hp;L[1].rc=0;for(let i=0;i<10;i++)gearUpd(1/60);return L[0].hp-h});ok(r>=25,'medic heals a hurt comrade (+'+r+')');
+ r=await p.evaluate(()=>{Z.length=0;S.fires=[];S.p.hp=1e5;const L=rSpawn(S.p.x+150,S.p.y,3);const m=L[1];rRole(m,'molo');m.state='fight';m.rc=0;for(let i=0;i<120;i++)gearUpd(1/60);return(S.fires||[]).length});ok(r>=1,'firebomber sets the ground on fire');
+ r=await p.evaluate(()=>{Z.length=0;S.rCalled=0;const L=rSpawn(S.p.x+150,S.p.y,1);const s=L[0];rRole(s,'scout');s.state='fight';const n0=Z.length;for(let i=0;i<60*9;i++)gearUpd(1/60);return{called:S.rCalled,more:Z.length>n0}});ok(r.called==1&&r.more,'an escaping scout brings a second squad');
+ r=await p.evaluate(()=>{stop9();let f=null;for(let d=6;d<60&&!f;d++)for(let a=-d;a<=d&&!f;a++)for(const[x,y]of[[a,-d],[a,d],[-d,a],[d,a]])if(kindAt(x,y)=='rbase'){f=[x,y];break}
+  let near=0;for(let x=-5;x<=5;x++)for(let y=-5;y<=5;y++)if(kindAt(x,y)=='rbase')near++;infGoto(f[0],f[1]);Z.length=0;S.sa=1e9;S.p.hp=1e5;rbTick();const gk=f.join(),g=Z.filter(z=>z.rbase==gk),boss=g.find(z=>z.nm=='약탈자 두목');
+  const objs=['fence','tower','tent','gunrack','ammo'].every(t=>W0.objs.some(o=>o.t==t&&gOf(o.x,o.y).join()==gk));return{f,near,n:g.length,boss:!!boss&&boss.mhp>=900,roles:g.filter(z=>z.role).length,objs}});
+ ok(r.near==0&&r.f,'raider camps only appear 6+ blocks out (first at '+r.f+')');ok(r.n>=6&&r.boss&&r.roles>=2&&r.objs,'a camp has fences, towers, tents, loot and a garrison of '+r.n+' with a boss ('+r.roles+' specialists)');
+ r=await p.evaluate(()=>{const gk=Object.keys(S.inf.rb)[0];const g=Z.filter(z=>z.rbase==gk);g.slice(0,3).forEach(z=>z.hp=0);return new Promise(res=>setTimeout(()=>{const left=S.inf.rb[gk].left;const[gx,gy]=gk.split(',').map(Number);infGoto(gx+8,gy);infGoto(gx,gy);rbTick();const back=Z.filter(z=>z.rbase==gk&&z.hp>0).length;res({left,back})},300))});
+ ok(r.back==r.left,'leaving and coming back keeps the survivors ('+r.back+' of them)');
+ r=await p.evaluate(()=>{const gk=Object.keys(S.inf.rb)[0];const e0=S.p.inv.enh2|0;for(const z of Z)if(z.rbase==gk)z.hp=0;return new Promise(res=>setTimeout(()=>{const st=S.inf.rb[gk];const[gx,gy]=gk.split(',').map(Number),[ox,oy]=bo(gx-OGX,gy-OGY);S.p.x=ox+BW/2;S.p.y=oy+BH/2+120;const c=dmCtx().map(q=>q.t).join('|');rbTake();const o=OP0()[gk];res({clear:st.clear,loot:(S.p.inv.enh2|0)>e0,c,op:!!o&&o.wall==2&&o.turs.length==2})},300))});
+ ok(r.clear&&r.loot,'clearing the camp pays out');ok(/기지 점령/.test(r.c)&&r.op,'taking it over turns it into your outpost with walls and two turrets '+r.c);
+ await p.evaluate(()=>{stop9();scene9('rb1')});await p.waitForTimeout(1500);await p.screenshot({path:OUT+'/rbase.png'});await p.evaluate(()=>{stop9();scene9('rv1')});await p.waitForTimeout(2500);await p.screenshot({path:OUT+'/rv-shield.png'});
+ ok(!errs.length,'no page errors '+errs.join(' | '));await b.close()})();
