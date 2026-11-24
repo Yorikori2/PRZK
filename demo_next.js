@@ -161,11 +161,12 @@ function dunExit(){const p=S.p;DUN=null;buildWorld();infDerived();Z=SURF.Z;dec=S
 {const _sv=save;save=function(){if(DUN&&SURF){const p=S.p,x=p.x,y=p.y;p.x=SURF.x;p.y=SURF.y;try{return _sv.apply(this,arguments)}finally{p.x=x;p.y=y}}return _sv.apply(this,arguments)}}
 /* ---------- bulldozer: a vehicle you drive; its blade flattens walls and furniture in front of it ---------- */
 P('dozer','불도저',null,o=>dozerD(o.x+o.w/2,o.y+o.h/2,o.dir||0),true);
-function dozerD(cx,cy,dir){const hz=Math.abs(Math.cos(dir))>=Math.abs(Math.sin(dir)),fw=Math.cos(dir)>=0,dn=Math.sin(dir)>=0;shd(cx-34,cy-18,68,38,.3);
- if(hz){R('#1d1714',cx-30,cy-20,60,8);R('#1d1714',cx-30,cy+10,60,8);for(let i=0;i<7;i++){R('#3a3a3a',cx-28+i*8,cy-19,5,6);R('#3a3a3a',cx-28+i*8,cy+11,5,6)}R('#1d1714',cx-24,cy-14,48,26);R('#d9a52a',cx-23,cy-30,46,40);R('#e8bc3a',cx-23,cy-30,46,4);R('#b8861e',cx-23,cy+6,46,4);
-  R('#1d1714',cx-10,cy-46,22,20);R('#7fb0c8',cx-8,cy-44,18,10);R('#d9a52a',cx-8,cy-34,18,8);const bx=fw?cx+28:cx-38;R('#1d1714',bx-1,cy-26,12,46);R('#8a9096',bx,cy-25,10,44);R('#b8bec4',bx+(fw?7:0),cy-25,3,44);R('#5a5f66',fw?cx+22:cx-28,cy-8,6,6)}
- else{R('#1d1714',cx-26,cy-26,8,52);R('#1d1714',cx+18,cy-26,8,52);for(let i=0;i<6;i++){R('#3a3a3a',cx-25,cy-24+i*8,6,5);R('#3a3a3a',cx+19,cy-24+i*8,6,5)}R('#d9a52a',cx-18,cy-34,36,48);R('#e8bc3a',cx-18,cy-34,36,4);R('#1d1714',cx-10,cy-48,20,18);R('#7fb0c8',cx-8,cy-46,16,9);
-  const by=dn?cy+18:cy-44;R('#1d1714',cx-26,by-1,52,12);R('#8a9096',cx-25,by,50,10);R('#b8bec4',cx-25,by+(dn?7:0),50,3)}}
+/* drawn facing +x, then turned to the nearest of 8 directions */
+function dozerD(cx,cy,dir){const a=Math.round(dir/(Math.PI/4))*(Math.PI/4);shd(cx-30,cy-14,60,32,.3);g.save();g.translate(Math.round(cx),Math.round(cy-8));g.rotate(a);
+ R('#1d1714',-30,-22,60,9);R('#1d1714',-30,13,60,9);for(let i=0;i<7;i++){R('#3a3a3a',-28+i*8,-21,5,7);R('#3a3a3a',-28+i*8,14,5,7)}
+ R('#1d1714',-25,-14,46,28);R('#d9a52a',-24,-13,44,26);R('#e8bc3a',-24,-13,44,4);R('#b8861e',-24,9,44,4);
+ R('#1d1714',-20,-9,18,18);R('#7fb0c8',-18,-7,14,14);R('#a8d0e0',-18,-7,14,3);R('#5a5f66',-2,-3,8,6);
+ R('#1d1714',21,-4,8,8);R('#5a5f66',22,-3,6,6);R('#1d1714',28,-27,10,54);R('#8a9096',29,-26,8,52);R('#b8bec4',34,-26,3,52);g.restore()}
 let DOZ=null;const DZSPD=.42;
 function dozerObj(){return W0.objs.find(o=>o.t=='dozer')}
 function dozerBoard(){const o=dozerObj(),p=S.p;if(!o)return;if(!(p.inv.dx2>0))return msg('🚜 불도저 열쇠가 필요해요');if((p.inv.fuel|0)<=0)return msg('🚜 연료가 필요해요');
@@ -176,7 +177,7 @@ function dozerPark(){const c=S.car,[gx,gy]=gOf(c.x,c.y),[ox,oy]=bo(gx-OGX,gy-OGY
 /* the parked dozer is a world object in its block */
 {const _b3=buildWorld;buildWorld=function(){const w=_b3();let dz=null;try{dz=!DUN&&S&&S.inf&&S.inf.dz}catch(e){}if(dz){const[gx,gy]=dz.gk.split(',').map(Number),c=gx-OGX,r=gy-OGY;if(c>=0&&r>=0&&c<NBX&&r<NBY){const[ox,oy]=bo(c,r);W0.objs.push({t:'dozer',x:ox+dz.rx-30,y:oy+dz.ry-15,w:60,h:30,dir:dz.dir,id:'dozer'})}}return w}}
 {const _sh=infShift;infShift=function(dc,dr,q){const c0=DOZ&&DOZ.car;_sh(dc,dr,q);if(c0&&(dc||dr)){c0.x-=dc*PX;c0.y-=dr*PY}}}
-{const _sv2=save;save=function(){if(DOZ&&S){const c=S.car;S.car=DOZ.car;try{return _sv2.apply(this,arguments)}finally{S.car=c}}return _sv2.apply(this,arguments)}}
+{const _sv2=save;save=function(){if(DOZ&&S){const c=S.car,dr=S.dr;S.car=DOZ.car;S.dr=0;try{return _sv2.apply(this,arguments)}finally{S.car=c;S.dr=dr}}return _sv2.apply(this,arguments)}}
 const DZW={};
 function dozerTick(dt){if(!DOZ)return;const p=S.p,c=S.car;if(!S.dr){dozerPark();return}
  /* slower than a car */
@@ -213,7 +214,7 @@ $('dmBox').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagati
 const OVL=[];/* other modules push draw(g, sx, sy, k) callbacks */
 {const cv=$('ovl'),g2=cv.getContext('2d');function frame(){requestAnimationFrame(frame);const w=innerWidth,h=innerHeight;if(cv.width!=Math.round(w*dpr)||cv.height!=Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr)}
   g2.setTransform(1,0,0,1,0,0);g2.clearRect(0,0,cv.width,cv.height);if(!run||!S||PAUSE&&!PLACEON())return;g2.setTransform(dpr,0,0,dpr,0,0);const sx=x=>(x-camX)*zoom,sy=y=>(y-camY)*zoom,k=zoom;
-  const tool=curTool(),p=S.p,zz=tool&&!DUN?dZone():null;if(zz){const z=zz,ok=z&&dReady(z,tool,true),r=(tool.auto?tool.rng:tool.rng)*k;g2.save();g2.setLineDash([6,5]);g2.lineWidth=2;g2.strokeStyle=ok?(tool.auto?'#ffd36acc':'#e8d7a8aa'):'#ff6a5a88';g2.fillStyle=ok?'#ffd36a14':'#ff6a5a10';
+  const tool=curTool(),p=S.p,zz=tool&&!DUN&&!S.dr?dZone():null;if(zz){const z=zz,ok=z&&dReady(z,tool,true),r=(tool.auto?tool.rng:tool.rng)*k;g2.save();g2.setLineDash([6,5]);g2.lineWidth=2;g2.strokeStyle=ok?(tool.auto?'#ffd36acc':'#e8d7a8aa'):'#ff6a5a88';g2.fillStyle=ok?'#ffd36a14':'#ff6a5a10';
    g2.beginPath();g2.arc(sx(p.x),sy(p.y),r,0,Math.PI*2);g2.fill();g2.stroke();g2.setLineDash([]);if(ok)for(const t of dNear(z,tool,tool.auto?tool.n:1,tool.rng)){g2.strokeStyle='#ffd36a';g2.lineWidth=2;g2.strokeRect(sx(t.x)-2,sy(t.y)-2,t.w*k+4,t.h*k+4)}if(ok&&tool.mode!='obj'){g2.strokeStyle='#e8d7a8aa';g2.lineWidth=1;for(const t of fTiles(z,p.x,p.y,tool.rng,tool.mode=='floor'?200:tool.ft))g2.strokeRect(sx(t.x)+1,sy(t.y)+1,t.w*k-2,t.h*k-2)}g2.restore()}
   for(const f of OVL)try{f(g2,sx,sy,k)}catch(e){}}requestAnimationFrame(frame)}
 const PLACEON=()=>typeof PLACE!='undefined'&&!!PLACE;
