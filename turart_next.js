@@ -28,7 +28,10 @@ function turD(o){const t=o.tt,C=TCOL[t],q=turRec(o),a=q?(q.ha!=null?q.ha:q.dir):
 {const _d=D.turret;D.turret=o=>{if(!o.tt)return _d(o);const cx=o.x+o.w/2,cy=o.y+o.h/2;g.save();g.translate(cx,cy);g.scale(1.35,1.35);g.translate(-cx,-cy);try{turD(o)}finally{g.restore()}}}
 
 /* heads turn smoothly: toward a target when there is one, otherwise a slow watchful sweep across the arc */
-function turHeads(dt){const ops=S&&S.inf&&S.inf.op;if(!ops)return;const T=performance.now()/1000;for(const gk in ops){const o=ops[gk];if(!o.turs)continue;o.turs.forEach((q,i)=>{const P=TURT[q.t];
-  let want=q.want;if(want==null){const sw=P.arc>=360?T*.7+i:q.dir+Math.sin(T*.55+i*1.7)*Math.min(P.arc,120)/360*Math.PI*.8;want=sw}if(q.ha==null)q.ha=q.dir;
-  let df=want-q.ha;df=Math.atan2(Math.sin(df),Math.cos(df));const sp=(q.want!=null?5:1.2)*dt;q.ha+=Math.max(-sp,Math.min(sp,df));q.ha=Math.atan2(Math.sin(q.ha),Math.cos(q.ha))})}}
+/* heads (and with them the firing arc) turn all the way round: toward the nearest target in range, otherwise a slow
+   360° watch. Heavier guns turn slower. After you turn a turret by hand it holds that facing for a few seconds. */
+const TSPD={mg:4,sg:3,sn:1.6,fl:3.2,tz:2};
+function turHeads(dt){const ops=S&&S.inf&&S.inf.op;if(!ops)return;for(const gk in ops){const o=ops[gk];if(!o.turs)continue;o.turs.forEach((q,i)=>{if(q.ha==null)q.ha=q.dir;q.hold=Math.max(0,(q.hold||0)-dt);
+  if(q.want==null){if(q.hold>0)return;q.ha+=(i%2?-1:1)*.55*dt;q.ha=Math.atan2(Math.sin(q.ha),Math.cos(q.ha));return}
+  let df=q.want-q.ha;df=Math.atan2(Math.sin(df),Math.cos(df));const sp=(TSPD[q.t]||3)*dt;q.ha+=Math.max(-sp,Math.min(sp,df));q.ha=Math.atan2(Math.sin(q.ha),Math.cos(q.ha))})}}
 {const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(S)turHeads(dt)}}
