@@ -117,7 +117,7 @@ const ELITEZ=['brute','heavy','stalker','shocker'];
 function topFoe(){const p=S.p;let best=null,bd=1e9;for(const z of Z){if(z.hp<=0||z.sleep)continue;const d=Math.hypot(z.x-p.x,z.y-p.y),boss=BOSSZ.includes(z.look),el=ELITEZ.includes(z.look)||z.b;
   if(!(boss&&d<700)&&!(el&&d<320))continue;const sc=d-(boss?5000:0);if(sc<bd){bd=sc;best=z}}return best}
 {const _h=hud2;hud2=function(){_h();if(!S)return;const b=topFoe(),el=$('bossbar');el.style.display=b?'':'none';
-  if(b){const boss=BOSSZ.includes(b.look),q=ZN[b.look],cat=boss?'보스':'엘리트',nm=q?q[1]:'거대 좀비',ic=boss?(b.look=='goliath'?'👹':'🪱'):'⚠';
+  if(b){const boss=BOSSZ.includes(b.look),q=ZN[b.look],cat=boss?'보스':'엘리트',nm=b.nm||(q?q[1]:'거대 좀비'),ic=boss?(b.look=='goliath'?'👹':'🪱'):'⚠';
    el.classList.toggle('elite',!boss);el.querySelector('b').textContent=ic+' '+cat+' · '+nm+' · '+Math.ceil(b.hp)+' / '+Math.round(b.mhp);el.querySelector('i').style.width=Math.max(0,b.hp/b.mhp*100)+'%'}}}
 /* ================= collection rewards ================= */
 /* 도감 숙련: 10 kills of a kind = +5 % damage to that kind, 50 kills = +10 % */

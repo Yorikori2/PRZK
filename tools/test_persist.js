@@ -19,9 +19,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  // risen raiders drop some of their old gear
  r=await p.evaluate(()=>{const R=Math.random;let got={},n=0;try{for(let i=0;i<300;i++){Z.length=0;mk(S.p.x+80,S.p.y,{look:zlook('rd4')});const z=Z[0];z.exr={wid:'ar',rt:4};const inv=JSON.stringify(S.p.inv);const before=Object.assign({},S.p.inv);kill(z);for(const k in S.p.inv){const d=(S.p.inv[k]|0)-(before[k]|0);if(d>0){got[k]=(got[k]||0)+1}}n++}}finally{Math.random=R}return{n,got}});
  ok(r.got.ar>60&&r.got.ar<150&&r.got.milarmor>25&&r.got.helmet>40&&r.got.tkn>80,'a risen zone-4 raider drops its rifle ~35%, armour ~20-25%, vouchers ~40% '+JSON.stringify(r.got));
- // raiders in every zone, growing past zone 5; risen leader is an elite
- r=await p.evaluate(()=>{const o={};for(const zn of[1,3,5,6,8,12]){infGoto(zn*zoneStep()+1,0);Z.length=0;const L=rSpawn(S.p.x+300,S.p.y,zn);o[zn]={n:L.length,hp:Math.round(Math.max(...L.filter(q=>!q.lead).map(q=>q.mhp))),dmg:+Math.max(...L.map(q=>q.dmg)).toFixed(1)}}Z.length=0;return o});
- ok(r[6].hp>r[5].hp&&r[8].hp>r[6].hp&&r[12].hp>r[8].hp&&r[12].n>=r[5].n,'raiders keep getting stronger every zone past 5: HP '+[1,3,5,6,8,12].map(z=>z+':'+r[z].hp).join(' ')+' · squad '+r[5].n+'→'+r[12].n);
+ // a risen leader is an elite
  r=await p.evaluate(()=>{infGoto(6,0);Z.length=0;dec.length=0;S.p.hp=1e5;const L=rSpawn(S.p.x+120,S.p.y,1);L.forEach(q=>{q.lead=1;q.look='rdL';q.hp=0});return new Promise(res=>setTimeout(()=>{infGoto(16,0);S.tt=(S.tt||0)+130;infGoto(6,0);const e=Z.find(z=>z.elite);mk(S.p.x+500,S.p.y,{look:'civ1'});const n=Z[Z.length-1];res({elite:!!e,hp:e&&Math.round(e.mhp),base:Math.round(n.mhp),nm:e&&e.nm,bar:typeof ELITEZ!='undefined'&&ELITEZ.includes(e&&e.look)})},300))});
  ok(r.elite&&r.hp>=r.base*3.9&&r.bar,'a risen raider leader comes back as an elite '+r.nm+' (HP '+r.hp+' vs '+r.base+')');
  // explosive countdown chip shows time and direction

@@ -35,12 +35,6 @@ const EXARM=[null,{},{vest:.2},{vest:.25,helmet:.25},{milarmor:.2,helmet:.25},{m
   const A=EXARM[Math.min(5,e.rt)]||{};for(const k in A)if(Math.random()<A[k]*(e.lead?1.5:1))r[k]=1;if(Math.random()<.4)r.tkn=1+(Math.random()*3|0);if(Math.random()<.15)r[stoneFor(e.rt)]=1;
   const ks=Object.keys(r);if(!ks.length)return;for(const k of ks)invAdd(S.p,k,r[k]);s3Float(z.x,z.y-30,'🧟 '+ks.map(k=>NM2(k)+(r[k]>1?' '+r[k]:'')).join(' · '),'#c8e0a0');S.exDrops=(S.exDrops||0)+1}}
 
-/* ---------- raiders keep coming in every zone and keep getting stronger ----------
-   Zones 1-5 use their own gear tiers. Past zone 5 the gear stays (machine guns, leaders) but health and damage keep
-   growing with the zone the same way zombies do (×3 per zone: zone 6 = ×18/×15 of zone 5 …), and squads get bigger. */
-const rZoneMul=zn=>zn<=5?1:zHpMul(zn)/zHpMul(5),rDmgMul=zn=>zn<=5?1:zAtkMul(zn)/zAtkMul(5);
-{const _rs=rSpawn;rSpawn=function(x,y,zn,goal){const L=_rs(x,y,zn,goal);if(zn>5){const hm=rZoneMul(zn),dm=rDmgMul(zn);for(const r of L){r.mhp*=hm;r.hp=r.mhp;r.dmg*=dm;r.zn=zn}
-   const extra=Math.min(4,Math.floor((zn-5)/2));for(let i=0;i<extra;i++){const L2=_rs(x+(i+1)*30,y+20,5,goal),q=L2.find(v=>!v.lead&&v.wid!='sniper')||L2[L2.length-1];for(const v of L2)if(v!==q){const k=Z.indexOf(v);if(k>=0)Z.splice(k,1)}if(!q)continue;q.mhp*=hm;q.hp=q.mhp;q.dmg*=dm;q.grp=L[0].grp;L.push(q)}}return L}}
 /* ---------- a risen leader is an elite: tougher, harder-hitting, a bit bigger, with a health bar ---------- */
 if(typeof ELITEZ!='undefined'&&!ELITEZ.includes('rdLZ'))ELITEZ.push('rdLZ');
 {const _sh2=infShift;infShift=function(dc,dr,q){const n0=Z.length;_sh2(dc,dr,q);for(let i=n0;i<Z.length;i++){const z=Z[i];if(z.exr&&z.exr.lead&&!z.elite){z.elite=1;z.mhp*=4;z.hp=z.mhp;z.dmg=(z.dmg!=null?z.dmg:7)*1.5;z.sm=(z.sm||1)*1.1;z.nm='좀비 대장'}}}}

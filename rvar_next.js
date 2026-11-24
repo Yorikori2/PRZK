@@ -32,7 +32,7 @@ OVL.push((g2,sx,sy,k)=>{for(const m of S.rMolo||[]){g2.strokeStyle='#ff8a2a';g2.
 /* ---------- raider camps ---------- */
 TIER.rbase=4;KL.rbase=['ammo','ammo','medkit','food','water','elec'];WLOOT.rbase=['pistol','pump','ar','smg','sniper','machete','hunting'];GLOOT.rbase=['vest','helmet','milarmor','bag2'];
 if(typeof SPEC!='undefined')SPEC.rbase={a556:30,medkit:1};
-{const _ka=kindAt;kindAt=function(gx,gy){const k=_ka(gx,gy);if(k=='base'||k=='lot'||k=='milR'||k=='mil')return k;const d=Math.max(Math.abs(gx),Math.abs(gy));if(d>=6&&bh(gx,gy,77)<(d>=15?.05:.03))return'rbase';return k}}
+{const _ka=kindAt;kindAt=function(gx,gy){const k=_ka(gx,gy);if(k=='base'||k=='lot'||k=='milR'||k=='mil')return k;const d=Math.max(Math.abs(gx),Math.abs(gy)),zn=zoneOf(gx,gy);/* raider camps live in zones 3, 6, 9, 12 … */if(zn>=3&&zn%3==0&&bh(gx,gy,77)<.06)return'rbase';return k}}
 BUILDERS.rbase=(c,r,sd)=>{const A=Bld('약탈자 기지',c,r,'rbase'),Rn=mulberry(sd*17+3);A.fl(0,0,BW,BH,'dirt');A.fl(90,80,BW-180,BH-170,'gravel');A.fl(BW/2-110,BH/2-70,220,140,'concrete');
  /* fence with a gate at the bottom, towers at the corners */
  A.o('fence',60,50,BW-120,4);A.o('fence',60,BH-70,BW/2-120,4);A.o('fence',BW/2+60,BH-70,BW/2-120,4);A.o('fence',60,54,4,BH-124);A.o('fence',BW-64,54,4,BH-124);

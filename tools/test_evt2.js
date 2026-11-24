@@ -16,7 +16,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
   const m=evStart('merf');const m0=!!m.m;return new Promise(res=>setTimeout(()=>res({fly,wreck,radio:r1==r0,fight:r2>r1,m0,m1:!!m.m&&m.m.wait>200}),3000))});
  ok(r.fly&&r.wreck,'the helicopter is seen falling, then a burning wreck lies there');ok(r.radio&&r.fight,'the raiders-vs-zombies fight is announced on the radio first, then starts');ok(!r.m0&&r.m1,'flare first (whistle… pop), then the merchant waits 5 min');
  // revenge envoys 1/3/5 then the assault
- r=await p.evaluate(()=>{stop9();let f=null;for(let d=6;d<60&&!f;d++)for(let a=-d;a<=d&&!f;a++)for(const[x,y]of[[a,-d],[a,d],[-d,a],[d,a]])if(kindAt(x,y)=='rbase'){f=[x,y];break}infGoto(f[0],f[1]);Z.length=0;S.sa=1e9;rbTick();for(const z of Z)if(z.rbase)z.hp=0;return f.join()});
+ r=await p.evaluate(()=>{stop9();let f=null;for(let d=40;d<100&&!f;d++)for(let a=-d;a<=d&&!f;a++)for(const[x,y]of[[a,-d],[a,d],[-d,a],[d,a]])if(kindAt(x,y)=='rbase'){f=[x,y];break}infGoto(f[0],f[1]);Z.length=0;S.sa=1e9;rbTick();for(const z of Z)if(z.rbase)z.hp=0;return f.join()});
  await p.waitForTimeout(400);r=await p.evaluate(gk=>{const[gx,gy]=gk.split(',').map(Number),[ox,oy]=bo(gx-OGX,gy-OGY);S.p.x=ox+BW/2;S.p.y=oy+BH/2+120;S.p.hp=1e5;rbTake();const d0=S.day,out=[];
   for(let d=1;d<=4;d++){Z=Z.filter(z=>!z.raider);S.day=d0+d;gearUpd(1/60);out.push([Z.filter(z=>z.env&&z.hp>0).length,Z.filter(z=>z.raider&&!z.env&&z.hp>0).length])}return out},r);
  ok(r[0][0]==1&&r[1][0]==3&&r[2][0]==5&&r[3][0]==0&&r[3][1]>=4,'envoys 1 → 3 → 5, then the assault on day 4 '+JSON.stringify(r));
