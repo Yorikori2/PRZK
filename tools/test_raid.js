@@ -20,6 +20,6 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  // turrets shoot raiders at an outpost
  await p.evaluate(()=>{stop9();scene9('rop')});await p.waitForTimeout(9000);r=await p.evaluate(()=>{const o=Object.values(OP0())[0];return{kills:S.rKills|0,hp:o.hp,dn:Z.filter(z=>z.raider).length}});ok(r.kills>0||r.dn<3,'outpost turrets fight off raiders (kills '+r.kills+', outpost '+Math.round(r.hp)+'%)');
  await p.screenshot({path:OUT+'/raid-op.png'});await p.evaluate(()=>{stop9();scene9('r4')});await p.waitForTimeout(3500);await p.screenshot({path:OUT+'/raid-r4.png'});
- r=await p.evaluate(()=>{stop9();infGoto(16,0);Z.length=0;S.sa=1e9;S.p.hp=1e5;const L=rSpawn(S.p.x+260,S.p.y+120,1);window.QSEEN=new Set();window.QDC=drawChar;drawChar=function(look,x,y,dir,fr){if(/^rd/.test(look))QSEEN.add(dir+':'+fr);return QDC.apply(this,arguments)};return 1});
+ r=await p.evaluate(()=>{stop9();infGoto(16,0);Z.length=0;S.sa=1e9;S.p.hp=1e5;const L=rSpawn(S.p.x+260,S.p.y,1);L.forEach(q=>q.state='fight');window.QSEEN=new Set();window.QDC=drawChar;drawChar=function(look,x,y,dir,fr){if(/^rd/.test(look))QSEEN.add(dir+':'+fr);return QDC.apply(this,arguments)};return 1});
  await p.waitForTimeout(2500);r=await p.evaluate(()=>{drawChar=QDC;const fr=new Set([...QSEEN].map(s=>s.split(':')[1]));return{frames:fr.size,walking:[...fr].some(f=>+f>=0)}});ok(r.walking&&r.frames>=4,'raiders are drawn walking ('+r.frames+' different frames while they approach)');
  ok(!errs.length,'no page errors '+errs.join(' | '));await b.close()})();
