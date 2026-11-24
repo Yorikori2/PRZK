@@ -1,0 +1,28 @@
+// Sample: special slot, armour sets, armour on the sprite, underground mining + 제작소, balance sheet.  usage: node tools/test_armor2.js
+const {chromium}=require('playwright');const path=require('path');const PAGE='file://'+path.resolve(__dirname,'..','inf-sample.html');
+const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
+(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:412,height:860}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+ await p.goto(PAGE);await p.evaluate(()=>localStorage.clear());await p.reload();await p.waitForTimeout(1800);await p.evaluate(()=>{closeBase();PAUSE=false;stop9()});
+ let r=await p.evaluate(()=>SLOTS.map(s=>s[0]).join(','));ok(r=='prim,sec,mel,thr,head,body,legs,feet,spec,bag','special slot comes after the shoes ('+r+')');
+ r=await p.evaluate(()=>{const P=S.p;P.eq.spec='';invAdd(P,'gasmask',1);const a=P.eq.spec;invAdd(P,'nvg',1);const b2=P.eq.spec;P.hp=100;P.eq.spec='';hurtP(40,'💥 부머가 터졌습니다!');const d0=100-P.hp;P.hp=100;P.eq.spec='gasmask';hurtP(40,'💥 부머가 터졌습니다!');const d1=100-P.hp;P.hp=100;return{a,b2,d0,d1}});
+ ok(r.a=='gasmask'&&r.b2=='gasmask','special gear only fills an empty slot automatically');ok(Math.abs(r.d1-r.d0*.3)<.01,'gas mask: bloater gas -70% ('+r.d0.toFixed(1)+'→'+r.d1.toFixed(1)+')');
+ r=await p.evaluate(()=>{const P=S.p;P.inv.weld=1;const f=L=>{P.eq.spec=L;S.fires=[];S4.burn=1;P.hp=100;for(let i=0;i<30;i++)gearUpd(1/60);S4.burn=0;return 100-P.hp};return{n:f(''),w:f('weld')}});ok(r.w<r.n*.65&&r.w>r.n*.5,'welding goggles: burning -40% ('+r.n.toFixed(2)+'→'+r.w.toFixed(2)+')');
+ r=await p.evaluate(()=>{const P=S.p;P.eq.spec='';P.mv=1;S.dr=0;NIGHT=true;const a=detMul();P.inv.headlamp=1;P.eq.spec='headlamp';const b2=detMul();P.eq.spec='';return b2/a});ok(Math.abs(r-1.3)<.01,'headlamp: zombies notice you 30% more at night');
+ r=await p.evaluate(()=>{const P=S.p;for(const id in ARMX)P.inv[id]=1;for(const k of['head','body','legs','feet'])P.eq[k]='';const a0=armMul2(P);for(const id of['helmet','armor','legguard','tacboots'])P.eq[ARMX[id][0]]=id;const pol=setOn('police'),a1=armMul2(P);
+  for(const id of['visor','milarmor','cpants','silboots'])P.eq[ARMX[id][0]]=id;P.inv.a556=100;const w1=weight(P);P.eq.feet='tacboots';const w0=weight(P);
+  for(const id of['spechelm','eod','exo','shockboots'])P.eq[ARMX[id][0]]=id;const bl=blastMul(P),sp=speedMul(P);P.eq.body='milarmor';const sp2=speedMul(P);return{pol,a1:a1/a0,w0,w1,bl,sp,sp2}});
+ ok(r.pol&&Math.abs(r.a1-(.9*.6*.9*.95*.95))<.001,'police set (armour body counts) gives -5% more');ok(r.w0>r.w1,'military set halves ammo weight ('+r.w0.toFixed(1)+'→'+r.w1.toFixed(1)+'kg)');
+ ok(r.bl==0&&r.sp>=r.sp2,'spec-ops set: blasts do nothing and the EOD suit no longer slows you');
+ r=await p.evaluate(()=>{const P=S.p;for(const k of['head','body','legs','feet','spec'])P.eq[k]='';P.eq.head='hardhat';P.eq.feet='shockboots';P.eq.spec='nvg';const k=plLook();const L=LOOKS[k];return{k,helm:L.helm,boot:L.boot,eye:L.eye}});
+ ok(r.k!='player'&&r.helm=='#e0b03a'&&r.boot&&r.eye,'worn gear builds a player look ('+r.k+')');
+ r=await p.evaluate(()=>{scene9('mine1');const P=S.p,v=oreNear(),B=dmCtx().map(q=>q.t).join('|');const n0=P.inv[v.id]|0,left=v.n;const f=dmCtx().find(q=>/캐기/.test(q.t));f.f();for(let i=0;i<90;i++)gearUpd(1/60);return{dun:!!DUN,ores:W0.ores.length,id:v.id,got:(P.inv[v.id]|0)-n0,left,now:v.n,B}});
+ ok(r.dun&&r.ores>=5,'underground shelter has ore veins ('+r.ores+')');ok(r.got>=1&&r.now==r.left-1,'mining with a pickaxe gives ore ('+r.id+' +'+r.got+', vein '+r.left+'→'+r.now+')');
+ r=await p.evaluate(()=>{const P=S.p;MINE=null;delete P.inv.pick2;P.inv.pick1=1;const v=W0.ores.find(o=>o.n>0&&ORE_BY[o.id][2]>=2);if(!v)return null;P.x=v.x+20;P.y=v.y;return dmCtx().map(q=>q.t).find(t=>/⛏/.test(t))});ok(r==null||/Lv2 필요|Lv3 필요/.test(r),'a weaker pickaxe cannot mine harder ore ('+r+')');
+ r=await p.evaluate(()=>{const P=S.p;dunExit();infGoto(2,1);let L={};for(let s=1;s<60;s++){const Rn=mulberry(s);for(let i=0;i<20;i++){const id=oreRoll(Rn,3,6);L[ORE_BY[id][2]]=(L[ORE_BY[id][2]]|0)+1}}let L1={};for(let s=1;s<60;s++){const Rn=mulberry(s);for(let i=0;i<20;i++){const id=oreRoll(Rn,3,1);L1[ORE_BY[id][2]]=(L1[ORE_BY[id][2]]|0)+1}}return{deep:L[3]/1180,shallow:L1[3]/1180}});
+ ok(r.deep>r.shallow*2,'deeper zones roll rare (Lv3) ore more often ('+(r.shallow*100).toFixed(1)+'% → '+(r.deep*100).toFixed(1)+'%)');
+ r=await p.evaluate(()=>{const P=S.p;FANY=true;S.base.lv.fst={};P.inv={oiron:4,coal:10,ocopper:2,ozinc:1,olead:2,salpet:6,sulfur:2,cement:4,scrap:40,wood:6,cloth:2,elec:4};S.base.st={};
+  const click=sel=>{const e=document.querySelector(sel);if(e&&!e.disabled)e.click();return!!e};openForge('forge');click('[data-fb]');click('[data-fc=iiron]');click('[data-fc=iiron]');click('[data-fc=icopper]');click('[data-fc=ilead]');openForge('powder');click('[data-fb]');click('[data-fc=bpow]');openForge('ammob');click('[data-fb]');click('[data-fc=blead]');
+  const st=JSON.stringify(S.base.lv.fst);closeBase();return{st,iiron:P.inv.iiron|0,bpow:P.inv.bpow|0,blead:P.inv.blead|0}});
+ ok(r.iiron==2&&r.bpow==5&&r.blead==10,'제작소: build stations, smelt iron, make powder and bullets '+JSON.stringify(r));
+ r=await p.evaluate(()=>{scene9('bal');const t=document.querySelectorAll('#bm .cmpT tr').length;closeBase();return t});ok(r==10,'balance sheet lists 9 zones');
+ ok(!errs.length,'no page errors '+errs.slice(0,3).join(' | '));await b.close()})();

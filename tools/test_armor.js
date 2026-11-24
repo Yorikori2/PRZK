@@ -6,7 +6,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  await p.goto(PAGE);await p.evaluate(()=>localStorage.clear());await p.reload();await p.waitForTimeout(1500);
  await p.evaluate(()=>{if(!run){document.querySelector('[data-d=S]').click()}$('bm').dataset.m='';closeBase();PAUSE=false;if(S.pg&&!S.pg.tr.length)S.pg.tr=['cop'];if(typeof stop9=='function')stop9()});
  let r=await p.evaluate(()=>{const P=S.p;P.inv.band=1;P.inv.hardhat=1;openBag('band');const labels=[...document.querySelectorAll('#bm .eq .l')].map(e=>e.textContent.split(' ·')[0]);closeBase();return{order:SLOTS.map(s=>s[0]).join(','),labels,eq:Object.keys(P.eq).join(',')}});
- ok(r.order=='prim,sec,mel,thr,head,body,legs,feet,bag','slot order: weapons → head · body · legs · feet → bag ('+r.order+')');
+ ok(/^prim,sec,mel,thr,head,body,legs,feet,(spec,)?bag$/.test(r.order),'slot order: weapons → head · body · legs · feet → bag ('+r.order+')');
  ok(r.labels.slice(4,8).join(',')=='머리,몸통,다리,신발','bag sheet shows 머리 · 몸통 · 다리 · 신발 in order ('+r.labels.join('/')+')');
  r=await p.evaluate(()=>{const parts={};for(const id in ARMX){const a=ARMX[id];(parts[a[0]]=parts[a[0]]||[]).push(a[1])}return{parts,slot:['jeans','tboots','eod','visor'].map(slotFor).join(',')}});
  ok(['head','body','legs','feet'].every(k=>[1,2,3,4,5].every(t=>r.parts[k].includes(t))),'every part has tiers T1–T5');ok(r.slot=='legs,feet,body,head','new items go to the right slot ('+r.slot+')');
