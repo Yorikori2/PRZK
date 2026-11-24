@@ -2,23 +2,26 @@
    found under the rubble that open into a small dungeon. Endless city only. Loaded after enh_next.js. */
 'use strict';
 /* ---------- tools ----------
-   hand tools (Lv1, tap to hit) · power tools (Lv2, automatic) · hydraulic tools (Lv3, faster automatic, two targets)
-   explosives / heavy machinery take the whole building at once when you don't need the materials */
-{const add=(id,nm,rar,wt,ds,draw,cat='m')=>{if(I_BY[id])return;const it=[id,nm,cat,rar,wt,ds];ITEMS.push(it);I_BY[id]=it;IC[id]=draw};
- add('dt1','손 공구 세트','u',2,'해체 Lv1 · 망치 · 쇠지렛대 · 톱 · 직접 두드려서 가구 · 바닥 · 벽을 뜯어요 · 주택가 · 아파트 · 교회 · 편의점',()=>{R('#6b4a2e',4,10,3,12);R('#2a2e33',2,6,8,5);R('#8a9096',2,6,8,2);R('#8a9096',12,4,2,16);R('#5a5f66',12,4,6,2);R('#c9a42a',16,12,6,3);R('#8a9096',16,15,6,6)});
- add('dt2','전동 드릴 · 그라인더','r',4,'해체 Lv2 · 켜 두면 가까운 것을 자동으로 해체 · 학교 · 철물점 · 소방서 · 물류창고까지',()=>{R('#c9a42a',4,7,12,7);R('#e0bc3a',4,7,12,2);R('#2a2e33',8,14,4,8);R('#8a9096',16,9,6,3);R('#1d1714',2,9,2,3)});
- add('dt3','유압 브레이커 세트','e',6,'해체 Lv3 · 더 빠른 자동 해체 · 한 번에 두 곳 · 진료소(병원) · 경찰서 · 군부대 · 연구소까지',()=>{R('#a8322a',6,3,10,9);R('#c84a3a',6,3,10,2);R('#2a2e33',9,12,4,6);R('#8a9096',10,18,2,5);R('#2a2e33',3,6,3,4);R('#2a2e33',16,6,3,4)});
+   Lv1: equip and swing (hammer for furniture and walls, pry bar for floors) · Lv2/Lv3: power tools that take apart
+   whatever is inside their reach while you walk about (shown as a ring) · explosives / bulldozer: whole building at once */
+{const addW=(id,nm,rar,st,ds,draw)=>{if(W_BY[id])return;const w=[id,nm,'m',rar,st,ds,'철거 도구'];WEAPONS.push(w);W_BY[id]=w;IC[id]=draw;if(I_BY[id]){const k=ITEMS.indexOf(I_BY[id]);if(k>=0)ITEMS.splice(k,1);delete I_BY[id]}};
+ const add=(id,nm,rar,wt,ds,draw)=>{if(I_BY[id])return;const it=[id,nm,'m',rar,wt,ds];ITEMS.push(it);I_BY[id]=it;IC[id]=draw};
+ addW('dt1','철거 해머','u',{d:16,cd:.5,r:46,dur:300,nz:2,wt:2},'해체 Lv1 · 장착하고 공격 버튼으로 가구 · 벽을 때려 부숴요 (바닥은 못 뜯음)',()=>{R('#6b4a2e',10,9,3,13);R('#2a2e33',4,4,15,6);R('#8a9096',4,4,15,2);R('#1d1714',4,9,15,1)});
+ addW('dt1f','바닥 지렛대','u',{d:12,cd:.45,r:42,dur:300,nz:1,wt:1.5},'해체 Lv1 · 바닥 전용 · 장착하고 공격 버튼으로 나무 바닥 · 타일 · 카펫을 뜯어요',()=>{R('#8a9096',5,4,3,16);R('#8a9096',5,18,9,3);R('#c9a42a',5,4,3,4);R('#5a5f66',13,18,3,3)});
+ addW('dt2','전동 드릴 · 그라인더','r',{d:20,cd:.45,r:44,dur:600,nz:3,wt:4},'해체 Lv2 · 장착하고 걸어 다니면 사거리(고리) 안의 가구 · 바닥 · 벽이 저절로 뜯겨요',()=>{R('#c9a42a',4,7,12,7);R('#e0bc3a',4,7,12,2);R('#2a2e33',8,14,4,8);R('#8a9096',16,9,6,3);R('#1d1714',2,9,2,3)});
+ addW('dt3','유압 브레이커','e',{d:30,cd:.6,r:48,dur:1200,nz:3,wt:6},'해체 Lv3 · 사거리가 더 넓고 빠르며 한 번에 두 곳 · 대형 건물까지',()=>{R('#a8322a',6,3,10,9);R('#c84a3a',6,3,10,2);R('#2a2e33',9,12,4,6);R('#8a9096',10,18,2,5);R('#2a2e33',3,6,3,4);R('#2a2e33',16,6,3,4)});
  add('dx1','폭약','e',1.5,'건물 통째로 폭파 · 10초 뒤 무너짐 · 재료는 10%만 남아요 · 1회용',()=>{for(let i=0;i<3;i++){R('#a8322a',4+i*6,6,5,14);R('#c84a3a',4+i*6,6,5,2)}R('#2a2e33',4,12,17,2);R('#d9b52a',10,2,2,5)});
  add('dx2','중장비 열쇠 (불도저)','e',.1,'건물 통째로 밀기 · 30초 · 재료 50% · 연료 5 사용',()=>{R('#d9a52a',4,9,15,8);R('#e8bc3a',4,9,15,2);R('#2a2e33',5,17,13,4);R('#5a5f66',2,6,3,13);R('#1d1714',9,5,6,4)})}
+/* what each tool does: lv · which pieces · reach · automatic period · pieces per tick · damage per hit */
+const DT={dt1:{lv:1,mode:'obj',rng:50,dmg:1,n:1},dt1f:{lv:1,mode:'floor',rng:50,dmg:1,n:1},dt2:{lv:2,mode:'all',rng:85,auto:.45,dmg:2,n:1},dt3:{lv:3,mode:'all',rng:120,auto:.3,dmg:3,n:2}};
 const DLV={houses:1,apt:1,church:1,mart:1,school:2,hard:2,fire:2,ware:2,clinic:3,police:3,mil:3,lab:3};
 const DNZ=[0,2,3,3];
 /* whole-building methods */
 const DWAY={boom:{T:10,keep:.1,nz:5,name:'💣 폭파',item:'dx1'},dozer:{T:30,keep:.5,nz:5,name:'🚜 중장비',item:'dx2',fuel:5}};
-/* power tools */
-const DTOOL=[null,{dmg:1,auto:0,rng:62,n:1},{dmg:2,auto:.45,rng:80,n:1},{dmg:3,auto:.3,rng:100,n:2}];
 /* chance of finding something under the rubble: [shelter, bunker] */
 const DSH={houses:[.15,0],apt:[.15,0],church:[.15,0],mart:[.15,0],school:[.25,0],hard:[.25,0],fire:[.25,0],ware:[.25,0],clinic:[.2,.15],police:[.2,.15],mil:[0,.5],lab:[0,.5]};
-const toolLv=()=>S?(S.p.inv.dt3>0?3:S.p.inv.dt2>0?2:S.p.inv.dt1>0?1:0):0;
+const toolLv=()=>S?(S.p.inv.dt3>0?3:S.p.inv.dt2>0?2:(S.p.inv.dt1>0||S.p.inv.dt1f>0)?1:0):0;
+const curTool=()=>{if(!S)return null;const id=actW(S.p);return DT[id]?Object.assign({id},DT[id]):null};
 const DM0=()=>{S.inf.demo=S.inf.demo||{};return S.inf.demo};
 const DIS0=gk=>{S.inf.dis=S.inf.dis||{};return S.inf.dis[gk]=S.inf.dis[gk]||{}};
 /* ---------- what each thing gives when taken apart ---------- */
@@ -54,32 +57,43 @@ const zInside=bi=>Z.filter(z=>z.hp>0&&inBld(bi,z.x,z.y));
 function disTag(){let dis=null;try{dis=S&&S.inf&&S.inf.dis}catch(e){}const cnt={},tag=(a,k,f)=>{for(const q of a){const[x,y]=f(q),gk=gOf(x,y).join(),c=(cnt[gk+k]=(cnt[gk+k]||0)+1);q.id=gk+':'+k+c}};
  tag(W0.hw,'h',h=>[(h.x0+h.x1)/2,h.y]);tag(W0.vw,'v',v=>[v.x,(v.y0+v.y1)/2]);tag(W0.fl,'f',f=>[f[0]+f[2]/2,f[1]+f[3]/2]);if(!dis)return;
  const gone=q=>{const id=q.id||'';const gk=id.slice(0,id.indexOf(':'));return dis[gk]&&dis[gk][id]};W0.hw=W0.hw.filter(q=>!gone(q));W0.vw=W0.vw.filter(q=>!gone(q));W0.fl=W0.fl.filter(q=>!gone(q));W0.objs=W0.objs.filter(q=>!gone(q))}
-/* ---------- targets inside a building ---------- */
+/* ---------- targets: inside a building, or loose junk on a rubble lot ---------- */
 function dTargets(bi){const T=[];for(const o of W0.objs)if(o.b==bi&&D[o.t]&&!['hatch','ladder','rubble'].includes(o.t))T.push({k:'o',r:o,id:o.id,x:o.x,y:o.y,w:o.w,h:o.h,nm:NM[o.t]||o.t});
  for(const h of W0.hw){const cx=(h.x0+h.x1)/2;if(inBld(bi,cx,h.y,14))T.push({k:'h',r:h,id:h.id,x:h.x0,y:h.y-8,w:h.x1-h.x0,h:10,nm:h.h>=26?'바깥벽':'벽'})}
  for(const v of W0.vw){const cy=(v.y0+v.y1)/2;if(inBld(bi,v.x,cy,14))T.push({k:'v',r:v,id:v.id,x:v.x-4,y:v.y0,w:8,h:v.y1-v.y0,nm:v.top>=26?'바깥벽':'벽'})}
  for(const f of W0.fl){if(!FLMAT[f[4]])continue;const cx=f[0]+f[2]/2,cy=f[1]+f[3]/2;if(inBld(bi,cx,cy))T.push({k:'f',r:f,id:f.id,x:f[0],y:f[1],w:f[2],h:f[3],nm:'바닥',fl:1})}return T}
+const LOTJUNK=['rubble','barrel','crate'];
+function lotTargets(gk){const T=[];for(const o of W0.objs){if(!LOTJUNK.includes(o.t))continue;if(gOf(o.x,o.y).join()!=gk)continue;const b=W0.b[o.b];if(!b||!['lot','outpost'].includes(b.kind))continue;T.push({k:'o',r:o,id:o.id,x:o.x,y:o.y,w:o.w,h:o.h,nm:o.ruin?'잔해 상자':NM[o.t]||o.t,ruin:o.ruin})}return T}
+/* where am I: a building (bi ≥ 0) or a lot (bi = -1) */
+function dZone(){const p=S.p,bi=bldAt(p.x,p.y);if(bi>=0){const b=W0.b[bi];return{bi,gk:b.gk,need:DLV[b.kind],kind:b.kind,name:b.name,gx:b.gx,gy:b.gy,T:()=>dTargets(bi)}}
+ const[gx,gy]=gOf(p.x,p.y),gk=gx+','+gy;let lot=false;try{lot=!!(S.inf.demo&&S.inf.demo[gk])}catch(e){}if(!lot)return null;return{bi:-1,gk,need:1,kind:'lot',name:'빈터',gx,gy,T:()=>lotTargets(gk)}}
 const rDist=(t,x,y)=>Math.hypot(Math.max(t.x-x,0,x-(t.x+t.w)),Math.max(t.y-y,0,y-(t.y+t.h)));
 /* floors only come up once the furniture standing on them is gone */
-function dNear(bi,n,rng){const p=S.p,T=dTargets(bi),objs=T.filter(t=>t.k=='o');const L=T.filter(t=>{if(t.fl&&objs.some(o=>o.x<t.x+t.w&&o.x+o.w>t.x&&o.y<t.y+t.h&&o.y+o.h>t.y))return false;return rDist(t,p.x,p.y)<=rng});
- L.sort((a,b)=>(a.fl?1:0)-(b.fl?1:0)||rDist(a,p.x,p.y)-rDist(b,p.x,p.y));return L.slice(0,n)}
-let DMODE=null;const DH={};
-function dmodeOn(){const p=S.p,bi=bldAt(p.x,p.y);if(bi<0)return;const b=W0.b[bi],need=DLV[b.kind],lv=toolLv();
- if(lv<need)return msg('🔨 '+b.name+' 해체에는 Lv'+need+' 도구('+NM2('dt'+need)+')가 필요해요 · 폭약이나 중장비는 모든 건물 가능');
- if(need>=2){const n=zInside(bi).length;if(n)return msg('🧟 '+b.name+' 안에 좀비 '+n+'마리가 남아 있어요 · 모두 처치해야 대형 건물을 해체할 수 있어요')}
- const d=DIS0(b.gk);if(d._tot==null)d._tot=dTargets(bi).length+Object.keys(d).filter(k=>k[0]!='_').length;
- DMODE={bi,gk:b.gk,lv,need,t:.2,kind:b.kind,name:b.name,gx:b.gx,gy:b.gy};msg(lv==1?'🔨 해체 모드 · 버튼을 누를 때마다 가까운 가구 · 바닥 · 벽을 두드려요':'⚙ '+NM2('dt'+lv)+' 켜짐 · 가까운 것부터 자동으로 해체해요 · 소음이 나요')}
-function dmodeOff(t){DMODE=null;if(t)msg(t)}
-function dHit(){if(!DMODE)return;const tool=DTOOL[DMODE.lv],L=dNear(DMODE.bi,tool.n,tool.rng);if(!L.length)return msg('🔨 손이 닿는 곳에 뜯을 것이 없어요 · 가까이 가세요');
- for(const t of L){if(!DMODE)break;const left=(DH[t.id]!=null?DH[t.id]:tgtHp(t))-tool.dmg;DH[t.id]=left;fx.push({k:'boom',x:t.x+t.w/2,y:t.y+t.h/2,r:12,l:.18,m:.18});
-  if(left>0)s3Float(t.x+t.w/2,t.y-10,t.nm+' '+'▮'.repeat(left),'#e8d7a8');else dBreak(t)}
- noise(S.p.x,S.p.y,DNZ[tool==DTOOL[1]?1:tool==DTOOL[2]?2:3]);S.dHits=(S.dHits||0)+1}
-function dBreak(t){const r=tgtDrop(t),d=DIS0(DMODE.gk);d[t.id]=1;delete DH[t.id];for(const k in r)if(r[k])invAdd(S.p,k,r[k]);
+function dNear(z,tool,n,rng){const p=S.p,T=z.T(),objs=T.filter(t=>t.k=='o');const L=T.filter(t=>{if(tool.mode=='floor'&&!t.fl)return false;if(tool.mode=='obj'&&t.fl)return false;
+  if(t.fl&&objs.some(o=>o.x<t.x+t.w&&o.x+o.w>t.x&&o.y<t.y+t.h&&o.y+o.h>t.y))return false;return rDist(t,p.x,p.y)<=rng});
+ L.sort((a,b)=>rDist(a,p.x,p.y)-rDist(b,p.x,p.y));return L.slice(0,n)}
+const DH={};let DMODE=null,DWARN=0;
+/* can this tool work here right now? */
+function dReady(z,tool,quiet){if(!z||!tool)return false;if(tool.lv<z.need){if(!quiet&&DWARN<=0){DWARN=2;msg('🔨 '+z.name+' 해체에는 Lv'+z.need+' 도구가 필요해요 · 폭약이나 중장비는 모든 건물 가능')}return false}
+ if(z.need>=2&&z.bi>=0){const n=zInside(z.bi).length;if(n){if(!quiet&&DWARN<=0){DWARN=2;msg('🧟 '+z.name+' 안에 좀비 '+n+'마리가 남아 있어요 · 모두 처치해야 대형 건물을 해체할 수 있어요')}return false}}return true}
+/* one swing / one tick of a power tool */
+function dHitWith(tool,z){const L=dNear(z,tool,tool.n,tool.rng);if(!L.length)return false;const d=DIS0(z.gk);if(d._tot==null)d._tot=z.T().length+Object.keys(d).filter(k=>k[0]!='_').length;
+ for(const t of L){const left=(DH[t.id]!=null?DH[t.id]:tgtHp(t))-tool.dmg;DH[t.id]=left;fx.push({k:'boom',x:t.x+t.w/2,y:t.y+t.h/2,r:12,l:.18,m:.18});
+  if(left>0)s3Float(t.x+t.w/2,t.y-10,t.nm+' '+'▮'.repeat(left),'#e8d7a8');else if(dBreak(t,z))break}
+ noise(S.p.x,S.p.y,DNZ[tool.lv]);S.dHits=(S.dHits||0)+1;const p=S.p;if(tool.id&&p.dur){p.dur[tool.id]=(p.dur[tool.id]??W_BY[tool.id][4].dur)-1;if(p.dur[tool.id]<=0){delete p.dur[tool.id];invTake(p,tool.id,1);msg('💔 '+NM2(tool.id)+' 이(가) 닳아 부서졌어요')}}return true}
+/* returns true when the building came down */
+function dBreak(t,z){const r=tgtDrop(t),d=DIS0(z.gk);d[t.id]=1;delete DH[t.id];if(t.ruin&&S.inf.ruin&&S.inf.ruin[z.gk]){Object.assign(r,{});for(const k in S.inf.ruin[z.gk])r[k]=(r[k]||0)+S.inf.ruin[z.gk][k];delete S.inf.ruin[z.gk]}
+ if(t.r.t=='rubble')Object.assign(r,{scrap:2,wood:1,cement:1});for(const k in r)if(r[k])invAdd(S.p,k,r[k]);
  s3Float(t.x+t.w/2,t.y-18,'🔨 '+t.nm+' → '+Object.entries(r).map(([k,v])=>NM2(k)+' '+v).join(' · '),'#ffd36a');
- const A=t.k=='o'?W0.objs:t.k=='h'?W0.hw:t.k=='v'?W0.vw:W0.fl,i=A.indexOf(t.r);if(i>=0)A.splice(i,1);infDerived();S.dBroke=(S.dBroke||0)+1;
- const left=dTargets(DMODE.bi),done=Object.keys(d).filter(k=>k[0]!='_').length,pct=done/Math.max(1,d._tot);
- if(DMODE.need>=2&&pct>=.5&&!d._up){d._up=1;dRise(DMODE.bi,8);msg('⚠ 지하에서 좀비가 올라오고 있습니다! · 소음을 듣고 주변 좀비가 몰려옵니다');noise(S.p.x,S.p.y,5)}
- if(!left.some(q=>q.k=='h'||q.k=='v')){const m=DMODE;DMODE=null;dCollapse(m,0)}}
+ const A=t.k=='o'?W0.objs:t.k=='h'?W0.hw:t.k=='v'?W0.vw:W0.fl,i=A.indexOf(t.r);if(i>=0)A.splice(i,1);infDerived();S.dBroke=(S.dBroke||0)+1;if(z.bi<0)return false;
+ const left=z.T(),done=Object.keys(d).filter(k=>k[0]!='_').length,pct=done/Math.max(1,d._tot);
+ if(z.need>=2&&pct>=.5&&!d._up){d._up=1;dRise(z.bi,8);msg('⚠ 지하에서 좀비가 올라오고 있습니다! · 소음을 듣고 주변 좀비가 몰려옵니다');noise(S.p.x,S.p.y,5)}
+ if(!left.some(q=>q.k=='h'||q.k=='v')){dCollapse(z,0);return true}return false}
+/* Lv1: the attack button swings at furniture / walls (hammer) or floors (pry bar) when no zombie is in reach */
+{const _ga=gearAct;gearAct=function(){const p=S.p,tool=curTool();if(tool&&!tool.auto&&!(p.ac>0)&&!S.dr){const s=W_BY[tool.id][4],[zz]=nearestTarget(p,s.r);
+   if(!zz){const z=dZone();if(z&&dReady(z,tool)){if(dHitWith(tool,z)){p.ac=s.cd;fx.push({k:'sw',x:p.x,y:p.y,fx:p.fx,fy:p.fy,l:.15});return}}}}return _ga.apply(this,arguments)}}
+/* kept for older scenes / tests: one hit with whatever tool you hold */
+function dHit(){const tool=curTool()||Object.assign({id:'dt1'},DT.dt1),z=dZone();if(z&&dReady(z,tool))dHitWith(tool,z)}
 function dRise(bi,n){const rs=W0.roofs.filter(r=>r.bi==bi);for(let i=0;i<n;i++){const rf=rs[Math.random()*rs.length|0],L=['crawler','civ1','sleeper','runner','civ2'];mk(rf.x+30+Math.random()*(rf.w-60),rf.y+30+Math.random()*(rf.h-60),{look:L[Math.random()*L.length|0],w:1})}}
 /* the building is gone → rubble lot, maybe something underneath */
 function dCollapse(d,keep,force){const ch=DSH[d.kind]||[0,0],r=Math.random();let sh=force==='none'?0:(force||(r<ch[1]?'bunker':r<ch[0]+ch[1]?'shelter':0));
@@ -140,24 +154,28 @@ function dmCtx(){const p=S.p,B=[];
  if(DM){B.push({t:(DM.way=='boom'?'💣 폭발까지 '+Math.ceil(DM.T-DM.t)+'초':'🚜 중장비 '+Math.round(DM.t/DM.T*100)+'% · 멈추기'),f:()=>demoStop('철거를 멈췄어요'),pr:DM.t/DM.T});return B}
  if(DUN){const l=W0.objs.find(o=>o.t=='ladder');if(l&&Math.hypot(l.x+14-p.x,l.y+10-p.y)<60)B.push({t:'⬆ 지상으로',f:dunExit});return B}
  const h=W0.objs.find(o=>o.t=='hatch'&&Math.hypot(o.x+26-p.x,o.y+20-p.y)<70);if(h){B.push({t:h.sh=='bunker'?'🪖 지하 벙커로 내려가기':'🕳 지하 대피소로 내려가기',f:()=>dunEnter(h)});return B}
- const bi=bldAt(p.x,p.y);if(bi<0){if(DMODE)dmodeOff('🔨 건물을 벗어나 해체 모드를 껐어요');return B}
- const b=W0.b[bi],need=DLV[b.kind],lv=toolLv();
- if(DMODE&&DMODE.bi==bi){const d=DIS0(b.gk),pct=Math.round(Object.keys(d).filter(k=>k[0]!='_').length/Math.max(1,d._tot)*100);
-  if(DMODE.lv==1){const t=dNear(bi,1,DTOOL[1].rng)[0];B.push({t:'🔨 두드리기'+(t?' · '+t.nm:' · 가까이 가세요'),f:dHit,pr:pct/100,big:1})}else B.push({t:'⚙ 자동 해체 중 '+pct+'%',f:null,pr:pct/100,big:1});
-  B.push({t:'해체 끄기',f:()=>dmodeOff('해체 모드를 껐어요'),sm:1});return B}
- B.push({t:'🔨 '+b.name+' 해체 · Lv'+need+(lv<need?' 🔒':''),f:dmodeOn,off:lv<need});
+ const bi=bldAt(p.x,p.y);if(bi<0)return B;const b=W0.b[bi],need=DLV[b.kind],tool=curTool(),d=S.inf.dis&&S.inf.dis[b.gk],pct=d&&d._tot?Math.round(Object.keys(d).filter(k=>k[0]!='_').length/d._tot*100):0;
+ if(tool)B.push({t:(tool.auto?'⚙ ':'🔨 ')+NM2(tool.id)+(tool.lv<need?' · Lv'+need+' 필요 🔒':tool.auto?' · 고리 안 자동 해체':' · 공격 버튼으로 '+(tool.mode=='floor'?'바닥':'가구·벽'))+(pct?' · '+pct+'%':''),f:null,off:tool.lv<need,pr:pct?pct/100:null,info:1});
  if(p.inv.dx1>0)B.push({t:'💣 폭파',f:()=>demoWhole('boom'),sm:1});if(p.inv.dx2>0)B.push({t:'🚜 중장비',f:()=>demoWhole('dozer'),sm:1});return B}
-let DMC=[];
-{const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(!S)return;demoUpd(dt);
-  if(DMODE&&DMODE.lv>=2){DMODE.t-=dt;if(DMODE.t<=0){DMODE.t=DTOOL[DMODE.lv].auto;if(W0.b[DMODE.bi]&&W0.b[DMODE.bi].gk==DMODE.gk)dHit();else DMODE=null}}
-  if(DMODE&&(!W0.b[DMODE.bi]||W0.b[DMODE.bi].gk!=DMODE.gk))DMODE=null;
-  const c=dmCtx(),el=$('dmBox');if(!el)return;const key=c.map(q=>q.t+(q.off?1:0)).join('|');if(key!=el.dataset.k){el.dataset.k=key;DMC=c;el.innerHTML=c.map((q,i)=>'<button data-i="'+i+'" class="'+(q.off?'off ':'')+(q.sm?'sm ':'')+(q.big?'big':'')+'">'+q.t+(q.pr!=null?'<i style="width:'+Math.round(q.pr*100)+'%"></i>':'')+'</button>').join('')}else DMC=c}}
-document.body.insertAdjacentHTML('beforeend','<div id="dmBox"></div>');$('c').insertAdjacentHTML('afterend','<div id="dunV"></div>');
+let DMC=[],DAT=0;
+{const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(!S)return;demoUpd(dt);DWARN-=dt;
+  const tool=curTool();if(tool&&tool.auto&&!DUN&&!S.dr){DAT-=dt;if(DAT<=0){DAT=tool.auto;const z=dZone();if(z&&dReady(z,tool,true))dHitWith(tool,z)}}
+  const c=dmCtx(),el=$('dmBox');if(!el)return;const key=c.map(q=>q.t+(q.off?1:0)).join('|');if(key!=el.dataset.k){el.dataset.k=key;DMC=c;el.innerHTML=c.map((q,i)=>'<button data-i="'+i+'" class="'+(q.off?'off ':'')+(q.sm?'sm ':'')+(q.info?'info ':'')+(q.big?'big':'')+'">'+q.t+(q.pr!=null?'<i style="width:'+Math.round(q.pr*100)+'%"></i>':'')+'</button>').join('')}else DMC=c}}
+document.body.insertAdjacentHTML('beforeend','<div id="dmBox"></div>');$('c').insertAdjacentHTML('afterend','<canvas id="ovl"></canvas><div id="dunV"></div>');
 $('dmBox').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();const b=e.target.closest('button');if(!b)return;const q=DMC[+b.dataset.i];if(q&&q.f)q.f()});
+/* ---------- overlay: tool reach ring, pieces in reach, turret arcs ---------- */
+const OVL=[];/* other modules push draw(g, sx, sy, k) callbacks */
+{const cv=$('ovl'),g2=cv.getContext('2d');function frame(){requestAnimationFrame(frame);const w=innerWidth,h=innerHeight;if(cv.width!=Math.round(w*dpr)||cv.height!=Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr)}
+  g2.setTransform(1,0,0,1,0,0);g2.clearRect(0,0,cv.width,cv.height);if(!run||!S||PAUSE&&!PLACEON())return;g2.setTransform(dpr,0,0,dpr,0,0);const sx=x=>(x-camX)*zoom,sy=y=>(y-camY)*zoom,k=zoom;
+  const tool=curTool(),p=S.p,zz=tool&&!DUN?dZone():null;if(zz){const z=zz,ok=z&&dReady(z,tool,true),r=(tool.auto?tool.rng:tool.rng)*k;g2.save();g2.setLineDash([6,5]);g2.lineWidth=2;g2.strokeStyle=ok?(tool.auto?'#ffd36acc':'#e8d7a8aa'):'#ff6a5a88';g2.fillStyle=ok?'#ffd36a14':'#ff6a5a10';
+   g2.beginPath();g2.arc(sx(p.x),sy(p.y),r,0,Math.PI*2);g2.fill();g2.stroke();g2.setLineDash([]);if(ok)for(const t of dNear(z,tool,tool.auto?tool.n:1,tool.rng)){g2.strokeStyle='#ffd36a';g2.lineWidth=2;g2.strokeRect(sx(t.x)-2,sy(t.y)-2,t.w*k+4,t.h*k+4)}g2.restore()}
+  for(const f of OVL)try{f(g2,sx,sy,k)}catch(e){}}requestAnimationFrame(frame)}
+const PLACEON=()=>typeof PLACE!='undefined'&&!!PLACE;
 document.head.insertAdjacentHTML('beforeend',`<style>
 #dmBox{position:fixed;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 292px);z-index:4;display:flex;flex-direction:column;align-items:flex-end;gap:5px;max-width:70vw}
 #dmBox button{position:relative;padding:8px 14px;font-size:13px;border-radius:12px;background:#3a2a14ee;border:1px solid #e0b03a;width:auto;max-width:70vw;overflow:hidden}#dmBox button.big{padding:12px 18px;font-size:15px}#dmBox button.sm{padding:5px 10px;font-size:12px;background:#222a;border-color:#ffffff44}
-#dmBox button.off{opacity:.6;border-color:#888}#dmBox button i{position:absolute;left:0;bottom:0;height:3px;background:#ffd36a}
+#dmBox button.off{opacity:.6;border-color:#888}#dmBox button.info{background:#1d1a14dd;font-size:12px;pointer-events:none}
+#ovl{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}#dmBox button i{position:absolute;left:0;bottom:0;height:3px;background:#ffd36a}
 #dunV{display:none;position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 50%,transparent 80px,#000c 200px,#000f 380px)}
 body[data-dun] #dunV{display:block}body[data-dun="bunker"] #dunV{background:radial-gradient(circle at 50% 50%,transparent 80px,#1a0505d0 200px,#000f 380px)}
 </style>`);
