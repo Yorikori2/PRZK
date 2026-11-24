@@ -3,7 +3,7 @@ const {chromium}=require('playwright');const fs=require('fs');
 const OUT=process.argv[2]||'.';
 (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1000,height:640}});const errs=[];
 p.on('pageerror',e=>errs.push('pageerror: '+e.message));p.on('console',m=>{if(m.type()=='error')errs.push('console: '+m.text())});
-await p.goto('file:///home/user/PRZK/index.html');await p.waitForTimeout(600);
+await p.goto('file://'+require('path').resolve(__dirname,'..',process.env.PG||'index.html'));await p.waitForTimeout(600);
 await p.evaluate(()=>{localStorage.clear();start('S',false);if(typeof S!='undefined'&&S&&S.pg&&!S.pg.tr.length){S.pg.tr=['cop'];$('bm').dataset.m='';closeBase();PAUSE=false}});await p.waitForTimeout(600);
 const R={};
 R.layout=await p.evaluate(()=>({WW,WH,NBX,NBY,buildings:W0.b.map(b=>b.name+'('+b.kind+')@'+b.c+','+b.r),objs:W0.objs.length,zombies:W0.zs.length,mm:[(document.getElementById('mm')||document.getElementById('mmw')).width,(document.getElementById('mm')||document.getElementById('mmw')).height]}));

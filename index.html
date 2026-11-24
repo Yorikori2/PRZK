@@ -97,7 +97,10 @@ body.uied #dg::after{top:auto;bottom:-14px}body.uied .uisel{outline:2px solid #f
 <div id="menu"><h1>PROJECT LEGACY</h1><small>고해상도 탑다운 좀비 생존 RPG<br>왼쪽 화면 드래그: 이동 · 건물에 들어가면 지붕이 열립니다<br>거점을 업그레이드하며 살아남으세요</small>
 <button id="ld" style="display:none">이어하기</button>
 <button data-d="S">Survival – 사망 시 거점에서 부활</button><button data-d="V">Veteran – 영구 사망</button><button data-d="N">Nightmare – 고난이도 + 영구 사망</button><small id="go"></small></div>
-<script src="art.js"></script><script src="world.js"></script><script src="world_next.js"></script><script src="items.js"></script><script src="progdata.js"></script><script src="gear.js"></script><script src="uiedit.js"></script>
+<script>/* map config: new games use the endless city (start area chosen on the title screen); old fixed-map saves keep their map */
+var MAPCFG=null,FIXEDSAVE=0;(function(){if(/[?&]fixed/.test(location.search))return;let s=null,nx=null;try{s=JSON.parse(localStorage.getItem('pl_save3')||'null')}catch(e){}try{nx=JSON.parse(localStorage.getItem('pl_newinf')||'null');localStorage.removeItem('pl_newinf')}catch(e){}
+ if(s&&s.map&&s.map.inf&&!nx){MAPCFG=s.map;return}if(s&&!nx){FIXEDSAVE=1;return}MAPCFG={nbx:5,nby:5,inf:1,seed:(nx&&nx.seed)||1+(Math.random()*99999|0),ogx:-2,ogy:-2}})()</script>
+<script src="art.js"></script><script src="world.js"></script><script src="world_next.js"></script><script src="maprand_next.js"></script><script src="infw_next.js"></script><script src="items.js"></script><script src="progdata.js"></script><script src="gear.js"></script><script src="uiedit.js"></script>
 <script>
 /* ===================== setup ===================== */
 const $=i=>document.getElementById(i),cv=$('c'),ctx=cv.getContext('2d'),buf=document.createElement('canvas'),bctx=buf.getContext('2d');
@@ -182,7 +185,7 @@ function ia(){const p=S.p,s=S;if(s.dr){s.dr=0;p.y+=24;if(blocker(p.x,p.y,7,'car'
  let ab=null;for(const d of W0.objs)if(d.t=='alarmbox'&&rdist(d,p.x,p.y)<34){ab=d;break}
  if(ab){const kd=W0.b[ab.b].kind;if((s.aoff[kd]||0)>=s.day)return msg('경보 장치는 이미 꺼져 있다');s.aoff[kd]=s.day+1;s3Xp(40,'경보 해제');if(s.alarm&&s.alarm.kind==kd)s.alarm=null;return msg('🔕 '+W0.b[ab.b].name+' 경보 장치 해제 (내일까지)')}
  const o=nearObj();if(o){if(!avail(o))return msg(s.wv>=300?'아이템 리스폰 중단됨':'이미 수색한 '+NM[o.t]);const first=s.lo[o.id]===undefined;if(srchBusy(o))return;
-  const b=W0.b[o.b],kind=b?b.kind:'',tier=TIER[kind]||1,r=roll(1+(Math.random()*3|0)+(tier>=3?1:0),LOOTT[o.t]);
+  const b=W0.b[o.b],kind=b?b.kind:'',tier=Math.min(5,(TIER[kind]||1)+((b&&b.zone)||0)),r=roll(1+(Math.random()*3|0)+(tier>=3?1:0),LOOTT[o.t]);
   if(KL[kind]&&Math.random()<.4+tier*.07){const k=KL[kind][Math.random()*KL[kind].length|0];r[k]=(r[k]||0)+1+(Math.random()<tier*.1?1:0)}
   if(OBJM[o.t]&&Math.random()<.35)r[OBJM[o.t]]=(r[OBJM[o.t]]||0)+1;
   resolveAmmo(r,kind);lootExtra(r,kind,tier,o);
@@ -315,4 +318,4 @@ document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>start(b.dataset.d
 $('ld').onclick=()=>start(0,true);try{if(localStorage.getItem(SAVE))$('ld').style.display='block'}catch(e){}
 requestAnimationFrame(loop);
 </script>
-<script src="stage3.js"></script><script src="search.js"></script><script src="guns4.js"></script><script src="zombies.js"></script><script src="stage4.js"></script><script src="gunfeel.js"></script><script src="codex.js"></script><script src="zsound.js"></script><script src="atmos.js"></script><script src="soundvis.js"></script><script src="toolbar.js"></script></body></html>
+<script src="stage3.js"></script><script src="search.js"></script><script src="guns4.js"></script><script src="zombies.js"></script><script src="stage4.js"></script><script src="gunfeel.js"></script><script src="codex.js"></script><script src="zsound.js"></script><script src="atmos.js"></script><script src="soundvis.js"></script><script src="toolbar.js"></script><script src="inf_next.js"></script><script src="enh_next.js"></script><script src="demo_next.js"></script><script src="outpost_next.js"></script><script src="stash_next.js"></script><script src="opin_next.js"></script><script src="title_next.js"></script></body></html>

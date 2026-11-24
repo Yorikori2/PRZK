@@ -37,7 +37,7 @@ const enchG=(id,k)=>{let g=0;for(const r of enchOf(id))if(r&&r.slice(3,-1)==k)g=
 {const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(!S)return;
   for(const q of Z){if(q.enB>0){q.enB-=dt;q.hp-=q.enBd*dt;if(Math.random()<dt*8)fx.push({k:'ember',x:q.x+(Math.random()-.5)*10,y:q.y-10-Math.random()*16,l:.35})}
    if(q.frz>0){q.frz-=dt;if(q.frz<=0)q.sm=q.enSm||1}}
-  enhWarn()}}
+  if(S.inf)enhWarn()}}
 /* ---------- drops: stones from zone zombies and zone buildings ---------- */
 const stoneFor=z=>z<=1?'enh1':z<=2?'enh2':z==3?(Math.random()<.3?'enh3':'enh2'):'enh3';
 const runeFor=z=>'rn_'+RK[Math.random()*RK.length|0]+Math.max(1,Math.min(4,z));

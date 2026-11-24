@@ -205,7 +205,7 @@ function dmCtx(){const p=S.p,B=[];if(DOZ){B.push({t:'🚜 불도저 운전 중 �
  if(tool)B.push({t:(tool.auto?'⚙ ':'🔨 ')+NM2(tool.id)+(tool.lv<need?' · Lv'+need+' 필요 🔒':tool.auto?' · 고리 안 자동 해체':' · 공격 버튼으로 '+(tool.mode=='floor'?'원 안 바닥':'가구·벽'))+(pct?' · '+pct+'%':''),f:null,off:tool.lv<need,pr:pct?pct/100:null,info:1});
  if(p.inv.dx1>0)B.push({t:'💣 폭파',f:()=>demoWhole('boom'),sm:1});return B}
 let DMC=[],DAT=0;
-{const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(!S)return;demoUpd(dt);DWARN-=dt;dozerTick(dt);
+{const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(!S||!S.inf){const el=$('dmBox');if(el&&el.innerHTML)el.innerHTML='';return}demoUpd(dt);DWARN-=dt;dozerTick(dt);
   const tool=curTool();if(tool&&tool.auto&&!DUN&&!S.dr){DAT-=dt;if(DAT<=0){DAT=tool.auto;const z=dZone();if(z&&dReady(z,tool,true))dHitWith(tool,z)}}
   const c=dmCtx(),el=$('dmBox');if(!el)return;const key=c.map(q=>q.t+(q.off?1:0)).join('|');if(key!=el.dataset.k){el.dataset.k=key;DMC=c;el.innerHTML=c.map((q,i)=>'<button data-i="'+i+'" class="'+(q.off?'off ':'')+(q.sm?'sm ':'')+(q.info?'info ':'')+(q.big?'big':'')+'">'+q.t+(q.pr!=null?'<i style="width:'+Math.round(q.pr*100)+'%"></i>':'')+'</button>').join('')}else DMC=c}}
 document.body.insertAdjacentHTML('beforeend','<div id="dmBox"></div>');$('c').insertAdjacentHTML('afterend','<canvas id="ovl"></canvas><div id="dunV"></div>');
@@ -213,7 +213,7 @@ $('dmBox').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagati
 /* ---------- overlay: tool reach ring, pieces in reach, turret arcs ---------- */
 const OVL=[];/* other modules push draw(g, sx, sy, k) callbacks */
 {const cv=$('ovl'),g2=cv.getContext('2d');function frame(){requestAnimationFrame(frame);const w=innerWidth,h=innerHeight;if(cv.width!=Math.round(w*dpr)||cv.height!=Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr)}
-  g2.setTransform(1,0,0,1,0,0);g2.clearRect(0,0,cv.width,cv.height);if(!run||!S||PAUSE&&!PLACEON())return;g2.setTransform(dpr,0,0,dpr,0,0);const sx=x=>(x-camX)*zoom,sy=y=>(y-camY)*zoom,k=zoom;
+  g2.setTransform(1,0,0,1,0,0);g2.clearRect(0,0,cv.width,cv.height);if(!run||!S||!S.inf||PAUSE&&!PLACEON())return;g2.setTransform(dpr,0,0,dpr,0,0);const sx=x=>(x-camX)*zoom,sy=y=>(y-camY)*zoom,k=zoom;
   const tool=curTool(),p=S.p,zz=tool&&!DUN&&!S.dr?dZone():null;if(zz){const z=zz,ok=z&&dReady(z,tool,true),r=(tool.auto?tool.rng:tool.rng)*k;g2.save();g2.setLineDash([6,5]);g2.lineWidth=2;g2.strokeStyle=ok?(tool.auto?'#ffd36acc':'#e8d7a8aa'):'#ff6a5a88';g2.fillStyle=ok?'#ffd36a14':'#ff6a5a10';
    g2.beginPath();g2.arc(sx(p.x),sy(p.y),r,0,Math.PI*2);g2.fill();g2.stroke();g2.setLineDash([]);if(ok)for(const t of dNear(z,tool,tool.auto?tool.n:1,tool.rng)){g2.strokeStyle='#ffd36a';g2.lineWidth=2;g2.strokeRect(sx(t.x)-2,sy(t.y)-2,t.w*k+4,t.h*k+4)}if(ok&&tool.mode!='obj'){g2.strokeStyle='#e8d7a8aa';g2.lineWidth=1;for(const t of fTiles(z,p.x,p.y,tool.rng,tool.mode=='floor'?200:tool.ft))g2.strokeRect(sx(t.x)+1,sy(t.y)+1,t.w*k-2,t.h*k-2)}g2.restore()}
   for(const f of OVL)try{f(g2,sx,sy,k)}catch(e){}}requestAnimationFrame(frame)}

@@ -10,7 +10,10 @@ const G_OF={};for(const o in GREMAP)G_OF[GREMAP[o]]=o; // design id -> game id
 const CALMAP={'762s':'762','762r':'762','50ae':'50','50bmg':'50'};
 /* 나중에 추가: guns whose ammo would be used by that one gun only. Their data stays in guns4.js;
    take an id out of this list (and its calibre out of AMMO_LATER) to bring it into the game. */
-const G4_LATER=['m10','m500','mp7','ak74','awm'],AMMO_LATER=['38','500','46','545','338'];
+/* ON/OFF switch for the 5 guns that use an ammo nobody else uses: set LATER_GUNS_ON to true (or run
+   localStorage.setItem('pl_laterguns','1') in the browser and reload) to bring them and their ammo into the game */
+const LATER_GUNS_ON=false||(()=>{try{return localStorage.getItem('pl_laterguns')=='1'}catch(e){return false}})();
+const G4_LATER=LATER_GUNS_ON?[]:['m10','m500','mp7','ak74','awm'],AMMO_LATER=LATER_GUNS_ON?[]:['38','500','46','545','338'];
 const NEWAMMO_ALL=[['45','.45 ACP','u',.02,'#5a4a3a','#d9a84a',[6,12]],['38','.38 스페셜','c',.015,'#6a5a4a','#c9ced3',[6,12]],['500','.500 매그넘','e',.05,'#3a3f45','#e0b050',[2,4]],
  ['57','5.7mm 탄','r',.01,'#3a3f45','#7fd0ff',[10,20]],['46','4.6mm 탄','r',.01,'#2a2f35','#9fe0b0',[10,20]],['545','5.45mm 탄','u',.015,'#4a5434','#c9a46a',[10,20]],['338','.338 매그넘','l',.06,'#2a2f35','#f0c84a',[2,4]]];
 const NEWAMMO=NEWAMMO_ALL.filter(a=>!AMMO_LATER.includes(a[0]));
