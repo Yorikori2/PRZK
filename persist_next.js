@@ -38,3 +38,11 @@ const EXARM=[null,{},{vest:.2},{vest:.25,helmet:.25},{milarmor:.2,helmet:.25},{m
 /* ---------- a risen leader is an elite: tougher, harder-hitting, a bit bigger, with a health bar ---------- */
 if(typeof ELITEZ!='undefined'&&!ELITEZ.includes('rdLZ'))ELITEZ.push('rdLZ');
 {const _sh2=infShift;infShift=function(dc,dr,q){const n0=Z.length;_sh2(dc,dr,q);for(let i=n0;i<Z.length;i++){const z=Z[i];if(z.exr&&z.exr.lead&&!z.elite){z.elite=1;z.mhp*=4;z.hp=z.mhp;z.dmg=(z.dmg!=null?z.dmg:7)*1.5;z.sm=(z.sm||1)*1.1;z.nm='좀비 대장'}}}}
+/* ---------- far-zone raiders throw more, instead of getting more health ----------
+   From zone 4 on, grenade and firebomb cooldowns run faster: +15% per zone past 3 (zone 6 ≈ 1.45×, zone 9 ≈ 1.9×, up to 3×). */
+{const _rs=rSpawn;rSpawn=function(x,y,zn,goal){const L=_rs(x,y,zn,goal);for(const r of L)r.zn=zn;return L}}
+const rThrowMul=zn=>zn>3?Math.min(3,1+.15*(zn-3)):1;
+{const _rt=rThink;rThink=function(r,dt){_rt(r,dt);const m=rThrowMul(r.zn|0);if(m>1){if(r.gc>0)r.gc-=dt*(m-1);if(r.role=='molo'&&r.rc>0)r.rc-=dt*(m-1)}}}
+/* ---------- rumours of raider camps on entering zones 3, 6 and 9 (not from 12 on) ---------- */
+{const _zc=infZoneCheck;infZoneCheck=function(quiet){const was=ZLAST;_zc(quiet);const z=ZLAST;if(quiet||was==null||z<=was||!S||!S.inf)return;if(z==3||z==6||z==9){S.inf.rum=S.inf.rum||{};if(S.inf.rum[z])return;S.inf.rum[z]=1;
+  setTimeout(()=>{if(typeof zoneRaw=='function')zoneRaw('<b style="color:#ff9a5a;font-size:17px">⚠ 약탈자 기지 소문</b><small>이 구역 어딘가에 약탈자 기지가 있다는 소문이 있어요 · 울타리와 망루를 조심하세요</small>','#ff9a5a',4200);else msg('⚠ 이 구역엔 약탈자 기지가 있다는 소문이 있어요')},4600)}}}
