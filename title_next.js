@@ -36,4 +36,4 @@ function nearBench(){const p=S.p;if(typeof inBase=='function'&&inBase(p.x,p.y)&&
 let GDAY=null;
 {const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(!S||!S.inf||!run||typeof evDay!='function')return;if(GDAY==null){GDAY=S.day;return}if(S.day!=GDAY){GDAY=S.day;try{evDay(false)}catch(e){}}}}
 {const _sh=infShift;infShift=function(dc,dr,q){_sh(dc,dr,q);if(q||!S||!S.inf||(typeof DUN!='undefined'&&DUN)||typeof merSpawn!='function')return;const[gx,gy]=gOf(S.p.x,S.p.y);
-  if(zoneOf(gx,gy)>=3&&!Z.some(z=>z.npc=='mer')&&Math.random()<.04){const c=(NBX-1)/2|0,r=(NBY-1)/2|0,[ox,oy]=bo(c+Math.sign(dc||0),r+Math.sign(dr||0));merSpawn(ox-RD/2,oy-RD/2,{life:300});msg('💰 떠돌이 상인이 근처를 지나가요')}}}
+  if(zoneOf(gx,gy)>=3&&!Z.some(z=>z.npc=='mer')&&Math.random()<.04){const c=(NBX-1)/2|0,r=(NBY-1)/2|0,mc=c+Math.sign(dc||0)*2,mr=r+Math.sign(dr||0)*2,[ox,oy]=bo(mc,mr);if(S.inf.seen&&S.inf.seen[(OGX+mc)+','+(OGY+mr)])return;merSpawn(ox-RD/2,oy-RD/2,{life:300});msg('💰 떠돌이 상인이 근처를 지나가요')}}}

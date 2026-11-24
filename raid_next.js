@@ -67,4 +67,4 @@ function rNades(dt){if(!S.rNade)return;S.rNade=S.rNade.filter(n=>{n.t-=dt;if(n.t
 OVL.push((g2,sx,sy,k)=>{for(const n of S.rNade||[]){g2.strokeStyle='#ff4a3a';g2.lineWidth=2;g2.beginPath();g2.arc(sx(n.x),sy(n.y),70*k*(1-n.t/1.3*.4),0,7);g2.stroke();g2.fillStyle='#ff4a3a22';g2.fill()}});
 /* raiders also show up on their own in zone 1+ (one group per new block, 6%) */
 {const _sh=infShift;infShift=function(dc,dr,q){_sh(dc,dr,q);if(q||!S||!S.inf||(typeof DUN!='undefined'&&DUN))return;const[gx,gy]=gOf(S.p.x,S.p.y),zn=zoneOf(gx,gy);if(zn<1||Math.random()>.06)return;
-  const c=(NBX-1)/2|0,r=(NBY-1)/2|0,[ox,oy]=bo(c+Math.sign(dc||0)*2,r+Math.sign(dr||0)*2);rSpawn(ox-RD/2,oy-RD/2,zn);msg('⚠ 멀리서 사람 목소리가 들려요 · '+RT[rTier(zn)].nm+' 무리')}}
+  const c=(NBX-1)/2|0,r=(NBY-1)/2|0,sc=c+Math.sign(dc||0)*2,sr=r+Math.sign(dr||0)*2,[ox,oy]=bo(sc,sr);if(S.inf.seen&&S.inf.seen[(OGX+sc)+','+(OGY+sr)])return;rSpawn(ox-RD/2,oy-RD/2,zn);msg('⚠ 멀리서 사람 목소리가 들려요 · '+RT[rTier(zn)].nm+' 무리')}}
