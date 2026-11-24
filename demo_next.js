@@ -11,13 +11,13 @@
  addW('dt2','전동 드릴 · 그라인더','r',{d:20,cd:.45,r:44,dur:600,nz:3,wt:4},'해체 Lv2 · 장착하고 걸어 다니면 사거리(고리) 안의 가구 · 바닥 · 벽이 저절로 뜯겨요',()=>{R('#c9a42a',4,7,12,7);R('#e0bc3a',4,7,12,2);R('#2a2e33',8,14,4,8);R('#8a9096',16,9,6,3);R('#1d1714',2,9,2,3)});
  addW('dt3','유압 브레이커','e',{d:30,cd:.6,r:48,dur:1200,nz:3,wt:6},'해체 Lv3 · 사거리가 더 넓고 빠르며 한 번에 두 곳 · 대형 건물까지',()=>{R('#a8322a',6,3,10,9);R('#c84a3a',6,3,10,2);R('#2a2e33',9,12,4,6);R('#8a9096',10,18,2,5);R('#2a2e33',3,6,3,4);R('#2a2e33',16,6,3,4)});
  add('dx1','폭약','e',1.5,'건물 통째로 폭파 · 10초 뒤 무너짐 · 재료는 10%만 남아요 · 1회용',()=>{for(let i=0;i<3;i++){R('#a8322a',4+i*6,6,5,14);R('#c84a3a',4+i*6,6,5,2)}R('#2a2e33',4,12,17,2);R('#d9b52a',10,2,2,5)});
- add('dx2','중장비 열쇠 (불도저)','e',.1,'건물 통째로 밀기 · 30초 · 재료 50% · 연료 5 사용',()=>{R('#d9a52a',4,9,15,8);R('#e8bc3a',4,9,15,2);R('#2a2e33',5,17,13,4);R('#5a5f66',2,6,3,13);R('#1d1714',9,5,6,4)})}
+ add('dx2','불도저 열쇠','e',.1,'세워 둔 불도저를 탈 수 있어요 · 타고 밀면 벽 · 가구가 무너지고 재료 절반을 얻어요 · 연료 사용',()=>{R('#d9a52a',4,9,15,8);R('#e8bc3a',4,9,15,2);R('#2a2e33',5,17,13,4);R('#5a5f66',2,6,3,13);R('#1d1714',9,5,6,4)})}
 /* what each tool does: lv · which pieces · reach · automatic period · pieces per tick · damage per hit */
-const DT={dt1:{lv:1,mode:'obj',rng:50,dmg:1,n:1},dt1f:{lv:1,mode:'floor',rng:50,dmg:1,n:1},dt2:{lv:2,mode:'all',rng:85,auto:.45,dmg:2,n:1},dt3:{lv:3,mode:'all',rng:120,auto:.3,dmg:3,n:2}};
+const DT={dt1:{lv:1,mode:'obj',rng:50,dmg:1,n:1},dt1f:{lv:1,mode:'floor',rng:56,dmg:1,n:0},dt2:{lv:2,mode:'all',rng:85,auto:.45,dmg:2,n:1,ft:3},dt3:{lv:3,mode:'all',rng:120,auto:.3,dmg:3,n:2,ft:6}};
 const DLV={houses:1,apt:1,church:1,mart:1,school:2,hard:2,fire:2,ware:2,clinic:3,police:3,mil:3,lab:3};
 const DNZ=[0,2,3,3];
 /* whole-building methods */
-const DWAY={boom:{T:10,keep:.1,nz:5,name:'💣 폭파',item:'dx1'},dozer:{T:30,keep:.5,nz:5,name:'🚜 중장비',item:'dx2',fuel:5}};
+const DWAY={boom:{T:10,keep:.1,nz:5,name:'💣 폭파',item:'dx1'}};
 /* chance of finding something under the rubble: [shelter, bunker] */
 const DSH={houses:[.15,0],apt:[.15,0],church:[.15,0],mart:[.15,0],school:[.25,0],hard:[.25,0],fire:[.25,0],ware:[.25,0],clinic:[.2,.15],police:[.2,.15],mil:[0,.5],lab:[0,.5]};
 const toolLv=()=>S?(S.p.inv.dt3>0?3:S.p.inv.dt2>0?2:(S.p.inv.dt1>0||S.p.inv.dt1f>0)?1:0):0;
@@ -56,12 +56,13 @@ const zInside=bi=>Z.filter(z=>z.hp>0&&inBld(bi,z.x,z.y));
 /* ---------- walls and floors get stable ids so taken-apart pieces stay gone ---------- */
 function disTag(){let dis=null;try{dis=S&&S.inf&&S.inf.dis}catch(e){}const cnt={},tag=(a,k,f)=>{for(const q of a){const[x,y]=f(q),gk=gOf(x,y).join(),c=(cnt[gk+k]=(cnt[gk+k]||0)+1);q.id=gk+':'+k+c}};
  tag(W0.hw,'h',h=>[(h.x0+h.x1)/2,h.y]);tag(W0.vw,'v',v=>[v.x,(v.y0+v.y1)/2]);tag(W0.fl,'f',f=>[f[0]+f[2]/2,f[1]+f[3]/2]);if(!dis)return;
- const gone=q=>{const id=q.id||'';const gk=id.slice(0,id.indexOf(':'));return dis[gk]&&dis[gk][id]};W0.hw=W0.hw.filter(q=>!gone(q));W0.vw=W0.vw.filter(q=>!gone(q));W0.fl=W0.fl.filter(q=>!gone(q));W0.objs=W0.objs.filter(q=>!gone(q))}
+ const gone=q=>{const id=q.id||'';const gk=id.slice(0,id.indexOf(':'));return dis[gk]&&dis[gk][id]};W0.hw=W0.hw.filter(q=>!gone(q));W0.vw=W0.vw.filter(q=>!gone(q));W0.fl=W0.fl.filter(q=>!gone(q));W0.objs=W0.objs.filter(q=>!gone(q))
+ const FB={};for(const f of W0.fl)FB[f.id]=f;for(const gk in dis){if(!gk.includes(','))continue;for(const k in dis[gk]){if(k[0]!='T')continue;const m=/^T:(.+):(\d+),(\d+)$/.exec(k);if(!m)continue;const f=FB[m[1]];if(!f)continue;const x=f[0]+(+m[2])*FT,y=f[1]+(+m[3])*FT;tileDec(x,y,Math.min(FT,f[0]+f[2]-x),Math.min(FT,f[1]+f[3]-y))}}}
 /* ---------- targets: inside a building, or loose junk on a rubble lot ---------- */
 function dTargets(bi){const T=[];for(const o of W0.objs)if(o.b==bi&&D[o.t]&&!['hatch','ladder','rubble'].includes(o.t))T.push({k:'o',r:o,id:o.id,x:o.x,y:o.y,w:o.w,h:o.h,nm:NM[o.t]||o.t});
  for(const h of W0.hw){const cx=(h.x0+h.x1)/2;if(inBld(bi,cx,h.y,14))T.push({k:'h',r:h,id:h.id,x:h.x0,y:h.y-8,w:h.x1-h.x0,h:10,nm:h.h>=26?'바깥벽':'벽'})}
  for(const v of W0.vw){const cy=(v.y0+v.y1)/2;if(inBld(bi,v.x,cy,14))T.push({k:'v',r:v,id:v.id,x:v.x-4,y:v.y0,w:8,h:v.y1-v.y0,nm:v.top>=26?'바깥벽':'벽'})}
- for(const f of W0.fl){if(!FLMAT[f[4]])continue;const cx=f[0]+f[2]/2,cy=f[1]+f[3]/2;if(inBld(bi,cx,cy))T.push({k:'f',r:f,id:f.id,x:f[0],y:f[1],w:f[2],h:f[3],nm:'바닥',fl:1})}return T}
+ return T}
 const LOTJUNK=['rubble','barrel','crate'];
 function lotTargets(gk){const T=[];for(const o of W0.objs){if(!LOTJUNK.includes(o.t))continue;if(gOf(o.x,o.y).join()!=gk)continue;const b=W0.b[o.b];if(!b||!['lot','outpost'].includes(b.kind))continue;T.push({k:'o',r:o,id:o.id,x:o.x,y:o.y,w:o.w,h:o.h,nm:o.ruin?'잔해 상자':NM[o.t]||o.t,ruin:o.ruin})}return T}
 /* where am I: a building (bi ≥ 0) or a lot (bi = -1) */
@@ -69,15 +70,24 @@ function dZone(){const p=S.p,bi=bldAt(p.x,p.y);if(bi>=0){const b=W0.b[bi];return
  const[gx,gy]=gOf(p.x,p.y),gk=gx+','+gy;let lot=false;try{lot=!!(S.inf.demo&&S.inf.demo[gk])}catch(e){}if(!lot)return null;return{bi:-1,gk,need:1,kind:'lot',name:'빈터',gx,gy,T:()=>lotTargets(gk)}}
 const rDist=(t,x,y)=>Math.hypot(Math.max(t.x-x,0,x-(t.x+t.w)),Math.max(t.y-y,0,y-(t.y+t.h)));
 /* floors only come up once the furniture standing on them is gone */
-function dNear(z,tool,n,rng){const p=S.p,T=z.T(),objs=T.filter(t=>t.k=='o');const L=T.filter(t=>{if(tool.mode=='floor'&&!t.fl)return false;if(tool.mode=='obj'&&t.fl)return false;
-  if(t.fl&&objs.some(o=>o.x<t.x+t.w&&o.x+o.w>t.x&&o.y<t.y+t.h&&o.y+o.h>t.y))return false;return rDist(t,p.x,p.y)<=rng});
+function dNear(z,tool,n,rng){const p=S.p;if(tool.mode=='floor')return[];const L=z.T().filter(t=>rDist(t,p.x,p.y)<=rng);
  L.sort((a,b)=>rDist(a,p.x,p.y)-rDist(b,p.x,p.y));return L.slice(0,n)}
 const DH={};let DMODE=null,DWARN=0;
+/* ---------- floors come up tile by tile (32 px) — only the tiles inside the tool's circle, never under furniture ---------- */
+const FT=32,FTGET=.25,DFR={};
+function fTiles(z,cx,cy,rng,max){if(!z||z.bi<0)return[];const out=[],d=S.inf.dis&&S.inf.dis[z.gk]||{},solid=W0.objs.filter(o=>!FLAT[o.t]&&o.b==z.bi);
+ for(const f of W0.fl){const m=FLMAT[f[4]];if(!m)continue;if(f[0]>cx+rng||f[0]+f[2]<cx-rng||f[1]>cy+rng||f[1]+f[3]<cy-rng)continue;if(!inBld(z.bi,f[0]+f[2]/2,f[1]+f[3]/2))continue;
+  const x0=Math.max(0,Math.floor((cx-rng-f[0])/FT)),x1=Math.min(Math.ceil(f[2]/FT)-1,Math.floor((cx+rng-f[0])/FT)),y0=Math.max(0,Math.floor((cy-rng-f[1])/FT)),y1=Math.min(Math.ceil(f[3]/FT)-1,Math.floor((cy+rng-f[1])/FT));
+  for(let ty=y0;ty<=y1;ty++)for(let tx=x0;tx<=x1;tx++){const x=f[0]+tx*FT,y=f[1]+ty*FT,w=Math.min(FT,f[0]+f[2]-x),h=Math.min(FT,f[1]+f[3]-y);if(Math.hypot(x+w/2-cx,y+h/2-cy)>rng)continue;
+   const key='T:'+f.id+':'+tx+','+ty;if(d[key])continue;if(solid.some(o=>o.x<x+w&&o.x+o.w>x&&o.y<y+h&&o.y+o.h>y))continue;out.push({f,key,x,y,w,h,m});if(out.length>=max)return out}}return out}
+function tileDec(x,y,w,h){W0.dec.push({x,y,w,h,ft:1,f:()=>{R('#4d453b',x,y,w,h);R('#5d5447',x+1,y+1,w-2,h-2);R('#3e372f',x+(w*.3|0),y+(h*.4|0),3,2);R('#6b6152',x+(w*.6|0),y+(h*.7|0),2,2);R('#2e2924',x,y+h-1,w,1)}})}
+function dFloor(z,cx,cy,rng,max){const L=fTiles(z,cx,cy,rng,max);if(!L.length)return 0;const d=DIS0(z.gk),got={};for(const t of L){d[t.key]=1;tileDec(t.x,t.y,t.w,t.h);DFR[t.m]=(DFR[t.m]||0)+FTGET*(t.w*t.h)/(FT*FT);const n=Math.floor(DFR[t.m]+1e-9);if(n){DFR[t.m]-=n;invAdd(S.p,t.m,n);got[t.m]=(got[t.m]||0)+n}}
+ if(typeof CHC!='undefined')CHC.clear();fx.push({k:'boom',x:cx,y:cy,r:rng*.6,l:.15,m:.15});s3Float(cx,cy-20,'🪛 바닥 '+L.length+'칸'+(Object.keys(got).length?' → '+Object.entries(got).map(([k,v])=>NM2(k)+' '+v).join(' · '):''),'#e8d7a8');S.dTiles=(S.dTiles||0)+L.length;return L.length}
 /* can this tool work here right now? */
 function dReady(z,tool,quiet){if(!z||!tool)return false;if(tool.lv<z.need){if(!quiet&&DWARN<=0){DWARN=2;msg('🔨 '+z.name+' 해체에는 Lv'+z.need+' 도구가 필요해요 · 폭약이나 중장비는 모든 건물 가능')}return false}
  if(z.need>=2&&z.bi>=0){const n=zInside(z.bi).length;if(n){if(!quiet&&DWARN<=0){DWARN=2;msg('🧟 '+z.name+' 안에 좀비 '+n+'마리가 남아 있어요 · 모두 처치해야 대형 건물을 해체할 수 있어요')}return false}}return true}
 /* one swing / one tick of a power tool */
-function dHitWith(tool,z){const L=dNear(z,tool,tool.n,tool.rng);if(!L.length)return false;const d=DIS0(z.gk);if(d._tot==null)d._tot=z.T().length+Object.keys(d).filter(k=>k[0]!='_').length;
+function dHitWith(tool,z){const p0=S.p;let fl=0;if(tool.mode!='obj')fl=dFloor(z,p0.x,p0.y,tool.rng,tool.mode=='floor'?999:tool.ft||0);const L=dNear(z,tool,tool.n,tool.rng);if(!L.length){if(fl){noise(p0.x,p0.y,DNZ[tool.lv]);S.dHits=(S.dHits||0)+1}return fl>0}const d=DIS0(z.gk);if(d._tot==null)d._tot=z.T().length+Object.keys(d).filter(k=>k[0]!='_').length;
  for(const t of L){const left=(DH[t.id]!=null?DH[t.id]:tgtHp(t))-tool.dmg;DH[t.id]=left;fx.push({k:'boom',x:t.x+t.w/2,y:t.y+t.h/2,r:12,l:.18,m:.18});
   if(left>0)s3Float(t.x+t.w/2,t.y-10,t.nm+' '+'▮'.repeat(left),'#e8d7a8');else if(dBreak(t,z))break}
  noise(S.p.x,S.p.y,DNZ[tool.lv]);S.dHits=(S.dHits||0)+1;const p=S.p;if(tool.id&&p.dur){p.dur[tool.id]=(p.dur[tool.id]??W_BY[tool.id][4].dur)-1;if(p.dur[tool.id]<=0){delete p.dur[tool.id];invTake(p,tool.id,1);msg('💔 '+NM2(tool.id)+' 이(가) 닳아 부서졌어요')}}return true}
@@ -149,16 +159,52 @@ function dunExit(){const p=S.p;DUN=null;buildWorld();infDerived();Z=SURF.Z;dec=S
 /* dungeon loot is richer: stones, runes, parts in the deep rooms */
 {const _sr=s3SearchRoll;s3SearchRoll=function(o,kind,tier,r){const pid=_sr(o,kind,DUN?Math.max(tier,DUN.sh=='bunker'?5:3):tier,r);if(DUN){const zn=Math.max(1,zoneOf(...gOf(o.x,o.y)));if(Math.random()<.3)r[stoneFor(zn)]=(r[stoneFor(zn)]||0)+1;if(Math.random()<.08)r[runeFor(zn)]=1;if(DUN.sh=='bunker'&&['gunrack','ammo','locker'].includes(o.t)&&Math.random()<.5){const ai=AMMO_ITEM(['556','9mm','308'][Math.random()*3|0]);r[ai]=(r[ai]||0)+20}}return s3PartRoll&&!pid&&DUN&&Math.random()<.15?s3PartRoll(5,1):pid}}
 {const _sv=save;save=function(){if(DUN&&SURF){const p=S.p,x=p.x,y=p.y;p.x=SURF.x;p.y=SURF.y;try{return _sv.apply(this,arguments)}finally{p.x=x;p.y=y}}return _sv.apply(this,arguments)}}
+/* ---------- bulldozer: a vehicle you drive; its blade flattens walls and furniture in front of it ---------- */
+P('dozer','불도저',null,o=>dozerD(o.x+o.w/2,o.y+o.h/2,o.dir||0),true);
+function dozerD(cx,cy,dir){const hz=Math.abs(Math.cos(dir))>=Math.abs(Math.sin(dir)),fw=Math.cos(dir)>=0,dn=Math.sin(dir)>=0;shd(cx-34,cy-18,68,38,.3);
+ if(hz){R('#1d1714',cx-30,cy-20,60,8);R('#1d1714',cx-30,cy+10,60,8);for(let i=0;i<7;i++){R('#3a3a3a',cx-28+i*8,cy-19,5,6);R('#3a3a3a',cx-28+i*8,cy+11,5,6)}R('#1d1714',cx-24,cy-14,48,26);R('#d9a52a',cx-23,cy-30,46,40);R('#e8bc3a',cx-23,cy-30,46,4);R('#b8861e',cx-23,cy+6,46,4);
+  R('#1d1714',cx-10,cy-46,22,20);R('#7fb0c8',cx-8,cy-44,18,10);R('#d9a52a',cx-8,cy-34,18,8);const bx=fw?cx+28:cx-38;R('#1d1714',bx-1,cy-26,12,46);R('#8a9096',bx,cy-25,10,44);R('#b8bec4',bx+(fw?7:0),cy-25,3,44);R('#5a5f66',fw?cx+22:cx-28,cy-8,6,6)}
+ else{R('#1d1714',cx-26,cy-26,8,52);R('#1d1714',cx+18,cy-26,8,52);for(let i=0;i<6;i++){R('#3a3a3a',cx-25,cy-24+i*8,6,5);R('#3a3a3a',cx+19,cy-24+i*8,6,5)}R('#d9a52a',cx-18,cy-34,36,48);R('#e8bc3a',cx-18,cy-34,36,4);R('#1d1714',cx-10,cy-48,20,18);R('#7fb0c8',cx-8,cy-46,16,9);
+  const by=dn?cy+18:cy-44;R('#1d1714',cx-26,by-1,52,12);R('#8a9096',cx-25,by,50,10);R('#b8bec4',cx-25,by+(dn?7:0),50,3)}}
+let DOZ=null;const DZSPD=.42;
+function dozerObj(){return W0.objs.find(o=>o.t=='dozer')}
+function dozerBoard(){const o=dozerObj(),p=S.p;if(!o)return;if(!(p.inv.dx2>0))return msg('🚜 불도저 열쇠가 필요해요');if((p.inv.fuel|0)<=0)return msg('🚜 연료가 필요해요');
+ const i=W0.objs.indexOf(o);W0.objs.splice(i,1);infDerived();delete S.inf.dz;DOZ={car:S.car,x:o.x+o.w/2,y:o.y+o.h/2,dir:o.dir||0,lx:0,ly:0,cd:0};S.car={x:DOZ.x,y:DOZ.y,w:60,h:30,c:'#d9a52a',dz:1};S.dr=1;p.x=DOZ.x;p.y=DOZ.y;DOZ.lx=p.x;DOZ.ly=p.y;
+ msg('🚜 불도저 운전 · 벽과 가구를 향해 밀고 들어가면 무너뜨려요 (재료 절반) · 내리려면 [상호작용]')}
+function dozerPark(){const c=S.car,[gx,gy]=gOf(c.x,c.y),[ox,oy]=bo(gx-OGX,gy-OGY);S.inf.dz={gk:gx+','+gy,rx:Math.round(c.x-ox),ry:Math.round(c.y-oy),dir:DOZ.dir};S.car=DOZ.car;DOZ=null;infRebuild();msg('🚜 불도저에서 내렸어요')}
+{const _cd=carD;carD=function(x,y,w,h,c,rust){if(DOZ&&S&&S.car&&S.car.dz&&Math.abs(x+w/2-S.car.x)<2&&Math.abs(y+h/2-S.car.y)<2)return dozerD(S.car.x,S.car.y,DOZ.dir);return _cd.apply(this,arguments)}}
+/* the parked dozer is a world object in its block */
+{const _b3=buildWorld;buildWorld=function(){const w=_b3();let dz=null;try{dz=!DUN&&S&&S.inf&&S.inf.dz}catch(e){}if(dz){const[gx,gy]=dz.gk.split(',').map(Number),c=gx-OGX,r=gy-OGY;if(c>=0&&r>=0&&c<NBX&&r<NBY){const[ox,oy]=bo(c,r);W0.objs.push({t:'dozer',x:ox+dz.rx-30,y:oy+dz.ry-15,w:60,h:30,dir:dz.dir,id:'dozer'})}}return w}}
+{const _sh=infShift;infShift=function(dc,dr,q){const c0=DOZ&&DOZ.car;_sh(dc,dr,q);if(c0&&(dc||dr)){c0.x-=dc*PX;c0.y-=dr*PY}}}
+{const _sv2=save;save=function(){if(DOZ&&S){const c=S.car;S.car=DOZ.car;try{return _sv2.apply(this,arguments)}finally{S.car=c}}return _sv2.apply(this,arguments)}}
+const DZW={};
+function dozerTick(dt){if(!DOZ)return;const p=S.p,c=S.car;if(!S.dr){dozerPark();return}
+ /* slower than a car */
+ const mx=c.x-DOZ.lx,my=c.y-DOZ.ly;if(Math.abs(mx)+Math.abs(my)>0.01&&Math.abs(mx)+Math.abs(my)<200){c.x=DOZ.lx+mx*DZSPD;c.y=DOZ.ly+my*DZSPD;p.x=c.x;p.y=c.y}
+ const m=Math.hypot(jx,jy);if(m>.1)DOZ.dir=Math.atan2(jy,jx);DOZ.lx=c.x;DOZ.ly=c.y;DOZ.cd-=dt;if(m<.1||DOZ.cd>0)return;DOZ.cd=.25;
+ /* blade: 56 x 30 box in front */
+ const ux=Math.cos(DOZ.dir),uy=Math.sin(DOZ.dir),bx=c.x+ux*40,by=c.y+uy*40,blade={x:bx-30,y:by-24,w:60,h:48};let hit=0,rose=0;
+ const zones=new Map();const bi=bldAt(bx,by);if(bi>=0){const b=W0.b[bi];zones.set(bi,{bi,gk:b.gk,need:DLV[b.kind],kind:b.kind,name:b.name,gx:b.gx,gy:b.gy,T:()=>dTargets(bi)})}
+ else{const z0=(()=>{const[gx,gy]=gOf(bx,by),gk=gx+','+gy;return S.inf.demo&&S.inf.demo[gk]?{bi:-1,gk,need:1,kind:'lot',name:'빈터',gx,gy,T:()=>lotTargets(gk)}:null})();if(z0)zones.set(-1,z0);
+  for(const r of W0.roofs)if(blade.x<r.x+r.w&&blade.x+blade.w>r.x&&blade.y<r.y+r.h&&blade.y+blade.h>r.y){const b=W0.b[r.bi];if(b&&DLV[b.kind]&&!zones.has(r.bi))zones.set(r.bi,{bi:r.bi,gk:b.gk,need:DLV[b.kind],kind:b.kind,name:b.name,gx:b.gx,gy:b.gy,T:()=>dTargets(r.bi)})}}
+ for(const z of zones.values()){if(z.need>=2&&z.bi>=0&&zInside(z.bi).length){if(DWARN<=0){DWARN=2.5;msg('🧟 '+z.name+' 안에 좀비가 남아 있어요 · 모두 처치해야 불도저로 밀 수 있어요')}continue}
+  const T=z.T().filter(t=>t.x<blade.x+blade.w&&t.x+t.w>blade.x&&t.y<blade.y+blade.h&&t.y+t.h>blade.y).slice(0,3);
+  for(const t of T){const left=(DH[t.id]!=null?DH[t.id]:tgtHp(t))-6;DH[t.id]=left;hit++;if(left<=0){const r=tgtDrop(t),half={};for(const k in r){const n=Math.floor(r[k]/2+Math.random()*.99*(r[k]%2));if(n)half[k]=n}
+     const d=DIS0(z.gk);if(d._tot==null)d._tot=z.T().length+Object.keys(d).filter(k=>k[0]!='_').length;d[t.id]=1;delete DH[t.id];for(const k in half)invAdd(p,k,half[k]);s3Float(t.x+t.w/2,t.y-16,'🚜 '+t.nm+(Object.keys(half).length?' → '+Object.entries(half).map(([k,v])=>NM2(k)+' '+v).join(' · '):''),'#ffd36a');
+     const A=t.k=='o'?W0.objs:t.k=='h'?W0.hw:W0.vw,i=A.indexOf(t.r);if(i>=0)A.splice(i,1);infDerived();S.dzBroke=(S.dzBroke||0)+1;
+     if(z.bi>=0){const pct=Object.keys(d).filter(k=>k[0]!='_').length/Math.max(1,d._tot);if(z.need>=2&&pct>=.5&&!d._up){d._up=1;dRise(z.bi,8);msg('⚠ 지하에서 좀비가 올라오고 있습니다! · 소음을 듣고 주변 좀비가 몰려옵니다')}
+      if(!z.T().some(q=>q.k=='h'||q.k=='v')){const cx=c.x,cy=c.y;dCollapse(z,0);c.x=cx;c.y=cy;p.x=cx;p.y=cy;DOZ.lx=cx;DOZ.ly=cy;return}}}}}
+ if(hit){noise(c.x,c.y,4);if(typeof S4!='undefined')S4.shake=Math.max(S4.shake||0,.1);fx.push({k:'boom',x:bx,y:by,r:22,l:.2,m:.2});p.inv.fuel=Math.max(0,(p.inv.fuel||0)-.05)}}
 /* ---------- context buttons ---------- */
-function dmCtx(){const p=S.p,B=[];
+function dmCtx(){const p=S.p,B=[];if(DOZ){B.push({t:'🚜 불도저 운전 중 · 앞을 밀어서 철거 · 내리기 = [상호작용]',f:null,info:1});return B}{const o=dozerObj();if(o&&!S.dr&&Math.hypot(o.x+30-p.x,o.y+15-p.y)<70){B.push({t:'🚜 불도저 타기'+(p.inv.dx2>0?'':' · 열쇠 필요'),f:dozerBoard,off:!(p.inv.dx2>0),dz:1,sm:1})}}
  if(DM){B.push({t:(DM.way=='boom'?'💣 폭발까지 '+Math.ceil(DM.T-DM.t)+'초':'🚜 중장비 '+Math.round(DM.t/DM.T*100)+'% · 멈추기'),f:()=>demoStop('철거를 멈췄어요'),pr:DM.t/DM.T});return B}
  if(DUN){const l=W0.objs.find(o=>o.t=='ladder');if(l&&Math.hypot(l.x+14-p.x,l.y+10-p.y)<60)B.push({t:'⬆ 지상으로',f:dunExit});return B}
  const h=W0.objs.find(o=>o.t=='hatch'&&Math.hypot(o.x+26-p.x,o.y+20-p.y)<70);if(h){B.push({t:h.sh=='bunker'?'🪖 지하 벙커로 내려가기':'🕳 지하 대피소로 내려가기',f:()=>dunEnter(h)});return B}
  const bi=bldAt(p.x,p.y);if(bi<0)return B;const b=W0.b[bi],need=DLV[b.kind],tool=curTool(),d=S.inf.dis&&S.inf.dis[b.gk],pct=d&&d._tot?Math.round(Object.keys(d).filter(k=>k[0]!='_').length/d._tot*100):0;
- if(tool)B.push({t:(tool.auto?'⚙ ':'🔨 ')+NM2(tool.id)+(tool.lv<need?' · Lv'+need+' 필요 🔒':tool.auto?' · 고리 안 자동 해체':' · 공격 버튼으로 '+(tool.mode=='floor'?'바닥':'가구·벽'))+(pct?' · '+pct+'%':''),f:null,off:tool.lv<need,pr:pct?pct/100:null,info:1});
- if(p.inv.dx1>0)B.push({t:'💣 폭파',f:()=>demoWhole('boom'),sm:1});if(p.inv.dx2>0)B.push({t:'🚜 중장비',f:()=>demoWhole('dozer'),sm:1});return B}
+ if(tool)B.push({t:(tool.auto?'⚙ ':'🔨 ')+NM2(tool.id)+(tool.lv<need?' · Lv'+need+' 필요 🔒':tool.auto?' · 고리 안 자동 해체':' · 공격 버튼으로 '+(tool.mode=='floor'?'원 안 바닥':'가구·벽'))+(pct?' · '+pct+'%':''),f:null,off:tool.lv<need,pr:pct?pct/100:null,info:1});
+ if(p.inv.dx1>0)B.push({t:'💣 폭파',f:()=>demoWhole('boom'),sm:1});return B}
 let DMC=[],DAT=0;
-{const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(!S)return;demoUpd(dt);DWARN-=dt;
+{const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(!S)return;demoUpd(dt);DWARN-=dt;dozerTick(dt);
   const tool=curTool();if(tool&&tool.auto&&!DUN&&!S.dr){DAT-=dt;if(DAT<=0){DAT=tool.auto;const z=dZone();if(z&&dReady(z,tool,true))dHitWith(tool,z)}}
   const c=dmCtx(),el=$('dmBox');if(!el)return;const key=c.map(q=>q.t+(q.off?1:0)).join('|');if(key!=el.dataset.k){el.dataset.k=key;DMC=c;el.innerHTML=c.map((q,i)=>'<button data-i="'+i+'" class="'+(q.off?'off ':'')+(q.sm?'sm ':'')+(q.info?'info ':'')+(q.big?'big':'')+'">'+q.t+(q.pr!=null?'<i style="width:'+Math.round(q.pr*100)+'%"></i>':'')+'</button>').join('')}else DMC=c}}
 document.body.insertAdjacentHTML('beforeend','<div id="dmBox"></div>');$('c').insertAdjacentHTML('afterend','<canvas id="ovl"></canvas><div id="dunV"></div>');
@@ -168,7 +214,7 @@ const OVL=[];/* other modules push draw(g, sx, sy, k) callbacks */
 {const cv=$('ovl'),g2=cv.getContext('2d');function frame(){requestAnimationFrame(frame);const w=innerWidth,h=innerHeight;if(cv.width!=Math.round(w*dpr)||cv.height!=Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr)}
   g2.setTransform(1,0,0,1,0,0);g2.clearRect(0,0,cv.width,cv.height);if(!run||!S||PAUSE&&!PLACEON())return;g2.setTransform(dpr,0,0,dpr,0,0);const sx=x=>(x-camX)*zoom,sy=y=>(y-camY)*zoom,k=zoom;
   const tool=curTool(),p=S.p,zz=tool&&!DUN?dZone():null;if(zz){const z=zz,ok=z&&dReady(z,tool,true),r=(tool.auto?tool.rng:tool.rng)*k;g2.save();g2.setLineDash([6,5]);g2.lineWidth=2;g2.strokeStyle=ok?(tool.auto?'#ffd36acc':'#e8d7a8aa'):'#ff6a5a88';g2.fillStyle=ok?'#ffd36a14':'#ff6a5a10';
-   g2.beginPath();g2.arc(sx(p.x),sy(p.y),r,0,Math.PI*2);g2.fill();g2.stroke();g2.setLineDash([]);if(ok)for(const t of dNear(z,tool,tool.auto?tool.n:1,tool.rng)){g2.strokeStyle='#ffd36a';g2.lineWidth=2;g2.strokeRect(sx(t.x)-2,sy(t.y)-2,t.w*k+4,t.h*k+4)}g2.restore()}
+   g2.beginPath();g2.arc(sx(p.x),sy(p.y),r,0,Math.PI*2);g2.fill();g2.stroke();g2.setLineDash([]);if(ok)for(const t of dNear(z,tool,tool.auto?tool.n:1,tool.rng)){g2.strokeStyle='#ffd36a';g2.lineWidth=2;g2.strokeRect(sx(t.x)-2,sy(t.y)-2,t.w*k+4,t.h*k+4)}if(ok&&tool.mode!='obj'){g2.strokeStyle='#e8d7a8aa';g2.lineWidth=1;for(const t of fTiles(z,p.x,p.y,tool.rng,tool.mode=='floor'?200:tool.ft))g2.strokeRect(sx(t.x)+1,sy(t.y)+1,t.w*k-2,t.h*k-2)}g2.restore()}
   for(const f of OVL)try{f(g2,sx,sy,k)}catch(e){}}requestAnimationFrame(frame)}
 const PLACEON=()=>typeof PLACE!='undefined'&&!!PLACE;
 document.head.insertAdjacentHTML('beforeend',`<style>

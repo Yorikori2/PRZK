@@ -10,10 +10,14 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  // Lv1 hammer: equip, press attack; appliances give electronics; hammer never lifts floors, the pry bar only lifts floors
  r=await p.evaluate(()=>{const g=goInside(['houses','apt'],{});Z.length=0;wield('dt1');const z=dZone();
   const fr=W0.objs.find(o=>o.b==g.bi&&['fridge','kitchen','tv','vending','drinks','washer'].includes(o.t));let elec=null;if(fr){S.p.x=fr.x+fr.w/2;S.p.y=fr.y+fr.h+14;const e0=S.p.inv.elec|0;for(let i=0;i<14&&W0.objs.includes(fr);i++){S.p.ac=0;gearAct()}elec=(S.p.inv.elec|0)-e0}
-  const hammer=dNear(z,DT.dt1,999,9999),bar=dNear(z,DT.dt1f,999,9999);return{elec,fr:fr&&fr.t,hf:hammer.some(t=>t.fl),bo:bar.every(t=>t.fl),nb:bar.length}});
- ok(r.fr&&r.elec>=1,'Lv1 hammer: swinging at a '+r.fr+' takes it apart for '+r.elec+' electronics');ok(!r.hf&&r.bo,'hammer never lifts floors; pry bar only lifts floors ('+r.nb+' free floors)');
- r=await p.evaluate(()=>{const z=dZone();wield('dt1f');let t=dNear(z,DT.dt1f,1,9999)[0];if(!t){const f=z.T().find(q=>q.fl);W0.objs=W0.objs.filter(o=>!(o.x<f.x+f.w&&o.x+o.w>f.x&&o.y<f.y+f.h&&o.y+o.h>f.y));infDerived();t=dNear(z,DT.dt1f,1,9999)[0]}if(!t)return null;S.p.x=t.x+t.w/2;S.p.y=t.y+t.h/2;const w0=S.p.inv.wood|0,c0=S.p.inv.cement|0,cl=S.p.inv.cloth|0;for(let i=0;i<10;i++){S.p.ac=0;gearAct()}return{gone:!W0.fl.includes(t.r),got:(S.p.inv.wood|0)-w0+(S.p.inv.cement|0)-c0+(S.p.inv.cloth|0)-cl}});
- ok(r&&r.gone&&r.got>=1,'pry bar lifts a free floor tile for materials '+JSON.stringify(r));
+  const t0=S.dTiles|0;for(let i=0;i<5;i++){S.p.ac=0;gearAct()}return{elec,fr:fr&&fr.t,hammerTiles:(S.dTiles|0)-t0}});
+ ok(r.fr&&r.elec>=1,'Lv1 hammer: swinging at a '+r.fr+' takes it apart for '+r.elec+' electronics');ok(r.hammerTiles==0,'the hammer never lifts floor tiles');
+ r=await p.evaluate(()=>{const z=dZone();wield('dt1f');let best=null,bn=0;for(const f of W0.fl){if(!FLMAT[f[4]]||!inBld(z.bi,f[0]+f[2]/2,f[1]+f[3]/2))continue;for(let y=f[1]+20;y<f[1]+f[3];y+=24)for(let x=f[0]+20;x<f[0]+f[2];x+=24){if(blocker(x,y,7))continue;const n=fTiles(z,x,y,DT.dt1f.rng,999).length;if(n>bn){bn=n;best=[x,y]}}}
+  S.p.x=best[0];S.p.y=best[1];const L=fTiles(z,S.p.x,S.p.y,DT.dt1f.rng,999),dec0=W0.dec.filter(d=>d.ft).length,inv0=['wood','cement','cloth'].reduce((a,k)=>a+(S.p.inv[k]|0),0)+Object.values(DFR).reduce((a,b)=>a+b,0);
+  S.p.ac=0;gearAct();const dec1=W0.dec.filter(d=>d.ft).length,inCircle=L.every(t=>Math.hypot(t.x+t.w/2-S.p.x,t.y+t.h/2-S.p.y)<=DT.dt1f.rng),underFurn=L.some(t=>W0.objs.some(o=>!FLAT[o.t]&&o.b==z.bi&&o.x<t.x+t.w&&o.x+o.w>t.x&&o.y<t.y+t.h&&o.y+o.h>t.y));
+  const left=fTiles(z,S.p.x,S.p.y,DT.dt1f.rng,999).length,mat=['wood','cement','cloth'].reduce((a,k)=>a+(S.p.inv[k]|0),0)+Object.values(DFR).reduce((a,b)=>a+b,0)-inv0;const gk=z.gk,[gx,gy]=gk.split(',').map(Number),px=S.p.x,py=S.p.y;infGoto(gx+9,gy);infGoto(gx,gy);
+  const back=W0.dec.filter(d=>d.ft).length;S.p.x=px;S.p.y=py;return{n:L.length,dec:dec1-dec0,inCircle,underFurn,left,mat:+mat.toFixed(2),back}});
+ ok(r.n>=4&&r.dec==r.n&&r.left==0&&r.inCircle&&!r.underFurn,'pry bar: one swing lifts exactly the '+r.n+' free floor tiles inside its circle, none under furniture');ok(r.mat>=r.n*.15&&r.back>=r.n,'lifted tiles give materials ('+r.mat+') and stay lifted after leaving ('+r.back+' patches)');
  // taken-apart pieces stay gone after leaving and coming back
  r=await p.evaluate(()=>{const z=dZone(),gk=z.gk,n0=z.T().length;const[gx,gy]=gk.split(',').map(Number);infGoto(gx+9,gy);infGoto(gx,gy);const bi=W0.b.findIndex(b=>b.gk==gk&&DLV[b.kind]);return{n0,n1:dTargets(bi).length}});
  ok(r.n1==r.n0,'removed pieces stay removed after a window slide ('+r.n0+' → '+r.n1+')');
@@ -35,9 +39,13 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
   demoWhole('boom');const rf=W0.roofs.filter(q=>q.bi==g.bi)[0];mk(rf.x+rf.w/2,rf.y+rf.h/2,{look:'civ1'});const zz=Z[Z.length-1];S.p.x=rf.x+rf.w/2;S.p.y=rf.y+rf.h+260;const inv0=['wood','scrap','cement','elec','cloth','fuel'].reduce((a,k)=>a+(S.p.inv[k]|0),0);
   for(let i=0;i<11*60;i++){gearUpd(1/60);S.p.hp=100}const got=['wood','scrap','cement','elec','cloth','fuel'].reduce((a,k)=>a+(S.p.inv[k]|0),0)-inv0;return{lot:W0.b.find(b=>b.gk==g.b.gk).kind,dead:zz.hp<=0,got,tot,dx:S.p.inv.dx1|0}});
  ok(r.lot=='lot'&&r.dead&&r.dx==0,'explosives level the building after 10 s and kill zombies inside');ok(r.got<=Math.ceil(r.tot*.15),'explosives keep only ~10% of the material ('+r.got+' of '+r.tot+')');
- r=await p.evaluate(()=>{const g=goInside(['police','clinic'],{dx2:1,fuel:5});Z=Z.filter(z=>!inBld(g.bi,z.x,z.y));const T=dTargets(g.bi);let tot=0;for(const t of T){const q=tgtDrop(t);for(const k in q)tot+=q[k]}const f0=S.p.inv.fuel|0;demoWhole('dozer');const spent=f0-(S.p.inv.fuel|0);const inv0=['wood','scrap','cement','elec','cloth','fuel'].reduce((a,k)=>a+(S.p.inv[k]|0),0);
-  for(let i=0;i<31*60;i++){gearUpd(1/60);S.p.hp=100;for(const z of Z)z.hp=0}const got=['wood','scrap','cement','elec','cloth','fuel'].reduce((a,k)=>a+(S.p.inv[k]|0),0)-inv0;return{lot:W0.b.find(b=>b.gk==g.b.gk).kind,got,tot,fuel:spent}});
- ok(r.lot=='lot'&&r.fuel==5&&Math.abs(r.got-r.tot*.5)<=r.tot*.12,'bulldozer: 30 s, fuel '+r.fuel+', keeps about half ('+r.got+' of '+r.tot+') '+r.lot);
+ r=await p.evaluate(()=>{stop9();scene9('dozer');const o=dozerObj();const b0=dmCtx().map(q=>q.t).join('|');dozerBoard();const driving=S.dr==1&&!!DOZ;window.M0=['wood','scrap','cement','elec','cloth'].reduce((a,k)=>a+(S.p.inv[k]|0),0);window.B0=S.dzBroke|0;window.Y0=S.p.y;S.p.hp=1e4;
+  jp=-1;jx=0;jy=-1;return{b0,o:!!o,driving}});
+ ok(r.o&&/불도저 타기/.test(r.b0)&&r.driving,'a parked bulldozer can be boarded with the key');await p.waitForTimeout(7000);
+ r=await p.evaluate(()=>{jp=null;jy=0;const moved=Y0-S.p.y,broke=(S.dzBroke|0)-B0,got=['wood','scrap','cement','elec','cloth'].reduce((a,k)=>a+(S.p.inv[k]|0),0)-M0;save();const sv=JSON.parse(localStorage.getItem(SAVE));S.p.hp=100;
+  return{moved:Math.round(moved),broke,got,realCarSaved:sv.car&&Math.round(sv.car.x)==Math.round(DOZ.car.x)}});
+ ok(r.broke>=3&&r.got>0,'driving into the building flattens '+r.broke+' pieces for '+r.got+' materials (moved '+r.moved+' px)');ok(r.realCarSaved,'saving while in the bulldozer keeps the real car');
+ r=await p.evaluate(()=>{const p=S.p;ia();gearUpd(1/60);const parked=!!dozerObj()&&!DOZ&&!S.car.dz;const gk=S.inf.dz.gk,[gx,gy]=gk.split(',').map(Number);infGoto(gx+8,gy);infGoto(gx,gy);return{parked,back:!!dozerObj()}});ok(r.parked&&r.back,'getting out parks the bulldozer where it stopped, and it stays there');
  // outposts: build on a lot, costs, nights while away
  r=await p.evaluate(()=>{stop9();const gk=mkLot(['houses','apt']);const c=dmCtx().map(q=>q.t).join('|');give({wood:10,scrap:10,cloth:4});const w0=S.p.inv.wood|0;opBuild();const o=OP0()[gk];return{c,ok:!!o,paid:w0-(S.p.inv.wood|0),objs:['tentS','stash','bench3','campfire'].every(t=>W0.objs.some(q=>q.t==t&&q.b!=null))}});
  ok(/전초기지 세우기/.test(r.c)&&r.ok&&r.paid==10&&r.objs,'a rubble lot offers an outpost; building it costs wood 10 and puts up tent, stash, bench, fire');
