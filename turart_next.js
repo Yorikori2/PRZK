@@ -5,7 +5,7 @@
 {const _lot=BUILDERS.lot;BUILDERS.lot=(c,r,sd)=>{const n0=W0.objs.length;_lot(c,r,sd);const gk=(OGX+c)+','+(OGY+r);for(let i=n0;i<W0.objs.length;i++){const o=W0.objs[i];if(o.t=='turret'&&o.tt)o.gk=gk}}}
 const TCOL={mg:['#5a6470','#3e464f','#8a949e'],sg:['#4f5a35','#3e4729','#6b7650'],sn:['#6b5a3a','#4a3e28','#8a7a52'],fl:['#a8441e','#7a3014','#d0622e'],tz:['#6a4a2a','#4a321c','#b87a3a']};
 function turRec(o){const op=S&&S.inf&&S.inf.op&&S.inf.op[o.gk];return op&&op.turs&&op.turs[o.tid]}
-function turD(o){const t=o.tt,C=TCOL[t],q=turRec(o),a=q?(q.aim!=null?q.aim:q.dir):0,cx=o.x+o.w/2,cy=o.y+o.h/2,T=performance.now()/1000,fire=q&&q.aim!=null&&TCD[o.gk+':'+o.tid]>(TURT[t].cd-.08);
+function turD(o){const t=o.tt,C=TCOL[t],q=turRec(o),a=q?(q.ha!=null?q.ha:q.dir):0,cx=o.x+o.w/2,cy=o.y+o.h/2,T=performance.now()/1000,fire=q&&q.aim!=null&&TCD[o.gk+':'+o.tid]>(TURT[t].cd-.08);
  blob(cx,cy+7,20,7,'#00000038');
  /* base */
  if(t=='mg'){for(let i=0;i<6;i++){const ang=i/6*Math.PI*2;R(i%2?'#b8a47a':'#a89468',cx+Math.cos(ang)*15-6,cy+Math.sin(ang)*8-2,12,6)}R('#2a2e33',cx-6,cy-4,12,8)}
@@ -26,3 +26,9 @@ function turD(o){const t=o.tt,C=TCOL[t],q=turRec(o),a=q?(q.aim!=null?q.aim:q.dir
   if(fire){g.globalAlpha=.85;R('#ff6a1a',20,-6,16,12);R('#ffb84a',20,-3,12,6);g.globalAlpha=1}}
  g.restore()}
 {const _d=D.turret;D.turret=o=>{if(!o.tt)return _d(o);const cx=o.x+o.w/2,cy=o.y+o.h/2;g.save();g.translate(cx,cy);g.scale(1.35,1.35);g.translate(-cx,-cy);try{turD(o)}finally{g.restore()}}}
+
+/* heads turn smoothly: toward a target when there is one, otherwise a slow watchful sweep across the arc */
+function turHeads(dt){const ops=S&&S.inf&&S.inf.op;if(!ops)return;const T=performance.now()/1000;for(const gk in ops){const o=ops[gk];if(!o.turs)continue;o.turs.forEach((q,i)=>{const P=TURT[q.t];
+  let want=q.want;if(want==null){const sw=P.arc>=360?T*.7+i:q.dir+Math.sin(T*.55+i*1.7)*Math.min(P.arc,120)/360*Math.PI*.8;want=sw}if(q.ha==null)q.ha=q.dir;
+  let df=want-q.ha;df=Math.atan2(Math.sin(df),Math.cos(df));const sp=(q.want!=null?5:1.2)*dt;q.ha+=Math.max(-sp,Math.min(sp,df));q.ha=Math.atan2(Math.sin(q.ha),Math.cos(q.ha))})}}
+{const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(S)turHeads(dt)}}

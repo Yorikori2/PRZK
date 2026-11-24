@@ -48,6 +48,10 @@ function scene9(k){stop9();const p=S.p;ZLOG=null;const zl=$('zlog');if(zl)zl.rem
   o.turs=[{t:'mg',rx:cx-180,ry:cy-115,dir:-Math.PI/2},{t:'sg',rx:cx-90,ry:cy-115,dir:-Math.PI/2},{t:'sn',rx:cx,ry:cy-115,dir:-Math.PI/2},{t:'fl',rx:cx+90,ry:cy-115,dir:-Math.PI/2},{t:'tz',rx:cx+180,ry:cy-115,dir:-Math.PI/2}];infRebuild();
   const[gx,gy]=gk.split(',').map(Number),[ox,oy]=bo(gx-OGX,gy-OGY);S.p.x=ox+cx;S.p.y=oy+cy+40;S.p.hp=1e4;msg('🔫 새 포탑 도트 · 기관총(탄띠) · 산탄(쌍열·탄피 꽂이) · 저격(삼각대·조준경 반짝) · 화염(연료통·불씨) · 테슬라(코일·전기 불꽃)');
   at9(2500,()=>{for(let i=0;i<12;i++)mk(ox+cx-260+i*45,oy+cy-420,{w:1})});at9(20000,()=>{S.p.hp=MHP(S.p)});return hud2()}
+ if(k=='z8'){stop9();infGoto(0,0);Z.length=0;S.sa=1e9;const p=S.p;p.hp=1e5;const L=['spitter','burner','shocker','dog','crawler','bloater','brute','goliath','brood','civ1','soldier'];L.forEach((l,i)=>{const a=i/L.length*Math.PI*2;mk(p.x+Math.cos(a)*300,p.y+Math.sin(a)*240,{look:l})});
+  for(const z of Z){z.al=0}let t=0;const T=setInterval(()=>{if(!run)return;t+=.12;Z.forEach((z,i)=>{if(z.raider)return;const a=t*.5+i/Z.length*Math.PI*2;z.al=3;z.nx=p.x+Math.cos(a)*240;z.ny=p.y+Math.sin(a)*190})},120);T9.push(T);at9(40000,()=>{clearInterval(T);p.hp=MHP(p)});
+  msg('🧟 특수 좀비 · 보스가 원을 그리며 걸어요 · 걷는 방향 8방향 · 등을 보이면 눈이 안 보여요 · 걸음마다 몸이 들썩여요');return hud2()}
+ if(k=='trot'){scene9('tart');setTimeout(()=>{opOpen();msg('🔄 관리 창의 포탑 목록에서 ↺ ↻로 45°씩 돌려요 · 닫으면 머리가 새 방향을 천천히 살펴요')},200);return}
  if(k=='boom'){const r=goInside(['houses','apt','church'],{dx1:1});if(!r)return;Z=Z.filter(z=>!inBld(r.bi,z.x,z.y));demoWhole('boom');const rf=W0.roofs.filter(q=>q.bi==r.bi)[0];S.p.x=rf.x+rf.w/2;S.p.y=rf.y+rf.h+150;msg('💣 10초 뒤 폭발해요 · 건물 밖(아래)으로 옮겨 놨어요');return hud2()}
  if(k=='op1'){const gk=mkLot(['houses','apt']);if(!gk)return;give({wood:10,scrap:10,cloth:4});msg('⛺ 철거한 빈터예요 · 오른쪽 [전초기지 세우기]를 눌러 보세요 (재료 지급됨)');return hud2()}
  if(k=='op2'){const gk=mkOp(['houses','apt'],{wall:2,tur:2,ammo:30});if(!gk)return;give({a9mm:60,scrap:10});setTimeout(opOpen,80);return}
@@ -109,9 +113,9 @@ function wield(id){const p=S.p;if(!(p.inv[id]>0))give({[id]:1});p.eq.mel=id;p.as
 function mkLot(L){const r=goInside(L,{});if(!r)return null;Z.length=0;DMODE={bi:r.bi,gk:r.b.gk,kind:r.b.kind,name:r.b.name,gx:r.b.gx,gy:r.b.gy};demoDone('none');const[ox,oy]=bo((NBX-1)/2|0,(NBY-1)/2|0);S.p.x=ox+BW/2;S.p.y=oy+BH/2+190;return r.b.gk}
 function mkOp(L,o){const gk=mkLot(L);if(!gk)return null;give({wood:10,scrap:10,cloth:4});opBuild();Object.assign(OP0()[gk],o||{});infRebuild();return gk}
 function fillBox(box){Object.assign(box,{food:6,water:5,bandage:8,medkit:2,a9mm:120,a12g:24,a556:90,scrap:34,wood:22,cloth:9,elec:7,cement:4,fuel:3,enh1:4,enh2:2,rn_fire2:1,rn_hunt3:1,pistol:1,pump:1,vest:1,helmet:1,bag2:1,dt1:1})}
-const SC9=[['mv8','🚶 8방향 걷기 모션','플레이어 · 좀비 · 약탈자'],['tart','🔫 새 포탑 도트 5종','고개를 돌려 조준 · 각자 움직임'],['rtab','🏴 약탈자 표 (더 강해짐)','체력 · 피해 · 속도 · 명중'],['r1','1구역 약탈자','체력 100 = 플레이어와 같음'],['r3','3구역 약탈자 분대','소총 · 수류탄'],['r5','5구역 군단 + 대장','대장을 쓰러뜨리면 달아남']];
+const SC9=[['mv8','🚶 사람 8방향 · 부드러운 걸음','플레이어 · 좀비 · 약탈자 (8단계 걸음)'],['z8','🧟 특수 좀비 · 보스 8방향','감염견 · 부머 · 브루트 · 골리앗 · 번식체 …'],['tart','🔫 포탑 머리 회전','목표를 향해 부드럽게 · 없으면 둘러보기'],['trot','🔄 포탑 방향 직접 돌리기','관리 창 ↺ ↻ 45°'],['r3','🏴 약탈자 분대 (걷기 모션)','3구역']];
 function open9(){const b=$('bm');b.dataset.m='scene';PAUSE=true;
- b.innerHTML='<div class="sh"><h2>🚶 걷기 모션 · 포탑 · 약탈자</h2><div class="wt">시드 #'+MAPCFG.seed+' · 거점에서 '+zoneStep()+'블록마다 구역이 올라가요</div><button id="s9X">✕</button></div><div class="scl">'+SC9.map(([k,n,d])=>'<div class="scc" data-s9="'+k+'"><b>'+n+'</b><small>'+d+'</small></div>').join('')+'</div>';
+ b.innerHTML='<div class="sh"><h2>🚶 8방향 걷기 · 포탑 회전</h2><div class="wt">시드 #'+MAPCFG.seed+' · 거점에서 '+zoneStep()+'블록마다 구역이 올라가요</div><button id="s9X">✕</button></div><div class="scl">'+SC9.map(([k,n,d])=>'<div class="scc" data-s9="'+k+'"><b>'+n+'</b><small>'+d+'</small></div>').join('')+'</div>';
  b.style.display='block';b.querySelectorAll('[data-s9]').forEach(c=>c.onclick=()=>scene9(c.dataset.s9));$('s9X').onclick=()=>{$('bm').dataset.m='';closeBase();PAUSE=false}}
 document.body.insertAdjacentHTML('beforeend','<button id="scB">♾ 장면</button>');
 $('scB').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation()});$('scB').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(run)open9()});
