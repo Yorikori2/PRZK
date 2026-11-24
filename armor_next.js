@@ -31,8 +31,11 @@ const armScore=id=>{const e=(ARMX[id]||[])[4]||{};return(e.dr||0)+(e.blast||0)*.
 function armEq(p){p=p||S.p;return APARTS.map(([k])=>p.eq&&p.eq[k]).filter(id=>id&&ARMX[id]&&has(p,id))}
 const armFx=(p,k)=>armEq(p).map(id=>ARMX[id][4][k]||0);
 const ARMCAP=.25;/* total reduction capped at 75% */
-function armPart(p){return Math.max(ARMCAP,armFx(p,'dr').reduce((m,v)=>m*(1-v),1))}
-armMul2=function(p){return(typeof s3Arm=='function'?s3Arm():1)*armPart(p)};
+const armProd=p=>armFx(p,'dr').reduce((m,v)=>m*(1-v),1);
+function armPart(p){return Math.max(ARMCAP,armProd(p))}
+/* everything that cuts damage (parts, perks, set bonuses) counts toward the one 75% cap */
+function armRaw(p){return(typeof s3Arm=='function'?s3Arm():1)*armProd(p)}
+armMul2=function(p){return Math.max(ARMCAP,armRaw(p))};
 function blastMul(p){return armFx(p,'blast').reduce((m,v)=>m*(1-v),1)}
 function kdMul(p){return armFx(p,'kd').reduce((m,v)=>m*(1-Math.min(1,v)),1)}
 {const _sp=s3Spd;s3Spd=function(p){return _sp(p)*(1+armFx(p,'mov').reduce((a,v)=>a+v,0))}}

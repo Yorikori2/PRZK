@@ -34,7 +34,7 @@ const ASETS={surv:['생존자 세트',['band','jacket','jeans','tboots'],'이동
 function setCount(k,p){p=p||S.p;const L=ASETS[k][1];return APARTS.filter(([sl],i)=>{const want=[].concat(L[i]);return want.includes(p.eq[sl])&&has(p,p.eq[sl])}).length}
 const setOn=(k,p)=>!!(S&&S.p)&&setCount(k,p)==4;
 const setOf=id=>Object.keys(ASETS).find(k=>ASETS[k][1].some(x=>[].concat(x).includes(id)));
-{const _a=armMul2;armMul2=function(p){return _a(p)*(setOn('police',p)?.95:1)}}
+{const _a=armRaw;armRaw=function(p){return _a(p)*(setOn('police',p)?.95:1)}}
 {const _b=blastMul;blastMul=function(p){return setOn('spec',p)?0:_b(p)}}
 {const _sp=s3Spd;s3Spd=function(p){let m=_sp(p);if(setOn('surv',p))m*=1.05;if(setOn('work',p))m/=.95;if(setOn('spec',p))m/=.8;return m}}
 {const _dm=detMul;detMul=function(){const m=_dm();return S&&S.p&&S.p.mv&&setOn('surv')?m*.9:m}}
