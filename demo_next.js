@@ -121,7 +121,13 @@ function demoWhole(way){if(DM)return demoStop('철거를 멈췄어요');const p=
  DM={way,bi,gk:b.gk,kind:b.kind,name:b.name,need,T:W.T*(window.DSPEED||1),t:0,nz:0,up:need>=2?3:1e9,cx,cy,gx:b.gx,gy:b.gy};
  msg(way=='boom'?'💣 폭약 설치 · 10초 뒤 폭발 · 건물에서 멀리 떨어지세요!':'🚜 중장비로 '+b.name+' 밀기 시작 · 30초 · 가까이 있어야 해요'+(need>=2?' · ⚠ 지하에서 좀비가 올라올 수 있어요':''));noise(cx,cy,4)}
 function demoStop(t){if(DM&&DM.way=='boom')return msg('💣 폭약은 이미 불이 붙었어요!');DM=null;msg(t)}
-function demoUpd(dt){if(!DM)return;const p=S.p;if(!W0.b[DM.bi]||W0.b[DM.bi].gk!=DM.gk){DM=null;return}
+function demoUpd(dt){if(!DM)return;const p=S.p;
+ /* the window slid (you walked away): find the building again by its block; if it is out of view the fuse keeps burning */
+ if(DM.far||!W0.b[DM.bi]||W0.b[DM.bi].gk!=DM.gk){const nb=W0.b.findIndex(b=>b.gk==DM.gk&&DLV[b.kind]);
+  if(nb>=0){DM.bi=nb;const rs=W0.roofs.filter(r=>r.bi==nb);if(rs.length){DM.cx=rs.reduce((a,r)=>a+r.x+r.w/2,0)/rs.length;DM.cy=rs.reduce((a,r)=>a+r.y+r.h/2,0)/rs.length}DM.far=0}
+  else if(DM.way=='boom')DM.far=1;else{DM=null;return}}
+ if(DM.far){DM.t+=dt;if(DM.t>=DM.T){const d=DM;DM=null;const ch=DSH[d.kind]||[0,0],r=Math.random(),sh=r<ch[1]?'bunker':r<ch[0]+ch[1]?'shelter':0;const D=DM0();D[d.gk]={k:d.kind,sh,day:S.day};if(d.kind=='mil')D[(d.gx+1)+','+d.gy]={k:'milR',sh:0,day:S.day};if(S.inf.dis)delete S.inf.dis[d.gk];
+   s3Xp(40*(DLV[d.kind]||1),'철거');S.demoN=(S.demoN||0)+1;try{sfx((a,t)=>{nz(a,t,{f:90,q:.5,v:.6,d:1.6,type:'lowpass'})})}catch(e){}msg('💥 멀리서 폭발음이 들렸어요 · '+d.name+' ('+d.gk+') 철거 완료'+(sh?' · 잔해 아래에 무언가 보여요':''))}return}
  if(DM.way=='dozer'&&!inBld(DM.bi,p.x,p.y,150))return demoStop('🚜 중장비에서 멀어져 철거가 멈췄어요 (진행 '+Math.round(DM.t/DM.T*100)+'%)');
  DM.t+=dt;DM.nz-=dt;if(DM.nz<=0){DM.nz=1.5;noise(DM.cx,DM.cy,DWAY[DM.way].nz);if(DM.way=='dozer'){if(typeof S4!='undefined')S4.shake=Math.max(S4.shake||0,.12);fx.push({k:'boom',x:DM.cx+(Math.random()-.5)*300,y:DM.cy+(Math.random()-.5)*200,r:30,l:.25,m:.25})}
   else if(DM.T-DM.t<6)s3Float(DM.cx,DM.cy-40,'💣 '+Math.ceil(DM.T-DM.t),'#ff6a5a')}
