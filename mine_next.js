@@ -50,7 +50,10 @@ function mineTarget(){if(!DUN||DUN.sh!='mine')return null;const p=S.p,fx=p.fx||0
  for(const o of W0.objs){if(o.t!='mtile')continue;const cx=o.x+TS/2,cy=o.y+TS/2,d=Math.hypot(cx-p.x,cy-(p.y-8));if(d>50)continue;const dot=((cx-p.x)*fx+(cy-(p.y-8))*fy)/(d*n||1),s=d-dot*24;if(s<bs){bs=s;b=o}}return b}
 const needLv=o=>ORE_BY[o.m]?ORE_BY[o.m][2]:1,digT=(o,lv)=>(o.m=='dirt'?.7:ORE_BY[o.m]?1.5:1.1)*[0,1,.75,.5][lv];
 function startDig(o){const p=S.p,lv=pickLv(p);if(!lv)return msg('⛏ 곡괭이가 필요해요 (작업대 Lv1에서 제작)');if(lv<needLv(o))return msg('⛏ '+NM2(o.m)+'은(는) 곡괭이 Lv'+needLv(o)+'이 필요해요');MINE={o,t:0,T:digT(o,lv),x:p.x,y:p.y}}
-function rmSolid(o){for(let i=SOL.length-1;i>=0;i--)if(SOL[i].o===o){const r=SOL[i];SOL.splice(i,1);for(const c of GRID){const k=c.indexOf(r);if(k>=0)c.splice(k,1)}}const i=W0.objs.indexOf(o);if(i>=0)W0.objs.splice(i,1)}
+function rmSolid(o){for(let i=SOL.length-1;i>=0;i--)if(SOL[i].o===o){const r=SOL[i];SOL.splice(i,1);for(const c of GRID){const k=c.indexOf(r);if(k>=0)c.splice(k,1)}}const i=W0.objs.indexOf(o);if(i>=0)W0.objs.splice(i,1);
+ /* also drop it from the draw grid, or the broken cell keeps being drawn */
+ if(typeof DG!='undefined')for(const c of DG)for(let k=c.length-1;k>=0;k--)if(c[k].r===o)c.splice(k,1);
+ o.dug=1;o.crack=0}
 function digDone(o){const p=S.p,M=MINE0(),ore=ORE_BY[o.m];rmSolid(o);M.dug[o.mc+','+o.mr]=1;noise(o.x+16,o.y+16,ore?3:2);try{sfx((a,t)=>{nz(a,t,{f:ore?2200:900,q:2,v:.25,d:.1,type:'bandpass'})})}catch(e){}
  const got={};if(ore){got[o.m]=1+(Math.random()<.35?1:0);got.stone=1}else got[o.m]=1;if(o.m=='stone'&&Math.random()<.12)got.coal=1;for(const k in got)invAdd(p,k,got[k]);
  s3Float(o.x+16,o.y-6,Object.entries(got).map(([k,n])=>'+'+n+' '+NM2(k)).join(' '),ore?ore[4]:'#e8d7a8');if(typeof s3Xp=='function')s3Xp(ore?5*ore[2]:1,'채굴');S.mineN=(S.mineN||0)+1;
