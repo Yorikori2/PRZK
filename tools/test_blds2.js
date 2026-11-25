@@ -15,7 +15,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  for(const k of['hosp','mall','park2','subway','prison','radio']){const B=r.b[k];ok(r.cnt[k]>0,k+' appears in the 33×33 city ('+(r.cnt[k]|0)+')');ok(B&&B!='none'&&!B.miss.length&&B.loot>3&&B.z>2&&B.tier>0&&B.spec,k+' builds with its furniture, loot, zombies, tier and bonus '+JSON.stringify(B))}
  ok(r.bridge&&r.bridgeX,'hospital: the road under the bridge stays open and both doors of the bridge are open');ok(r.lot[0]=='lot'&&r.lot[1]=='lot','a demolished hospital: both halves become lots '+r.lot);
  ok(r.prisoner,'prisoner zombie look');ok(r.legend==1,'map legend lists 병원 once');
- for(const s of['ncT','nc1','nc2','nc3','nc4','nc5','nc6']){await p.evaluate(s=>scene9(s),s);await p.waitForTimeout(500)}
+ for(const s of['ncT','nc1','nc2','nc3','nc4','nc5','nc6','op','zg','zp','zb']){await p.evaluate(s=>scene9(s),s);await p.waitForTimeout(500)}
  ok(!errs.length,'no page errors '+errs.slice(0,3).join(' | '));await b.close()})();
 // every searchable object in the 10 new buildings can be reached on foot, and floor-level things never draw over the player
 (async()=>{const {chromium}=require('playwright');const b=await chromium.launch();const p=await b.newPage();await p.goto(PAGE);await p.waitForTimeout(1600);
