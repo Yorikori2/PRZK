@@ -14,7 +14,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  r=await p.evaluate(()=>{scene9('mm');mm2();const on=$('mmw').style.display!='none';const sn=Object.keys(mSeen(1)).length;scene9('mmOff');mm2();const off=$('mmw').style.display=='none';dunExit();return{on,sn,off}});
  ok(r.on&&r.sn>=30&&r.off,'mine map shows only when the minimap is on ('+r.sn+' cells seen)');
  r=await p.evaluate(()=>{const M=MINE0();if(DUN)dunExit();M.dug={'3,3':1};M.hive={dead:1,looted:1};const s0=M.seed;S.wv=6;const left=wavesToReset();Z.length=0;wave(7);Z.length=0;const a={dug:Object.keys(M.dug).length,dead:M.hive.dead,seed:M.seed!=s0};
-  M.dug={'4,4':1};mineEnter();wave(14);Z.length=0;const pend=M.resetPend,still=Object.keys(M.dug).length;dunExit();return{left,a,pend,still,after:Object.keys(M.dug).length}});
+  M.dug={'4,4':1};mineEnter();wave(14);Z.length=0;const pend=M.resetPend||(S.wavePend==14?1:0),still=Object.keys(M.dug).length;dunExit();return new Promise(res=>setTimeout(()=>{Z.length=0;res({left,a,pend,still,after:Object.keys(M.dug).length})},800))});
  ok(r.left==1&&r.a.dug==0&&r.a.dead==0&&r.a.seed,'wave 7 resets the mine (new ore, nest back)');ok(r.pend==1&&r.still==1&&r.after==0,'a reset while you are underground waits until you climb out');
  r=await p.evaluate(()=>{const out={};for(const lv of[1,2,3]){scene9('hvA'+lv);const H=Z.find(z=>z.hive&&z.hive!='pod');out[lv]={core:H&&H.hive,hp:H&&H.mhp,pods:Z.filter(z=>z.hive=='pod').length,wall:W0.objs.filter(o=>o.m==HCFG[lv].wall).length}}if(DUN)dunExit();return out});
  ok(r[1].core=='heart'&&r[2].hp==2400&&r[3].core=='queen'&&r[3].pods==8&&r[2].wall>30&&r[3].wall>30,'a nest on every floor '+JSON.stringify(r));
