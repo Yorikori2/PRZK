@@ -21,8 +21,8 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
 (async()=>{const {chromium}=require('playwright');const b=await chromium.launch();const p=await b.newPage();await p.goto(PAGE);await p.waitForTimeout(1600);
  const r=await p.evaluate(()=>{closeBase();PAUSE=false;const out={};for(const kind of['pharm','gunshop','garage','bank','hosp','mall','park2','subway','prison','radio']){const f=findKind([kind],3);infGoto(f[0]+(kind=='hosp'?1:0),f[1]);const B=W0.b.find(q=>q.gk==f.join()),bi=W0.b.indexOf(B);
    const W=(kind=='hosp'?2*BW+RD:BW)+RD,H=BH+RD,X0=B.ox-RD/2,Y0=B.oy-RD/2,C=8,GXn=Math.ceil(W/C),GYn=Math.ceil(H/C),seen=new Uint8Array(GXn*GYn),q=[];
-   for(const[sx,sy]of[[2,GYn>>1],[GXn-3,GYn>>1],[GXn>>1,GYn-3]])if(!blocker(X0+sx*C+4,Y0+sy*C+4,7)){seen[sy*GXn+sx]=1;q.push(sx,sy)}
-   for(let i=0;i<q.length;i+=2)for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const X=q[i]+dx,Y=q[i+1]+dy;if(X<0||Y<0||X>=GXn||Y>=GYn)continue;const k=Y*GXn+X;if(seen[k])continue;if(blocker(X0+X*C+4,Y0+Y*C+4,7)){seen[k]=2;continue}seen[k]=1;q.push(X,Y)}
+   for(const[sx,sy]of[[2,GYn>>1],[GXn-3,GYn>>1],[GXn>>1,GYn-3]])if(!blocker(X0+sx*C+4,Y0+sy*C+4,10)){seen[sy*GXn+sx]=1;q.push(sx,sy)}
+   for(let i=0;i<q.length;i+=2)for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const X=q[i]+dx,Y=q[i+1]+dy;if(X<0||Y<0||X>=GXn||Y>=GYn)continue;const k=Y*GXn+X;if(seen[k])continue;if(blocker(X0+X*C+4,Y0+Y*C+4,10)){seen[k]=2;continue}seen[k]=1;q.push(X,Y)}
    out[kind]=W0.objs.filter(o=>o.b===bi&&LOOTT[o.t]).filter(o=>{for(let y=Math.max(0,((o.y-Y0-30)/C)|0);y<=Math.min(GYn-1,((o.y+o.h-Y0+30)/C)|0);y++)for(let x=Math.max(0,((o.x-X0-30)/C)|0);x<=Math.min(GXn-1,((o.x+o.w-X0+30)/C)|0);x++){if(seen[y*GXn+x]!=1)continue;const px=X0+x*C+4,py=Y0+y*C+4;if(rdist(o,px,py)<28&&seeObj({x:px,y:py},o))return false}return true}).map(o=>o.t)}
   out.flat=['rail','pstair','escal','lift','hatch','mhole','island','stripes'].filter(t=>!FLAT[t]);return out});
  for(const k in r)if(k!='flat')ok(!r[k].length,k+': every searchable object can be reached '+r[k].join(','));ok(!r.flat.length,'floor-level things are drawn under the player '+r.flat);await b.close()})();
