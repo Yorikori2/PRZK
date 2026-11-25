@@ -9,7 +9,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  r=await p.evaluate(()=>{const P=S.p;infGoto(2,1);Z.length=0;mk(P.x+10,P.y,{look:'civ1'});const z=Z[0],h=z.hp;zBite4(z);const th=h-z.hp;
   P.inv.cpants=1;P.eq.legs='cpants';const pg=AE();pg.aenh.cpants=10;const s0=speedMul(P),w0=weight(P);pg.aopt.cpants=['ao_dash3','ao_light3'];const s1=speedMul(P),w1=weight(P);
   P.hp=50;S.aNoHit=6;pg.aopt.vest=['ao_regen3'];gearUpd(1);const reg=P.hp-50;return{th,s:s1/s0,dw:w0-w1,reg}});
- ok(r.th>=8,'thorns hurt the biter ('+r.th+')');ok(Math.abs(r.s-1.09)<.01,'질주 Ⅲ: +9% speed');ok(Math.abs(r.dw-1.5*.75)<.01,'경량 Ⅲ: that piece weighs 75% less');ok(r.reg>1.2,'재생 Ⅲ: heals when untouched for 5 s (+'+r.reg.toFixed(2)+'/s)');
+ ok(r.th>=8,'thorns hurt the biter ('+r.th+')');ok(Math.abs(r.s-1.09)<.01,'질주 Ⅲ: +9% speed');ok(Math.abs(r.dw-1.5*.6)<.01,'경량 Ⅲ: that piece weighs 60% less');ok(r.reg>1.2,'재생 Ⅲ: heals when untouched for 5 s (+'+r.reg.toFixed(2)+'/s)');
  r=await p.evaluate(()=>{const P=S.p;give({ar:1});P.eq.prim='ar';P.as='prim';const pg=EP();S.inf.fz={};for(let i=1;i<=9;i++)S.inf.fz[i]=1;const T=[];for(const l of[0,7,10,13,ENH.max]){pg.enh.ar=l;T.push(wTier())}
   const set=['spechelm','eod','exo','shockboots'],ae=AE();for(const id of set){P.inv[id]=1;P.eq[ARMX[id][0]]=id}const A=[];for(const l of[0,7,10,ENH.max]){for(const id of set)ae.aenh[id]=l;A.push(aTier())}
   pg.enh.ar=ENH.max;run=true;for(let i=0;i<30;i++)glowFx(P.x,P.y,1);const n=GLP.length;openBag();const gw=document.querySelectorAll('#bm .gw4').length;closeBase();return{T,A,n,gw}});
