@@ -72,8 +72,8 @@ BUILDERS.subway=(c,r,sd)=>{const A=Bld('지하철역',c,r,'subway'),Rn=mulberry(
  shellG(A,80,60,816,300,sN,[[160,240],[440,520],[660,740]],[[140,220]],[[140,220]]);
  A.o('tgate',300,180,300,14);A.o('counter',120,90,140,22,{fc:'#3f9a5a'});A.o('vending',700,90,24,20);A.o('vending',740,90,24,20);A.o('chairs',620,240,120,20);A.o('bench',120,240,60,12);A.o('locker',300,90,24,40);A.o('cabinet',350,90,40,10);
  A.o('pstair',160,300,80,30);A.o('pstair',660,300,80,30);A.o('pstair',440,300,80,30);
- for(let x=100;x<=760;x+=110){A.o('bench',x,344,50,12);A.o('pillar',x+60,350,14,12)}for(let x=100;x<=760;x+=150)A.o('pillar',x,530,14,12);
- A.roof(80,60,736,240,'flat','지하철역',['#3f9a5a','#d8dcdc']);A.roof(40,330,816,70,'metal','승강장',['#3f9a5a','#9aa0a6']);A.ent(480,274,0,1);A.ent(180,140,1,0);
+ /* benches and pillars stay clear of the three stairways */for(const x of[260,560,770])A.o('bench',x,344,50,12);for(const x of[100,350,600,800])A.o('pillar',x,350,14,12);for(let x=100;x<=760;x+=150)A.o('pillar',x,530,14,12);
+ A.roof(80,60,736,240,'flat','지하철역',['#3f9a5a','#d8dcdc']);A.roof(40,330,816,70,'metal','승강장',['#3f9a5a','#9aa0a6']);A.ent(480,314,0,-1);A.ent(66,180,1,0);A.ent(830,180,-1,0);
  A.o('lamp',60,620,6,6);A.o('car',300,630,56,28,{c:'#c43c32'});A.o('trash',840,40,16,8);
  for(const[l,x,y]of[['civ1',300,240],['civ2',600,150],['runner',200,360],['civ3',700,360],['civ1',400,540],['screamer',500,370],['civ2',150,540]])if(Rn()<.8)A.z(l,x,y)};
 BUILDERS.prison=(c,r,sd)=>{const A=Bld('교도소',c,r,'prison'),Rn=mulberry(sd*31+13);

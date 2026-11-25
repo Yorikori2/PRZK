@@ -23,7 +23,7 @@ function Bld(name,c,r,kind){const[ox,oy]=bo(c,r),b={name,kind,ox,oy,c,r};const b
 /* outer walls helper: north wall tall, others cut */
 function shell(A,x0,y0,x1,y1,face,southGaps=[]){A.hw(x0-4,x1+4,y0,34,face);A.vw(x0,y0,y1,34);A.vw(x1,y0,y1,34);let x=x0-4;for(const[a,b]of southGaps){A.hw(x,a,y1,8,'#b8b2a6');x=b}A.hw(x,x1+4,y1,8,'#b8b2a6')}
 function hseg(A,x0,x1,y,gaps=[],face='#c9c2b4'){let x=x0;for(const[a,b]of gaps){if(a>x)A.hw(x,a,y,10,face);x=b}if(x1>x)A.hw(x,x1,y,10,face)}
-function vseg(A,x,y0,y1,gaps=[],top=10){let y=y0;for(const[a,b]of gaps){if(a>y)A.vw(x,y,a,top);y=b}if(y1>y)A.vw(x,y,y1,top)}
+function vseg(A,x,y0,y1,gaps=[],top=10){/* only the piece touching the top wall is tall; pieces after a door are low, so no stub sticks up beside the door */let y=y0,t=top;for(const[a,b]of gaps){if(a>y)A.vw(x,y,a,t);y=b;t=10}if(y1>y)A.vw(x,y,y1,t)}
 const crossIcon=(x,y)=>{R('#d33a3a',x-2,y-6,4,12);R('#d33a3a',x-6,y-2,12,4)};
 const badgeIcon=(x,y)=>{R('#d9b52a',x-6,y-6,12,12);R('#34466a',x-3,y-3,6,6)};
 
@@ -68,7 +68,7 @@ function buildClinic(c=1,r=0){const A=Bld('진료소',c,r,'clinic');const L=56,R
  A.o('sink',560,432,62,12,{n:2});A.o('stall',600,500,3,58);A.o('stall',640,500,3,58);[566,612,660].forEach(x=>A.o('toilet',x,540,16,16));
  A.o('fridge',702,300,20,14);A.o('kitchen',776,300,60,14,{cm:1});A.o('locker',814,316,24,100);A.o('rtable',728,440,40,22);A.o('ctable',736,504,48,10);A.o('sofa',722,530,84,18);A.o('plant',818,540,14,10);A.o('alarmbox',706,404,10,6);
  // outside
- A.o('planter',92,572,110,12);A.o('planter',502,572,110,12);A.o('planter',672,572,110,12);A.o('sign',306,590,34,6,{icon:crossIcon});[342,382,422,462].forEach(x=>A.o('bollard',x,588,6,6));A.o('lamp',62,592,6,6);A.o('lamp',822,592,6,6);
+ A.o('planter',92,572,110,12);A.o('planter',502,572,110,12);A.o('planter',672,572,110,12);A.o('sign',306,590,34,6,{icon:crossIcon});[330,346,440,456].forEach(x=>A.o('bollard',x,588,6,6));A.o('lamp',62,592,6,6);A.o('lamp',822,592,6,6);
  A.o('ambulance',432,640,120,34);A.o('car',86,640,56,28,{c:'#3a6ea8'});A.o('car',198,640,56,28,{c:'#8a8f95'});A.o('car',652,664,56,28,{c:'#c9a42a'});
  A.roof(L,TP,RR-L,BT-TP,'clinic','진료소');A.ent(392,574,0,-1);
  [['병동',208,140],['수술실',476,92],['준비실',640,92],['영상의학실',764,92],['복도',132,262],['진료실 1',144,312],['진료실 2',144,444],['로비 · 접수',392,312],['약국',624,312],['화장실',624,444],['직원 휴게실',768,312]].forEach(a=>A.room(...a));

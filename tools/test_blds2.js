@@ -30,3 +30,11 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
 (async()=>{const {chromium}=require('playwright');const b=await chromium.launch();const p=await b.newPage();await p.goto(PAGE);await p.waitForTimeout(1600);
  for(const k of['nb1','nb2','nb3','nb4','nc1','nc2','nc3','nc4','nc5','nc6']){const r=await p.evaluate(k=>{closeBase();PAUSE=false;scene9(k);give({scrap:3000});return{x:S.p.x,y:S.p.y,stuck:!!blocker(S.p.x,S.p.y,7),over:weight(S.p)>capacity(S.p)}},k);
   await p.evaluate(()=>{ky.w=1});await p.waitForTimeout(600);const m=await p.evaluate(()=>{delete ky.w;return[S.p.x,S.p.y]});ok(!r.stuck&&!r.over&&Math.hypot(m[0]-r.x,m[1]-r.y)>40,k+': starts free, not overweight, walks in')}await b.close()})();
+// every entrance arrow sits on an open door: inside a roof on one side, outside on the other, nothing in the way
+(async()=>{const {chromium}=require('playwright');const b=await chromium.launch();const p=await b.newPage();await p.goto(PAGE);await p.waitForTimeout(1600);
+ const r=await p.evaluate(()=>{closeBase();PAUSE=false;const ks=new Set();for(let gx=-12;gx<=12;gx++)for(let gy=-12;gy<=12;gy++)ks.add(kindAt(gx,gy));const bad=[];
+  for(const kind of[...ks].filter(k=>!['base','milR','hospR','lot','mil','rbase'].includes(k))){const f=findKind([kind],1);infGoto(f[0]+(kind=='hosp'?1:0),f[1]);const B=W0.b.find(q=>q.gk==f.join()),bis=W0.b.map((q,i)=>q.gk==f.join()?i:-1).filter(i=>i>=0),W=kind=='hosp'?2*BW+RD:BW;
+   const inR=(x,y)=>W0.roofs.findIndex(rf=>bis.includes(rf.bi)&&x>rf.x&&x<rf.x+rf.w&&y>rf.y&&y<rf.y+rf.h);
+   for(const[x,y,dx,dy]of W0.ents){if(x<B.ox-20||x>B.ox+W+20||y<B.oy-20||y>B.oy+BH+20)continue;const ax=x-dx*26,ay=y-dy*26,bx=x+dx*26,by=y+dy*26;let w=true;for(let t=0;t<=1;t+=.05)if(blocker(ax+(bx-ax)*t,ay+(by-ay)*t,7)){w=false;break}
+    const ri=inR(bx,by);if(!w||ri<0||inR(ax,ay)==ri)bad.push(kind+'@'+Math.round(x-B.ox)+','+Math.round(y-B.oy))}}return bad});
+ ok(!r.length,'every entrance arrow is on an open door '+r.join(' '));await b.close()})();
