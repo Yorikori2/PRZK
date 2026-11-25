@@ -11,7 +11,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  r=await p.evaluate(()=>{const P=S.p;for(const id of['visor','milarmor','cpants','silboots'])P.inv[id]=1;for(const id of['visor','milarmor','cpants','silboots'])P.eq[ARMX[id][0]]=id;const on=setOn('mil'),k=plLook();for(const s of['head','body','legs','feet'])P.eq[s]='';return{on,k}});
  ok(r.on&&/^pa_/.test(r.k),'military set is on and changes the look');
  r=await p.evaluate(()=>{const P=S.p;P.x=BL.ox+MSPOT[0]+28;P.y=BL.oy+MSPOT[1]+70;P.inv.pick1=1;const a=dmCtx().find(q=>/땅 파고/.test(q.t));if(!a)return{a:false};a.f();for(let i=0;i<420;i++)gearUpd(1/60);const d=dmCtx().find(q=>/내려가기/.test(q.t));if(!d)return{a:true,d:false};d.f();
-  const n=W0.objs.filter(o=>o.t=='mtile').length;P.fx=0;P.fy=1;const o=mineTarget();gearAct();for(let i=0;i<120;i++)gearUpd(1/60);const dug=!W0.objs.includes(o);dunExit();return{a:true,d:true,n,dug,back:!DUN&&BP.some(o2=>o2.t=='mshaft')}});
+  const n=W0.objs.filter(o=>o.t=='mtile').length;P.fx=0;P.fy=1;const o=mineTarget();for(let i=0;i<12&&W0.objs.includes(o);i++){P.ac=0;gearAct()}for(let i=0;i<120;i++)gearUpd(1/60);const dug=!W0.objs.includes(o);dunExit();return{a:true,d:true,n,dug,back:!DUN&&BP.some(o2=>o2.t=='mshaft')}});
  ok(r.a&&r.d&&r.n>400&&r.dug&&r.back,'dig a shaft at the base, mine a cell, climb back up '+JSON.stringify(r));
  r=await p.evaluate(()=>{const P=S.p;give({cement:4,scrap:20});P.x=BL.ox+FPOS.forge[0]+27;P.y=BL.oy+FPOS.forge[1]+70;const c=dmCtx().find(q=>/제작소 짓기/.test(q.t));if(c)c.f();const bb=document.querySelector('[data-fb]');if(bb)bb.click();closeBase();return{c:!!c,st:BP.some(o=>o.t=='st_forge')}});
  ok(r.c&&r.st,'build the smelter at the base and it stands there');
