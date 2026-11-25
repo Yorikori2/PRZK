@@ -12,9 +12,9 @@ const PN={head:'머리',body:'몸통',legs:'다리',feet:'신발'};
 const AOPT={
  regen:['🩸','재생',['body'],g=>'5초 동안 안 맞으면 초당 체력 +'+(.5*g),'#ff5a6a'],
  thorn:['🦔','가시',['body','legs'],g=>'물리면 그 좀비에게 '+8*g+' 피해를 되돌려요','#c9a46a'],
- light:['🪶','경량',['body','legs'],g=>'이 방어구 무게 -'+Math.min(75,25*g)+'%','#cfe8ff'],
+ light:['🪶','경량',['body','legs'],g=>'이 방어구 무게 -'+20*g+'%','#cfe8ff'],
  fire:['🔥','내화',['head','body'],g=>'화염 피해 -'+20*g+'%','#ff8a3a'],
- tox:['☣','내독',['head'],g=>'부머 가스 · 산성 웅덩이 피해 -'+25*g+'%','#9ad04a'],
+ tox:['☣','내독',['head'],g=>'부머 가스 · 산성 웅덩이 피해 -'+20*g+'%','#9ad04a'],
  clot:['🩹','지혈',['body'],g=>'물렸을 때 출혈이 막힐 확률 '+20*g+'%','#f0f0e0'],
  hush:['🦶','무음',['feet'],g=>'움직일 때 발소리 -'+12*g+'%','#9aa0a6'],
  ins:['⚡','절연',['head','feet'],g=>'감전 · 넘어짐 시간 -'+20*g+'%','#ffe45a'],
@@ -23,10 +23,10 @@ const AOPT={
  rage:['💢','복수',['head'],g=>'물린 뒤 3초 동안 내 공격 피해 +'+10*g+'%','#ff4a4a'],
  loot:['🧲','수집가',['legs'],g=>'좀비를 쓰러뜨리면 '+5*g+'% 확률로 쓰는 총의 탄약 3~6발','#e0b03a'],
  dash:['🏃','질주',['legs','feet'],g=>'이동 속도 +'+3*g+'%','#7fd07f'],
- brace:['🪨','버팀목',['legs'],g=>'넘어지는 시간 -'+25*g+'%','#a08a6a'],
+ brace:['🪨','버팀목',['legs'],g=>'넘어지는 시간 -'+20*g+'%','#a08a6a'],
  calm:['🎯','침착',['head'],g=>'체력 50% 이상일 때 총기 피해 +'+4*g+'%','#5aa8ff'],
  musk:['🧟','악취 위장',['body'],g=>'좀비 냄새를 둘러 좀비가 알아채는 거리 -'+8*g+'% (낮에도)','#6a8a4a']};
-const ROMN=['','Ⅰ','Ⅱ','Ⅲ'];
+const ROMN=['','Ⅰ','Ⅱ','Ⅲ','Ⅳ'];
 for(const k in AOPT)for(let g2=1;g2<=3;g2++){const id='ao_'+k+g2,[e,n,parts,f,c]=AOPT[k];if(!I_BY[id]){const it=[id,n+' 방어구 룬 '+ROMN[g2],'c',['','r','e','l'][g2],.1,'방어구 옵션 · '+f(g2)+' · 끼울 수 있는 부위: '+parts.map(q=>PN[q]).join(' · ')];ITEMS.push(it);I_BY[id]=it}
  IC[id]=()=>{R('#1d1714',5,3,14,18);R('#3a3f45',6,4,12,15);R('#2a2e33',8,17,8,3);R(c,9,7,6,2);R(c,11,7,2,8);R(c,8,11,8,2);for(let i=0;i<g2;i++)R('#fff',7+i*4,16,2,2)}}
 /* ---------- state ---------- */
@@ -41,14 +41,14 @@ function aopt(k,p){p=p||S.p;let g2=0;for(const id of wornA(p))for(const r of(S.p
 /* ---------- 1) enhancement makes each piece cut more ---------- */
 {const _a=armRaw;armRaw=function(p){let m=_a(p);for(const id of wornA(p)){const b=ARMX[id][4].dr||0;if(b)m*=(1-aDr(id))/(1-b)}const w=aopt('wolf',p);if(w&&p.hp<MHP(p)*.3)m*=1-.05*w;return m}}
 /* ---------- the options ---------- */
-{const _w=weight;weight=function(p){let w=_w(p);if(!S||p!==S.p)return w;for(const id of wornA(p)){let g2=0;for(const r of(S.pg.aopt||{})[id]||[])if(r&&r.slice(3,-1)=='light')g2+=+r.slice(-1);if(g2)w-=wtOf(id)*Math.min(.75,.25*g2)}return Math.max(0,w)}}
+{const _w=weight;weight=function(p){let w=_w(p);if(!S||p!==S.p)return w;for(const id of wornA(p)){let g2=0;for(const r of(S.pg.aopt||{})[id]||[])if(r&&r.slice(3,-1)=='light')g2+=+r.slice(-1);if(g2)w-=wtOf(id)*Math.min(.8,.2*g2)}return Math.max(0,w)}}
 {const _sp=s3Spd;s3Spd=function(p){let m=_sp(p);if(!S||!S.p)return m;const d=aopt('dash'),w=aopt('wolf');if(d)m*=1+.03*d;if(w&&S.p.hp<MHP(S.p)*.3)m*=1+.08*w;return m}}
 {const _dm=detMul;detMul=function(){let m=_dm();if(!S||!S.p)return m;const h=aopt('hush'),sh=aopt('shade'),mu=aopt('musk');if(h&&S.p.mv)m*=Math.max(.2,1-.12*h);if(sh&&NIGHT)m*=Math.max(.3,1-.1*sh);if(mu)m*=Math.max(.4,1-.08*mu);return m}}
-{const _k=kdMul;kdMul=function(p){return _k(p)*Math.max(0,1-.2*aopt('ins',p))*Math.max(0,1-.25*aopt('brace',p))}}
+{const _k=kdMul;kdMul=function(p){return _k(p)*Math.max(0,1-.2*aopt('ins',p))*Math.max(0,1-.2*aopt('brace',p))}}
 {const _f=fireMul;fireMul=function(){return _f()*Math.max(0,1-.2*aopt('fire'))}}
-{const _h=hurtP;hurtP=function(n,why){const t=aopt('tox');if(t&&why&&/부머/.test(why))n*=Math.max(0,1-.25*t);return _h(n,why)}}
+{const _h=hurtP;hurtP=function(n,why){const t=aopt('tox');if(t&&why&&/부머/.test(why))n*=Math.max(0,1-.2*t);return _h(n,why)}}
 {const _gu=gearUpd;gearUpd=function(dt){const p=S&&S.p,h0=p&&p.hp;_gu(dt);if(!p||!run)return;
-  /* acid refund (내독) */const t=aopt('tox');if(t&&p.hp<h0&&typeof S4!='undefined'){let a=0;for(const q of S4.pud||[])if(Math.hypot(p.x-q.x,p.y-q.y)<q.r)a+=10*dt;if(a)p.hp=Math.min(h0,p.hp+a*Math.min(.9,.25*t))}
+  /* acid refund (내독) */const t=aopt('tox');if(t&&p.hp<h0&&typeof S4!='undefined'){let a=0;for(const q of S4.pud||[])if(Math.hypot(p.x-q.x,p.y-q.y)<q.r)a+=10*dt;if(a)p.hp=Math.min(h0,p.hp+a*Math.min(.9,.2*t))}
   /* regen */const rg=aopt('regen');if(p.hp<h0-.01)S.aNoHit=0;else S.aNoHit=(S.aNoHit||0)+dt;if(rg&&S.aNoHit>5&&p.hp<MHP(p)&&!p.bleed)p.hp=Math.min(MHP(p),p.hp+.5*rg*dt);
   if(S.aRage>0)S.aRage-=dt}}
 {const _zb=zBite4;zBite4=function(z){const p=S.p,b0=BLD0;_zb(z);const th=aopt('thorn');if(th&&z&&Z.includes(z)){hitZ(z,8*th,(z.x-p.x)/20,(z.y-p.y)/20,2);s3Float(z.x,z.y-40,'🦔 '+8*th,'#c9a46a')}

@@ -2,16 +2,17 @@
    옵션의 룬 · 빛나는 옵션의 룬 · 찬란한 옵션의 룬 work on weapons, armour and special gear alike.
    Using one on a slot rolls a random option that fits that item; the option that was there simply disappears
    (nothing comes back to the bag) and the new one is applied. Locks + "roll every unlocked slot" work everywhere.
-   Weapons roll weapon runes (Ⅰ~Ⅳ), armour and special gear roll their own options (Ⅰ~Ⅲ; a Ⅳ roll counts as Ⅲ).
+   Every option, on every kind of gear, comes in grades Ⅰ · Ⅱ · Ⅲ · Ⅳ.
    Loaded after armenh_next.js, light_next.js and mineplus_next.js. */
 'use strict';
-const ORN={orn1:['옵션의 룬','u',[65,28,7],'#7fd07f'],orn2:['빛나는 옵션의 룬','e',[30,50,20],'#5aa8ff'],orn3:['찬란한 옵션의 룬','l',[0,55,45],'#ffb84a']};
-for(const id in ORN){const[n,rar,w,c]=ORN[id];if(!I_BY[id]){const it=[id,n,'r',rar,.1,'무기 · 방어구 · 특수 장비 · 철거 장비의 옵션 칸에 써요 · 그 장비에 맞는 옵션이 무작위로 붙고, 있던 옵션은 사라져요 · 등급 Ⅰ '+w[0]+'% · Ⅱ '+w[1]+'% · Ⅲ '+w[2]+'%'];ITEMS.push(it);I_BY[id]=it}
+const ORN={orn1:['옵션의 룬','u',[62,28,8,2],'#7fd07f'],orn2:['빛나는 옵션의 룬','e',[28,45,22,5],'#5aa8ff'],orn3:['찬란한 옵션의 룬','l',[0,40,40,20],'#ffb84a']};
+for(const id in ORN){const[n,rar,w,c]=ORN[id];if(!I_BY[id]){const it=[id,n,'r',rar,.1,'무기 · 방어구 · 특수 장비 · 철거 장비의 옵션 칸에 써요 · 그 장비에 맞는 옵션이 무작위로 붙고, 있던 옵션은 사라져요 · 등급 Ⅰ '+w[0]+'% · Ⅱ '+w[1]+'% · Ⅲ '+w[2]+'% · Ⅳ '+w[3]+'%'];ITEMS.push(it);I_BY[id]=it}
  IC[id]=()=>{R('#1d1714',5,3,14,18);R('#2e2a40',6,4,12,15);R('#1d1a2a',8,17,8,3);R(c,11,5,2,2);R(c,9,7,6,2);R(c,8,9,8,2);R(c,9,11,6,2);R(c,11,13,2,2);R('#fff',11,9,2,1);if(id!='orn1'){R('#fff',7,5,1,1);R('#fff',16,15,1,1)}if(id=='orn3'){R('#fff',16,5,1,1);R('#fff',7,15,1,1)}}}
 /* every rune now sits in one bag tab */
 for(const it of ITEMS)if(/^(rn_|ao_|so_|do_|aor|wor|orn)/.test(it[0]))it[2]='r';
 /* old option runes from earlier samples turn into the unified ones */
 function ornMigrate(){const p=S&&S.p;if(!p||p.ornMig)return;for(const[a,b2]of[['aor1','orn1'],['aor2','orn2'],['aor3','orn3'],['wor1','orn1'],['wor2','orn2'],['wor3','orn3']])if(p.inv[a]>0){p.inv[b2]=(p.inv[b2]|0)+p.inv[a];delete p.inv[a]}p.ornMig=1}
+for(const k in AOPT){const id='ao_'+k+4,[e,n,parts,f]=AOPT[k];if(!I_BY[id]){const it=[id,n+' 방어구 룬 Ⅳ','r','l',.1,'방어구 옵션 · '+f(4)+' · 끼울 수 있는 부위: '+parts.map(q=>PN[q]).join(' · ')];ITEMS.push(it);I_BY[id]=it}}
 /* ---------- special gear options ---------- */
 const SOPT={
  amp:['🔦','광원 증폭',g=>'손전등 · 헤드램프 · 총기 전술조명 빛 거리 +'+10*g+'%','#ffe680'],
@@ -20,7 +21,7 @@ const SOPT={
  pure:['🫁','정화',g=>'가스 · 산성 · 광산 독가스 피해 -'+15*g+'%','#9ad04a'],
  focus:['🎯','집중',g=>'밤이나 지하에서 총기 피해 +'+3*g+'%','#5aa8ff'],
  seek:['🧭','탐색가',g=>'광산에서 광석을 캘 때 '+8*g+'% 확률로 하나 더','#e0b03a']};
-for(const k in SOPT)for(let g2=1;g2<=3;g2++){const id='so_'+k+g2;if(!I_BY[id]){const it=[id,SOPT[k][1]+' 옵션 '+ROMN[g2],'r','r',.1,'특수 장비 옵션 · '+SOPT[k][2](g2)];ITEMS.push(it);I_BY[id]=it}}
+for(const k in SOPT)for(let g2=1;g2<=4;g2++){const id='so_'+k+g2;if(!I_BY[id]){const it=[id,SOPT[k][1]+' 옵션 '+ROMN[g2],'r','r',.1,'특수 장비 옵션 · '+SOPT[k][2](g2)];ITEMS.push(it);I_BY[id]=it}}
 const sSlots=id=>SPX[id]?Math.ceil(SPX[id][0]/2):0;/* T1-2: 1 · T3-4: 2 · T5: 3 */
 const SE=()=>{const pg=PGo();pg.sopt=pg.sopt||{};pg.olock=pg.olock||{};return pg};
 function sopt(k){const p=S&&S.p;if(!p||!p.eq||!p.eq.spec||!has(p,p.eq.spec))return 0;let g2=0;for(const r of((S.pg&&S.pg.sopt)||{})[p.eq.spec]||[])if(r&&r.slice(3,-1)==k)g2+=+r.slice(-1);return g2}
@@ -33,9 +34,9 @@ function sopt(k){const p=S&&S.p;if(!p||!p.eq||!p.eq.spec||!has(p,p.eq.spec))retu
 {const _ia=invAdd;invAdd=function(p,id,n){const s=sopt('seek');if(s&&MDIG&&ORE_BY[id]&&n>0&&Math.random()<.08*s){n++;S.seekHit=1}return _ia(p,id,n)}}
 OVL.push((g2,sx,sy,k)=>{const h=sopt('heat');if(!h)return;const p=S.p,R2=(spec('thermal')?300:0)+50*h;for(const z of Z){const d=Math.hypot(z.x-p.x,z.y-p.y);if(d>R2||z.npc)continue;if(los(p.x,p.y-12,z.x,z.y-12))continue;const X=sx(z.x),Y=sy(z.y);g2.fillStyle='rgba(255,90,50,.5)';g2.beginPath();g2.ellipse(X,Y-14*k,7*k,14*k,0,0,Math.PI*2);g2.fill()}});
 /* ---------- one roll for every kind of gear ---------- */
-const OK={w:{nm:'무기',list:()=>ownedW().filter(i=>!DT[i]),slots:id=>ENH.slots(enhLv(id)),how:'+0 1칸 · +5 2칸 · +10 3칸 (무기 강화)',arr:id=>{const pg=EP();return pg.ench[id]=pg.ench[id]||[]},pool:id=>RK.slice(),mk:(k,g2)=>'rn_'+k+Math.min(3,g2),max:3,info:r=>{const t=r.slice(3,-1);return[RUNES[t][0],RUNES[t][1],RUNES[t][3],RUNES[t][2].replace(/등급/g,'등급 '+r.slice(-1))]}},
- a:{nm:'방어구',list:()=>Object.keys(ARMX).filter(id=>has(S.p,id)),slots:id=>aSlots(aLv(id)),how:'+5 1칸 · +10 2칸 · +15 3칸 (방어구 강화)',arr:id=>{const pg=AE();return pg.aopt[id]=pg.aopt[id]||[]},pool:id=>Object.keys(AOPT).filter(k=>AOPT[k][2].includes(ARMX[id][0])),mk:(k,g2)=>'ao_'+k+Math.min(3,g2),max:3,info:r=>{const o=AOPT[r.slice(3,-1)];return[o[0],o[1],o[4],o[3](+r.slice(-1))]}},
- s:{nm:'특수 장비',list:()=>Object.keys(SPX).filter(id=>has(S.p,id)),slots:sSlots,how:'T1~T2 1칸 · T3~T4 2칸 · T5 3칸 (강화 없음)',arr:id=>{const pg=SE();return pg.sopt[id]=pg.sopt[id]||[]},pool:id=>Object.keys(SOPT),mk:(k,g2)=>'so_'+k+Math.min(3,g2),max:3,info:r=>{const o=SOPT[r.slice(3,-1)];return[o[0],o[1],o[3],o[2](+r.slice(-1))]}}};
+const OK0=1;const OK={w:{nm:'무기',list:()=>ownedW().filter(i=>!DT[i]),slots:id=>ENH.slots(enhLv(id)),how:'+0 1칸 · +5 2칸 · +10 3칸 (무기 강화)',arr:id=>{const pg=EP();return pg.ench[id]=pg.ench[id]||[]},pool:id=>RK.slice(),mk:(k,g2)=>'rn_'+k+g2,max:4,info:r=>{const t=r.slice(3,-1);return[RUNES[t][0],RUNES[t][1],RUNES[t][3],typeof WTXT!='undefined'&&WTXT[t]?WTXT[t](+r.slice(-1)):RUNES[t][2]]}},
+ a:{nm:'방어구',list:()=>Object.keys(ARMX).filter(id=>has(S.p,id)),slots:id=>aSlots(aLv(id)),how:'+5 1칸 · +10 2칸 · +15 3칸 (방어구 강화)',arr:id=>{const pg=AE();return pg.aopt[id]=pg.aopt[id]||[]},pool:id=>Object.keys(AOPT).filter(k=>AOPT[k][2].includes(ARMX[id][0])),mk:(k,g2)=>'ao_'+k+g2,max:4,info:r=>{const o=AOPT[r.slice(3,-1)];return[o[0],o[1],o[4],o[3](+r.slice(-1))]}},
+ s:{nm:'특수 장비',list:()=>Object.keys(SPX).filter(id=>has(S.p,id)),slots:sSlots,how:'T1~T2 1칸 · T3~T4 2칸 · T5 3칸 (강화 없음)',arr:id=>{const pg=SE();return pg.sopt[id]=pg.sopt[id]||[]},pool:id=>Object.keys(SOPT),mk:(k,g2)=>'so_'+k+g2,max:4,info:r=>{const o=SOPT[r.slice(3,-1)];return[o[0],o[1],o[3],o[2](+r.slice(-1))]}}};
 const oLock=(kd,id)=>{const pg=SE();return pg.olock[kd+':'+id]=pg.olock[kd+':'+id]||[]};
 const pickG=w=>{let r=Math.random()*100;for(let i=0;i<w.length;i++){r-=w[i];if(r<0)return i+1}return w.length};
 let OKD='w',OSEL=null,ORS='orn1',ORRES=null,OLAST=null;
@@ -49,7 +50,7 @@ function openRunes(kd,id){ornMigrate();if(kd)OKD=kd;if(id)OSEL=id;const b=$('bm'
  let h='<div class="sh"><h2>🔮 룬 · 옵션</h2><div class="wt">룬 하나로 무기 · 방어구 · 특수 장비 모두</div><button onclick="closeBase();PAUSE=false">✕</button></div>';
  h+='<div class="flt">'+Object.keys(OK).map(k=>'<span class="chip'+(OKD==k?' on':'')+'" data-okd="'+k+'">'+OK[k].nm+'</span>').join('')+'</div>';
  h+='<div class="aeL">'+(L.map(i=>{const n=(K.arr(i)||[]).filter(Boolean).length;return'<div class="aeI'+(i==OSEL?' on':'')+'" data-osel="'+i+'"><img src="'+icon(i)+'"><b>'+(n?'◆'.repeat(n):'')+'</b><small>'+NM2(i).slice(0,6)+'</small></div>'}).join('')||'<small class="mut">가진 '+K.nm+'이(가) 없어요</small>')+'</div>';
- h+='<div class="aorP">'+Object.keys(ORN).map(k=>'<span class="chip'+(ORS==k?' on':'')+'" data-orn="'+k+'"><img src="'+icon(k)+'">'+ORN[k][0]+' ×'+(p.inv[k]|0)+'<small>Ⅰ'+ORN[k][2][0]+' Ⅱ'+ORN[k][2][1]+' Ⅲ'+ORN[k][2][2]+'%</small></span>').join('')+'</div>';
+ h+='<div class="aorP">'+Object.keys(ORN).map(k=>'<span class="chip'+(ORS==k?' on':'')+'" data-orn="'+k+'"><img src="'+icon(k)+'">'+ORN[k][0]+' ×'+(p.inv[k]|0)+'<small>Ⅰ'+ORN[k][2][0]+' Ⅱ'+ORN[k][2][1]+' Ⅲ'+ORN[k][2][2]+' Ⅳ'+ORN[k][2][3]+'%</small></span>').join('')+'</div>';
  if(OSEL){const sl=K.slots(OSEL),a=K.arr(OSEL),lk=oLock(OKD,OSEL);
   h+='<div class="aeC"><div class="aeT"><img src="'+icon(OSEL)+'"><div><b>'+NM2(OSEL)+'</b><small>옵션 칸 '+sl+'/3 · '+K.how+'</small></div></div>';if(ORRES)h+='<div class="aeRes '+ORRES[0]+'">'+ORRES[1]+'</div>';
   h+='<div class="aeS">'+[0,1,2].map(i=>{if(i>=sl)return'<div class="aeSl lk">🔒 아직 잠긴 칸</div>';const r=a[i],f=r&&K.info(r),fresh=OLAST&&OLAST.kd==OKD&&OLAST.id==OSEL&&OLAST.slots.includes(i);
@@ -78,33 +79,35 @@ const DOPT={
  speed:['⚡','빠른 손',g=>'휘두르기 · 자동 철거 간격 -'+12*g+'%','#ffe45a'],
  power:['🔨','파괴력',g=>'한 번에 주는 철거 피해 +'+25*g+'%','#ff8a3a'],
  reach:['📏','긴 손잡이',g=>'닿는 거리 +'+10*g+'%','#9ad0f0'],
- chain:['🧱','연쇄 파괴',g=>g>=3?'한 번에 부수는 가구 · 벽 +2':g>=2?'한 번에 부수는 가구 · 벽 +1':'25% 확률로 가구 · 벽 하나 더','#c9a46a'],
+ chain:['🧱','연쇄 파괴',g=>g>=4?'한 번에 부수는 가구 · 벽 +3':g>=3?'한 번에 부수는 가구 · 벽 +2':g>=2?'한 번에 부수는 가구 · 벽 +1':'25% 확률로 가구 · 벽 하나 더','#c9a46a'],
  salv:['♻','재활용',g=>'부순 것에서 나오는 재료 +'+15*g+'%','#7fd07f'],
- hush:['🤫','저소음',g=>'철거 소음 -'+20*g+'% (좀비가 덜 몰려와요)','#9aa0a6']};
-for(const k in DOPT)for(let g2=1;g2<=3;g2++){const id='do_'+k+g2;if(!I_BY[id]){const it=[id,DOPT[k][1]+' 옵션 '+ROMN[g2],'r','r',.1,'철거 장비 옵션 · '+DOPT[k][2](g2)];ITEMS.push(it);I_BY[id]=it}}
+ hush:['🤫','저소음',g=>'철거 소음 -'+18*g+'% (좀비가 덜 몰려와요)','#9aa0a6']};
+for(const k in DOPT)for(let g2=1;g2<=4;g2++){const id='do_'+k+g2;if(!I_BY[id]){const it=[id,DOPT[k][1]+' 옵션 '+ROMN[g2],'r','r',.1,'철거 장비 옵션 · '+DOPT[k][2](g2)];ITEMS.push(it);I_BY[id]=it}}
 const dSlots=id=>({dt1:1,dt1f:1,dt2:2,dt3:3})[id]||0;/* tool level = option slots */
-OK.d={nm:'철거 장비',list:()=>Object.keys(DT).filter(id=>has(S.p,id)),slots:dSlots,how:'Lv1 도구 1칸 · Lv2 2칸 · Lv3 3칸',arr:id=>{const pg=SE();pg.dopt=pg.dopt||{};return pg.dopt[id]=pg.dopt[id]||[]},pool:id=>Object.keys(DOPT).filter(k=>!(id=='dt1f'&&k=='chain')),mk:(k,g2)=>'do_'+k+Math.min(3,g2),max:3,info:r=>{const o=DOPT[r.slice(3,-1)];return[o[0],o[1],o[3],o[2](+r.slice(-1))]}};
+OK.d={nm:'철거 장비',list:()=>Object.keys(DT).filter(id=>has(S.p,id)),slots:dSlots,how:'Lv1 도구 1칸 · Lv2 2칸 · Lv3 3칸',arr:id=>{const pg=SE();pg.dopt=pg.dopt||{};return pg.dopt[id]=pg.dopt[id]||[]},pool:id=>Object.keys(DOPT).filter(k=>!(id=='dt1f'&&k=='chain')),mk:(k,g2)=>'do_'+k+g2,max:4,info:r=>{const o=DOPT[r.slice(3,-1)];return[o[0],o[1],o[3],o[2](+r.slice(-1))]}};
 function dopt(k,id){const p=S&&S.p;id=id||(p&&actW(p));if(!id||!DT[id])return 0;let g2=0;for(const r of(((S.pg&&S.pg.dopt)||{})[id])||[])if(r&&r.slice(3,-1)==k)g2+=+r.slice(-1);return g2}
 /* the tool numbers read the options live (curTool copies them) */
 for(const id in DT){const T=DT[id],base={rng:T.rng,dmg:T.dmg,n:T.n,auto:T.auto};
  Object.defineProperty(T,'rng',{get:()=>base.rng*(1+.1*dopt('reach',id)),enumerable:true,configurable:true});
  Object.defineProperty(T,'dmg',{get:()=>base.dmg*(1+.25*dopt('power',id)),enumerable:true,configurable:true});
- Object.defineProperty(T,'n',{get:()=>{const c=dopt('chain',id);return base.n+(c>=3?2:c>=2?1:c>=1&&Math.random()<.25?1:0)},enumerable:true,configurable:true});
+ Object.defineProperty(T,'n',{get:()=>{const c=dopt('chain',id);return base.n+(c>=4?3:c>=3?2:c>=2?1:c>=1&&Math.random()<.25?1:0)},enumerable:true,configurable:true});
  if(base.auto)Object.defineProperty(T,'auto',{get:()=>base.auto*Math.max(.3,1-.12*dopt('speed',id)),enumerable:true,configurable:true});
  const W=W_BY[id]&&W_BY[id][4];if(W){const cd=W.cd;Object.defineProperty(W,'cd',{get:()=>cd*Math.max(.3,1-.12*dopt('speed',id)),enumerable:true,configurable:true})}}
 let DHIT=false;
 {const _dh=dHitWith;dHitWith=function(tool,z){DHIT=true;try{return _dh(tool,z)}finally{DHIT=false}}}
 {const _df=dFloor;dFloor=function(){DHIT=true;try{return _df.apply(this,arguments)}finally{DHIT=false}}}
-{const _n=noise;noise=function(x,y,lv){if(DHIT){const h=dopt('hush');if(h)lv=Math.max(0,lv*(1-.2*h))}return _n(x,y,lv)}}
+{const _n=noise;noise=function(x,y,lv){if(DHIT){const h=dopt('hush');if(h)lv=Math.max(0,lv*(1-.18*h))}return _n(x,y,lv)}}
 {const _ia=invAdd;invAdd=function(p,id,n){if(DHIT&&n>0&&!W_BY[id]){const s=dopt('salv');if(s){const x=n*.15*s;n+=Math.floor(x)+(Math.random()<x%1?1:0)}}return _ia(p,id,n)}}
 {const _ob=openBag;openBag=function(id){_ob(id);if(BSEL&&DT[BSEL]){const ba=$('bm').querySelector('.det .ba');if(ba&&!ba.querySelector('.dOpt'))ba.insertAdjacentHTML('afterbegin','<button class="dOpt" onclick="openRunes(\'d\',\''+BSEL+'\')">🔮 옵션</button>')}}}
-/* the option table (Ⅰ · Ⅱ · Ⅲ for every option of the tab) */
-function optTable(kd){const R3=[1,2,3],row=(ic,nm,f,c)=>'<tr><td style="white-space:normal"><b style="color:'+c+'">'+ic+' '+nm+'</b></td>'+R3.map(g2=>'<td style="white-space:normal">'+f(g2)+'</td>').join('')+'</tr>';let rows='';
- if(kd=='w')for(const t of RK){const r=RUNES[t];rows+=row(r[0],r[1],g2=>r[2].replace(/등급/g,'등급 '+g2),r[3])}
+/* weapon runes in plain numbers per grade */
+const WTXT={fire:g=>'맞으면 불 · 초당 '+8*g+' 피해 (2초)',ice:g=>'맞으면 2초 동안 '+(15+10*g)+'% 느려져요',shock:g=>(10+5*g)+'% 확률로 주변 2마리에 번개 (피해 40%)',leech:g=>'준 피해의 '+2*g+'% 만큼 체력 회복',hunt:g=>'구역 좀비에게 피해 +'+6*g+'% × 구역 (4구역부터 +'+24*g+'%)',exec:g=>'체력 30% 이하 좀비에게 피해 +'+25*g+'%'};
+/* the option table (Ⅰ ~ Ⅳ for every option of the tab) */
+function optTable(kd){const R3=[1,2,3,4],row=(ic,nm,f,c)=>'<tr><td style="white-space:normal"><b style="color:'+c+'">'+ic+' '+nm+'</b></td>'+R3.map(g2=>'<td style="white-space:normal">'+f(g2)+'</td>').join('')+'</tr>';let rows='';
+ if(kd=='w')for(const t of RK){const r=RUNES[t];rows+=row(r[0],r[1],g2=>WTXT[t]?WTXT[t](g2):r[2],r[3])}
  if(kd=='a')for(const k in AOPT){const o=AOPT[k];rows+=row(o[0],o[1]+' <small>('+o[2].map(q=>PN[q]).join('·')+')</small>',o[3],o[4])}
  if(kd=='s')for(const k in SOPT){const o=SOPT[k];rows+=row(o[0],o[1],o[2],o[3])}
  if(kd=='d')for(const k in DOPT){const o=DOPT[k];rows+=row(o[0],o[1],o[2],o[3])}
- return'<div style="overflow-x:auto"><table class="cmpT"><tr><th>'+OK[kd].nm+' 옵션</th><th>Ⅰ등급</th><th>Ⅱ등급</th><th>Ⅲ등급</th></tr>'+rows+'</table></div>'}
+ return'<div style="overflow-x:auto"><table class="cmpT"><tr><th>'+OK[kd].nm+' 옵션</th><th>Ⅰ등급</th><th>Ⅱ등급</th><th>Ⅲ등급</th><th>Ⅳ등급</th></tr>'+rows+'</table></div>'}
 let OTAB=false;
 {const _or=openRunes;openRunes=function(kd,id){_or(kd,id);const b=$('bm'),f=b.querySelector('.flt');if(!f)return;f.insertAdjacentHTML('beforeend','<span class="chip'+(OTAB?' on':'')+'" id="oTab">📋 옵션 표</span>');$('oTab').onclick=()=>{OTAB=!OTAB;openRunes()};
   if(OTAB){const L=b.querySelector('.aeL');if(L)L.insertAdjacentHTML('beforebegin',optTable(OKD))}}}
