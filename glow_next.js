@@ -6,8 +6,8 @@
 function wTier(){const p=S.p,id=actW(p);if(!W_BY[id])return 0;const lv=enhLv(id),mx=ENH.max;return lv>=mx&&lv>=10?4:lv>=13?3:lv>=10?2:lv>=7?1:0}
 function aTier(){const p=S.p,L=APARTS.map(([k])=>p.eq&&p.eq[k]).filter(id=>id&&ARMX[id]&&has(p,id));if(!L.length)return 0;const lv=L.map(aLv),avg=lv.reduce((a,b)=>a+b,0)/4,mx=ENH.max;
  return L.length==4&&mx>=10&&lv.every(v=>v>=mx)?3:avg>=10?2:avg>=7?1:0}
-const GLP=[];let GLT=0;
-function glowFx(x,y,sc){const p=S.p,t=performance.now()/1000,dt=Math.min(.05,t-(GLT||t));GLT=t;const wt=wTier(),at=aTier(),c=g;if(!wt&&!at&&!GLP.length)return;c.save();c.globalCompositeOperation='lighter';
+const GLP=[];let GLT=0,GLOWON=true;try{GLOWON=localStorage.getItem('pl_glow')!=='0'}catch(e){}
+function glowFx(x,y,sc){if(!GLOWON){GLP.length=0;return}const p=S.p,t=performance.now()/1000,dt=Math.min(.05,t-(GLT||t));GLT=t;const wt=wTier(),at=aTier(),c=g;if(!wt&&!at&&!GLP.length)return;c.save();c.globalCompositeOperation='lighter';
  const rad=(X,Y,r,col,a)=>{const gr=c.createRadialGradient(X,Y,0,X,Y,r);gr.addColorStop(0,'rgba('+col+','+a+')');gr.addColorStop(1,'rgba('+col+',0)');c.fillStyle=gr;c.fillRect(X-r,Y-r,r*2,r*2)};
  const hue=h=>{const k=n=>(n+h/30)%12,f=n=>Math.round(255*(.5-.5*Math.max(-1,Math.min(k(n)-3,9-k(n),1))));return f(0)+','+f(8)+','+f(4)};
  /* armour */
@@ -28,9 +28,13 @@ function glowFx(x,y,sc){const p=S.p,t=performance.now()/1000,dt=Math.min(.05,t-(
  if(GLP.length>160)GLP.splice(0,GLP.length-160);c.restore()}
 {const _dc=drawChar;drawChar=function(look,x,y,dir,fr,wpn,scale){const r=_dc.apply(this,arguments);if(look=='player'&&S&&S.p&&run&&!S.dr)try{glowFx(x,y,scale||1)}catch(e){}return r}}
 /* icons glow in the bag and on the weapon card */
-const iTier=id=>{const lv=W_BY[id]?enhLv(id):ARMX[id]?aLv(id):0;return lv>=ENH.max&&lv>=10?4:lv>=13?3:lv>=10?2:lv>=7?1:0};
+const iTier=id=>{if(!GLOWON)return 0;const lv=W_BY[id]?enhLv(id):ARMX[id]?aLv(id):0;return lv>=ENH.max&&lv>=10?4:lv>=13?3:lv>=10?2:lv>=7?1:0};
 {const _ob=openBag;openBag=function(id){_ob(id);if(!S)return;document.querySelectorAll('#bm [data-i],#bm .eq [data-s]').forEach(e=>{const k=e.dataset.i||e.dataset.s;if(!k)return;const tr=iTier(k);if(tr)e.classList.add('gw'+tr)})}}
 {const _wc=wcard;wcard=function(){_wc();const tr=iTier(actW(S.p)),i=$('wc').querySelector('.wi');if(i&&tr)i.classList.add('gw'+tr)}}
 document.head.insertAdjacentHTML('beforeend',`<style>@keyframes gwP{0%,100%{box-shadow:0 0 4px 1px var(--gc)}50%{box-shadow:0 0 12px 3px var(--gc)}}@keyframes gwH{0%{--gc:#ff5a5a}25%{--gc:#ffd36a}50%{--gc:#7fd07f}75%{--gc:#5aa8ff}100%{--gc:#ff5a5a}}
 .gw1{--gc:#bfe4ff88;animation:gwP 2.4s infinite}.gw2{--gc:#ffd36acc;animation:gwP 1.8s infinite}.gw3{--gc:#ff8a3aee;animation:gwP 1.1s infinite}.gw4{--gc:#ff5a5a;animation:gwP 1s infinite,gwH 3s linear infinite;filter:saturate(1.3)}
 @property --gc{syntax:'<color>';inherits:false;initial-value:#fff}#wc .wi.gw1,#wc .wi.gw2,#wc .wi.gw3,#wc .wi.gw4{border-radius:10px}</style>`);
+
+/* on/off switch (phones): in the sound/settings sheet */
+{const _om=openMixer;openMixer=function(){_om.apply(this,arguments);const b=$('bm');if(!b||$('glowT'))return;b.insertAdjacentHTML('beforeend','<div style="margin-top:10px;padding:8px;border-radius:10px;background:#ffffff0a"><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="glowT" '+(GLOWON?'checked':'')+'> ✨ 강화 빛 효과 (끄면 휴대폰이 가벼워져요)</label></div>');
+  $('glowT').onchange=e=>{GLOWON=e.target.checked;try{localStorage.setItem('pl_glow',GLOWON?'1':'0')}catch(_){}hud2()}}}

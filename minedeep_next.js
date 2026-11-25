@@ -45,9 +45,8 @@ function mSolids(){const R0=MREG(),x1=R0.x0+R0.cols*TS,y1=R0.y0+R0.rows*TS;addSo
 function mineGo(lv,cell){const p=S.p,R0=MREG();DUN.lv=lv;MINE=null;MDOWN=null;S.mgas=[];S.mdeb=[];Z=[];dec=[];buildWorld();infDerived();mSolids();
  const isL=cell==mUp(lv)||(cell&&mUp(lv)&&cell[0]==mUp(lv)[0]&&cell[1]==mUp(lv)[1]);p.x=R0.x0+cell[0]*TS+16;p.y=R0.y0+cell[1]*TS+(isL?2*TS+8:28);
  const cv=mCaves(lv);cv.forEach((q,i)=>{const n=lv==2?2+(i%2):2;for(let k=0;k<n;k++){mk(R0.x0+q.c*TS+16+(k-1)*14,R0.y0+q.r*TS+16,{look:lv==3&&k==0?'brute':k%2?'sleeper':'crawler'});Z[Z.length-1].g=1}});
- if(lv==3&&cv.length){const L=mUp(3),far=cv.slice().sort((a,b)=>Math.hypot(b.c-L[0],b.r-L[1])-Math.hypot(a.c-L[0],a.r-L[1]))[0];mk(R0.x0+far.c*TS+16,R0.y0+far.r*TS+16,{look:'brood'});Z[Z.length-1].g=1}
  mSpawnX(lv);
- msg(['','⛏ 지하 광산 1층 · 3×3블록 크기 · 공격 버튼으로 앞의 칸을 깨요 · 반대편 끝(오른쪽 아래)에 초록 출구','⛏ 2층 깊은 갱도 · 단단한 암반 (곡괭이 Lv2) · 광석 2배 · 동굴 10곳','⛏ 3층 심층 · 심층암 (곡괭이 Lv3) · 희귀 광석 · 가스 주머니 (방독면) · 번식체 둥지'][lv])}
+ msg(['','⛏ 지하 광산 1층 · 3×3블록 크기 · 공격 버튼으로 앞의 칸을 깨요 · 반대편 끝(오른쪽 아래)에 초록 출구','⛏ 2층 깊은 갱도 · 단단한 암반 (곡괭이 Lv2) · 광석 2배 · 동굴 10곳','⛏ 3층 심층 · 심층암 (곡괭이 Lv3) · 희귀 광석 · 가스 주머니 (방독면) · 거대 둥지'][lv])}
 mineEnter=function(){const p=S.p;SURF={x:p.x,y:p.y,Z,dec,carW:W0.car};DUN={sh:'mine',seed:MINE0().seed,gk:'mine',lv:1};document.body.dataset.dun='mine';mineGo(1,MLAD)};
 function mineExitFar(){const R0=MREG(),EX=mExit(),x=R0.x0+EX[0]*TS+16,y=R0.y0+EX[1]*TS+40;SURF.x=x;SURF.y=y;dunExit();const p=S.p;for(let i=0;i<80&&blocker(p.x,p.y,10);i++){const a=i*.7,r=10+i*6;p.x=x+Math.cos(a)*r;p.y=y+Math.sin(a)*r}
  const[bx,by]=bo(-OGX,-OGY);msg('🌄 광산 반대편 출구로 나왔어요 · 거점에서 '+Math.round(Math.hypot(p.x-bx-BW/2,p.y-by-BH/2)/(BW+RD)*10)/10+'블록 떨어진 곳')}

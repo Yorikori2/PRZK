@@ -4,7 +4,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
 (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:412,height:860}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.goto(PAGE);await p.evaluate(()=>localStorage.clear());await p.reload();await p.waitForTimeout(1800);await p.evaluate(()=>{closeBase();PAUSE=false;stop9()});
  let r=await p.evaluate(()=>{const P=S.p,pg=AE();for(const k of['head','body','legs','feet'])P.eq[k]='';P.inv.vest=1;P.eq.body='vest';const a0=armMul2(P);pg.aenh.vest=10;const a1=armMul2(P);P.inv={vest:1,enh3:5,enh2:5,enh1:5,scrap:30,ao_thorn1:1,ao_hush1:1};
-  AESEL='vest';const lv0=aLv('vest');aInscribe('ao_hush1');const wrong=(P.inv.ao_hush1|0)==1;aInscribe('ao_thorn1');const on=aopt('thorn');closeBase();return{a0,a1,wrong,on}});
+  AESEL='vest';const lv0=aLv('vest');const R=Math.random;Math.random=()=>0;aInscribe('ao_hush1');const wrong=(P.inv.ao_hush1|0)==1;aInscribe('ao_thorn1');Math.random=R;const on=aopt('thorn');closeBase();return{a0,a1,wrong,on}});
  ok(Math.abs(r.a0-.7)<1e-6&&Math.abs(r.a1-(1-.45))<1e-6,'+10 vest: -30% → -45%');ok(r.wrong&&r.on==1,'a feet-only rune will not go on the body; thorns does');
  r=await p.evaluate(()=>{const P=S.p;infGoto(2,1);Z.length=0;mk(P.x+10,P.y,{look:'civ1'});const z=Z[0],h=z.hp;zBite4(z);const th=h-z.hp;
   P.inv.cpants=1;P.eq.legs='cpants';const pg=AE();pg.aenh.cpants=10;const s0=speedMul(P),w0=weight(P);pg.aopt.cpants=['ao_dash3','ao_light3'];const s1=speedMul(P),w1=weight(P);

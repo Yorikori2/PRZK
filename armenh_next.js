@@ -32,6 +32,7 @@ for(const k in AOPT)for(let g2=1;g2<=3;g2++){const id='ao_'+k+g2,[e,n,parts,f,c]
 /* ---------- state ---------- */
 const AE=()=>{const pg=PGo();pg.aenh=pg.aenh||{};pg.aopt=pg.aopt||{};return pg};
 const aLv=id=>(S&&S.pg&&S.pg.aenh&&S.pg.aenh[id])|0;
+const AERATE=n=>Math.max(2,Math.round(ENH.rate[n]*.8)),AORATE=[0,75,55,35];
 const aSlots=lv=>lv>=15?3:lv>=10?2:lv>=5?1:0;
 const aDr=id=>{const b=ARMX[id][4].dr||0;return Math.min(.85,b*(1+.05*aLv(id)))};
 const wornA=p=>APARTS.map(([k])=>p.eq&&p.eq[k]).filter(id=>id&&ARMX[id]&&has(p,id));
@@ -59,26 +60,26 @@ let AESEL=null,AERES=null,AEPROT=false;
 function openAEnh(sel){const b=$('bm'),p=S.p,L=Object.keys(ARMX).filter(id=>has(p,id)).sort((a,c)=>APARTS.findIndex(q=>q[0]==ARMX[a][0])-APARTS.findIndex(q=>q[0]==ARMX[c][0])||ARMX[c][1]-ARMX[a][1]);if(sel)AESEL=sel;if(!L.includes(AESEL))AESEL=L[0]||null;b.dataset.m='aenh';PAUSE=true;
  let h='<div class="sh"><h2>🛡 방어구 강화 · 옵션</h2><div class="wt">강화 한도 +'+ENH.max+' · 무기와 같은 강화석</div><button onclick="closeBase();PAUSE=false">✕</button></div>';
  h+='<div class="aeL">'+L.map(id=>'<div class="aeI'+(id==AESEL?' on':'')+(aLv(id)>=7?' gl'+Math.min(3,1+((aLv(id)-7)/3|0)):'')+'" data-ae="'+id+'"><img src="'+icon(id)+'"><b>'+(aLv(id)?'+'+aLv(id):'')+'</b><small>'+PN[ARMX[id][0]]+(Object.values(p.eq).includes(id)?' · E':'')+'</small></div>').join('')+'</div>';
- if(AESEL){const id=AESEL,lv=aLv(id),nx=lv+1,mx=ENH.max,base=ARMX[id][4].dr||0,now=aDr(id),nxt=Math.min(.85,base*(1+.05*nx)),cost=lv<mx?ENH.cost(nx):null,rate=lv<mx?ENH.rate[nx]:0,have=cost&&Object.keys(cost).every(k=>(p.inv[k]|0)>=cost[k]);
+ if(AESEL){const id=AESEL,lv=aLv(id),nx=lv+1,mx=ENH.max,base=ARMX[id][4].dr||0,now=aDr(id),nxt=Math.min(.85,base*(1+.05*nx)),cost=lv<mx?ENH.cost(nx):null,rate=lv<mx?AERATE(nx):0,have=cost&&Object.keys(cost).every(k=>(p.inv[k]|0)>=cost[k]);
   h+='<div class="aeC"><div class="aeT"><img src="'+icon(id)+'"><div><b>'+(lv?'+'+lv+' ':'')+NM2(id)+'</b><small>'+PN[ARMX[id][0]]+' · 받는 피해 -'+(now*100).toFixed(1)+'%'+(lv<mx?' → <span style="color:#7fd07f">-'+(nxt*100).toFixed(1)+'%</span>':' (최대)')+'</small></div></div>';
-  h+='<div class="enBar">'+Array.from({length:mx},(_,i)=>'<i class="'+(i<lv?'f':'')+(i==4||i==9||i==14?' m':'')+'"></i>').join('')+'</div><small class="mut">+5 · +10 · +15에서 옵션 칸이 하나씩 열려요 · +6부터 실패하면 한 단계 내려가요</small>';
+  h+='<div class="enBar">'+Array.from({length:mx},(_,i)=>'<i class="'+(i<lv?'f':'')+(i==4||i==9||i==14?' m':'')+'"></i>').join('')+'</div><small class="mut">+5 · +10 · +15에서 옵션 칸이 하나씩 열려요 · +6부터 실패하면 한 단계 내려가요 · 방어구 강화 확률은 무기의 80%</small>';
   if(lv<mx)h+='<div class="aeR"><span>성공 '+rate+'%</span><span>'+costTxt(cost)+'</span>'+(nx>=6?'<label><input type="checkbox" id="aeProt" '+(AEPROT?'checked':'')+'> 보호 부적 ('+(p.inv.enhg|0)+')</label>':'')+'<button id="aeGo" '+(have?'':'disabled')+'>🔨 강화</button></div>';
   if(AERES)h+='<div class="aeRes '+AERES[0]+'">'+AERES[1]+'</div>';
   const sl=aSlots(lv),cur=(S.pg.aopt||{})[id]||[];h+='<h4>옵션 칸 '+sl+'/3</h4><div class="aeS">'+[0,1,2].map(i=>{const r=cur[i],o=r&&AOPT[r.slice(3,-1)];return'<div class="aeSl'+(i<sl?'':' lk')+'">'+(i>=sl?'🔒 +'+[5,10,15][i]:o?'<img src="'+icon(r)+'"><b style="color:'+o[4]+'">'+o[0]+' '+o[1]+' '+ROMN[+r.slice(-1)]+'</b><small>'+o[3](+r.slice(-1))+'</small>':'<small>비어 있음</small>')+'</div>'}).join('')+'</div>';
   const part=ARMX[id][0],rs=Object.keys(p.inv).filter(k=>/^ao_/.test(k)&&p.inv[k]>0);
-  h+='<h4>가진 방어구 룬</h4>'+(rs.length?'<div class="aeRn">'+rs.map(k=>{const o=AOPT[k.slice(3,-1)],fit=o[2].includes(part);return'<div class="aeRc'+(fit?'':' no')+'" data-rn="'+k+'"><img src="'+icon(k)+'"><b style="color:'+o[4]+'">'+o[0]+' '+o[1]+' '+ROMN[+k.slice(-1)]+'</b><small>'+(fit?o[3](+k.slice(-1)):o[2].map(q=>PN[q]).join(' · ')+' 전용')+' ×'+p.inv[k]+'</small></div>'}).join('')+'</div>':'<small class="mut">없음 · 광산 깊은 층 · 좀비 기지 · 약탈자 기지에서 나와요</small>');
+  h+='<h4>가진 방어구 룬</h4>'+(rs.length?'<div class="aeRn">'+rs.map(k=>{const o=AOPT[k.slice(3,-1)],fit=o[2].includes(part);return'<div class="aeRc'+(fit?'':' no')+'" data-rn="'+k+'"><img src="'+icon(k)+'"><b style="color:'+o[4]+'">'+o[0]+' '+o[1]+' '+ROMN[+k.slice(-1)]+'</b><small>'+(fit?o[3](+k.slice(-1))+' · <b style="color:#ffd36a">새기기 '+AORATE[+k.slice(-1)]+'%</b>':o[2].map(q=>PN[q]).join(' · ')+' 전용')+' ×'+p.inv[k]+'</small></div>'}).join('')+'</div>':'<small class="mut">없음 · 광산 깊은 층 · 좀비 기지 · 약탈자 기지에서 나와요</small>');
   h+='</div>'}
  b.innerHTML=h;b.style.display='block';
  b.querySelectorAll('[data-ae]').forEach(e=>e.onclick=()=>{AERES=null;openAEnh(e.dataset.ae)});
  const pr=$('aeProt');if(pr)pr.onchange=()=>{AEPROT=pr.checked};const go=$('aeGo');if(go)go.onclick=doAEnh;
  b.querySelectorAll('[data-rn]').forEach(e=>e.onclick=()=>aInscribe(e.dataset.rn))}
 function doAEnh(){const id=AESEL,pg=AE(),lv=aLv(id),nx=lv+1;if(lv>=ENH.max)return;const c=ENH.cost(nx),p=S.p;if(!Object.keys(c).every(k=>(p.inv[k]|0)>=c[k]))return msg('재료가 부족해요');for(const k in c)invTake(p,k,c[k]);
- if(Math.random()*100<ENH.rate[nx]){pg.aenh[id]=nx;AERES=['ok','✨ 성공! +'+nx+' '+NM2(id)+([5,10,15].includes(nx)?' · 옵션 칸이 열렸어요':'')];try{enhSnd(1)}catch(e){}}
+ if(Math.random()*100<AERATE(nx)){pg.aenh[id]=nx;AERES=['ok','✨ 성공! +'+nx+' '+NM2(id)+([5,10,15].includes(nx)?' · 옵션 칸이 열렸어요':'')];try{enhSnd(1)}catch(e){}}
  else if(nx>=6){if(AEPROT&&(p.inv.enhg|0)>0){invTake(p,'enhg',1);AERES=['pr','🛡 실패했지만 보호 부적이 막았어요 · +'+lv+' 유지']}else{pg.aenh[id]=lv-1;AERES=['no','💥 실패 · +'+lv+' → +'+(lv-1)]}}
  else AERES=['no','💨 실패 · 재료만 사라졌어요'];openAEnh();hud2()}
 function aInscribe(rn){const id=AESEL,p=S.p,o=AOPT[rn.slice(3,-1)];if(!o[2].includes(ARMX[id][0]))return msg('🛡 '+o[1]+'은(는) '+o[2].map(q=>PN[q]).join(' · ')+'에만 새길 수 있어요');const pg=AE(),sl=aSlots(aLv(id)),cur=pg.aopt[id]=pg.aopt[id]||[];
  if(!sl)return msg('🛡 +5부터 옵션 칸이 열려요');let i=cur.findIndex((r,j)=>j<sl&&!r);if(i<0){for(let j=0;j<sl;j++)if(!cur[j]){i=j;break}}if(i<0||i>=sl)i=sl-1;const old=cur[i];
- if(cur.some((r,j)=>j!=i&&r&&r.slice(3,-1)==rn.slice(3,-1)))return msg('🛡 같은 옵션은 한 방어구에 하나만');invTake(p,rn,1);cur[i]=rn;AERES=['ok','✨ '+o[1]+' '+ROMN[+rn.slice(-1)]+' 새김'+(old?' · 원래 옵션은 사라졌어요':'')];openAEnh();hud2()}
+ if(cur.some((r,j)=>j!=i&&r&&r.slice(3,-1)==rn.slice(3,-1)))return msg('🛡 같은 옵션은 한 방어구에 하나만');invTake(p,rn,1);const gr=+rn.slice(-1);if(Math.random()*100>=AORATE[gr]){AERES=['no','💥 새기기 실패 ('+AORATE[gr]+'%) · 룬이 부서졌어요'+(old?' · 원래 옵션은 그대로':'')];openAEnh();hud2();return}cur[i]=rn;AERES=['ok','✨ '+o[1]+' '+ROMN[gr]+' 새김'+(old?' · 원래 옵션은 사라졌어요':'')];openAEnh();hud2()}
 {const _ob=openBase;openBase=function(){_ob.apply(this,arguments);if(!S||$('aeOpen'))return;const h=$('bm').querySelector('h2');if(h&&(S.base.lv.bench|0)>=1)h.insertAdjacentHTML('afterend','<button id="aeOpen" style="float:right;padding:4px 10px;font-size:12px;width:auto;margin-left:4px" onclick="openAEnh()">🛡 방어구 강화</button>')}}
 /* runes drop from deep places (3층 심층 cells, hive, raider camps) */
 const aRune=maxG=>{const ks=Object.keys(AOPT),k=ks[Math.random()*ks.length|0],r=Math.random(),g2=maxG>=3&&r<.15?3:maxG>=2&&r<.5?2:1;return'ao_'+k+g2};
@@ -87,3 +88,8 @@ document.head.insertAdjacentHTML('beforeend',`<style>#bm .aeL{display:flex;gap:6
 #bm .aeR{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0;font-size:12px}#bm .aeR button{width:auto;padding:6px 14px}#bm .aeRes{padding:6px 10px;border-radius:8px;margin:4px 0;font-size:12.5px}#bm .aeRes.ok{background:#2f5a2a}#bm .aeRes.no{background:#5a2a2a}#bm .aeRes.pr{background:#2a3e5a}
 #bm .aeS{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}#bm .aeSl{padding:6px;border-radius:9px;background:#ffffff0c;border:1px dashed #ffffff2a;min-height:52px;font-size:11px}#bm .aeSl.lk{opacity:.45}#bm .aeSl img{width:22px;image-rendering:pixelated;float:left;margin-right:4px}#bm .aeSl b{display:block;font-size:11.5px}#bm .aeSl small{color:var(--mut);font-size:10.5px}
 #bm .aeRn{display:grid;grid-template-columns:1fr 1fr;gap:5px}#bm .aeRc{display:grid;grid-template-columns:26px 1fr;gap:0 6px;padding:5px;border-radius:9px;background:#ffffff0c;cursor:pointer}#bm .aeRc.no{opacity:.45}#bm .aeRc img{grid-row:1/3;width:24px;image-rendering:pixelated}#bm .aeRc b{font-size:11.5px}#bm .aeRc small{font-size:10.5px;color:var(--mut)}#bm h4{margin:10px 0 4px;font-size:13px}</style>`);
+
+/* ---------- runes are their own kind: 무기 룬 · 방어구 룬 tabs in the bag ---------- */
+for(const it of ITEMS){if(/^rn_/.test(it[0]))it[2]='r';if(/^ao_/.test(it[0]))it[2]='o'}
+{const _ob=openBag;openBag=function(id){_ob(id);const f=$('bm').querySelector('.flt');if(!f||f.querySelector('[data-f="r"]'))return;f.insertAdjacentHTML('beforeend','<span class="chip'+(BF=='r'?' on':'')+'" data-f="r">무기 룬</span><span class="chip'+(BF=='o'?' on':'')+'" data-f="o">방어구 룬</span>');
+  f.querySelectorAll('[data-f="r"],[data-f="o"]').forEach(c=>c.onclick=()=>{BF=c.dataset.f;openBag()})}}
