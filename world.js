@@ -299,7 +299,7 @@ function drawGround(x0,y0,w,h){R('#3b5a30',x0,y0,w,h);
   // vertical road strip
   if(sx<x0+w&&sx+RD>x0){floor(sx,y0,24,h,'walk');floor(sx+24,y0,80,h,'asphalt');floor(sx+104,y0,24,h,'walk');for(let y=Math.floor(y0/48)*48;y<y0+h;y+=48)R('#d9c35a',sx+63,y,2,26)}
   if(sy<y0+h&&sy+RD>y0){floor(x0,sy,w,24,'walk');floor(x0,sy+24,w,80,'asphalt');floor(x0,sy+104,w,24,'walk');for(let x=Math.floor(x0/48)*48;x<x0+w;x+=48)R('#d9c35a',x,sy+63,26,2)}}
- for(let i=0;i<=NBX;i++)for(let j=0;j<=NBY;j++){const sx=i*(BW+RD),sy=j*(BH+RD);if(sx<x0+w&&sx+RD>x0&&sy<y0+h&&sy+RD>y0){floor(sx+24,sy+24,80,80,'asphalt');for(let k=0;k<6;k++){R('#e8e8e0',sx+28+k*13,sy+14,8,10);R('#e8e8e0',sx+28+k*13,sy+104,8,10);R('#e8e8e0',sx+14,sy+28+k*13,10,8);R('#e8e8e0',sx+104,sy+28+k*13,10,8)}}}}
+ for(let i=0;i<=NBX;i++)for(let j=0;j<=NBY;j++){const sx=i*(BW+RD),sy=j*(BH+RD);if(sx<x0+w&&sx+RD>x0&&sy<y0+h&&sy+RD>y0){/* both roads run straight through: no sidewalk band across the crossing (only the four corners stay sidewalk) */floor(sx+24,sy,80,RD,'asphalt');floor(sx,sy+24,RD,80,'asphalt');for(let k=0;k<6;k++){R('#e8e8e0',sx+28+k*13,sy+14,8,10);R('#e8e8e0',sx+28+k*13,sy+104,8,10);R('#e8e8e0',sx+14,sy+28+k*13,10,8);R('#e8e8e0',sx+104,sy+28+k*13,10,8)}}}}
 function drawStatic(x0,y0,w,h){drawGround(x0,y0,w,h);const hit=(x,y,ww,hh2)=>x<x0+w&&x+ww>x0&&y<y0+h&&y+hh2>y0;
  for(const f of W0.fl)if(hit(f[0],f[1],f[2],f[3]))floor(...f);
  for(const d of W0.dec)if(hit(d.x,d.y,d.w,d.h))d.f();
