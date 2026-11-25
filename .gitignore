@@ -3,3 +3,4 @@ s2b.json
 # test screenshots written to the repo root
 /*.png
 !/original-graphics.png
+/target.json
