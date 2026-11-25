@@ -15,15 +15,20 @@ function iaTop(B){const A=B.filter(q=>q.f&&!q.info&&!q.off);return A.find(q=>q.b
 /* stations and things around the base that used to need a menu: now [상호작용] */
 {const _c=dmCtx;dmCtx=function(){const B=_c();if(!S||DUN||!S.base||!inBase(S.p.x,S.p.y))return B;const p=S.p,near=(t,r)=>BP.find(o=>o.t==t&&Math.hypot(o.x+o.w/2-p.x,o.y+o.h/2-p.y)<(r||70));
   if(near('bench3'))B.push({t:'🛠 제작 (작업대)',f:()=>openCraft()});if(near('stash',60))B.push({t:'📦 보관함 열기',f:()=>openStash()});if(near('turret',80))B.push({t:'🔫 포탑 · 거점 관리',f:()=>openBase()});return B}}
+/* the hint says what [상호작용] does in one word, no emoji */
+const noEmo=t=>t.replace(/[\u{1F000}-\u{1FAFF}\u{2190}-\u{21FF}\u{2300}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]/gu,'').replace(/\s+/g,' ').trim();
+const IAW=[[/무기 강화/,'무기 강화'],[/방어구 강화/,'방어구 강화'],[/룬 · 옵션/,'룬 · 옵션'],[/제작 \(작업대\)/,'제작'],[/제련로/,'제련'],[/화약 제작대/,'화약'],[/탄약 제작대/,'탄약'],[/총기 제작대/,'총기 제작'],[/제작소 짓기|전초기지 세우기|포탑 · 거점 관리|전초기지 관리/,'건축'],
+ [/보관함/,'보관함'],[/먼 출구/,'나가기'],[/지상으로|층으로$|⬆/,'올라가기'],[/내려가기|⬇/,'내려가기'],[/땅 파고/,'파기'],[/깨기|파기/,'캐기'],[/상인/,'거래'],[/줍기/,'줍기'],[/열기|챙기기|보물/,'열기'],[/폭파/,'폭파'],[/운전|불도저/,'운전'],[/해킹|무전/,'조작']];
+const iaWord=t=>{for(const[r,w]of IAW)if(r.test(t))return w;return noEmo(t).split(' ').slice(0,2).join(' ')};
 let IAB=[],IAK='',IAT=0;
 document.body.insertAdjacentHTML('beforeend','<div id="iaHint"></div>');
 function iaRefresh(){const el=$('iaHint');if(!el)return;const B=run&&S&&!PAUSE?iaList():[],top=iaTop(B),rest=B.filter(q=>q!==top&&(q.f||q.info)),info=B.find(q=>q.info&&!q.f);IAB=B;
  const k=(top?top.t:'')+'|'+rest.length+'|'+(info?info.t:'');if(k==IAK)return;IAK=k;{const pp=$('iaPop');if(pp)pp.remove()}const a=$('act').getBoundingClientRect();
  if(!top&&!info&&!rest.length){el.style.display='none';return}el.style.display='flex';el.style.right=(innerWidth-a.right-4)+'px';el.style.bottom=(innerHeight-a.top+8)+'px';
- el.innerHTML=(top?'<span class="t">'+top.t.replace(/\s*\(.*?\)\s*$/,'')+'</span>':info?'<span class="t i">'+info.t+'</span>':'')+(rest.length?'<span class="n">'+(top||info?'+'+rest.length:'⋯ '+rest.length)+'</span>':'')}
+ el.innerHTML=(top?'<span class="t">'+iaWord(top.t)+'</span>':info?'<span class="t i">'+noEmo(info.t)+'</span>':'')+(rest.length?'<span class="n">'+(top||info?'+'+rest.length:'⋯ '+rest.length)+'</span>':'')}
 {const _gu=gearUpd;gearUpd=function(dt){_gu(dt);IAT-=dt;if(IAT<=0){IAT=.2;iaRefresh()}}}
 $('iaHint').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();iaPop()});
-function iaPop(){let el=$('iaPop');if(el){el.remove();return}const B=IAB.filter(q=>q.f||q.info);if(!B.length)return;document.body.insertAdjacentHTML('beforeend','<div id="iaPop">'+B.map((q,i)=>'<button data-i="'+i+'" class="'+(q.f&&!q.off?'':'dim')+'">'+q.t+'</button>').join('')+'</div>');el=$('iaPop');
+function iaPop(){let el=$('iaPop');if(el){el.remove();return}const B=IAB.filter(q=>q.f||q.info);if(!B.length)return;document.body.insertAdjacentHTML('beforeend','<div id="iaPop">'+B.map((q,i)=>'<button data-i="'+i+'" class="'+(q.f&&!q.off?'':'dim')+'">'+noEmo(q.t)+'</button>').join('')+'</div>');el=$('iaPop');
  const h=$('iaHint').getBoundingClientRect();el.style.right=(innerWidth-h.right)+'px';el.style.bottom=(innerHeight-h.top+6)+'px';
  el.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();const b=e.target.closest('[data-i]');if(b){const q=B[+b.dataset.i];if(q&&q.f&&!q.off)q.f()}el.remove();IAK=''});
  setTimeout(()=>{const off=e=>{if(!el.contains(e.target)&&!e.target.closest('#iaHint')){el.remove();removeEventListener('pointerdown',off,true)}};addEventListener('pointerdown',off,true)},40)}
