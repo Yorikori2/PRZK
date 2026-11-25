@@ -4,8 +4,8 @@ const {chromium}=require('playwright');const path=require('path');const PAGE='fi
 const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
 (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:412,height:860}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.goto(PAGE);await p.evaluate(()=>localStorage.clear());await p.reload();await p.waitForTimeout(1800);await p.evaluate(()=>{closeBase();PAUSE=false;stop9()});
- let r=await p.evaluate(()=>{give({rn_fire2:1,ao_thorn2:1});BF='o';openBag();const o=[...document.querySelectorAll('#bm [data-i]')].map(e=>e.dataset.i);BF='r';openBag();const w=[...document.querySelectorAll('#bm [data-i]')].map(e=>e.dataset.i);BF='all';closeBase();return{o,w,ca:catOf('ao_thorn2'),cr:catOf('rn_fire2')}});
- ok(r.o.join()=='ao_thorn2'&&r.w.join()=='rn_fire2'&&r.ca=='o'&&r.cr=='r','runes have their own bag tabs (무기 룬 / 방어구 룬)');
+ let r=await p.evaluate(()=>{give({rn_fire2:1,ao_thorn2:1});BF='r';openBag();const w=[...document.querySelectorAll('#bm [data-i]')].map(e=>e.dataset.i);BF='all';closeBase();return{w,ca:catOf('ao_thorn2'),cr:catOf('rn_fire2')}});
+ ok(r.w.includes('rn_fire2')&&r.w.includes('ao_thorn2')&&r.ca=='r'&&r.cr=='r','runes sit together in the 룬 tab');
  r=await p.evaluate(()=>({a:[5,8,10].map(AERATE),w:[5,8,10].map(n=>ENH.rate[n]),o:AORATE.slice(1)}));ok(r.a.every((v,i)=>v<r.w[i])&&r.o.join()=='75,55,35','armour odds are lower than weapons '+JSON.stringify(r));
  r=await p.evaluate(()=>{const P=S.p,pg=AE();P.inv={vest:1,ao_regen3:5};P.eq.body='vest';pg.aenh.vest=5;pg.aopt.vest=[];AESEL='vest';const R=Math.random;let ok1,fail;try{Math.random=()=>.99;aInscribe('ao_regen3');fail=!(pg.aopt.vest[0])&&(P.inv.ao_regen3|0)==4;Math.random=()=>.0;aInscribe('ao_regen3');ok1=pg.aopt.vest[0]=='ao_regen3'}finally{Math.random=R}closeBase();return{fail,ok1}});
  ok(r.fail&&r.ok1,'inscribing can fail and the rune breaks');
