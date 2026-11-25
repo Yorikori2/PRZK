@@ -13,3 +13,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  ok(r.b.gunshop.alr>0&&r.b.bank.alr>0,'gunshop and bank have an alarm chance');ok(r.carpart,'차량 부품 item exists');
  for(const s of['nbT','nb1','nb2','nb3','nb4']){await p.evaluate(s=>scene9(s),s);await p.waitForTimeout(400)}
  ok(!errs.length,'no page errors '+errs.slice(0,3).join(' | '));await b.close()})();
+// a demolished block (빈터 / 전초기지) must stay a lot, never turn into a new building
+(async()=>{const {chromium}=require('playwright');const b=await chromium.launch();const p=await b.newPage();await p.goto(PAGE);await p.waitForTimeout(1500);
+ const r=await p.evaluate(()=>{const out=[];for(const k of['pharm','gunshop','garage','bank']){const at=findKind([k]);S.inf.demo=S.inf.demo||{};S.inf.demo[at.join()]=1;out.push(kindAt(at[0],at[1]));delete S.inf.demo[at.join()]}return out});
+ ok(r.every(k=>k=='lot'),'a demolished block / outpost stays a lot (no shop on top) '+r);await b.close()})();

@@ -64,5 +64,5 @@ if(typeof KCOL!='undefined')Object.assign(KCOL,{pharm:'#3f9a5a',gunshop:'#c43c32
 /* the special first-visit bonus */
 if(typeof SPEC!='undefined')Object.assign(SPEC,{gunshop:{a9mm:30,a12g:12},pharm:{medkit:1,bandage:3},garage:{fuel:4,carpart:1},bank:{tkn:20}});
 /* they appear in the endless city */
-{const _k=kindAt;kindAt=function(gx,gy){const k=_k(gx,gy);if(gx==0&&gy==0||k=='mil'||k=='milR'||k=='rbase')return k;const d=Math.max(Math.abs(gx),Math.abs(gy)),r=bh(gx,gy,23);
+{const _k=kindAt;kindAt=function(gx,gy){const k=_k(gx,gy);if(gx==0&&gy==0||k=='base'||k=='lot'||k=='mil'||k=='milR'||k=='rbase')return k;const d=Math.max(Math.abs(gx),Math.abs(gy)),r=bh(gx,gy,23);
   if(d>=1&&r<.07)return'pharm';if(d>=2&&r<.12)return'garage';if(d>=3&&r<.16)return'bank';if(d>=3&&r<.2)return'gunshop';return k}}
