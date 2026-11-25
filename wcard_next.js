@@ -57,3 +57,23 @@ body[data-wcs="A"] #atk::after{content:'';position:absolute;inset:-5px;border-ra
 #wc2 .sl img{width:30px;height:30px;image-rendering:pixelated}#wc2 .sl .k{font-size:9.5px;color:var(--mut)}#wc2 .sl .v{font-size:11px;font-weight:800;line-height:1}#wc2 .sl .v small{font-size:9px;color:var(--mut);font-weight:500}
 #wc2 .sl.on{border-color:#ffd36a;background:#2a2410ee;box-shadow:0 0 8px #ffd36a55}#wc2 .sl .lv{position:absolute;top:2px;right:4px;font-size:9px;color:#ffd36a;font-weight:800}#wc2 .sl .kd{position:absolute;top:2px;left:4px;font-size:8.5px;color:#9ad0f0}
 #wc2 .sl[data-s="dm"]{border-style:dashed}#wc2 .sl[data-s="dm"].on{border-color:#e0b03a;background:#4a3014ee}</style>`);
+/* ---------- slot style + quick slots on one panel ----------
+   Top row: the 4 quick slots (tap = use, hold = choose what goes there). Bottom row: weapon slots.
+   The separate quick-slot box is hidden in this style. */
+function wcQuickRow(){const p=S.p;return'<div class="qr">'+p.quick.map((id,i)=>{const n=id?p.inv[id]|0:0;return'<div class="q'+(id&&n>0?'':' off')+'" data-q="'+i+'">'+(id?'<img src="'+icon(id)+'">':'<i>+</i>')+'<span class="n">'+(id?n:'')+'</span><span class="ky">'+(i+1)+'</span></div>'}).join('')+'</div>'}
+{const _r=wcRender;wcRender=function(){_r();if(WCS!='C'||!S||!S.p||!run)return;const el=$('wc2'),p=S.p,k2=p.quick.map(id=>id+':'+(p.inv[id]|0)).join();if(el.dataset.qk==k2+WCK&&el.querySelector('.qr'))return;el.dataset.qk=k2+WCK;
+  const slots=el.innerHTML.includes('class="wr"')?el.querySelector('.wr').innerHTML:el.innerHTML;el.innerHTML=wcQuickRow()+'<div class="wr">'+slots+'</div>'}}
+function wcPick(i){const p=S.p,L=Object.keys(p.inv).filter(k=>p.inv[k]>0&&(catOf(k)=='c'||(W_BY[k]&&W_BY[k][2]=='t'))).sort((a,b)=>NM2(a).localeCompare(NM2(b)));let el=$('qPick');if(el)el.remove();
+ document.body.insertAdjacentHTML('beforeend','<div id="qPick"><div class="h">퀵 '+(i+1)+'번에 넣을 것</div>'+L.map(k=>'<button data-k="'+k+'"'+(p.quick[i]==k?' class="on"':'')+'><img src="'+icon(k)+'">'+NM2(k)+'<small>×'+(p.inv[k]|0)+'</small></button>').join('')+'<button data-k="" class="clr">비우기</button></div>');el=$('qPick');
+ const r=$('wc2').getBoundingClientRect();el.style.right='8px';el.style.bottom=(innerHeight-r.top+6)+'px';
+ el.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();const b=e.target.closest('[data-k]');if(!b)return;const k=b.dataset.k,j=p.quick.indexOf(k);if(k&&j>=0&&j!=i)p.quick[j]=p.quick[i]||'';p.quick[i]=k;el.remove();WCK='';hud2()});
+ setTimeout(()=>{const off=e=>{if(!el.contains(e.target)){el.remove();removeEventListener('pointerdown',off,true)}};addEventListener('pointerdown',off,true)},40)}
+{let tm=null,held=false;const el=$('wc2');
+ el.addEventListener('pointerdown',e=>{const q=e.target.closest('[data-q]');if(!q||!run)return;e.preventDefault();e.stopImmediatePropagation();held=false;clearTimeout(tm);tm=setTimeout(()=>{held=true;wcPick(+q.dataset.q)},420)},true);
+ el.addEventListener('pointerup',e=>{const q=e.target.closest('[data-q]');if(!q||!run)return;e.preventDefault();e.stopImmediatePropagation();clearTimeout(tm);if(held)return;const i=+q.dataset.q,p=S.p;if(!p.quick[i])return wcPick(i);useQuick(i);WCK='';hud2()},true)}
+document.head.insertAdjacentHTML('beforeend',`<style>body[data-wcs="C"] #rc{display:none!important}body[data-wcs="C"] #wc2{flex-direction:column;align-items:flex-end;gap:5px}
+#wc2 .wr{display:flex;gap:5px}#wc2 .qr{display:flex;gap:5px;padding:4px;border-radius:12px;background:#0a0e12b0}
+#wc2 .q{position:relative;width:46px;height:46px;border-radius:10px;background:#141a20e6;border:1.5px solid #ffffff22;display:flex;align-items:center;justify-content:center}#wc2 .q img{width:30px;height:30px;image-rendering:pixelated}#wc2 .q i{font-style:normal;color:var(--mut);font-size:18px}
+#wc2 .q .n{position:absolute;right:3px;bottom:1px;font-size:11px;font-weight:800;text-shadow:0 1px 2px #000}#wc2 .q .ky{position:absolute;left:4px;top:1px;font-size:9px;color:var(--mut)}#wc2 .q.off{opacity:.45}
+#qPick{position:fixed;z-index:9;display:flex;flex-direction:column;gap:4px;padding:6px;border-radius:12px;background:#141a20f2;border:1px solid #ffffff2a;max-height:50vh;overflow:auto;min-width:180px}#qPick .h{font-size:11px;color:var(--mut);padding:2px 4px}
+#qPick button{display:flex;align-items:center;gap:6px;text-align:left;padding:5px 10px;font-size:12.5px;width:auto}#qPick button img{width:22px;image-rendering:pixelated}#qPick button small{margin-left:auto;color:var(--mut)}#qPick button.on{border-color:#ffd36a}#qPick .clr{justify-content:center;color:var(--mut)}</style>`);
