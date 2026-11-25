@@ -48,7 +48,7 @@ BUILDERS.garage=(c,r,sd)=>{const A=Bld('정비소',c,r,'garage'),Rn=mulberry(sd*
 BUILDERS.bank=(c,r,sd)=>{const A=Bld('은행',c,r,'bank'),Rn=mulberry(sd*3+17);
  A.fl(0,0,BW,BH,'stone');A.fl(140,120,600,380,'tileP');A.fl(140,500,600,40,'walk');A.fl(0,560,BW,144,'asphalt');
  const bN=(x0,x1,y,h)=>{const o=A.ox;R('#dccfb8',o+140,y,600,h);for(let i=0;i<6;i++)R('#c6baa4',o+160+i*100,y,16,h-10);R('#2f4a7a',o+140,y+h-14,600,8);R('#c9a030',o+380,y+6,120,h-26);winD(o+200,50,y,h);winD(o+640,50,y,h)};
- shell(A,140,120,740,500,bN,[[410,470]]);A.hw(140,560,300,26,'#c6baa4');A.hw(620,744,300,26,'#c6baa4');vseg(A,560,120,300,[],34);
+ shell(A,140,120,740,500,bN,[[410,470]]);A.hw(140,480,300,26,'#c6baa4');A.hw(620,744,300,26,'#c6baa4');vseg(A,560,120,300,[],34);
  A.o('counter',180,250,340,22,{fc:'#2f4a7a',logo:'bar'});for(let x=200;x<=460;x+=90)A.o('chair',x,230,14,12);A.o('chairs',200,360,120,20);A.o('chairs',400,360,120,20);A.o('plant',160,460,14,10);A.o('plant',700,460,14,10);A.o('vending',660,340,24,20);
  A.o('desk',170,140,60,30);A.o('desk',300,140,60,30);A.o('desk',430,140,60,30);A.o('cabinet',160,130,40,10);A.o('vault',600,190,100,46);A.o('locker',580,140,24,40);A.o('alarmbox',710,140,16,12);
  A.roof(140,120,600,380,'police','은행',['#2f4a7a','#dccfb8']);A.ent(440,514,0,-1);

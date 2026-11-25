@@ -19,13 +19,15 @@ P('pstair','승강장 계단',null,o=>{const{x,y,w,h}=o;R('#1d1714',x-1,y-1,w+2,
 P('rail','선로',null,o=>{const{x,y,w,h}=o;for(let i=x;i<x+w;i+=14)R('#5a4030',i,y,6,h);R('#9aa0a6',x,y+4,w,2);R('#9aa0a6',x,y+h-6,w,2)},false);
 P('riot','진압 장비 보관함',['ammo','scrap'],o=>{const{x,y,w,h}=o;B3(x,y,w,h,34,'#3a4a5a','#2a3a4a');for(let i=4;i<w-4;i+=12){R('#1d1714',x+i,y-30,8,20);R('#9ad0f055',x+i+1,y-29,6,8)}R('#e0b03a',x+2,y-8,w-4,2)});
 LOOTT.riot=['ammo','scrap'];
+/* floor-level things are drawn with the floor, never on top of the player */
+Object.assign(FLAT,{rail:1,pstair:1,escal:1,lift:1});
 /* hospital: main building on the left block, ward on the right block, bridge across the road */
 function shellG(A,x0,y0,x1,y1,face,south,wG,eG){A.hw(x0-4,x1+4,y0,34,face);vseg(A,x0,y0,y1,wG||[],34);vseg(A,x1,y0,y1,eG||[],34);let x=x0-4;for(const[a,b]of south){A.hw(x,a,y1,8,'#b8b2a6');x=b}A.hw(x,x1+4,y1,8,'#b8b2a6')}
 BUILDERS.hosp=(c,r,sd)=>{if(c>NBX-2)return BUILDERS.park(c,r,sd);const A=Bld('병원',c,r,'hosp'),Rn=mulberry(sd*19+7),R2=BW+RD;/* right block starts at R2 · the road between stays a road, the bridge crosses it */
  for(const x0 of[0,R2]){A.fl(x0,0,BW,BH,'grass');A.fl(x0,540,BW,164,'asphalt')}A.fl(80,80,780,390,'hall');A.fl(80,470,780,50,'walk');A.fl(R2+40,80,780,390,'vinylW');A.fl(R2+40,470,780,50,'walk');A.fl(860,250,R2+40-860,56,'hall');
  A.dec(0,540,BW,164,(ox,oy)=>{for(let x=60;x<BW-40;x+=70)R('#e8e8e0',ox+x,oy+610,2,60);R('#e0b03a',ox+300,oy+556,320,3);for(let i=0;i<4;i++)R('#e8e8e0',ox+320+i*80,oy+570,40,6)});
  const mN=(x0,x1,y,h)=>{const o=A.ox;R('#eef0ee',o+80,y,780,h);R('#c43c32',o+80,y+h-14,780,8);for(const wx of[130,230,640,760])winD(o+wx,50,y,h);R('#c43c32',o+440,y+6,60,h-24);R('#f4f4ee',o+465,y+8,10,h-28);R('#f4f4ee',o+450,y+(h-14)/2-6,40,10)};
- shellG(A,80,80,860,470,mN,[[420,520]],[],[[250,306]]);vseg(A,360,80,470,[[300,360]],34);vseg(A,620,80,470,[[180,240]],34);A.hw(620,860,290,10);A.hw(80,360,260,10);
+ shellG(A,80,80,860,470,mN,[[420,520]],[],[[250,306]]);vseg(A,360,80,470,[[300,360]],34);vseg(A,620,80,470,[[180,240]],34);A.hw(620,860,290,10);A.hw(80,240,260,10);A.hw(300,360,260,10);
  /* 응급실 */for(let x=100;x<=260;x+=80){A.o('gurney',x,110,50,18);A.o('curtain',x+64,92,3,64);A.o('iv',x+40,100,8,8)}A.o('monitor',320,110,22,10);A.o('mcart',260,200,40,18);A.o('wheelchair',110,220,22,8);
  /* 접수 */A.o('counter',390,140,200,22);A.o('chairs',390,330,100,20);A.o('chairs',500,330,100,20);A.o('chairs',390,400,100,20);A.o('vending',580,420,24,20);A.o('plant',380,440,14,10);
  /* 약제실 */for(let y=290;y<=410;y+=60)A.o('medshelf',96,y,60,18);A.o('medshelf',190,300,44,16);A.o('cabinet',280,290,40,10);A.o('fridge',310,400,30,22);
@@ -77,12 +79,12 @@ BUILDERS.subway=(c,r,sd)=>{const A=Bld('지하철역',c,r,'subway'),Rn=mulberry(
 BUILDERS.prison=(c,r,sd)=>{const A=Bld('교도소',c,r,'prison'),Rn=mulberry(sd*31+13);
  A.fl(0,0,BW,BH,'dirt');A.fl(120,80,656,340,'grey');A.fl(120,420,656,160,'gravel');A.fl(400,580,96,124,'asphalt');A.fl(0,660,BW,44,'asphalt');
  A.dec(120,440,656,140,(ox,oy)=>{R('#e8e8e0',ox+200,oy+470,200,2);R('#e8e8e0',ox+200,oy+560,200,2);R('#e8e8e0',ox+200,oy+470,2,90);R('#e8e8e0',ox+400,oy+470,2,90)});
- A.o('fence',30,30,836,4);A.o('fence',30,640,370,4);A.o('fence',496,640,370,4);A.o('fence',30,34,4,606);A.o('fence',862,34,4,606);A.o('fence',60,52,776,4);
+ A.o('fence',30,30,836,4);A.o('fence',30,640,370,4);A.o('fence',496,640,370,4);A.o('fence',30,34,4,606);A.o('fence',862,34,4,606);
  for(const[x,y]of[[40,40],[820,40],[40,600],[820,600]])A.o('tower',x,y,28,26);A.o('booth',420,600,40,30);A.o('barrier',462,640,34,10);
  const cN=(x0,x1,y,h)=>{const o=A.ox;R('#a8a49a',o+120,y,656,h);for(let i=0;i<656;i+=40)R('#8a867c',o+120+i,y,2,h-10);R('#5a5650',o+120,y+h-12,656,6);for(const wx of[180,300,560,680])R('#1d1714',o+wx,y+8,20,h-26),R('#6a6f75',o+wx+4,y+8,2,h-26),R('#6a6f75',o+wx+12,y+8,2,h-26)};
- shell(A,120,80,776,420,cN,[[420,476]]);vseg(A,560,80,420,[[330,380]],34);A.hw(120,560,250,10);
+ shell(A,120,80,776,420,cN,[[420,476]]);vseg(A,560,80,420,[[330,380]],34);/* the cell bars are the wall: a door gap beside every cell */
  /* 감방 */for(let x=130;x<=470;x+=68){A.o('cell',x+4,236,46,4);A.o('bunk',x+6,96,30,54);A.o('toilet',x+40,100,14,12)}A.o('cell',130,96,4,140);
- /* 식당 */A.o('longtable',160,300,160,24);A.o('longtable',360,300,160,24);A.o('longtable',160,370,160,24);A.o('kitchen',380,380,120,20);
+ /* 식당 */A.o('longtable',160,290,160,24);A.o('longtable',360,290,160,24);A.o('longtable',160,350,160,24);A.o('kitchen',380,350,120,20);
  /* 무기고 · 간수실 */A.o('riot',580,96,80,20);A.o('gunrack',680,100,60,16);A.o('locker',740,140,24,40);A.o('desk',600,200,60,30);A.o('chair',620,240,14,12);A.o('console',600,300,82,14);A.o('cabinet',720,300,40,10);A.o('alarmbox',740,380,16,12);
  A.roof(120,80,656,340,'police','교도소',['#d8742a','#a8a49a']);A.ent(448,434,0,-1);
  A.o('hoop',600,450,40,4);A.o('bench',220,520,60,12);A.o('pcar',540,670,60,30);A.o('truck',120,660,90,36);
@@ -90,7 +92,7 @@ BUILDERS.prison=(c,r,sd)=>{const A=Bld('교도소',c,r,'prison'),Rn=mulberry(sd*
 BUILDERS.radio=(c,r,sd)=>{const A=Bld('라디오 방송국',c,r,'radio'),Rn=mulberry(sd*37+5);
  A.fl(0,0,BW,BH,'grass');A.fl(100,100,480,330,'carpet');A.fl(100,430,480,40,'walk');A.fl(620,80,240,360,'gravel');A.fl(0,560,BW,144,'asphalt');
  const rN=(x0,x1,y,h)=>{const o=A.ox;R('#d8d0c0',o+100,y,480,h);R('#2a2e33',o+100,y+h-14,480,8);R('#c43c32',o+260,y+6,160,h-26);R('#f4f4ee',o+272,y+10,40,h-34);R('#f4f4ee',o+318,y+14,90,4);for(const wx of[140,480])winD(o+wx,50,y,h)};
- shell(A,100,100,580,430,rN,[[310,370]]);vseg(A,340,100,280,[[200,250]],34);A.hw(100,580,280,10);
+ shell(A,100,100,580,430,rN,[[310,370]]);vseg(A,340,100,280,[[200,250]],34);A.hw(100,200,280,10);A.hw(260,420,280,10);A.hw(480,580,280,10);
  /* 스튜디오 */A.o('mic',140,150,140,18);A.o('chair',190,190,14,12);A.o('chair',230,190,14,12);A.o('leadglass',120,240,200,4);A.o('rug',150,110,120,30);
  /* 서버 · 송출실 */A.o('rack',370,120,60,18);A.o('rack',450,120,60,18);A.o('console',370,220,140,14,{radio:1});A.o('gen',520,200,44,20);
  /* 사무실 */A.o('desk',130,320,60,30);A.o('desk',240,320,60,30);A.o('bookshelf',380,300,60,14);A.o('sofa',460,370,70,24);A.o('cabinet',140,400,40,10);A.o('cooler',520,300,16,14);

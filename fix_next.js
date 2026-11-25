@@ -7,3 +7,6 @@
 {const _d=die;die=function(){if(typeof DUN!='undefined'&&DUN&&SURF){try{dunExit()}catch(e){}}return _d.apply(this,arguments)}}
 /* holding a demolition tool means demolition mode (e.g. after loading a save made in demolition mode) */
 {const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(typeof DEMO=='undefined'||!S||!S.p||!run)return;if(!DEMO&&DT[actW(S.p)]){DEMO=true;document.body.classList.add('demoOn');if(typeof WCK!='undefined')WCK=''}}}
+
+/* floor-level things (hatch, hole to the next floor, fuel island) are drawn with the floor, never on top of the player */
+Object.assign(FLAT,{hatch:1,mhole:1,island:1});
