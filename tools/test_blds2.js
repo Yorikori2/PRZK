@@ -26,3 +26,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
    out[kind]=W0.objs.filter(o=>o.b===bi&&LOOTT[o.t]).filter(o=>{for(let y=Math.max(0,((o.y-Y0-30)/C)|0);y<=Math.min(GYn-1,((o.y+o.h-Y0+30)/C)|0);y++)for(let x=Math.max(0,((o.x-X0-30)/C)|0);x<=Math.min(GXn-1,((o.x+o.w-X0+30)/C)|0);x++){if(seen[y*GXn+x]!=1)continue;const px=X0+x*C+4,py=Y0+y*C+4;if(rdist(o,px,py)<28&&seeObj({x:px,y:py},o))return false}return true}).map(o=>o.t)}
   out.flat=['rail','pstair','escal','lift','hatch','mhole','island','stripes'].filter(t=>!FLAT[t]);return out});
  for(const k in r)if(k!='flat')ok(!r[k].length,k+': every searchable object can be reached '+r[k].join(','));ok(!r.flat.length,'floor-level things are drawn under the player '+r.flat);await b.close()})();
+// every building scene starts at a free spot by a door and you can walk in; the sample never makes you overweight
+(async()=>{const {chromium}=require('playwright');const b=await chromium.launch();const p=await b.newPage();await p.goto(PAGE);await p.waitForTimeout(1600);
+ for(const k of['nb1','nb2','nb3','nb4','nc1','nc2','nc3','nc4','nc5','nc6']){const r=await p.evaluate(k=>{closeBase();PAUSE=false;scene9(k);give({scrap:3000});return{x:S.p.x,y:S.p.y,stuck:!!blocker(S.p.x,S.p.y,7),over:weight(S.p)>capacity(S.p)}},k);
+  await p.evaluate(()=>{ky.w=1});await p.waitForTimeout(600);const m=await p.evaluate(()=>{delete ky.w;return[S.p.x,S.p.y]});ok(!r.stuck&&!r.over&&Math.hypot(m[0]-r.x,m[1]-r.y)>40,k+': starts free, not overweight, walks in')}await b.close()})();
