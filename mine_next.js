@@ -64,7 +64,8 @@ function digDone(o){const p=S.p,M=MINE0(),ore=ORE_BY[o.m];rmSolid(o);M.dug[o.mc+
   if(Math.hypot(p.x-sx,p.y-sy)<70){if(M.hole)B.unshift({t:'⛏ 광산으로 내려가기',f:mineEnter,big:1});else if(DIGS)B.unshift({t:'⛏ 땅 파는 중… '+Math.round(DIGS.t/DIGS.T*100)+'%',f:null,info:1});else B.unshift(pickLv(p)?{t:'⛏ 땅 파고 광산 만들기 (6초)',f:()=>{DIGS={t:0,T:6,x:p.x,y:p.y}},big:1}:{t:'⛏ 광산 자리 · 곡괭이가 필요해요 (작업대 Lv1)',f:null,info:1})}
   for(const[k,n]of FST){const L=FPOS[k];if(!fBuilt(k))continue;if(Math.hypot(p.x-(BL.ox+L[0]+L[2]/2),p.y-(BL.oy+L[1]+L[3]/2))<70)B.unshift({t:'⚒ '+n.slice(2),f:()=>openForge(k),big:1})}
   if(Math.hypot(p.x-(BL.ox+FPOS.forge[0]),p.y-(BL.oy+FPOS.forge[1]))<120&&!FST.every(([k])=>fBuilt(k)))B.push({t:'⚒ 제작소 짓기',f:()=>openForge(FST.find(([k])=>!fBuilt(k))[0])});return B}}
-{const _ga=gearAct;gearAct=function(){if(DUN&&DUN.sh=='mine'&&!MINE&&pickLv(S.p)){const p=S.p,o=mineTarget(),z=Z.some(q=>Math.hypot(q.x-p.x,q.y-p.y)<70);if(o&&!z){startDig(o);return}}return _ga()}}
+/* attack digs only when nothing is being aimed at and the pickaxe can actually break that cell; otherwise it fights */
+{const _ga=gearAct;gearAct=function(){if(DUN&&DUN.sh=='mine'&&!MINE&&pickLv(S.p)){const p=S.p,o=mineTarget(),z=Z.some(q=>Math.hypot(q.x-p.x,q.y-p.y)<70)||(S.tg&&S.tgIn&&Z.includes(S.tg)),need=o?(typeof needLv2=='function'?needLv2(o):needLv(o)):99;if(o&&!z&&pickLv(p)>=need){startDig(o);return}}return _ga()}}
 {const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(!S)return;const p=S.p;
   if(DIGS){if(Math.hypot(p.x-DIGS.x,p.y-DIGS.y)>24){DIGS=null}else{DIGS.t+=dt;if((DIGS.t*2|0)!=((DIGS.t-dt)*2|0))noise(p.x,p.y,2);if(DIGS.t>=DIGS.T){DIGS=null;MINE0().hole=1;rebuildBase();msg('⛏ 광산 입구를 팠어요 · [⛏ 광산으로 내려가기]')}}}
   if(!MINE)return;if(!DUN||Math.hypot(p.x-MINE.x,p.y-MINE.y)>24||!W0.objs.includes(MINE.o)){if(MINE.o)MINE.o.crack=0;MINE=null;return}
