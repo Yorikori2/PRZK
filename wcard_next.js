@@ -77,3 +77,17 @@ document.head.insertAdjacentHTML('beforeend',`<style>body[data-wcs="C"] #rc{disp
 #wc2 .q .n{position:absolute;right:3px;bottom:1px;font-size:11px;font-weight:800;text-shadow:0 1px 2px #000}#wc2 .q .ky{position:absolute;left:4px;top:1px;font-size:9px;color:var(--mut)}#wc2 .q.off{opacity:.45}
 #qPick{position:fixed;z-index:9;display:flex;flex-direction:column;gap:4px;padding:6px;border-radius:12px;background:#141a20f2;border:1px solid #ffffff2a;max-height:50vh;overflow:auto;min-width:180px}#qPick .h{font-size:11px;color:var(--mut);padding:2px 4px}
 #qPick button{display:flex;align-items:center;gap:6px;text-align:left;padding:5px 10px;font-size:12.5px;width:auto}#qPick button img{width:22px;image-rendering:pixelated}#qPick button small{margin-left:auto;color:var(--mut)}#qPick button.on{border-color:#ffd36a}#qPick .clr{justify-content:center;color:var(--mut)}</style>`);
+/* ---------- tuck it away on the right, like the 도구 menu on the left ----------
+   A small handle on the right edge shows the weapon in hand and its ammo. Tap it to slide the quick slots + weapon
+   slots out; tap again to tuck them away. The choice is remembered. */
+let WCOPEN=true;try{WCOPEN=localStorage.getItem('pl_wcopen')!=='0'}catch(e){}
+document.body.insertAdjacentHTML('beforeend','<div id="wcH"></div>');document.body.classList.toggle('wcOpen',WCOPEN);
+function wcToggle(o){WCOPEN=o==null?!WCOPEN:o;try{localStorage.setItem('pl_wcopen',WCOPEN?'1':'0')}catch(e){}document.body.classList.toggle('wcOpen',WCOPEN);{const pk=$('qPick');if(pk)pk.remove()}WHK='';wcHandle()}
+let WHK='';
+function wcHandle(){const h=$('wcH');if(!h||!S||!S.p)return;if(WCS!='C'){h.style.display='none';return}h.style.display='';const p=S.p,id=actW(p),i=wcInfo(id),dm=typeof DEMO!='undefined'&&DEMO,k=id+i.mag+'/'+i.rs+i.rl+WCOPEN+dm+i.cnt;if(k==WHK)return;WHK=k;
+ h.innerHTML='<span class="ar">'+(WCOPEN?'▶':'◀')+'</span>'+(id=='fist'?'<b class="ic">✊</b>':'<img class="ic" src="'+icon(id)+'">')+'<span class="am">'+(dm?'철거':i.gun?(i.rl?'장전':i.mag):i.thr?i.cnt:'')+'</span>'}
+{const _gu=gearUpd;gearUpd=function(dt){_gu(dt);try{wcHandle()}catch(e){}}}
+$('wcH').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(run)wcToggle()});
+document.head.insertAdjacentHTML('beforeend',`<style>#wcH{position:fixed;right:0;z-index:4;bottom:calc(env(safe-area-inset-bottom,0px) + 132px);width:44px;height:62px;border-radius:12px 0 0 12px;background:#141a20ee;border:1.5px solid #ffffff2a;border-right:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer}
+#wcH .ar{font-size:9px;color:var(--mut)}#wcH .ic{width:28px;height:28px;image-rendering:pixelated;font-size:18px;text-align:center}#wcH .am{font-size:11px;font-weight:800;line-height:1}
+body.wcOpen #wcH{border-color:#ffd36a88}body[data-wcs="C"] #wc2{right:52px;transition:transform .22s ease,opacity .22s}body[data-wcs="C"]:not(.wcOpen) #wc2{transform:translateX(calc(100% + 60px));opacity:0;pointer-events:none}</style>`);
