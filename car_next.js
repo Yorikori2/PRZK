@@ -212,8 +212,8 @@ function vRot45(a,ang){const w=a.width,h=a.height,src=a.getContext('2d').getImag
   const base=_vs(t,'r',o),ang={dr:Math.PI/4,dl:3*Math.PI/4,ul:-3*Math.PI/4,ur:-Math.PI/4}[dir];return VSPR[k]=vRot45(base,ang)}}
 /* ---------- the trunk: 40 kg to start · 🧳 trunk mod +20 kg a level (civilian +25) · each kind carries one kind of cargo at half weight ---------- */
 VMOD.trunk=['🧳','트렁크 확장',4,'트렁크 +20kg (민간 승용차는 +25kg)',l=>({scrap:8*l,cloth:4*l})];
-const VTR={civ:['넓은 트렁크','확장할 때마다 +25kg',null],pol:['무기 거치대','무기 무게 절반',id=>!!W_BY[id]],med:['의료 칸','음식 · 물 · 의료품 무게 절반',id=>catOf(id)=='c'],
- mil:['탄약고','탄약 무게 절반',id=>catOf(id)=='a'],lab:['부품 선반','재료 (고철 · 전자부품 등) 무게 절반',id=>catOf(id)=='m']};
+const VTR={civ:['넓은 트렁크','확장할 때마다 +25kg',null],pol:['장비 보관함','방어구 · 장비 무게 절반',id=>!W_BY[id]&&catOf(id)=='e'],med:['의료 칸','음식 · 물 · 의료품 무게 절반',id=>catOf(id)=='c'],
+ mil:['무기고','무기 + 탄약 무게 절반',id=>!!W_BY[id]||catOf(id)=='a'],lab:['부품 선반','재료 (고철 · 전자부품 등) 무게 절반',id=>catOf(id)=='m']};
 const vTrCap=c=>40+(vMods(c).trunk|0)*(c.t=='civ'?25:20);
 const vTrW=(c,id)=>wtOf(id)*(VTR[c.t][2]&&VTR[c.t][2](id)?.5:1);
 const vTrBox=c=>{c.tr=c.tr||{};return c.tr};
@@ -228,7 +228,7 @@ function vTrunk(){const c=VC();if(!vOwned(c))return;const b=$('bm'),p=S.p,T=vTrB
   '<div class="vB" style="height:8px;margin:2px 0 8px"><i style="width:'+Math.min(100,used/cap*100)+'%;background:'+(used/cap>.9?'#ff8a5a':'#6ab0ff')+'"></i></div>'+
   '<h3 class="vH">트렁크</h3>'+(Object.keys(T).length?Object.keys(T).map(k=>row(k,T[k],true)).join('')+'<div class="vR"><button id="tAll">전부 꺼내기</button></div>':'<div class="sub">비어 있어요</div>')+
   '<h3 class="vH">내 가방 <small style="font-weight:400;color:var(--mut)">'+(+weight(p).toFixed(1))+'kg · 장착 중인 건 빼고</small></h3>'+(bag.length?bag.map(k=>row(k,p.inv[k]|0,false)).join(''):'<div class="sub">넣을 게 없어요</div>')+
-  '<div class="sub" style="line-height:1.6;margin-top:6px">· 기본 40kg · 차고에서 <b>🧳 트렁크 확장</b> (Lv4까지, 한 번에 +20kg · 민간 +25kg)<br>· 민간 넓은 트렁크 · 경찰 무기 절반 · 구급차 음식·의료품 절반 · 장갑차 탄약 절반 · 전기 밴 재료 절반<br>· 차고에 넣은 차도 짐을 그대로 실고 있어요</div>';
+  '<div class="sub" style="line-height:1.6;margin-top:6px">· 기본 40kg · 차고에서 <b>🧳 트렁크 확장</b> (Lv4까지, 한 번에 +20kg · 민간 +25kg)<br>· 민간 넓은 트렁크 · 경찰 방어구·장비 절반 · 구급차 음식·의료품 절반 · 장갑차 무기+탄약 절반 · 전기 밴 재료 절반<br>· 차고에 넣은 차도 짐을 그대로 실고 있어요</div>';
  b.style.display='block';
  b.querySelectorAll('[data-ti]').forEach(x=>x.onclick=()=>{vTrPut(c,x.dataset.ti,+x.dataset.n);vTrunk()});b.querySelectorAll('[data-to]').forEach(x=>x.onclick=()=>{vTrTake(c,x.dataset.to,+x.dataset.n);vTrunk()});
  const a=$('tAll');if(a)a.onclick=()=>{for(const k of Object.keys(T))vTrTake(c,k,T[k]|0);vTrunk()}}

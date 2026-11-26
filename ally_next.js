@@ -117,11 +117,11 @@ function aDaily(){if(S.inf.allyDay==null)S.inf.allyDay=S.day;if(S.day<=S.inf.all
 /* ---------- drawing ---------- */
 {const _zd=zDraw4;zDraw4=function(z){if(z.npc!='ally')return _zd(z);const a=aById(z.ally);if(!a)return true;const R0=AROLE[a.role];
   g.save();g.globalAlpha=.55;g.strokeStyle='#5aa8ff';g.lineWidth=2;g.beginPath();g.ellipse(z.x,z.y+1,14,5,0,0,6.28);g.stroke();g.restore();
-  if(a.st=='down'){g.save();g.globalAlpha=.75;g.translate(z.x,z.y);g.rotate(Math.PI/2);drawChar(aLook(a),0,0,'d',-1);g.restore();const t=performance.now()/300;g.font='bold 10px sans-serif';g.textAlign='center';g.fillStyle='#ff8a7a';g.fillText('🆘 '+a.nm+' · '+Math.ceil(a.downT)+'초',z.x,z.y-34+Math.sin(t)*2);return true}
+  if(a.st=='down'){g.save();g.globalAlpha=.75;g.translate(z.x,z.y);g.rotate(Math.PI/2);drawChar(aLook(a),0,0,'d',-1);g.restore();return true}
   const fr=z.walk>0?(typeof F8=='function'?F8(z.ph||0):(z.ph|0)%4):-1,dir=typeof dir8=='function'?(z.d8=dir8(z.fx,z.fy,z.d8)):'d';drawChar(aLook(a),z.x,z.y,dir,fr,wkOf(aWid(a)));if(a.shd&&typeof shdDraw=='function'){shdDraw(z.x,z.y,z.fx||0,z.fy||1,a.shd,dir);if(typeof shdCrack=='function')shdCrack(z.x,z.y,dir,shdRatioAlly(a))}
   if(z.hurt>0){z.hurt-=.016;g.globalAlpha=.45;R('#ff3a2a',z.x-9,z.y-36,18,34);g.globalAlpha=1}
   const w=26,f=Math.max(0,a.hp/aMhp(a));R('#000a',z.x-w/2-1,z.y-48,w+2,5);R(f>.5?'#5fe08a':f>.25?'#ffd36a':'#ff6a5a',z.x-w/2,z.y-47,w*f,3);
-  const GR=AGRADE[a.gr||1];g.font='bold 9px sans-serif';g.textAlign='center';g.fillStyle=GR[1];g.fillText(GR[0],z.x,z.y-62);g.fillStyle='#9ad0ff';g.fillText(R0.ic+' '+a.nm+' Lv'+a.lv+(a.st=='job'?' · '+AJOB[a.job][1]:a.st=='wait'?' · 대기':''),z.x,z.y-52);return true}}
+  return true}}
 /* allies on the minimap and the map (always, in blue) */
 {const _mm=mm2;mm2=function(){_mm();if(!S||!S.p||typeof DUN!='undefined'&&DUN&&DUN.sh=='mine')return;const c=$('mm2');if(!c||$('mmw').style.display=='none')return;const x=c.getContext('2d'),W2=c.width,sc=MMBIG?.35:1,k=MK*sc,cx=S.p.x*k-W2/2,cy=S.p.y*k-W2/2;
   x.fillStyle='#5aa8ff';for(const z of Z)if(z.npc=='ally')x.fillRect(z.x*k-cx-1.5,z.y*k-cy-1.5,3,3)}}
@@ -200,7 +200,13 @@ function aStashFill(a,z,quiet){const id=aAmmoId(a);if(!id||!S.base||!S.base.st)r
 {const _zd=zDraw4;zDraw4=function(z){if(z.npc=='ally'&&z.nzT>0){z.nzT-=.016;const k=1-z.nzT/.5;g.save();g.globalAlpha=.35*(1-k);g.strokeStyle='#ffd36a';g.lineWidth=1.5;g.beginPath();g.arc(z.x,z.y-10,20+(Math.min(z.nzR||160,260)-20)*k,0,6.2832);g.stroke();g.restore()}return _zd.apply(this,arguments)}}
 /* ---------- speech bubbles and the "탄약 없음" tag: drawn sharp at screen resolution (the world is drawn small and blown up) ---------- */
 function aBubbles(){if(!S||!S.inf||typeof ctx=='undefined')return;const c=ctx,k=zoom*dpr;let any=false;
- for(const z of Z){if(z.npc!='ally')continue;const a=aById(z.ally);if(!a||a.st=='down')continue;const say=z.sayT>0&&z.say,out=!say&&aAmmoId(a)&&aOut(a);if(!say&&!out)continue;
+ for(const z of Z){if(z.npc!='ally')continue;const a=aById(z.ally);if(!a)continue;
+  {const X=(z.x-camX)*k,Y=(z.y-camY)*k;if(X>-200&&Y>-100&&X<c.canvas.width+200&&Y<c.canvas.height+200){c.save();c.setTransform(1,0,0,1,0,0);c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';
+   if(a.st=='down'){const t=performance.now()/300;c.font='700 '+Math.round(12*dpr)+'px system-ui,sans-serif';const tx='🆘 '+a.nm+' · '+Math.ceil(a.downT)+'초';c.lineWidth=3.5*dpr;c.strokeStyle='#000c';c.strokeText(tx,X,Y-34*k+Math.sin(t)*2*dpr);c.fillStyle='#ff9a8a';c.fillText(tx,X,Y-34*k+Math.sin(t)*2*dpr)}
+   else{const GR=AGRADE[a.gr||1],R0=AROLE[a.role],nm=R0.ic+' '+a.nm+' Lv'+a.lv+(a.st=='job'?' · '+AJOB[a.job][1]:a.st=='wait'?' · 대기':'');c.lineWidth=3*dpr;c.strokeStyle='#000b';
+    c.font='700 '+Math.round(10*dpr)+'px system-ui,sans-serif';c.strokeText(GR[0],X,Y-64*k);c.fillStyle=GR[1];c.fillText(GR[0],X,Y-64*k);
+    c.font='600 '+Math.round(11*dpr)+'px system-ui,sans-serif';c.strokeText(nm,X,Y-54*k);c.fillStyle='#b4dcff';c.fillText(nm,X,Y-54*k)}c.restore()}}
+  if(a.st=='down')continue;const say=z.sayT>0&&z.say,out=!say&&aAmmoId(a)&&aOut(a);if(!say&&!out)continue;
   const X=(z.x-camX)*k,Y=(z.y-camY)*k;if(X<-200||Y<-100||X>c.canvas.width+200||Y>c.canvas.height+200)continue;any=true;c.save();c.setTransform(1,0,0,1,0,0);c.textAlign='center';c.textBaseline='middle';
   const fs=Math.round(13*dpr),pad=8*dpr,top=Y-76*k;
   if(say){c.font='600 '+fs+'px system-ui,sans-serif';const w=c.measureText(z.say).width+pad*2,h=fs+pad*1.1,x0=Math.round(X-w/2),y0=Math.round(top-h);c.globalAlpha=Math.min(1,z.sayT);
