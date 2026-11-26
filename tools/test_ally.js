@@ -41,3 +41,18 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  await p.evaluate(()=>{closeBase();scene9('ms')});await p.waitForTimeout(600);const ms=await p.evaluate(()=>({m:$('bm').dataset.m,rows:document.querySelectorAll('#bm .mR').length}));ok(ms.m=='mast'&&ms.rows>=5,'mastery sheet lists your weapons and tools ('+ms.rows+')');
  await p.evaluate(()=>{closeBase();scene9('al4')});const dex=await p.evaluate(()=>document.querySelectorAll('#bm canvas[data-dl]').length);ok(dex==5,'companion guide shows the 5 roles');
  ok(!errs.length,'no page errors (variety · mastery · shields) '+errs.slice(0,2));await b.close()})();
+// S-rank bonuses per weapon kind · shield durability (wear, worn, broken, repair at the workbench)
+(async()=>{const {chromium,devices}=require('playwright');const b=await chromium.launch();const ctx=await b.newContext({...devices['Pixel 7']});const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
+ await p.goto(PAGE);await p.evaluate(()=>localStorage.clear());await p.reload();await p.waitForTimeout(1800);await p.evaluate(()=>{closeBase();scene9('msS')});await p.waitForTimeout(700);
+ const r=await p.evaluate(()=>{closeBase();PAUSE=false;const P=S.p,M=MAST(),out={};const one=(id,setup)=>{mk(P.x+60,P.y,{look:'civ1'});const q=Z[Z.length-1];setup&&setup(q);MCTX={who:'p',id,x:P.x,y:P.y,rng:300};try{hitZ(q,10,1,0,1)}finally{MCTX=null}return q};
+  /* pistol S: some headshots (x2.5) */let big=0;for(let i=0;i<200;i++){const q=one('pistol',q=>{q.hp=1e6;q.mhp=1e6});if(1e6-q.hp>20)big++;q.hp=0}out.head=big;
+  /* pistol F: none */M.pistol=0;big=0;for(let i=0;i<200;i++){const q=one('pistol',q=>{q.hp=1e6;q.mhp=1e6});if(1e6-q.hp>20)big++;q.hp=0}out.headF=big;M.pistol=MXP[6];
+  /* machete S: execute */{const q=one('machete',q=>{q.mhp=100;q.hp=24});out.exec=q.hp<=0}
+  /* rifle S: the one behind is hit too */{mk(P.x+60,P.y,{look:'civ1'});const q=Z[Z.length-1];mk(P.x+120,P.y,{look:'civ1'});const t=Z[Z.length-1];q.hp=t.hp=1e6;const h=t.hp;MCTX={who:'p',id:'ar',x:P.x,y:P.y,rng:300};try{for(let i=0;i<6;i++)hitZ(q,10,1,0,1)}finally{MCTX=null}out.pierce=t.hp<h;q.hp=t.hp=0}
+  /* sniper S vs elite */{mk(P.x+60,P.y,{look:'heavy'});const q=Z[Z.length-1];q.hp=1e6;let mx=0;for(let i=0;i<8;i++){const h=q.hp;MCTX={who:'p',id:'hunting',x:P.x,y:P.y,rng:400};try{hitZ(q,10,1,0,1)}finally{MCTX=null}mx=Math.max(mx,h-q.hp)}out.elite=mx;q.hp=0}
+  return out});
+ ok(r.head>10&&r.headF==0,'pistol S: headshots ('+r.head+'/200) · at F none');ok(r.exec,'melee S: a nearly-dead zombie is executed');ok(r.pierce,'rifle S: the zombie behind is hit too');ok(r.elite>=15,'sniper S: +60% on elites ('+r.elite+' from 10)');
+ await p.evaluate(()=>{closeBase();scene9('shd2')});await p.waitForTimeout(600);
+ const s=await p.evaluate(()=>{const P=S.p,M=MAST();const worn=shdBlock('shd3',M);P.hp=100;const d0=shdHp('shd3');hurtP(40,'t');const d1=shdHp('shd3');SHDST().shd3=1;hurtP(40,'t');const broke=shdHp('shd3')==0&&shdBlock('shd3',M)==0;const L=iaList().map(q=>q.t);const sc=P.inv.scrap;iaList().find(q=>/방패 수리 · 강화/.test(q.t)).f();return{worn,wear:d0-d1,broke,menu:L.some(t=>/방패 수리/.test(t)),fixed:shdHp('shd3')==SHDHP.shd3,paid:sc-P.inv.scrap,full:shdBlock('shd3',M),hud:!!$('shdHud')}});
+ ok(s.wear>0,'a block wears the shield ('+s.wear+')');ok(s.worn<s.full,'below 25%: blocks less ('+s.worn.toFixed(2)+' < '+s.full.toFixed(2)+')');ok(s.broke,'at 0 the shield is broken and blocks nothing');
+ ok(s.menu&&s.fixed&&s.paid>0,'repair at the base workbench for scrap (+steel / parts by grade)');ok(s.hud,'shield durability shows on screen');ok(!errs.length,'no page errors (S bonus · durability) '+errs.slice(0,2));await b.close()})();

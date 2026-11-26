@@ -40,7 +40,7 @@ for(const id in SHD){const[n,rar,wt,bl]=SHD[id];if(!I_BY[id]){const it=[id,n,'e'
 if(!SLOTS.some(s=>s[0]=='shd')){const i=SLOTS.findIndex(s=>s[0]=='bag');SLOTS.splice(i<0?SLOTS.length:i,0,['shd','방패']);SLOTN.shd='방패'}
 {const _sf=slotFor;slotFor=function(id){return /^shd\d$/.test(id)?'shd':_sf(id)}}
 const shdOn=p=>{const id=p&&p.eq&&p.eq.shd;return id&&SHD[id]&&has(p,id)?id:null};
-const shdBlock=(id,M)=>SHD[id][3]+.02*mRank(M[id]|0);
+let shdBlock=(id,M)=>SHD[id][3]+.02*mRank(M[id]|0);
 {const _h=hurtP;hurtP=function(n,why){const p=S&&S.p,id=shdOn(p);if(id&&n>0){const b=shdBlock(id,MAST());n*=1-b;mGain('p',id,1);if(Math.random()<.3)mFloat(p.x+(p.fx||0)*12,p.y-30,'🛡','#9ad0f0',.4)}return _h.call(this,n,why)}}
 const isPistol=id=>GCLASS[id]=='pistol';
 /* holding a shield: pistols only */
@@ -68,3 +68,52 @@ document.head.insertAdjacentHTML('beforeend',`<style>#bm .mR{display:flex;align-
 if(typeof IAW!='undefined')IAW.unshift([/숙련도/,'숙련도']);
 /* a way in: the bag's weapon detail, and the companion sheet */
 {const _ob=openBag;openBag=function(id){_ob(id);const ba=$('bm').querySelector('.det .ba');if(ba&&BSEL&&(W_BY[BSEL]||SHD[BSEL]))ba.insertAdjacentHTML('afterbegin','<button onclick="mastOpen()">🎖 숙련도 '+MRK[mRank(MAST()[BSEL]|0)]+'</button>')}}
+/* ================= S-rank bonus: one special effect per kind of weapon ================= */
+const SBON={pistol:['🎯','헤드샷','15% 확률로 피해 ×2.5'],smg:['🔁','탄 절약','20% 확률로 탄을 쓰지 않아요'],rifle:['➡','관통 +1','맞힌 좀비 뒤의 한 마리도 맞아요 (피해 60%)'],shotgun:['💥','강한 반동','피해 +15% · 더 멀리 밀쳐내요'],
+ sniper:['💀','거물 사냥','정예 · 보스에게 피해 +60%'],bow:['🏹','화살 회수','40% 확률로 화살을 쓰지 않아요'],melee:['⚔','처형','맞고 체력이 15% 아래로 남으면 바로 쓰러뜨려요'],throw:['🎁','하나 더','30% 확률로 던진 게 줄지 않아요'],
+ tool:['⚡','숙련 철거','자동 철거 간격 -25%'],shield:['🔰','완벽한 막기','25% 확률로 피해를 모두 막고 주변 좀비를 밀쳐내요']};
+const isS=(M,id)=>mRank(M[id]|0)==6;
+const ELITE=z=>!!(z.b||z.tboss||['heavy','stalker','shocker','brute','brood','goliath'].includes(z.look));
+let SB_PIERCE=false;
+{const _hz=hitZ;hitZ=function(q,dmg,dx,dy,n){const C=MCTX;if(C&&q&&!q.npc&&!SB_PIERCE){const M=C.who=='p'?MAST():(C.who.mast||{});if(isS(M,C.id)){const c=mClass(C.id);
+   if(c=='pistol'&&Math.random()<.15){dmg*=2.5;mFloat(q.x,q.y-50,'HEADSHOT','#ff6a5a',.7)}
+   if(c=='shotgun'){dmg*=1.15;const d=Math.hypot(q.x-C.x,q.y-C.y)||1;mv(q,(q.x-C.x)/d*12,(q.y-C.y)/d*12,7)}
+   if(c=='sniper'&&ELITE(q))dmg*=1.6;
+   if(c=='melee'){const r=_hz.apply(this,[q,dmg,dx,dy,n]);if(q.hp>0&&q.hp<q.mhp*.15&&!ELITE(q)){q.hp=0;mFloat(q.x,q.y-50,'처형','#ffd36a',.7)}return r}
+   if(c=='rifle'){const r=_hz.apply(this,[q,dmg,dx,dy,n]);const ux=dx||((q.x-C.x)/(Math.hypot(q.x-C.x,q.y-C.y)||1)),uy=dy||((q.y-C.y)/(Math.hypot(q.x-C.x,q.y-C.y)||1));
+    for(const t of Z){if(t===q||t.npc||!(t.hp>0))continue;const ex=t.x-q.x,ey=t.y-q.y,along=ex*ux+ey*uy,side=Math.abs(ex*uy-ey*ux);if(along>0&&along<120&&side<18){SB_PIERCE=true;try{_hz.call(this,t,dmg*.6,dx,dy,n)}finally{SB_PIERCE=false}fx.push({k:'tr',a:[q.x,q.y-14],b:[t.x,t.y-14],l:.06});break}}return r}}}
+  return _hz.call(this,q,dmg,dx,dy,n)}}
+/* smg · bow: the round may not be spent */
+{const _ga=gearAct;gearAct=function(){const p=S.p,id=actW(p),m0=p.mag[id];const r=_ga.apply(this,arguments);const c=mClass(id);if((c=='smg'&&Math.random()<.2||c=='bow'&&Math.random()<.4)&&isS(MAST(),id)&&p.mag[id]==m0-1){p.mag[id]++;if(Math.random()<.3)mFloat(p.x,p.y-48,c=='bow'?'🏹 회수':'🔁 절약','#9ad0f0',.5)}return r}}
+/* throws: one more */
+{const _t=throwIt;throwIt=function(p,id,s){const n0=p.inv[id]|0;const r=_t.apply(this,arguments);if(isS(MAST(),id)&&(p.inv[id]|0)<n0&&Math.random()<.3){p.inv[id]=n0;if(p.eq.thr!=id&&has(p,id))p.eq.thr=id;mFloat(p.x,p.y-48,'🎁 하나 더','#9ad0f0',.6)}return r}}
+/* tools: faster automatic demolition */
+for(const id in DT){const T=DT[id],d=Object.getOwnPropertyDescriptor(T,'auto');if(!d)continue;const get=d.get||(()=>d.value);Object.defineProperty(T,'auto',{get:()=>{const v=get();return v&&S&&S.pg&&isS(MAST(),id)?v*.75:v},enumerable:true,configurable:true})}
+/* ================= shield durability: blocks wear it down, repair at the workbench ================= */
+const SHDHP={shd1:100,shd2:150,shd3:220,shd4:300,shd5:400};
+const SHDST=()=>{const pg=S.pg||(S.pg={});pg.shdHp=pg.shdHp||{};return pg.shdHp};
+const shdHp=id=>{const H=SHDST();if(H[id]==null)H[id]=SHDHP[id];return H[id]};
+{const _sb=shdBlock;shdBlock=function(id,M){/* a broken shield blocks nothing; a worn one a bit less */if(M===MAST()){const h=shdHp(id),mx=SHDHP[id];if(h<=0)return 0;return _sb(id,M)*(h<mx*.25?.7:1)}return _sb(id,M)}}
+/* the hurt wrapper above reads shdBlock; wear and the S-rank perfect block live here */
+{const _h=hurtP;hurtP=function(n,why){const p=S&&S.p,id=shdOn(p);if(id&&n>0&&shdHp(id)>0){const M=MAST();if(isS(M,id)&&Math.random()<.25){mFloat(p.x,p.y-48,'🔰 완벽한 막기','#9ad0ff',.7);for(const z of Z)if(!z.npc&&z.hp>0&&Math.hypot(z.x-p.x,z.y-p.y)<60){const d=Math.hypot(z.x-p.x,z.y-p.y)||1;mv(z,(z.x-p.x)/d*30,(z.y-p.y)/d*30,7);z.stun=Math.max(z.stun||0,.6)}SHDST()[id]=Math.max(0,shdHp(id)-1);return}
+  const before=shdHp(id);SHDST()[id]=Math.max(0,before-Math.max(1,Math.round(n*.25)));if(SHDST()[id]==0&&before>0){msg('💥 '+NM2(id)+'이(가) 부서졌어요! 작업대에서 고쳐야 다시 막아요');try{sfx((A,t)=>tone(A,t,{w:'sawtooth',f0:300,f1:60,d:.4,v:.12}))}catch(e){}}
+  else if(SHDST()[id]<SHDHP[id]*.25&&before>=SHDHP[id]*.25)msg('⚠ '+NM2(id)+' 내구도가 25% 아래예요 · 막는 힘이 줄어요')}return _h.call(this,n,why)}}
+const shdCost=id=>{const miss=SHDHP[id]-shdHp(id),c={scrap:Math.ceil(miss/10)};const tier=+id.slice(3);if(tier>=3)c.steel=Math.ceil(miss/60);if(tier>=5)c.elec=Math.ceil(miss/100);return c};
+function shdRepair(id){const p=S.p,c=shdCost(id);for(const k in c)if((p.inv[k]|0)<c[k])return msg('🛠 재료가 모자라요 · '+Object.entries(c).map(([k,n])=>NM2(k)+' '+n).join(' · '));for(const k in c)p.inv[k]-=c[k];SHDST()[id]=SHDHP[id];msg('🛠 '+NM2(id)+' 수리 완료 · 내구 '+SHDHP[id]+'/'+SHDHP[id])}
+{const _c=dmCtx;dmCtx=function(){const B=_c();try{if(!S||typeof DUN!='undefined'&&DUN||!S.base||!inBase(S.p.x,S.p.y))return B;const p=S.p,nb=BP.find(o=>o.t=='bench3'&&Math.hypot(o.x+o.w/2-p.x,o.y+o.h/2-p.y)<70);if(!nb)return B;
+  for(const id in SHD){if(!has(p,id))continue;const h=shdHp(id);if(h>=SHDHP[id])continue;const c=shdCost(id);B.push({t:'🛠 방패 수리 · '+NM2(id)+' '+h+'/'+SHDHP[id]+' · '+Object.entries(c).map(([k,n])=>NM2(k)+' '+n).join(' · '),f:()=>shdRepair(id),big:h<=0})}}catch(e){}return B}}
+if(typeof IAW!='undefined')IAW.unshift([/방패 수리/,'방패 수리']);
+/* the shield looks cracked when worn, and a durability bar shows under the weapon card */
+{const _sd=shdDraw;shdDraw=function(x,y,fx,fy,id,dir){_sd(x,y,fx,fy,id,dir);if(!S||!S.p||!shdOn(S.p)||Math.abs(x-S.p.x)>2)return;const h=shdHp(id),mx=SHDHP[id];if(h>=mx*.5)return;
+  let side=/r/.test(dir||'')?1:/l/.test(dir||'')?-1:0;const X=x+side*8+(side?0:-5),Y=y-26;R('#1d1714',X-3,Y+4,1,6);R('#1d1714',X-2,Y+9,3,1);R('#1d1714',X+1,Y+9,1,5);if(h<=0){R('#1d1714',X+2,Y+2,1,8);R('#ff6a5a',X-5,Y+17,10,1)}}}
+{const _gu=gearUpd;let T=0;gearUpd=function(dt){_gu(dt);T-=dt;if(T>0||!S||!S.p)return;T=.4;let el=$('shdHud');const id=shdOn(S.p);if(!id){if(el)el.remove();return}
+  if(!el){document.body.insertAdjacentHTML('beforeend','<div id="shdHud"><img><span><b></b><i><u></u></i></span></div>');el=$('shdHud');el.querySelector('img').src=icon(id)}const h=shdHp(id),mx=SHDHP[id],f=h/mx;
+  el.querySelector('b').textContent='🛡 '+h+'/'+mx+(h<=0?' 부서짐':'');const u=el.querySelector('u');u.style.width=(f*100)+'%';u.style.background=f>.5?'#5fe08a':f>.25?'#ffd36a':'#ff6a5a';el.classList.toggle('broken',h<=0)}}
+document.head.insertAdjacentHTML('beforeend',`<style>#shdHud{position:fixed;left:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 64px);z-index:5;display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:10px;background:#141a20d9;border:1px solid #ffffff22;font-size:11px;pointer-events:none}#shdHud img{width:20px;height:20px;image-rendering:pixelated}
+#shdHud i{display:block;width:70px;height:5px;border-radius:3px;background:#ffffff18;overflow:hidden;margin-top:2px}#shdHud u{display:block;height:100%}#shdHud.broken{border-color:#ff6a5a;animation:shdB 1s infinite}@keyframes shdB{50%{background:#5a1414d9}}</style>`);
+/* the mastery sheet shows each weapon's S-rank bonus (locked until S) and shield durability */
+{const _mo=mastOpen;mastOpen=function(who){_mo(who);const a=who&&who!='p'?who:null,M=a?(a.mast||{}):MAST();document.querySelectorAll('#bm .mR').forEach(el=>{const img=el.querySelector('img');if(!img)return;const nm=el.querySelector('.mN b').textContent;
+  const id=Object.keys(W_BY).concat(Object.keys(SHD)).find(k=>NM2(k)==nm);if(!id)return;const c=mClass(id),B=SBON[c];if(!B)return;const on=isS(M,id);
+  el.querySelector('.mN').insertAdjacentHTML('beforeend','<div class="sbn'+(on?' on':'')+'">'+(on?'':'🔒 S랭크: ')+B[0]+' '+B[1]+' · '+B[2]+'</div>'+(SHD[id]&&!a?'<div class="sbn">내구 '+shdHp(id)+'/'+SHDHP[id]+(shdHp(id)<=0?' · 부서짐':'')+'</div>':''))});
+  const sub=document.querySelector('#bm .sub:last-child');if(sub)sub.insertAdjacentHTML('beforeend','<br>· <b>S랭크 보너스</b>: 무기 종류마다 하나씩 (권총 헤드샷 · 기관단총 탄 절약 · 소총 관통 · 산탄총 강한 반동 · 저격총 거물 사냥 · 활 화살 회수 · 근접 처형 · 투척 하나 더 · 철거 숙련 철거 · 방패 완벽한 막기)<br>· <b>방패 내구도</b>: 막을 때마다 닳아요 · 25% 아래면 막는 힘 70% · 0이면 부서져서 못 막아요 · 거점 작업대에서 고철(희귀 이상 강철 · 전설 전자부품)로 수리')}}
+document.head.insertAdjacentHTML('beforeend',`<style>#bm .sbn{font-size:10.5px;color:#8a9096;margin-top:2px}#bm .sbn.on{color:#ffd36a;font-weight:700}</style>`);
