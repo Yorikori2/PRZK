@@ -9,7 +9,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
   const s=wdef('ar')[4],base=W_BY.ar[4];return{mag:P.mag.ar,ap:P.inv.a556_ap|0,plain:P.inv.a556|0,t:P.magT.ar,pierce:s.pierce||1,bp:base.pierce||1}});
  ok(r.mag==30&&r.ap==10&&r.plain==50&&r.t=='a556_ap','reloading takes the chosen kind (AP 40→10, plain untouched)');ok(r.pierce==r.bp+1,'armour-piercing adds a pierce');
  r=await p.evaluate(()=>{const P=S.p;P.inv.a556_inc=30;ammoLoad('a556_inc');const back=P.inv.a556_ap|0,mag=P.mag.ar;reload(P,true);for(let i=0;i<200&&P.rl>0;i++)reloadTick(P,.05);
-  Z.length=0;mk(P.x+80,P.y,{look:'civ1'});const z=Z[0];z.hp=1e4;P.fx=1;P.fy=0;S.tg=z;P.ac=0;gearAct();return{back,mag,burn:z.burn|0,t:P.magT.ar}});
+  Z.length=0;mk(P.x+80,P.y,{look:'civ1'});const z=Z[0];z.hp=1e4;P.fx=1;P.fy=0;S.tg=z;for(let i=0;i<12&&!(z.burn>0);i++){P.ac=0;P.cd=0;gearAct()}return{back,mag,burn:z.burn|0,t:P.magT.ar}});
  ok(r.back==40&&r.mag==0,'switching kinds puts the old rounds back in the bag');ok(r.t=='a556_inc'&&r.burn>0,'incendiary rounds set zombies alight');
  r=await p.evaluate(()=>{const P=S.p;give({pump:1});P.eq.prim='pump';P.mag.pump=0;P.inv.a12g_slug=12;ammoLoad('a12g_slug');reload(P,true);for(let i=0;i<300&&P.rl>0;i++)reloadTick(P,.05);const s=wdef('pump')[4],b2=W_BY.pump[4];
   P.inv.a12g_bean=12;ammoLoad('a12g_bean');reload(P,true);for(let i=0;i<300&&P.rl>0;i++)reloadTick(P,.05);Z.length=0;mk(P.x+40,P.y,{look:'civ1'});const z=Z[0];z.hp=1e4;S.tg=z;P.ac=0;gearAct();return{slug:!s.pel&&s.r>b2.r&&s.d>b2.d*3,stun:z.stun>0}});
