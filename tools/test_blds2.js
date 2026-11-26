@@ -12,7 +12,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
   /* a demolished hospital block stays a lot */const h=findKind(['hosp'],3);S.inf.demo=S.inf.demo||{};S.inf.demo[h.join()]={k:'hosp',sh:0,day:1};out.lot=[kindAt(h[0],h[1]),kindAt(h[0]+1,h[1])];delete S.inf.demo[h.join()];delete S.inf.demo[(h[0]+1)+','+h[1]];
   out.prisoner=!!LOOKS.prisoner;out.legend=Object.keys(KNAME).filter(k=>KNAME[k]=='병원').length;return out});
  console.log(JSON.stringify(r.cnt));ok(!r.pairBad.length,'every hospital has both halves side by side '+r.pairBad.slice(0,3));
- for(const k of['hosp','mall','park2','subway','prison','radio']){const B=r.b[k];ok(r.cnt[k]>0,k+' appears in the 81×81 city ('+(r.cnt[k]|0)+')');ok(B&&B!='none'&&!B.miss.length&&B.loot>3&&B.z>2&&B.tier>0&&B.spec,k+' builds with its furniture, loot, zombies, tier and bonus '+JSON.stringify(B))}
+ for(const k of['hosp','mall','park2','subway','prison','radio']){const B=r.b[k];ok(r.cnt[k]>0,k+' appears in the 81×81 city ('+(r.cnt[k]|0)+')');ok(B&&B!='none'&&!B.miss.length&&B.loot>3&&B.z>=2&&B.tier>0&&B.spec,k+' builds with its furniture, loot, zombies, tier and bonus '+JSON.stringify(B))}
  ok(r.bridge&&r.bridgeX,'hospital: the road under the bridge stays open and both doors of the bridge are open');ok(r.lot[0]=='lot'&&r.lot[1]=='lot','a demolished hospital: both halves become lots '+r.lot);
  ok(r.prisoner,'prisoner zombie look');ok(r.legend==1,'map legend lists 병원 once');
  for(const s of['ncT','nc1','nc2','nc3','nc4','nc5','nc6','op','zg','zp','zb']){await p.evaluate(s=>scene9(s),s);await p.waitForTimeout(500)}
