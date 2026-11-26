@@ -36,9 +36,9 @@ function metroEnter(o){const p=S.p,c=(NBX-1)/2|0,r=(NBY-1)/2|0;const at=gOf(o.x,
  /* underground = two zones more dangerous than the station above, more of them the longer the line, guards at the far stairs */
  const Rn=mulberry(DUN.seed+3),L=['civ1','civ2','runner','crawler','sleeper','runner','spitter','civ3'],n0=Z.length,n=16+to[2]*4;for(let i=0;i<n;i++)mk(ox+450+Rn()*(W-800),oy+250+Rn()*210,{look:L[Rn()*L.length|0]});
  for(let k=0;k<2;k++)mk(ox+W/2+(k?340:-340),oy+440,{look:'heavy'});mk(ox+W/2,oy+300,{look:'screamer'});
- mk(ox+W-200,oy+300,{look:'brute'});mk(ox+W-260,oy+250,{look:'stalker'});mk(ox+W-260,oy+420,{look:'stalker'});
- metroHarden(Z.slice(n0));DUN.amb=0;DUN.W=W;DUN.ox=ox;DUN.oy=oy;
- msg('🚇 지하 선로 · 지상보다 2구역 더 위험 · '+(n+6)+'마리 · 끝 계단 = '+to[2]+'블록 떨어진 지하철역 ('+to[0]+', '+to[1]+') · 출구를 브루트가 지켜요');S.metroN=(S.metroN||0)+1}
+ mk(ox+W-260,oy+250,{look:'stalker'});mk(ox+W-260,oy+420,{look:'stalker'});
+ metroHarden(Z.slice(n0));DUN.amb=0;metroNests(ox,oy,W,to[2]);metroBoss(ox+W-230,oy+340);DUN.W=W;DUN.ox=ox;DUN.oy=oy;
+ msg('🚇 지하 선로 · 지상보다 2구역 더 위험 · '+(n+6)+'마리 · 끝 계단 = '+to[2]+'블록 떨어진 지하철역 ('+to[0]+', '+to[1]+') · 둥지 '+(2+(to[2]>=5?1:0))+'개 · 출구를 기관사 거수(보스)가 지켜요');S.metroN=(S.metroN||0)+1}
 const MZ=2;/* how many zones harder the tunnel is */
 function metroHarden(L){const zn=Math.max(0,zoneOf(...DUN.from)),f=zMulHp(zn+MZ)/zMulHp(zn),fa=zMulAtk(zn+MZ)/zMulAtk(zn);for(const z of L){z.hp*=f;z.mhp*=f;if(z.dmg!=null)z.dmg*=fa;z.metro=1}}
 /* halfway: the train horn wakes the line — a pack from behind and from ahead */
@@ -72,9 +72,12 @@ OVL.push((g2,sx,sy,k)=>{const s=S&&S.inf&&S.inf.sos;if(!s||s.done||typeof DUN!='
   if(typeof DUN!='undefined'&&DUN&&DUN.sh=='metro'){for(const o of W0.objs)if(o.t=='mup'&&Math.hypot(o.x+o.w/2-p.x,o.y+o.h/2-p.y)<70)B.unshift({t:o.go?'⬆ 다음 역으로 올라가기 ('+DUN.to.join(', ')+')':'⬆ 처음 역으로 올라가기',f:()=>metroUp(!!o.go),big:1});return B}
   if(typeof DUN!='undefined'&&DUN)return B;
   for(const o of W0.objs){if(o.t=='tmouth'&&Math.hypot(o.x+o.w/2-p.x,o.y+o.h/2-p.y)<80){const at=gOf(o.x,o.y),to=nextStation(at[0],at[1]);B.unshift({t:to?'🚇 지하 터널로 · 다음 역 '+to[2]+'블록':'🚇 지하 터널 (막힘)',f:()=>metroEnter(o),big:1})}
-   /* the transmission tower in the fenced yard (not the studio console) */if(o.t=='mast'&&Math.hypot(o.x+o.w/2-p.x,o.y+o.h-p.y)<80){const gk=gOf(o.x,o.y).join(),st=RADIO0()[gk]||{};
-    B.unshift({t:st.map==S.day?'📡 지도 받기 (오늘 함)':'📡 송신탑 · 주변 지도 받기 (반경 8블록)',f:()=>radioMap(gk),off:st.map==S.day});
-    B.unshift({t:S.inf.sos&&!S.inf.sos.done?'📻 생존자 신호 · '+S.inf.sos.nm+' 찾는 중':st.sos==S.day?'📻 신호 찾기 (오늘 함)':'📻 송신탑 · 생존자 신호 찾기',f:()=>radioSos(gk),off:!!(S.inf.sos&&!S.inf.sos.done)||st.sos==S.day})}
+   /* the transmission tower in the fenced yard: fuel powers it for a while, each use takes electronic parts */if(o.t=='mast'&&Math.hypot(o.x+o.w/2-p.x,o.y+o.h-p.y)<80){const gk=gOf(o.x,o.y).join(),st=RADIO0()[gk]=RADIO0()[gk]||{},pw=st.pw>0,has2=k=>(S.p.inv[k]|0);
+    const finding=!!(S.inf.sos&&!S.inf.sos.done);
+    if(!pw){B.unshift({t:'⛽ 발전기에 연료 넣기 · 연료 1 = '+TPW_MIN+'분 가동'+(has2('fuel')?'':' · 연료 없음'),f:()=>towerFuel(gk),off:!has2('fuel')});B.push({t:'📡 송신탑 · 전원 꺼짐 (연료 먼저)',f:null,off:true,sm:1})}
+    else{B.unshift({t:'⛽ 연료 더 넣기 · 남은 '+towerLeft(st),f:()=>towerFuel(gk),off:!has2('fuel'),sm:1});
+     B.unshift({t:'📡 송신탑 · 주변 지도 받기 (반경 8블록) · 전자부품 '+TCOST.map,f:()=>{if(!towerPay('map'))return;radioMap(gk)},off:has2('elec')<TCOST.map});
+     B.unshift({t:finding?'📻 생존자 신호 · '+S.inf.sos.nm+' 찾는 중':'📻 송신탑 · 생존자 신호 찾기 · 전자부품 '+TCOST.sos,f:()=>{if(!towerPay('sos'))return;radioSos(gk)},off:finding||has2('elec')<TCOST.sos})}}
    if(o.t=='sosnpc'&&Math.hypot(o.x+o.w/2-p.x,o.y+o.h/2-p.y)<60)B.unshift({t:'🤝 생존자 구출 · '+(S.inf.sos?S.inf.sos.nm:''),f:sosSave,big:1})}
   return B}}
 
@@ -87,3 +90,36 @@ document.head.insertAdjacentHTML('beforeend',`<style>#sigM{position:fixed;left:5
 #sigM.out{opacity:0;transition:opacity .5s}@keyframes sigIn{from{opacity:0;transform:translate(-50%,-8px)}}@keyframes sigBar{from{width:100%}to{width:0}}</style>`);
 /* the [상호작용] hint words for the new actions */
 if(typeof IAW!='undefined')IAW.unshift([/생존자 신호/,'신호 찾기'],[/지도 받기/,'지도 받기'],[/생존자 구출/,'구출'],[/지하 터널/,'지하 터널'],[/다음 역으로/,'다음 역'],[/처음 역으로/,'올라가기']);
+
+/* ---------- tower power: fuel → running for a while, then electronic parts per use ---------- */
+const TPW_MIN=6,TCOST={map:2,sos:3};/* minutes of play per fuel · parts per use */
+const towerLeft=st=>{const m=Math.floor(st.pw/60),s2=Math.floor(st.pw%60);return m+':'+String(s2).padStart(2,'0')};
+function towerFuel(gk){const p=S.p;if(!(p.inv.fuel>0))return msg('⛽ 연료가 없어요');p.inv.fuel--;const st=RADIO0()[gk]=RADIO0()[gk]||{};st.pw=Math.min(3*TPW_MIN*60,(st.pw||0)+TPW_MIN*60);
+ sigMsg('⛽ 발전기 가동','송신탑에 전원이 들어왔어요 · 남은 시간 '+towerLeft(st),'전원이 켜진 동안 전자부품으로 신호 찾기('+TCOST.sos+') · 지도 받기('+TCOST.map+')');try{sfx((a,t)=>{tone(a,t,{w:'sawtooth',f0:60,f1:120,d:1.2,v:.12})})}catch(e){}}
+function towerPay(k){const p=S.p,n=TCOST[k];if((p.inv.elec|0)<n){msg('🔌 전자부품이 '+n+'개 필요해요');return false}p.inv.elec-=n;return true}
+{const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(!S||!S.inf||!S.inf.radio||PAUSE)return;for(const k in S.inf.radio){const st=S.inf.radio[k];if(st.pw>0){st.pw=Math.max(0,st.pw-dt);if(!st.pw){const[gx,gy]=gOf(S.p.x,S.p.y);if(gx+','+gy==k)msg('⛽ 송신탑 발전기 연료가 떨어졌어요')}}}}}
+/* the tower's red light blinks only while powered, plus a hum glow */
+{const d0=D.mast;D.mast=o=>{d0(o);let st=null;try{st=RADIO0()[gOf(o.x,o.y).join()]}catch(e){}const x=o.x+o.w/2,y=o.y+o.h;if(!(st&&st.pw>0)){R('#401010',x-2,y-186,4,4);return}
+ const t=performance.now()/1000;g.save();g.globalAlpha=.25+.15*Math.sin(t*4);g.fillStyle='#7fd0ff';for(let i=0;i<3;i++){g.beginPath();g.arc(x,y-186,10+((t*30+i*20)%60),0,7);g.globalAlpha=Math.max(0,.4-((t*30+i*20)%60)/150);g.strokeStyle='#7fd0ff';g.lineWidth=2;g.stroke()}g.restore()}}
+
+/* ---------- tunnel nests: they keep hatching while you are near, until you burst them ---------- */
+function metroNests(ox,oy,W,len){const xs=[.26,.56].concat(len>=5?[.8]:[]);for(const f of xs){const x=ox+W*f,y=oy+(f<.5?452:262);mk(x,y,{look:'sleeper'});const z=Z[Z.length-1];
+  Object.assign(z,{mnest:1,stun:1e9,cd:1e9,dmg:0,g:1,nm:'선로 둥지',pt:2+Math.random()*3});const zn=Math.max(0,zoneOf(...DUN.from))+MZ;z.mhp=z.hp=700*zMulHp(zn)}}
+function metroBoss(x,y){mk(x,y,{look:'brute'});const z=Z[Z.length-1];const zn=Math.max(0,zoneOf(...DUN.from))+MZ;Object.assign(z,{g:1,tboss:1,boss:1,nm:'기관사 거수',tbT:3,metro:1});z.mhp=z.hp=1400*zMulHp(zn);z.dmg=(z.dmg||18)*zMulAtk(zn)}
+{const _zd=zDraw4;zDraw4=function(z){if(z.mnest){const t=performance.now()/1000,x=z.x,y=z.y,c=g,hp=z.hp/z.mhp,pul=1+.08*Math.sin(t*4+x),w=34*pul,h=26*pul;
+   c.fillStyle='#00000066';c.beginPath();c.ellipse(x,y+3,w+6,9,0,0,6.28);c.fill();for(let i=0;i<6;i++){c.strokeStyle='#5a1a1a';c.lineWidth=3;c.beginPath();c.moveTo(x,y-6);c.quadraticCurveTo(x+Math.cos(i)*50,y+Math.sin(i)*14,x+Math.cos(i)*70,y+Math.sin(i)*20);c.stroke()}
+   c.fillStyle='#4a1414';c.beginPath();c.ellipse(x,y-h,w+2,h+2,0,0,6.28);c.fill();c.fillStyle='#8a2a2a';c.beginPath();c.ellipse(x,y-h,w,h,0,0,6.28);c.fill();c.fillStyle='#b8443a';c.beginPath();c.ellipse(x-8,y-h-8,w*.45,h*.4,0,0,6.28);c.fill();
+   const k2=Math.max(0,1-z.pt/6);c.fillStyle='rgba(255,200,80,'+(.3+.5*k2)+')';c.beginPath();c.ellipse(x,y-h,6+6*k2,7+6*k2,0,0,6.28);c.fill();
+   c.fillStyle='#000a';c.fillRect(x-30,y-h*2-14,60,6);c.fillStyle='#ff4a4a';c.fillRect(x-29,y-h*2-13,58*hp,4);c.font='600 9px system-ui';c.textAlign='center';c.fillStyle='#fff';c.fillText('선로 둥지',x,y-h*2-17);return true}
+  const r=_zd(z);if(z.tboss){const t=performance.now()/1000,x=z.x,y=z.y,c=g;c.save();c.globalAlpha=.5+.3*Math.sin(t*8);c.fillStyle='#ffe27a';c.beginPath();c.arc(x+2,y-74,5,0,7);c.fill();
+   const a=Math.atan2(S.p.y-y,S.p.x-x);c.globalAlpha=.12;c.beginPath();c.moveTo(x,y-70);c.arc(x,y-70,180,a-.3,a+.3);c.closePath();c.fill();c.restore();
+   if(z.tbC>0){c.strokeStyle='rgba(255,120,60,.8)';c.lineWidth=3;for(let i=0;i<4;i++){c.beginPath();c.moveTo(x-z.tbX*(20+i*14),y-20-i*6);c.lineTo(x-z.tbX*(40+i*14),y-26-i*6);c.stroke()}}
+   const hp=z.hp/z.mhp;c.fillStyle='#000a';c.fillRect(x-45,y-108,90,7);c.fillStyle='#ff6a2a';c.fillRect(x-44,y-107,88*hp,5);c.font='700 10px system-ui';c.textAlign='center';c.fillStyle='#ffd36a';c.fillText('💀 기관사 거수',x,y-112)}return r}}
+{const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(typeof DUN=='undefined'||!DUN||DUN.sh!='metro'||PAUSE)return;const p=S.p;
+  for(const z of Z){if(z.mnest&&z.hp>0&&Math.hypot(z.x-p.x,z.y-p.y)<560){z.pt-=dt;if(z.pt<=0){z.pt=6+Math.random()*2;if(Z.filter(q=>q.fromNest&&q.hp>0).length<14){mk(z.x+(Math.random()-.5)*40,z.y+16,{look:Math.random()<.5?'runner':'crawler'});const n=Z[Z.length-1];n.fromNest=1;n.g=1;metroHarden([n])}}}
+   if(z.tboss&&z.hp>0){const d=Math.hypot(p.x-z.x,p.y-z.y);if(z.tbC>0){z.tbC-=dt;mv(z,z.tbX*460*dt,z.tbY*460*dt,14);if(!z.tbH&&Math.hypot(p.x-z.x,p.y-z.y)<34){z.tbH=1;hurtP(26*zMulAtk(Math.max(0,zoneOf(...DUN.from))+MZ),'🚂 기관사 거수가 돌진했어요!');try{S4.kd=Math.max(S4.kd,.6)}catch(e){}mv(p,z.tbX*60,z.tbY*60,7)}continue}
+    if(d<420){z.tbT-=dt;if(z.tbT<=0){z.tbT=5.5;z.tbC=.75;z.tbH=0;z.tbX=(p.x-z.x)/(d||1);z.tbY=(p.y-z.y)/(d||1);msg('🚂 기관사 거수가 돌진해요!');try{sfx((a,t)=>tone(a,t,{w:'square',f0:220,f1:180,d:.6,v:.14}))}catch(e){}}}
+    if(z.hp<z.mhp*.5&&!z.tbK){z.tbK=1;const n0=Z.length;for(let i=0;i<5;i++)mk(z.x+(Math.random()-.5)*200,z.y+(Math.random()-.5)*120,{look:'runner'});metroHarden(Z.slice(n0));msg('📢 기관사 거수의 기적 소리 · 좀비가 몰려와요!')}}}}}
+{const _k=kill;kill=function(z){if(z&&z.mnest){dec.push({k:'p',x:z.x,y:z.y+2,r:22});const g2={orn1:1,enh2:1,scrap:6};give(g2);msg('💥 선로 둥지를 터뜨렸어요 · 옵션의 룬 · 중급 강화석 · 고철 6');blood(z.x,z.y,0,0,18);return}
+  const r=_k(z);if(z&&z.tboss){const g2={enh3:2,orn2:1,tkn:30,carpart:2};give(g2);sigMsg('💀 기관사 거수 처치','보상: 상급 강화석 2 · 옵션의 룬 Ⅱ · 교환권 30 · 차량 부품 2','출구 계단으로 다음 역에 올라갈 수 있어요');try{s3Xp(400,'보스')}catch(e){}}return r}}
+if(typeof IAW!='undefined')IAW.unshift([/연료 넣기|연료 더 넣기/,'연료 넣기']);
