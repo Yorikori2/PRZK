@@ -40,7 +40,7 @@ if(typeof nearBench=='function')nearBench=nearEnhB;
 document.head.insertAdjacentHTML('beforeend','<style>#enhOpen,#aeOpen,#ornOpen,#forgeOpen{display:none!important}</style>');
 /* ---------- 3) demolition mode ---------- */
 let DEMO=false,DEMOPREV=null;
-const bestTool=()=>['dt3','dt2','dt1','dt1f'].find(id=>has(S.p,id));
+const bestTool=()=>['dt5','dt4','dt3','dt2','dt1','dt1f'].find(id=>has(S.p,id));
 function demoMode(on){const p=S.p;if(on==null)on=!DEMO;if(on){const t=bestTool();if(!t)return msg('🔨 철거 도구가 없어요 (작업대에서 철거 해머 제작)');DEMOPREV={mel:p.eq.mel,as:p.as};p.eq.mel=t;p.as='mel';DEMO=true;msg('🔨 철거 모드 · '+NM2(t)+' · 공격 버튼으로 철거해요 · 다시 누르면 무기로 돌아가요')}
  else{DEMO=false;if(DEMOPREV){if(DEMOPREV.mel&&has(p,DEMOPREV.mel))p.eq.mel=DEMOPREV.mel;else if(DT[p.eq.mel])p.eq.mel='';p.as=DEMOPREV.as=='mel'&&!p.eq.mel?'prim':DEMOPREV.as}DEMOPREV=null;msg('⚔ 전투 모드')}
  document.body.classList.toggle('demoOn',DEMO);hud2()}

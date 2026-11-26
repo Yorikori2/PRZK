@@ -83,16 +83,17 @@ const DOPT={
  salv:['♻','재활용',g=>'부순 것에서 나오는 재료 +'+15*g+'%','#7fd07f'],
  hush:['🤫','저소음',g=>'철거 소음 -'+18*g+'% (좀비가 덜 몰려와요)','#9aa0a6']};
 for(const k in DOPT)for(let g2=1;g2<=4;g2++){const id='do_'+k+g2;if(!I_BY[id]){const it=[id,DOPT[k][1]+' 옵션 '+ROMN[g2],'r','r',.1,'철거 장비 옵션 · '+DOPT[k][2](g2)];ITEMS.push(it);I_BY[id]=it}}
-const dSlots=id=>({dt1:1,dt1f:1,dt2:2,dt3:3})[id]||0;/* tool level = option slots */
-OK.d={nm:'철거 장비',list:()=>Object.keys(DT).filter(id=>has(S.p,id)),slots:dSlots,how:'Lv1 도구 1칸 · Lv2 2칸 · Lv3 3칸',arr:id=>{const pg=SE();pg.dopt=pg.dopt||{};return pg.dopt[id]=pg.dopt[id]||[]},pool:id=>Object.keys(DOPT).filter(k=>!(id=='dt1f'&&k=='chain')),mk:(k,g2)=>'do_'+k+g2,max:4,info:r=>{const o=DOPT[r.slice(3,-1)];return[o[0],o[1],o[3],o[2](+r.slice(-1))]}};
+const dSlots=id=>({dt1:1,dt1f:1,dt2:2,dt3:3,dt4:4,dt5:4})[id]||0;/* tool level = option slots */
+OK.d={nm:'철거 장비',list:()=>Object.keys(DT).filter(id=>has(S.p,id)),slots:dSlots,how:'Lv1 도구 1칸 · Lv2 2칸 · Lv3 3칸 · Lv4 · Lv5 4칸',arr:id=>{const pg=SE();pg.dopt=pg.dopt||{};return pg.dopt[id]=pg.dopt[id]||[]},pool:id=>Object.keys(DOPT).filter(k=>!(id=='dt1f'&&k=='chain')),mk:(k,g2)=>'do_'+k+g2,max:4,info:r=>{const o=DOPT[r.slice(3,-1)];return[o[0],o[1],o[3],o[2](+r.slice(-1))]}};
 function dopt(k,id){const p=S&&S.p;id=id||(p&&actW(p));if(!id||!DT[id])return 0;let g2=0;for(const r of(((S.pg&&S.pg.dopt)||{})[id])||[])if(r&&r.slice(3,-1)==k)g2+=+r.slice(-1);return g2}
 /* the tool numbers read the options live (curTool copies them) */
-for(const id in DT){const T=DT[id],base={rng:T.rng,dmg:T.dmg,n:T.n,auto:T.auto};
+function dtOptBind(id){const T=DT[id];if(!T||T._ob)return;Object.defineProperty(T,'_ob',{value:1});const base={rng:T.rng,dmg:T.dmg,n:T.n,auto:T.auto};
  Object.defineProperty(T,'rng',{get:()=>base.rng*(1+.1*dopt('reach',id)),enumerable:true,configurable:true});
  Object.defineProperty(T,'dmg',{get:()=>base.dmg*(1+.25*dopt('power',id)),enumerable:true,configurable:true});
  Object.defineProperty(T,'n',{get:()=>{const c=dopt('chain',id);return base.n+(c>=4?3:c>=3?2:c>=2?1:c>=1&&Math.random()<.25?1:0)},enumerable:true,configurable:true});
  if(base.auto)Object.defineProperty(T,'auto',{get:()=>base.auto*Math.max(.3,1-.12*dopt('speed',id)),enumerable:true,configurable:true});
  const W=W_BY[id]&&W_BY[id][4];if(W){const cd=W.cd;Object.defineProperty(W,'cd',{get:()=>cd*Math.max(.3,1-.12*dopt('speed',id)),enumerable:true,configurable:true})}}
+for(const id in DT)dtOptBind(id);
 let DHIT=false;
 {const _dh=dHitWith;dHitWith=function(tool,z){DHIT=true;try{return _dh(tool,z)}finally{DHIT=false}}}
 {const _df=dFloor;dFloor=function(){DHIT=true;try{return _df.apply(this,arguments)}finally{DHIT=false}}}

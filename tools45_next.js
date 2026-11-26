@@ -11,7 +11,17 @@ DNZ[4]=3;DNZ[5]=4;
 for(const k in TIER)if(DLV[k]!=null)DLV[k]=TIER[k]||1;DLV.rbase=4;
 /* where they turn up */
 for(const[k,id]of[['police','dt4'],['prison','dt4'],['rbase','dt4'],['mil','dt5'],['lab','dt5']])if(GLOOT[k]&&!GLOOT[k].includes(id))GLOOT[k].push(id);
-/* demolition mode picks the best tool you have, Lv5 first */
-{const _dm=demoMode;demoMode=function(on){const p=S&&S.p,best=p&&['dt5','dt4'].find(id=>has(p,id)),want=on==null?!DEMO:on;
-  if(want&&best&&!['dt3','dt2','dt1','dt1f'].some(id=>has(p,id))){DEMOPREV={mel:p.eq.mel,as:p.as};p.eq.mel=best;p.as='mel';DEMO=true;document.body.classList.add('demoOn');msg('🔨 철거 모드 · '+NM2(best));try{hud2()}catch(e){}return}
-  const r=_dm.apply(this,arguments);if(DEMO&&S&&S.p){const best=['dt5','dt4'].find(id=>has(S.p,id));if(best){S.p.eq.mel=best;S.p.as='mel';try{hud2()}catch(e){}}}return r}}
+/* option-rune slots (4) and live option numbers like the other tools · demolition mode already picks Lv5 → Lv4 → … */
+if(typeof dtOptBind=='function'){dtOptBind('dt4');dtOptBind('dt5')}
+/* ---------- crafting Lv4 · Lv5 at the 강화 · 룬 작업대 (the old tool is rebuilt into the new one) ---------- */
+const T45R=[['dt4',{dt3:1,steel:6,elec:10,enh3:1},'유압 브레이커를 플라즈마 절단기로 개조'],['dt5',{dt4:1,steel:10,milpart:3,enh3:2},'플라즈마 절단기를 중장비 파쇄기로 개조']];
+function t45Open(){const b=$('bm'),p=S.p;b.dataset.m='t45';PAUSE=true;
+ const card=([id,cost,ds])=>{const ok=Object.entries(cost).every(([k,n])=>(p.inv[k]|0)>=n);return'<div class="t45c"><div class="t45h"><canvas data-ic="'+id+'" width="44" height="44"></canvas><div><b>'+NM2(id)+'</b> <small>Lv'+DT[id].lv+' · 옵션 4칸</small><div class="mut">'+ds+'</div></div></div>'+
+  '<div class="t45m">'+Object.entries(cost).map(([k,n])=>'<span class="'+((p.inv[k]|0)>=n?'ok':'no')+'">'+NM2(k)+' '+(p.inv[k]|0)+'/'+n+'</span>').join('')+'</div><button data-t45="'+id+'"'+(ok?'':' disabled')+'>'+(has(p,id)?'하나 더 만들기':'만들기')+'</button></div>'};
+ b.innerHTML='<div class="sh"><h2>🔨 철거 도구 제작</h2><div class="wt">강화 · 룬 작업대 · 아래 단계 도구를 개조해요</div><button onclick="closeBase();PAUSE=false">✕</button></div>'+T45R.map(card).join('')+'<div class="sub" style="margin-top:6px">Lv1 ~ Lv3은 작업대 · 제작에서 · Lv4는 ★4 (경찰서 · 교도소 · 약탈자 기지), Lv5는 ★5 (군부대 · 연구소) 건물을 부숴요</div>';
+ b.style.display='block';b.querySelectorAll('canvas[data-ic]').forEach(c=>{try{const x=c.getContext('2d'),g0=g;g=x;x.scale(44/24,44/24);IC[c.dataset.ic]();g=g0}catch(e){}});
+ b.querySelectorAll('[data-t45]').forEach(bt=>bt.onclick=()=>{const r=T45R.find(q=>q[0]==bt.dataset.t45);for(const k in r[1])p.inv[k]-=r[1][k];give({[r[0]]:1});msg('🔨 '+NM2(r[0])+' 완성!');t45Open()})}
+{const _c=dmCtx;dmCtx=function(){const B=_c();try{if(typeof nearEnhB=='function'&&nearEnhB()&&!(typeof DUN!='undefined'&&DUN))B.push({t:'🔨 철거 도구 제작 · Lv4 · Lv5',f:t45Open,sm:1})}catch(e){}return B}}
+if(typeof IAW!='undefined')IAW.unshift([/철거 도구 제작/,'도구 제작']);
+document.head.insertAdjacentHTML('beforeend',`<style>#bm .t45c{padding:10px;margin:8px 0;border-radius:12px;background:#ffffff0c;border:1px solid #ffffff18}#bm .t45h{display:flex;gap:10px;align-items:center}#bm .t45h canvas{width:44px;height:44px;image-rendering:pixelated;background:#0006;border-radius:8px}
+#bm .t45h small{color:var(--mut)}#bm .t45m{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}#bm .t45m span{padding:3px 8px;border-radius:99px;font-size:12px;background:#ffffff10}#bm .t45m .ok{color:#9fe09f}#bm .t45m .no{color:#ff9a8a}#bm .t45c button{width:100%;padding:9px}</style>`);

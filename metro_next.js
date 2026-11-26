@@ -45,7 +45,7 @@ function metroHarden(L){const zn=Math.max(0,zoneOf(...DUN.from)),f=zMulHp(zn+MZ)
 {const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(typeof DUN=='undefined'||!DUN||DUN.sh!='metro'||DUN.amb||!DUN.W)return;const p=S.p;if(p.x<DUN.ox+DUN.W*.42)return;DUN.amb=1;const n0=Z.length;
   for(let i=0;i<7;i++)mk(p.x-520-Math.random()*200,DUN.oy+260+Math.random()*200,{look:i%3?'runner':'dog'});for(let i=0;i<4;i++)mk(p.x+480+Math.random()*200,DUN.oy+260+Math.random()*200,{look:i%2?'runner':'crawler'});
   metroHarden(Z.slice(n0));msg('📢 전동차 경적이 울렸어요 · 앞뒤에서 좀비 떼가 몰려와요!');try{sfx((a,t)=>{tone(a,t,{w:'square',f0:330,f1:320,d:.9,v:.14});tone(a,t+.05,{w:'square',f0:415,f1:405,d:.85,v:.1})})}catch(e){}}}
-function metroUp(go){if(!go)return dunExit();const to=DUN.to;dunExit();infGoto(to[0],to[1]);const b=W0.b.find(q=>q.gk==to.join());if(b){const m=W0.objs.find(o=>o.t=='tmouth'&&o.b==W0.b.indexOf(b));S.p.x=m?m.x-30:b.ox+BW/2;S.p.y=m?m.y+50:b.oy+BH-60}
+function metroUp(go){if(!go)return dunExit();const to=DUN.to,fr=DUN.from;mEdge(fr,to,1);dunExit();infGoto(to[0],to[1]);const b=W0.b.find(q=>q.gk==to.join());if(b){const m=W0.objs.find(o=>o.t=='tmouth'&&o.b==W0.b.indexOf(b));S.p.x=m?m.x-30:b.ox+BW/2;S.p.y=m?m.y+50:b.oy+BH-60}
  msg('🚇 ('+to[0]+', '+to[1]+') 지하철역으로 올라왔어요');(S.inf.mline=S.inf.mline||{})[to.join()]=1}
 /* ---------- the radio station console ---------- */
 const RADIO0=()=>{S.inf.radio=S.inf.radio||{};return S.inf.radio};
@@ -111,7 +111,8 @@ function metroBoss(x,y){mk(x,y,{look:'brute'});const z=Z[Z.length-1];const zn=Ma
    c.fillStyle='#4a1414';c.beginPath();c.ellipse(x,y-h,w+2,h+2,0,0,6.28);c.fill();c.fillStyle='#8a2a2a';c.beginPath();c.ellipse(x,y-h,w,h,0,0,6.28);c.fill();c.fillStyle='#b8443a';c.beginPath();c.ellipse(x-8,y-h-8,w*.45,h*.4,0,0,6.28);c.fill();
    const k2=Math.max(0,1-z.pt/6);c.fillStyle='rgba(255,200,80,'+(.3+.5*k2)+')';c.beginPath();c.ellipse(x,y-h,6+6*k2,7+6*k2,0,0,6.28);c.fill();
    c.fillStyle='#000a';c.fillRect(x-30,y-h*2-14,60,6);c.fillStyle='#ff4a4a';c.fillRect(x-29,y-h*2-13,58*hp,4);c.font='600 9px system-ui';c.textAlign='center';c.fillStyle='#fff';c.fillText('선로 둥지',x,y-h*2-17);return true}
-  const r=_zd(z);if(z.tboss){const t=performance.now()/1000,x=z.x,y=z.y,c=g;c.save();c.globalAlpha=.5+.3*Math.sin(t*8);c.fillStyle='#ffe27a';c.beginPath();c.arc(x+2,y-74,5,0,7);c.fill();
+  if(z.tboss){drawConductor(z);return true}
+  const r=_zd(z);if(false&&z.tboss){const t=performance.now()/1000,x=z.x,y=z.y,c=g;c.save();c.globalAlpha=.5+.3*Math.sin(t*8);c.fillStyle='#ffe27a';c.beginPath();c.arc(x+2,y-74,5,0,7);c.fill();
    const a=Math.atan2(S.p.y-y,S.p.x-x);c.globalAlpha=.12;c.beginPath();c.moveTo(x,y-70);c.arc(x,y-70,180,a-.3,a+.3);c.closePath();c.fill();c.restore();
    if(z.tbC>0){c.strokeStyle='rgba(255,120,60,.8)';c.lineWidth=3;for(let i=0;i<4;i++){c.beginPath();c.moveTo(x-z.tbX*(20+i*14),y-20-i*6);c.lineTo(x-z.tbX*(40+i*14),y-26-i*6);c.stroke()}}
    const hp=z.hp/z.mhp;c.fillStyle='#000a';c.fillRect(x-45,y-108,90,7);c.fillStyle='#ff6a2a';c.fillRect(x-44,y-107,88*hp,5);c.font='700 10px system-ui';c.textAlign='center';c.fillStyle='#ffd36a';c.fillText('💀 기관사 거수',x,y-112)}return r}}
@@ -121,5 +122,42 @@ function metroBoss(x,y){mk(x,y,{look:'brute'});const z=Z[Z.length-1];const zn=Ma
     if(d<420){z.tbT-=dt;if(z.tbT<=0){z.tbT=5.5;z.tbC=.75;z.tbH=0;z.tbX=(p.x-z.x)/(d||1);z.tbY=(p.y-z.y)/(d||1);msg('🚂 기관사 거수가 돌진해요!');try{sfx((a,t)=>tone(a,t,{w:'square',f0:220,f1:180,d:.6,v:.14}))}catch(e){}}}
     if(z.hp<z.mhp*.5&&!z.tbK){z.tbK=1;const n0=Z.length;for(let i=0;i<5;i++)mk(z.x+(Math.random()-.5)*200,z.y+(Math.random()-.5)*120,{look:'runner'});metroHarden(Z.slice(n0));msg('📢 기관사 거수의 기적 소리 · 좀비가 몰려와요!')}}}}}
 {const _k=kill;kill=function(z){if(z&&z.mnest){dec.push({k:'p',x:z.x,y:z.y+2,r:22});const g2={orn1:1,enh2:1,scrap:6};give(g2);msg('💥 선로 둥지를 터뜨렸어요 · 옵션의 룬 · 중급 강화석 · 고철 6');blood(z.x,z.y,0,0,18);return}
-  const r=_k(z);if(z&&z.tboss){const g2={enh3:2,orn2:1,tkn:30,carpart:2};give(g2);sigMsg('💀 기관사 거수 처치','보상: 상급 강화석 2 · 옵션의 룬 Ⅱ · 교환권 30 · 차량 부품 2','출구 계단으로 다음 역에 올라갈 수 있어요');try{s3Xp(400,'보스')}catch(e){}}return r}}
+  const r=_k(z);if(z&&z.tboss){if(DUN&&DUN.from)mEdge(DUN.from,DUN.to,2);const g2={enh3:2,orn2:1,tkn:30,carpart:2};give(g2);sigMsg('💀 기관사 거수 처치','보상: 상급 강화석 2 · 옵션의 룬 Ⅱ · 교환권 30 · 차량 부품 2','이 선로는 이제 안전해요 · 역의 터널 입구에서 🗺 노선도로 빠른 이동');try{s3Xp(400,'보스')}catch(e){}}return r}}
 if(typeof IAW!='undefined')IAW.unshift([/연료 넣기|연료 더 넣기/,'연료 넣기']);
+
+/* ---------- the conductor colossus: its own drawing (hunched giant in a conductor's uniform, a train's nose fused to
+   its chest with the headlight still burning, a rail for a club, chains) ---------- */
+function drawConductor(z){const c=g,t=performance.now()/1000,P=S.p,fl=P.x<z.x?-1:1,ch=z.tbC>0,step=Math.sin(t*(ch?14:5)),x=z.x,y=z.y,hp=z.hp/z.mhp;
+ const Rq=(col,dx,dy,w,h)=>{c.fillStyle=col;c.fillRect(Math.round(x+(fl>0?dx:-dx-w)),Math.round(y+dy),w,h)};
+ c.fillStyle='#00000077';c.beginPath();c.ellipse(x,y+2,34,9,0,0,6.28);c.fill();
+ const lean=ch?6:0,b=Math.abs(step)*2;
+ /* legs */Rq('#1d1714',-17,-30+b*.5,14,31);Rq('#22304a',-16,-29+b*.5,12,22);Rq('#1d1714',4,-30-b*.5,14,31);Rq('#22304a',5,-29-b*.5,12,22);Rq('#3a2a1e',-18,-4,15,5);Rq('#3a2a1e',4,-4,15,5);
+ /* torso: uniform jacket, torn flesh */Rq('#1d1714',-25+lean,-78,52,52);Rq('#2a3a5a',-24+lean,-77,50,50);Rq('#22304a',-24+lean,-77,6,50);Rq('#6a8a5a',-20+lean,-46,12,14);Rq('#4a6a3e',-18+lean,-44,6,8);Rq('#8a1a1a',-16+lean,-40,3,3);
+ for(let i=0;i<4;i++)Rq('#e0b03a',-2+lean,-72+i*11,3,3);
+ /* the train's nose fused to the chest: red and white plate, the headlight */Rq('#1d1714',2+lean,-70,24,26);Rq('#d8dcdc',3+lean,-69,22,24);Rq('#c43c32',3+lean,-56,22,5);Rq('#3a3f45',3+lean,-69,22,3);
+ const lamp=.7+.3*Math.sin(t*9);c.save();c.globalAlpha=lamp;Rq('#fff4b0',10+lean,-66,8,8);Rq('#ffd36a',11+lean,-65,6,6);c.restore();
+ c.save();c.globalAlpha=.18*lamp;c.fillStyle='#ffe27a';const lx=x+fl*(14+lean),ly=y-62,a=Math.atan2(P.y-ly,P.x-lx);c.beginPath();c.moveTo(lx,ly);c.arc(lx,ly,200,a-.28,a+.28);c.closePath();c.fill();c.restore();
+ /* arms: a chained fist and a bent rail */const sw=ch?-10:step*4;Rq('#1d1714',-35+lean,-74+sw,13,44);Rq('#5a7a4a',-34+lean,-73+sw,11,40);for(let i=0;i<5;i++)Rq(i%2?'#8a9096':'#5a6068',-36+lean,-60+sw+i*6,15,3);Rq('#4a6a3e',-36+lean,-33+sw,14,10);
+ Rq('#1d1714',24+lean,-74-sw,12,30);Rq('#5a7a4a',25+lean,-73-sw,10,26);Rq('#3a3f45',27+lean,-50-sw,6,44);Rq('#8a9096',28+lean,-50-sw,2,44);Rq('#3a3f45',20+lean,-8-sw,18,5);
+ /* cables */c.strokeStyle='#1d1714';c.lineWidth=2;for(let i=0;i<3;i++){c.beginPath();c.moveTo(x+fl*(4+i*6+lean),y-46);c.quadraticCurveTo(x+fl*(i*7+lean),y-28+step*3,x+fl*(-2+i*8+lean),y-18);c.stroke()}
+ /* hunched head with the conductor's cap, red eyes */Rq('#1d1714',-9+lean*1.4,-94,20,18);Rq('#7a9a6a',-8+lean*1.4,-93,18,16);Rq('#5a7a4a',-8+lean*1.4,-80,18,3);Rq('#ff3030',(fl>0?0:-1)+lean*1.4,-87,3,3);Rq('#ff3030',(fl>0?6:5)+lean*1.4,-87,3,3);
+ Rq('#1d1714',-12+lean*1.4,-101,26,9);Rq('#22304a',-11+lean*1.4,-100,24,7);Rq('#e0b03a',-11+lean*1.4,-95,24,2);Rq('#1d1714',fl>0?4+lean*1.4:-18-lean*1.4,-95,14,3);
+ if(ch){c.strokeStyle='rgba(255,140,60,.85)';c.lineWidth=3;for(let i=0;i<5;i++){c.beginPath();c.moveTo(x-fl*(30+i*12),y-20-i*12);c.lineTo(x-fl*(54+i*12),y-24-i*12);c.stroke()}}
+ if(z.hurt>0){c.save();c.globalAlpha=.4;c.fillStyle='#fff';c.fillRect(x-30,y-100,60,100);c.restore()}
+ c.fillStyle='#000a';c.fillRect(x-46,y-120,92,8);c.fillStyle='#ff6a2a';c.fillRect(x-45,y-119,90*hp,6);c.font='700 11px system-ui';c.textAlign='center';c.fillStyle='#ffd36a';c.fillText('💀 기관사 거수',x,y-125)}
+
+/* ---------- the line map: stations you have been to, tunnels you walked (dashed) and cleared (solid, safe) ---------- */
+const MLINE=()=>{S.inf.mline=S.inf.mline||{};S.inf.medge=S.inf.medge||{};return S.inf};
+function mEdge(a,b,v){const I=MLINE(),k=[a.join(),b.join()].sort().join('|');I.mline[a.join()]=1;I.mline[b.join()]=1;I.medge[k]=Math.max(I.medge[k]|0,v)}
+{const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(!S||!S.inf||typeof DUN!='undefined'&&DUN)return;const[gx,gy]=gOf(S.p.x,S.p.y),k=gx+','+gy;if(MLINE().mline[k])return;if(kindAt(gx,gy)=='subway')S.inf.mline[k]=1}}
+function mSafeFrom(k0){const I=MLINE(),out=new Map([[k0,0]]),q=[k0];while(q.length){const a=q.shift();for(const e in I.medge){if(I.medge[e]<2)continue;const[x,y]=e.split('|');const n=x==a?y:y==a?x:null;if(n&&!out.has(n)){out.set(n,out.get(a)+1);q.push(n)}}}out.delete(k0);return out}
+function mTravelOpen(k0){const b=$('bm'),L=[...mSafeFrom(k0)].sort((a,c)=>a[1]-c[1]);b.dataset.m='mline';PAUSE=true;
+ b.innerHTML='<div class="sh"><h2>🗺 지하철 노선도</h2><div class="wt">보스를 잡아 안전해진 선로로만 빠르게 이동해요 · 궤도 카트</div><button onclick="closeBase();PAUSE=false">✕</button></div>'+
+  (L.length?L.map(([k,n])=>{const[gx,gy]=k.split(',').map(Number),[x0,y0]=k0.split(',').map(Number);return'<button class="mlB" data-go="'+k+'"><b>🚇 ('+gx+', '+gy+') 역</b><small>'+zoneOf(gx,gy)+'구역 · '+Math.max(Math.abs(gx-x0),Math.abs(gy-y0))+'블록 · 선로 '+n+'구간</small></button>'}).join(''):'<div class="sub">아직 안전한 선로가 없어요 · 터널 출구의 기관사 거수를 잡으면 그 선로가 열려요</div>')+
+  '<div class="sub" style="margin-top:6px">들른 역 '+Object.keys(MLINE().mline).length+'곳 · 지도에서 노선을 볼 수 있어요 (점선 = 걸어 본 선로 · 초록 실선 = 안전한 선로)</div>';b.style.display='block';
+ b.querySelectorAll('[data-go]').forEach(bt=>bt.onclick=()=>{const[gx,gy]=bt.dataset.go.split(',').map(Number);closeBase();PAUSE=false;let f=$('mlF');if(!f){document.body.insertAdjacentHTML('beforeend','<div id="mlF">🚇 궤도 카트로 이동 중…</div>');f=$('mlF')}
+  setTimeout(()=>{infGoto(gx,gy);const B=W0.b.find(q=>q.gk==gx+','+gy),m=B&&W0.objs.find(o=>o.t=='tmouth'&&o.b==W0.b.indexOf(B));if(m){S.p.x=m.x-30;S.p.y=m.y+50}msg('🚇 ('+gx+', '+gy+') 역에 도착');setTimeout(()=>{const e=$('mlF');if(e)e.remove()},500)},900)})}
+{const _c=dmCtx;dmCtx=function(){const B=_c();if(typeof DUN!='undefined'&&DUN)return B;const p=S.p;for(const o of W0.objs)if(o.t=='tmouth'&&Math.hypot(o.x+o.w/2-p.x,o.y+o.h/2-p.y)<80){const k=gOf(o.x,o.y).join(),n=mSafeFrom(k).size;B.push({t:'🗺 노선도 · 빠른 이동'+(n?' ('+n+'곳)':' (안전한 선로 없음)'),f:()=>mTravelOpen(k),sm:1})}return B}}
+if(typeof IAW!='undefined')IAW.unshift([/노선도/,'노선도']);
+document.head.insertAdjacentHTML('beforeend',`<style>#bm .mlB{display:block;width:100%;text-align:left;padding:10px 12px;margin:6px 0;border-radius:12px}#bm .mlB small{display:block;color:var(--mut);font-size:11.5px}
+#mlF{position:fixed;inset:0;z-index:45;background:#000;display:flex;align-items:center;justify-content:center;font-size:18px;color:#9fe09f;animation:mlF .9s}@keyframes mlF{from{opacity:0}}</style>`);
