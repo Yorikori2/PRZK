@@ -210,32 +210,32 @@ function vRot45(a,ang){const w=a.width,h=a.height,src=a.getContext('2d').getImag
  x.putImageData(img,0,0);return b}
 {const _vs=vSprite;vSprite=function(t,dir,o){if(!/^(dr|dl|ur|ul)$/.test(dir))return _vs(t,dir,o);const k=t+dir+(o&&o.blink?'b':'')+(o&&o.dmg?'d':'')+(o&&o.dust?'u':'');if(VSPR[k])return VSPR[k];
   const base=_vs(t,'r',o),ang={dr:Math.PI/4,dl:3*Math.PI/4,ul:-3*Math.PI/4,ur:-Math.PI/4}[dir];return VSPR[k]=vRot45(base,ang)}}
-/* ---------- the trunk: 40 kg to start · 🧳 trunk mod +20 kg a level (civilian +25) · each kind carries one kind of cargo at half weight ---------- */
-VMOD.trunk=['🧳','트렁크 확장',4,'트렁크 +20kg (민간 승용차는 +25kg)',l=>({scrap:8*l,cloth:4*l})];
-const VTR={civ:['넓은 트렁크','확장할 때마다 +25kg',null],pol:['장비 보관함','방어구 · 장비 무게 절반',id=>!W_BY[id]&&catOf(id)=='e'],med:['의료 칸','음식 · 물 · 의료품 무게 절반',id=>catOf(id)=='c'],
- mil:['무기고','무기 + 탄약 무게 절반',id=>!!W_BY[id]||catOf(id)=='a'],lab:['부품 선반','재료 (고철 · 전자부품 등) 무게 절반',id=>catOf(id)=='m']};
+/* ---------- the trunk: slots like every box (8 to start · 🧳 trunk mod +4 a level, civilian +5) · each kind stacks one kind of cargo twice as high ---------- */
+VMOD.trunk=['🧳','트렁크 확장',4,'트렁크 +4칸 (민간 승용차는 +5칸)',l=>({scrap:8*l,cloth:4*l})];
+const VTR={civ:['넓은 트렁크','확장할 때마다 +5칸',null],pol:['장비 보관함','방어구 · 장비 한 칸에 2개',id=>!W_BY[id]&&catOf(id)=='e'],med:['의료 칸','음식 · 물 · 의료품 한 칸에 2배',id=>catOf(id)=='c'],
+ mil:['무기고','무기 한 칸에 2개 · 탄약 한 칸에 600발',id=>!!W_BY[id]||catOf(id)=='a'],lab:['부품 선반','재료 (고철 · 전자부품 등) 한 칸에 2배',id=>catOf(id)=='m']};
 const VTRCAT=[['m','🧱 재료',id=>!W_BY[id]&&catOf(id)=='m'],['c','🥫 음식·의료',id=>catOf(id)=='c'],['a','🔫 탄약',id=>catOf(id)=='a'],['w','🗡 무기',id=>!!W_BY[id]],['e','🦺 장비',id=>!W_BY[id]&&catOf(id)=='e']];
-const vTrCap=c=>40+(vMods(c).trunk|0)*(c.t=='civ'?25:20);
-const vTrW=(c,id)=>wtOf(id)*(VTR[c.t][2]&&VTR[c.t][2](id)?.5:1);
+const vTrCap=c=>8+(vMods(c).trunk|0)*(c.t=='civ'?5:4);
+const vTrK=(c,id)=>STK(id)*(VTR[c.t][2]&&VTR[c.t][2](id)?2:1);
 const vTrBox=c=>{c.tr=c.tr||{};return c.tr};
-const vTrUsed=c=>{let w=0;const T=vTrBox(c);for(const k in T)w+=vTrW(c,k)*(T[k]|0);return w};
+const vTrUsed=c=>{let w=0;const T=vTrBox(c);for(const k in T)if((T[k]|0)>0)w+=Math.ceil((T[k]|0)/vTrK(c,k));return w};
 const vEquipped=id=>{const e=S.p.eq||{};return Object.values(e).includes(id)};
-function vTrPut(c,id,n){const p=S.p,have=p.inv[id]|0;if(have<=0)return;const room=vTrCap(c)-vTrUsed(c),w=vTrW(c,id),can=w>0?Math.floor((room+1e-6)/w):have;n=Math.min(n,have,can);if(n<=0)return msg('🧳 트렁크가 가득 찼어요 ('+vTrCap(c)+'kg)');invTake(p,id,n);vTrBox(c)[id]=(vTrBox(c)[id]|0)+n}
+function vTrPut(c,id,n){const p=S.p,have=p.inv[id]|0;if(have<=0)return;const T=vTrBox(c),k=vTrK(c,id),cur=T[id]|0,part=cur%k?k-cur%k:0,can=part+Math.max(0,vTrCap(c)-vTrUsed(c))*k;n=Math.min(n,have,can);if(n<=0)return msg('🧳 트렁크가 가득 찼어요 ('+vTrCap(c)+'칸)');invTake(p,id,n);T[id]=cur+n}
 function vTrTake(c,id,n){const T=vTrBox(c);n=Math.min(n,T[id]|0);if(n<=0)return;T[id]-=n;if(T[id]<=0)delete T[id];invAdd(S.p,id,n)}
 function vTrunk(){const c=VC();if(!vOwned(c))return;const b=$('bm'),p=S.p,T=vTrBox(c),R0=VTR[c.t],used=vTrUsed(c),cap=vTrCap(c);b.dataset.m='trunk';PAUSE=true;
- const row=(id,n,inT)=>{const w=inT?vTrW(c,id):wtOf(id),half=inT&&R0[2]&&R0[2](id);return'<div class="tR"><img src="'+icon(id)+'"><span><b>'+NM2(id)+'</b> ×'+n+'<small>'+(+(w*n).toFixed(1))+'kg'+(half?' · <b style="color:#9fe09f">절반</b>':(!inT&&R0[2]&&R0[2](id)?' · 트렁크에선 절반':''))+'</small></span><button data-'+(inT?'to':'ti')+'="'+id+'" data-n="1">1</button><button data-'+(inT?'to':'ti')+'="'+id+'" data-n="'+n+'">전부</button></div>'};
+ const row=(id,n,inT)=>{const kk=inT?vTrK(c,id):STK(id),dbl=R0[2]&&R0[2](id);return'<div class="tR"><img src="'+icon(id)+'"><span><b>'+NM2(id)+'</b> ×'+n+'<small>'+(inT?Math.ceil(n/kk)+'칸 · 한 칸에 '+kk:'한 칸에 '+STK(id))+(inT&&dbl?' · <b style="color:#9fe09f">2배</b>':(!inT&&dbl?' · 트렁크에선 2배':''))+'</small></span><button data-'+(inT?'to':'ti')+'="'+id+'" data-n="1">1</button><button data-'+(inT?'to':'ti')+'="'+id+'" data-n="'+n+'">전부</button></div>'};
  const bag=Object.keys(p.inv).filter(k=>(p.inv[k]|0)>0&&!vEquipped(k)&&!/^vk_/.test(k)).sort((a,b)=>catOf(a).localeCompare(catOf(b)));
- b.innerHTML='<div class="sh"><h2>🧳 '+VEH[c.t].nm+' 트렁크</h2><div class="wt">'+(+used.toFixed(1))+' / '+cap+'kg · '+R0[0]+': '+R0[1]+'</div><button onclick="closeBase();PAUSE=false">✕</button></div>'+
+ b.innerHTML='<div class="sh"><h2>🧳 '+VEH[c.t].nm+' 트렁크</h2><div class="wt">'+used+' / '+cap+'칸 · '+R0[0]+': '+R0[1]+'</div><button onclick="closeBase();PAUSE=false">✕</button></div>'+
   '<div class="vB" style="height:8px;margin:2px 0 8px"><i style="width:'+Math.min(100,used/cap*100)+'%;background:'+(used/cap>.9?'#ff8a5a':'#6ab0ff')+'"></i></div>'+
   '<h3 class="vH">트렁크</h3>'+(Object.keys(T).length?Object.keys(T).map(k=>row(k,T[k],true)).join('')+'<div class="vR"><button id="tAll">전부 꺼내기</button></div>':'<div class="sub">비어 있어요</div>')+
   (bag.length?'<div class="vR">'+VTRCAT.filter(([,,f])=>bag.some(f)).map(([k,nm])=>'<button data-tc="'+k+'">'+nm+' 전부 넣기</button>').join('')+'</div>':'')+'<h3 class="vH">내 가방 <small style="font-weight:400;color:var(--mut)">'+(+weight(p).toFixed(1))+'kg · 장착 중인 건 빼고</small></h3>'+(bag.length?bag.map(k=>row(k,p.inv[k]|0,false)).join(''):'<div class="sub">넣을 게 없어요</div>')+
-  '<div class="sub" style="line-height:1.6;margin-top:6px">· 기본 40kg · 차고에서 <b>🧳 트렁크 확장</b> (Lv4까지, 한 번에 +20kg · 민간 +25kg)<br>· 민간 넓은 트렁크 · 경찰 방어구·장비 절반 · 구급차 음식·의료품 절반 · 장갑차 무기+탄약 절반 · 전기 밴 재료 절반<br>· 차고에 넣은 차도 짐을 그대로 실고 있어요</div>';
+  '<div class="sub" style="line-height:1.6;margin-top:6px">· 트렁크도 보관함과 같은 칸 규칙 (탄약 300 · 무기 · 방어구 1 …) · 기본 8칸 · 차고에서 <b>🧳 트렁크 확장</b> (Lv4까지, 한 번에 +4칸 · 민간 +5칸)<br>· 민간 넓은 트렁크 · 경찰 방어구·장비 2배 · 구급차 음식·의료품 2배 · 장갑차 무기 2개·탄약 600 · 전기 밴 재료 2배<br>· 차고에 넣은 차도 짐을 그대로 실고 있어요</div>';
  b.style.display='block';
  b.querySelectorAll('[data-ti]').forEach(x=>x.onclick=()=>{vTrPut(c,x.dataset.ti,+x.dataset.n);vTrunk()});b.querySelectorAll('[data-to]').forEach(x=>x.onclick=()=>{vTrTake(c,x.dataset.to,+x.dataset.n);vTrunk()});
  b.querySelectorAll('[data-tc]').forEach(x=>x.onclick=()=>{const f=VTRCAT.find(q=>q[0]==x.dataset.tc)[2];let n=0;for(const id of bag.filter(f)){const before=p.inv[id]|0;vTrPut(c,id,before);n+=before-(p.inv[id]|0)}if(n)msg('🧳 '+x.textContent.replace(' 전부 넣기','')+' '+n+'개 넣었어요');vTrunk()});
  const a=$('tAll');if(a)a.onclick=()=>{for(const k of Object.keys(T))vTrTake(c,k,T[k]|0);vTrunk()}}
-{const _c=dmCtx;dmCtx=function(){const B=_c();try{if(!S||!run||S.dr||typeof DUN!='undefined'&&DUN||typeof GPL!='undefined'&&GPL)return B;const p=S.p,c=VC();if(vOwned(c)&&Math.hypot(c.x-p.x,c.y-p.y)<50){const i=B.findIndex(q=>/운전 ·|차 수리/.test(q.t));B.splice(i<0?0:i+1,0,{t:'🧳 트렁크 · '+Math.round(vTrUsed(c))+'/'+vTrCap(c)+'kg',f:vTrunk})}}catch(e){}return B}}
+{const _c=dmCtx;dmCtx=function(){const B=_c();try{if(!S||!run||S.dr||typeof DUN!='undefined'&&DUN||typeof GPL!='undefined'&&GPL)return B;const p=S.p,c=VC();if(vOwned(c)&&Math.hypot(c.x-p.x,c.y-p.y)<50){const i=B.findIndex(q=>/운전 ·|차 수리/.test(q.t));B.splice(i<0?0:i+1,0,{t:'🧳 트렁크 · '+vTrUsed(c)+'/'+vTrCap(c)+'칸',f:vTrunk})}}catch(e){}return B}}
 if(typeof IAW!='undefined')IAW.unshift([/트렁크/,'트렁크']);
 document.head.insertAdjacentHTML('beforeend',`<style>#bm .tR{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid #ffffff10}#bm .tR img{width:28px;height:28px;image-rendering:pixelated}#bm .tR span{flex:1;display:flex;flex-direction:column;font-size:12.5px}#bm .tR small{font-size:11px;color:var(--mut)}#bm .tR button{padding:4px 9px;font-size:12px}</style>`);
 /* the garage card shows the trunk and the kind's cargo trait */
-{const _vg=vGarage;vGarage=function(){_vg.apply(this,arguments);try{const b=$('bm');const cards=b.querySelectorAll('.vC');const list=vAll();cards.forEach((el,i)=>{const v=list[i];if(!v)return;const s=el.querySelector('.vI');if(s)s.insertAdjacentHTML('beforeend','<small>🧳 트렁크 '+Math.round(vTrUsed(v))+'/'+vTrCap(v)+'kg · '+VTR[v.t][0]+' ('+VTR[v.t][1]+')</small>')})}catch(e){}}}
+{const _vg=vGarage;vGarage=function(){_vg.apply(this,arguments);try{const b=$('bm');const cards=b.querySelectorAll('.vC');const list=vAll();cards.forEach((el,i)=>{const v=list[i];if(!v)return;const s=el.querySelector('.vI');if(s)s.insertAdjacentHTML('beforeend','<small>🧳 트렁크 '+vTrUsed(v)+'/'+vTrCap(v)+'칸 · '+VTR[v.t][0]+' ('+VTR[v.t][1]+')</small>')})}catch(e){}}}
