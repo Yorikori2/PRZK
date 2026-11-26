@@ -41,7 +41,7 @@ function vNone(){return{x:-1e6,y:-1e6,h:true,none:1}}
 /* ---------- the engine hooks ---------- */
 function vSpd(){const c=VC();if(!vOwned(c))return 300;if(c.broken)return 0;return VEH[c.t].spd*(1+.07*(vMods(c).eng|0))}
 let vNzT=0;
-function vTick(dt,vx,vy){const c=VC(),p=S.p,V=VEH[c.t],M=vMods(c);c.dir=Math.abs(vx)>=Math.abs(vy)?(vx>=0?'r':'l'):(vy>=0?'d':'u');
+function vTick(dt,vx,vy){const c=VC(),p=S.p,V=VEH[c.t],M=vMods(c);c.dir=VDIR8[((Math.round(Math.atan2(vy,vx)/(Math.PI/4))%8)+8)%8];
  const use=dt*(1-.2*(M.eco|0));
  if(c.t=='lab'){c.bat=Math.max(0,(c.bat||0)-use*.7);if(c.bat<=0){S.dr=0;p.y+=24;msg('🔋 배터리가 다 됐어요 · 전자부품으로 충전하세요');return}}
  else{p.inv.fuel=Math.max(0,(p.inv.fuel||0)-use*V.fuel);if(p.inv.fuel<=0){delete p.inv.fuel;S.dr=0;p.y+=24;msg('⛽ 연료가 다 떨어졌어요');return}}
@@ -69,7 +69,7 @@ function vSpot(x,y){let X=x,Y=y+70;for(let i=0;i<60&&blocker(X,Y,30);i++){const 
 function vWildAdd(t){const p=S.p;if(VWILD().some(w=>w.t==t))return;const[x,y]=vSpot(p.x,p.y),[gx,gy]=gOf(x,y),[ox,oy]=bo(gx-OGX,gy-OGY);const w={t,gk:gx+','+gy,rx:Math.round(x-ox),ry:Math.round(y-oy),dir:Math.random()<.5?'r':'l',vid:Date.now()%1e6};VWILD().push(w);
  if(typeof MARKS=='function'){if(typeof MKI!='undefined'&&!MKI.some(m=>m[0]=='🔑'))MKI.push(['🔑','#ffd36a','차량']);MARKS().push({gx,gy,lx:w.rx,ly:w.ry,ic:MKI.findIndex(m=>m[0]=='🔑'),nm:VEH[t].nm,veh:w.vid})}
  infRebuild();setTimeout(()=>msg('🔑 '+VEH[t].kn+' 차 열쇠! · 근처에 '+VEH[t].nm+'이(가) 서 있어요 (지도에 🔑)'),700)}
-{const _ia=invAdd;invAdd=function(p,id,n){const r=_ia.apply(this,arguments);try{if(n>0&&S&&S.inf&&p===S.p&&/^vk_/.test(id)){const t=id.slice(3);if(VEH[t])vWildAdd(t)}}catch(e){}return r}}
+{const _ia=invAdd;invAdd=function(p,id,n){const r=_ia.apply(this,arguments);try{if(n>0&&S&&S.inf&&p===S.p&&/^vk_/.test(id)){const t=id.slice(3);if(VEH[t]&&!(typeof vAll=='function'&&vAll().some(v=>v.t==t)))vWildAdd(t)}}catch(e){}return r}}
 /* searching: a small chance for a key of that building's kind (not for a car you already have or one already waiting) */
 {const _sr=s3SearchRoll;s3SearchRoll=function(o,kind,tier,r){const pid=_sr.apply(this,arguments);try{if(typeof DUN!='undefined'&&DUN)return pid;const t=VKIN[kind];if(!t||!S||!S.inf)return pid;
   const own=vOwned(S.car)&&S.car.t==t||VGAR().some(v=>v.t==t)||VWILD().some(w=>w.t==t)||(S.p.inv['vk_'+t]|0)>0;if(own)return pid;
@@ -78,30 +78,32 @@ function vWildAdd(t){const p=S.p;if(VWILD().some(w=>w.t==t))return;const[x,y]=vS
 {const _bw=buildWorld;buildWorld=function(){const w=_bw.apply(this,arguments);try{if(!(typeof DUN!='undefined'&&DUN)&&S&&S.inf)for(const v of S.inf.vwild||[]){const[gx,gy]=v.gk.split(',').map(Number),cc=gx-OGX,rr=gy-OGY;if(cc<0||rr<0||cc>=NBX||rr>=NBY)continue;const[ox,oy]=bo(cc,rr),V=VEH[v.t],hz=v.dir=='r'||v.dir=='l',w2=hz?V.L:V.Wd,h2=hz?V.Wd:V.L;
   W0.objs.push({t:'vwild',x:ox+v.rx-w2/2,y:oy+v.ry-h2/2,w:w2,h:h2,vt:v.t,dir:v.dir,vid:v.vid})}}catch(e){}return w}}
 P('vwild','버려진 차',null,o=>{vPaint(o.vt,o.dir,o.x+o.w/2,o.y+o.h/2,{dust:1});const t=performance.now()/250,y=o.y-14+Math.sin(t)*2,cx=o.x+o.w/2;R('#1d1714',cx-5,y-2,11,8);R('#ffd36a',cx-4,y-1,9,6);R('#1d1714',cx-1,y+6,3,3);R('#ffd36a',cx,y+6,1,2)},true);
-function vClaim(o){const p=S.p,t=o.vt,id='vk_'+t;if(!(p.inv[id]>0))return msg('🔒 '+VEH[t].kn+' 차 열쇠가 필요해요');invTake(p,id,1);
+function vClaim(o){const p=S.p,t=o.vt,id='vk_'+t;if(!(p.inv[id]>0))return msg('🔒 '+VEH[t].kn+' 차 열쇠가 필요해요');const own=vAll();if(own.some(v=>v.t==t))return msg('이미 '+VEH[t].nm+'이(가) 있어요 · 종류마다 1대만 가질 수 있어요');if(own.length>=vCap())return msg(vGLv()?'🔧 차고가 가득 찼어요 (Lv'+vGLv()+' · '+vCap()+'대) · 차고를 올리거나 차고에서 폐차하세요':'🏗 차를 더 가지려면 거점에 차고를 지어야 해요 (천막에서 [차고 짓기])');invTake(p,id,1);
  const i=VWILD().findIndex(w=>w.vid==o.vid);if(i>=0)VWILD().splice(i,1);if(typeof MARKS=='function'){const L=MARKS(),j=L.findIndex(m=>m.veh==o.vid);if(j>=0)L.splice(j,1)}
  const k=W0.objs.indexOf(o);if(k>=0)W0.objs.splice(k,1);infDerived();
  const old=VC();if(vOwned(old)){const keep=Object.assign({},old);delete keep.x;delete keep.y;keep.siren=0;VGAR().push(keep)}
  const c=vNew(t);c.x=o.x+o.w/2;c.y=o.y+o.h/2;c.dir=o.dir;c.h=o.dir=='r'||o.dir=='l';S.car=c;
  msg('🔑 '+VEH[t].nm+'이(가) 내 차가 됐어요!'+(vOwned(old)?' · 타던 '+VEH[old.t].nm+'은(는) 거점 차고로 보냈어요':'')+' · '+VEH[t].ds)}
 /* ---------- garage at the base parking spot ---------- */
-const vGarPos=()=>W0.car?[W0.car.x+30,W0.car.y+15]:null;
-function vGarNear(){const g=vGarPos();if(!g||typeof DUN!='undefined'&&DUN||!S.base||typeof inBase!='function'||!inBase(S.p.x,S.p.y))return false;return Math.hypot(S.p.x-g[0],S.p.y-g[1])<90}
+const vGarPos=()=>{const o=W0.objs.find(o=>o.t=='garage');return o?[o.x+o.w/2,o.y+o.h+34]:null};
+function vGarNear(){const o=W0.objs.find(o=>o.t=='garage');if(!o||typeof DUN!='undefined'&&DUN)return false;const p=S.p;return p.x>o.x-30&&p.x<o.x+o.w+30&&p.y>o.y-20&&p.y<o.y+o.h+60}
 function vCost(c){return Object.entries(c).map(([k,v])=>NM2(k)+' '+v).join(' · ')}
 function vHave(c){const p=S.p;return Object.entries(c).every(([k,v])=>((p.inv[k]|0)+((S.base.st||{})[k]|0))>=v)}
 function vPay(c){const p=S.p;for(const k in c){const a=Math.min(p.inv[k]|0,c[k]);if(a)invTake(p,k,a);if(c[k]-a)S.base.st[k]-=c[k]-a}}
 function vGarage(){const b=$('bm'),c=VC(),g=VGAR();b.dataset.m='veh';PAUSE=true;
  const card=(v,act)=>{const V=VEH[v.t],M=vMods(v),mx=vMaxHp(v),f=Math.max(0,v.hp/mx);
-  return'<div class="vC'+(act?' on':'')+'"><img src="'+vImg(v.t,'r')+'"><div class="vI"><b>'+V.ic+' '+V.nm+(act?' <small>· 지금 타는 차</small>':'')+'</b><small>'+V.ds+'</small><div class="vB"><i style="width:'+f*100+'%;background:'+(f>.5?'#5fe08a':f>.25?'#ffd36a':'#ff6a5a')+'"></i></div><small>체력 '+Math.round(v.hp)+'/'+mx+' · 속도 '+Math.round(V.spd*(1+.07*(M.eng|0)))+' · 들이받기 '+Math.round(V.ram*((M.ram|0)?1.6:1))+(v.t=='lab'?' · 배터리 '+Math.round(v.bat||0)+'%':' · 연료 '+(+(V.fuel*(1-.2*(M.eco|0))).toFixed(2))+'/초')+(v.broken?' · <b style="color:#ff8a7a">고장</b>':'')+'</small></div>'+(act?'':'<button data-vs="'+v.vid+'">이 차로 바꾸기</button>')+'</div>'};
- let h='<div class="sh"><h2>🔧 차고</h2><div class="wt">차 바꾸기 · 수리 · 개조 · 재료는 가방과 창고에서 같이 써요</div><button onclick="closeBase();PAUSE=false">✕</button></div>';
+  return'<div class="vC'+(act?' on':'')+'"><img src="'+vImg(v.t,'r')+'"><div class="vI"><b>'+V.ic+' '+V.nm+(act?' <small>· 지금 타는 차</small>':'')+'</b><small>'+V.ds+'</small><div class="vB"><i style="width:'+f*100+'%;background:'+(f>.5?'#5fe08a':f>.25?'#ffd36a':'#ff6a5a')+'"></i></div><small>체력 '+Math.round(v.hp)+'/'+mx+' · 속도 '+Math.round(V.spd*(1+.07*(M.eng|0)))+' · 들이받기 '+Math.round(V.ram*((M.ram|0)?1.6:1))+(v.t=='lab'?' · 배터리 '+Math.round(v.bat||0)+'%':' · 연료 '+(+(V.fuel*(1-.2*(M.eco|0))).toFixed(2))+'/초')+(v.broken?' · <b style="color:#ff8a7a">고장</b>':'')+'</small></div>'+(act?'':'<div class="vR" style="flex-direction:column"><button data-vs="'+v.vid+'">꺼내기</button><button data-vx="'+v.vid+'" class="no">폐차</button></div>')+'</div>'};
+ const gl=vGLv(),up=gl<5?GCOST[gl]:null;let h='<div class="sh"><h2>🔧 차고 Lv'+gl+'</h2><div class="wt">차 '+vAll().length+'/'+vCap()+'대 · 종류마다 1대 · 재료는 가방과 창고에서 같이 써요</div><button onclick="closeBase();PAUSE=false">✕</button></div>'+(up?'<div class="vM"><span><b>🏗 차고 Lv'+(gl+1)+'로 올리기</b><small>주차 '+(gl+1)+'대 · 비용: '+vCost(up)+'</small></span><button id="vGup" class="'+(vHave(up)?'':'no')+'">올리기</button></div>':'<div class="sub">차고 최고 레벨 · 5대까지 주차</div>');
  if(!vOwned(c)&&!g.length)h+='<div class="sub">아직 차가 없어요 · 건물을 수색하다 보면 <b>차 열쇠</b>가 떨어져 있어요<br>· 민간: 주택 · 아파트 · 정비소 · 마트 · 쇼핑몰<br>· 경찰: 경찰서 · 교도소 · 병원: 병원 · 의원 · 약국<br>· 군: 군부대 · 약탈자 기지 · 연구소: 연구소<br>· 열쇠를 주우면 그 근처에 차가 서 있고, 지도에 🔑로 표시돼요</div>';
  if(vOwned(c)){h+=card(c,true);const n=vFixCost(c);h+='<div class="vR"><button id="vFix" '+(n<=0?'disabled':'')+'>🔧 수리 · 고철 '+n+'</button>'+(c.t=='lab'?'<button id="vChg" '+(c.bat>=100?'disabled':'')+'>🔋 충전 · 전자부품 1 (+25%)</button>':'')+'</div><h3 class="vH">개조</h3>';
   for(const k in VMOD){const[ic,nm,mx,ds,cf]=VMOD[k],l=vMods(c)[k]|0,cost=l<mx?cf(l+1):null;h+='<div class="vM"><span><b>'+ic+' '+nm+'</b> '+(mx>1?'Lv'+l+'/'+mx:l?'달림':'없음')+'<small>'+ds+(cost?' · 비용: '+vCost(cost):' · 다 올렸어요')+'</small></span>'+(cost?'<button data-vm="'+k+'" '+(vHave(cost)?'':'class="no"')+'>'+(l?'올리기':'달기')+'</button>':'')+'</div>'}}
  if(g.length)h+='<h3 class="vH">차고에 있는 차</h3>'+g.map(v=>card(v,false)).join('');
  b.innerHTML=h;b.style.display='block';
+ const gu=$('vGup');if(gu)gu.onclick=()=>{if(!vHave(up))return msg('재료가 부족해요 · '+vCost(up));vPay(up);S.base.gar.lv++;infRebuild();msg('🏗 차고 Lv'+S.base.gar.lv+' · 주차 '+vCap()+'대');vGarage()};
+ b.querySelectorAll('[data-vx]').forEach(x=>x.onclick=()=>{const i=g.findIndex(v=>v.vid==+x.dataset.vx);if(i<0)return;if(x.dataset.ok!='1'){x.dataset.ok='1';x.textContent='정말 폐차?';return}const v=g.splice(i,1)[0];invAdd(S.p,'scrap',10);if(I_BY.steel)invAdd(S.p,'steel',2);infRebuild();msg('🔧 '+VEH[v.t].nm+' 폐차 · 고철 10 · 강철 2 · 이 종류 열쇠가 다시 나올 수 있어요');vGarage()});
  const f=$('vFix');if(f)f.onclick=()=>{vRepairG();vGarage()};const ch=$('vChg');if(ch)ch.onclick=()=>{vCharge();vGarage()};
  b.querySelectorAll('[data-vm]').forEach(x=>x.onclick=()=>{const k=x.dataset.vm,l=vMods(c)[k]|0,cost=VMOD[k][4](l+1);if(!vHave(cost))return msg('재료가 부족해요 · '+vCost(cost));vPay(cost);const before=vMaxHp(c);vMods(c)[k]=l+1;if(k=='arm')c.hp+=vMaxHp(c)-before;msg('🔧 '+VMOD[k][1]+(VMOD[k][2]>1?' Lv'+(l+1):' 달았어요'));vGarage()});
- b.querySelectorAll('[data-vs]').forEach(x=>x.onclick=()=>{const i=g.findIndex(v=>v.vid==+x.dataset.vs);if(i<0)return;const nv=g.splice(i,1)[0];if(vOwned(c)){const keep=Object.assign({},c);delete keep.x;delete keep.y;keep.siren=0;g.push(keep)}const[gx,gy]=vGarPos();nv.x=gx;nv.y=gy;nv.dir='r';nv.h=true;S.car=nv;S.dr=0;msg(VEH[nv.t].ic+' '+VEH[nv.t].nm+'을(를) 꺼냈어요');vGarage()})}
+ b.querySelectorAll('[data-vs]').forEach(x=>x.onclick=()=>{const i=g.findIndex(v=>v.vid==+x.dataset.vs);if(i<0)return;const nv=g.splice(i,1)[0];if(vOwned(c)){const keep=Object.assign({},c);delete keep.x;delete keep.y;keep.siren=0;g.push(keep)}const[gx,gy]=vGarPos();nv.x=gx;nv.y=gy;nv.dir='r';nv.h=true;S.car=nv;S.dr=0;infRebuild();msg(VEH[nv.t].ic+' '+VEH[nv.t].nm+'을(를) 꺼냈어요'+(vOwned(c)?' · 타던 차는 차고에':''));vGarage()})}
 /* at the garage the repair can use the stash too */
 function vRepairG(){const c=VC(),n=vFixCost(c);if(n<=0)return;const st=S.base.st||{},have=(S.p.inv.scrap|0)+(st.scrap|0);if(!have)return msg('🔧 고철이 필요해요 ('+n+'개)');const u=Math.min(have,n);vPay({scrap:u});c.hp=Math.min(vMaxHp(c),c.hp+Math.ceil(vMaxHp(c)*u/20));if(c.hp>=vMaxHp(c)*.25)c.broken=0;msg('🔧 고철 '+u+'개로 수리 · 체력 '+Math.round(c.hp)+'/'+vMaxHp(c))}
 /* ---------- [상호작용] list ---------- */
@@ -164,3 +166,44 @@ function vPaint(t,dir,cx,cy,o){const s=vSprite(t,dir||'r',o);shd(cx-s.width/2+5,
 function vImg(t,dir){const s=vSprite(t,dir||'r');const c=document.createElement('canvas');c.width=s.width*2;c.height=s.height*2;const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.drawImage(s,0,0,c.width,c.height);return c.toDataURL()}
 function vDraw(c){if(!vOwned(c))return;const o={blink:c.t=='pol'&&c.siren&&(performance.now()/180|0)%2==0,dmg:c.hp<vMaxHp(c)*.4};let dir=c.dir||(c.h===false?'d':'r');vPaint(c.t,dir,c.x,c.y,o);
  if(c.broken){const t=performance.now()/300;for(let i=0;i<3;i++){const k=(t+i/3)%1;g.globalAlpha=.5*(1-k);R('#5a5a5a',c.x-3+i*3,c.y-12-k*22,5,5);g.globalAlpha=1}}}
+
+/* ---------- the garage: built at the base · Lv1-5 = 1-5 cars · one car per kind ---------- */
+const VDIR8=['r','dr','d','dl','l','ul','u','ur'];
+const GCOST=[{wood:20,scrap:20},{scrap:30,steel:4},{scrap:40,steel:8,elec:4},{scrap:50,steel:12,elec:8},{scrap:60,steel:16,elec:12,tkn:20}];
+const GW=210,GH=84,GBAY=40;
+const vGLv=()=>(S&&S.base&&S.base.gar&&S.base.gar.lv)|0;
+const vCap=()=>Math.max(1,vGLv());
+const vAll=()=>[...(vOwned(VC())?[VC()]:[]),...VGAR()];
+{const _bw=buildWorld;buildWorld=function(){const w=_bw.apply(this,arguments);try{const G=S&&S.base&&S.base.gar;if(G&&G.lv&&W0.base&&!(typeof DUN!='undefined'&&DUN)){const B=W0.base,x=B.ox+G.rx-GW/2,y=B.oy+G.ry-GH/2;
+  W0.objs.push({t:'garage',x,y,w:GW,h:GH,lv:G.lv});W0.objs.push({t:'garwall',x,y:y-6,w:GW,h:10});
+  VGAR().forEach((v,i)=>{if(i<5)W0.objs.push({t:'garcar',x:x+5+i*GBAY+GBAY/2-VEH[v.t].Wd/2,y:y+GH-6-VEH[v.t].L,w:VEH[v.t].Wd,h:VEH[v.t].L,vt:v.t,dmg:v.hp<vMaxHp(v)*.4})});
+  W0.lights.push([x+GW/2,y+GH/2,130,.6,'#ffe9b0'])}}catch(e){}return w}}
+FLAT.garage=1;
+P('garage','차고',null,o=>{const{x,y,w,h}=o,lv=o.lv|0;R('#5a5a56',x,y,w,h);R('#7a7a74',x+2,y+2,w-4,h-4);for(let i=0;i<w;i+=7)R('#6e6e68',x+2+i,y+2+((i*13)%(h-6)),2,1);
+ for(let i=0;i<5;i++){const bx=x+5+i*GBAY,on=i<lv;R(on?'#e8c84a':'#55554f',bx,y+10,2,h-14);R(on?'#e8c84a':'#55554f',bx+GBAY-2,y+10,2,h-14);if(!on){R('#5a5a54',bx+6,y+20,GBAY-12,h-30);R('#3a3a36',bx+9,y+h/2-1|0,GBAY-18,2)}
+  else{R('#e8c84a',bx+GBAY/2-4|0,y+h-10,8,2)}}
+ R('#e8c84a',x,y+h-3,w,1)},false);
+P('garwall','차고 벽',null,o=>{const{x,y,w}=o;R('#1d1714',x-2,y-26,w+4,30);R('#6a3a2a',x,y-25,w,22);R('#8a4a34',x,y-25,w,4);for(let i=x+4;i<x+w-4;i+=12)R('#5a2e20',i,y-19,8,1);R('#3a3a3a',x+w/2-26,y-14,52,10);R('#e8c84a',x+w/2-24,y-13,48,1);
+ R('#2a2a2a',x-2,y+4,5,82);R('#2a2a2a',x+w-3,y+4,5,82)},true);
+P('garcar','주차된 차',null,o=>vPaint(o.vt,'u',o.x+o.w/2,o.y+o.h/2,{dmg:o.dmg}),true);
+/* placing the garage (once) */
+let GPL=false;
+function gSpot(){const p=S.p,f=Math.hypot(p.fx||0,p.fy||0)||1;return[p.x+(p.fx||0)/f*(GH/2+30),p.y+(p.fy||1)/f*(GH/2+30)]}
+function gOk(){const[x,y]=gSpot();for(const[a,b]of[[x-GW/2,y-GH/2-30],[x+GW/2,y-GH/2-30],[x-GW/2,y+GH/2],[x+GW/2,y+GH/2]])if(!(typeof inBase=='function'&&inBase(a,b)))return'거점 안에만 지을 수 있어요';
+ for(let a=x-GW/2+8;a<x+GW/2;a+=24)for(let b=y-GH/2-24;b<y+GH/2;b+=24)if(blocker(a,b,6))return'자리가 좁아요 · 넓은 곳으로';if(!vHave(GCOST[0]))return'재료가 부족해요 · '+vCost(GCOST[0]);return''}
+function gDo(){const bad=gOk();if(bad)return msg('🏗 '+bad);vPay(GCOST[0]);const[x,y]=gSpot(),B=W0.base;S.base.gar={lv:1,rx:Math.round(x-B.ox),ry:Math.round(y-B.oy)};GPL=false;infRebuild();msg('🏗 차고를 지었어요 · 주차 1대 · 차고에서 수리 · 개조 · 차고 올리기')}
+if(typeof OVL!='undefined')OVL.push((g,sx,sy,k)=>{if(!GPL||!S||!S.p)return;const[x,y]=gSpot(),bad=gOk();g.save();g.fillStyle=bad?'#ff6a5a30':'#7fd07f30';g.strokeStyle=bad?'#ff6a5acc':'#7fd07fcc';g.lineWidth=2;g.setLineDash([6,4]);
+ g.fillRect(sx(x-GW/2),sy(y-GH/2-30),GW*k,(GH+30)*k);g.strokeRect(sx(x-GW/2),sy(y-GH/2-30),GW*k,(GH+30)*k);g.setLineDash([]);g.font='600 13px system-ui,sans-serif';g.textAlign='center';g.lineWidth=3;g.strokeStyle='#000a';const t='🏗 '+(bad||'차고 여기에');g.strokeText(t,sx(x),sy(y-GH/2-30)-8);g.fillStyle='#fff';g.fillText(t,sx(x),sy(y-GH/2-30)-8);g.restore()});
+{const _c=dmCtx;dmCtx=function(){if(GPL){const bad=gOk();return[{t:'✅ 차고 짓기'+(bad?' · '+bad:''),f:gDo,off:!!bad,big:1},{t:'✖ 취소',f:()=>{GPL=false;msg('🏗 취소')},sm:1}]}const B=_c();try{if(!S||!run||S.dr||typeof DUN!='undefined'&&DUN)return B;const p=S.p,c=VC();
+  if(!vGLv()&&typeof rqNear=='function'&&rqNear())B.push({t:'🏗 차고 짓기 · '+vCost(GCOST[0]),f:()=>{GPL=true;msg('🏗 차고 자리를 정해요 · 넓은 곳으로 걸어가서 [차고 짓기] · 바라보는 쪽 앞에 지어져요')}});
+  if(vGarNear()&&vOwned(c)&&!S.dr&&Math.hypot(c.x-p.x,c.y-p.y)<160&&VGAR().length<5)B.push({t:'🅿 '+VEH[c.t].nm+' 차고에 넣기',f:()=>{const keep=Object.assign({},c);delete keep.x;delete keep.y;keep.siren=0;VGAR().push(keep);S.car=vNone();infRebuild();msg('🅿 '+VEH[keep.t].nm+'을(를) 차고에 넣었어요')},sm:1})}catch(e){}return B}}
+if(typeof IAW!='undefined')IAW.unshift([/차고 짓기/,'차고 짓기'],[/차고에 넣기/,'주차']);
+/* ---------- 8 directions: diagonals are rotated with a supersampled majority vote, so the pixels stay clean ---------- */
+function vRot45(a,ang){const w=a.width,h=a.height,src=a.getContext('2d').getImageData(0,0,w,h).data,D=Math.ceil((w+h)/Math.SQRT2)+2,b=document.createElement('canvas');b.width=D;b.height=D;const x=b.getContext('2d'),img=x.createImageData(D,D),out=img.data;
+ const co=Math.cos(-ang),si=Math.sin(-ang),cx=D/2,cy=D/2,sx0=w/2,sy0=h/2,N=4;
+ for(let py=0;py<D;py++)for(let px=0;px<D;px++){const cnt=new Map();let tr=0;for(let j=0;j<N;j++)for(let i=0;i<N;i++){const dx=px+(i+.5)/N-cx,dy=py+(j+.5)/N-cy,u=Math.floor(dx*co-dy*si+sx0),v=Math.floor(dx*si+dy*co+sy0);
+   if(u<0||v<0||u>=w||v>=h){tr++;continue}const o=(v*w+u)*4;if(src[o+3]<128){tr++;continue}const key=(src[o]<<16)|(src[o+1]<<8)|src[o+2];cnt.set(key,(cnt.get(key)||0)+1)}
+  if(tr>N*N/2)continue;let best=0,bk=0;for(const[k,n]of cnt)if(n>best){best=n;bk=k}const o=(py*D+px)*4;out[o]=bk>>16&255;out[o+1]=bk>>8&255;out[o+2]=bk&255;out[o+3]=255}
+ x.putImageData(img,0,0);return b}
+{const _vs=vSprite;vSprite=function(t,dir,o){if(!/^(dr|dl|ur|ul)$/.test(dir))return _vs(t,dir,o);const k=t+dir+(o&&o.blink?'b':'')+(o&&o.dmg?'d':'')+(o&&o.dust?'u':'');if(VSPR[k])return VSPR[k];
+  const base=_vs(t,'r',o),ang={dr:Math.PI/4,dl:3*Math.PI/4,ul:-3*Math.PI/4,ur:-Math.PI/4}[dir];return VSPR[k]=vRot45(base,ang)}}

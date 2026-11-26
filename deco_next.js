@@ -21,7 +21,7 @@ const DECO={
  line:['👕','빨랫줄',{wood:2,cloth:3},1,50,12,false,'빨래가 바람에 흔들려요'],
  garden:['🥬','텃밭',{wood:6,cloth:2},2,44,28,false,'매일 아침 통조림 1개 (채소)'],
  barrel:['🛢','빗물 통',{scrap:6,wood:2},1,18,20,true,'매일 아침 물병 1개']};
-const DLIST=Object.keys(DECO);
+const DLIST=Object.keys(DECO);Object.assign(FLAT,{deco_rug:1,deco_flower:1,deco_garden:1});
 const DTIER=[[5,'🛋 아늑함','거점에서 나와 동료 체력 회복 +0.5/초'],[12,'🏡 내 집 같음','매일 아침 생존자들이 음식 · 물을 나눠요'],[20,'🎉 활기참','의뢰 보상 +20% · 거점 동료 매일 경험치']];
 const DSTORE=()=>{S.base.deco=S.base.deco||[];return S.base.deco};
 const comfort=()=>DSTORE().reduce((a,d)=>a+(DECO[d.t]?DECO[d.t][3]:0),0);
