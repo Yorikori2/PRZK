@@ -162,7 +162,10 @@ function vSprite(t,dir,o){const k=t+dir+(o&&o.blink?'b':'')+(o&&o.dmg?'d':'')+(o
  if(o&&(o.dmg||o.dust)){x.globalCompositeOperation='source-atop';if(o.dust){x.fillStyle='#8a7a5a';x.globalAlpha=.28;x.fillRect(0,0,a.width,a.height)}if(o.dmg){x.globalAlpha=1;x.fillStyle='#2a1e16';for(const[px,py,w]of[[.2,.3,4],[.5,.7,5],[.7,.25,3],[.35,.55,3],[.85,.6,4]])x.fillRect(4+L*px|0,4+Wd*py|0,w,w-1);x.fillStyle='#6a3a20';for(const[px,py]of[[.22,.32],[.52,.72],[.86,.62]])x.fillRect(4+L*px|0,4+Wd*py|0,2,1)}x.globalCompositeOperation='source-over';x.globalAlpha=1}
  let out=a;if(dir!='r'){const b=document.createElement('canvas'),v=dir=='u'||dir=='d';b.width=v?a.height:a.width;b.height=v?a.width:a.height;const y=b.getContext('2d');y.translate(b.width/2,b.height/2);y.rotate(dir=='l'?Math.PI:dir=='d'?Math.PI/2:-Math.PI/2);y.drawImage(a,-a.width/2,-a.height/2);out=b}
  return VSPR[k]=out}
-function vPaint(t,dir,cx,cy,o){const s=vSprite(t,dir||'r',o);shd(cx-s.width/2+5,cy-s.height/2+6,s.width-6,s.height-6,.3);g.drawImage(s,Math.round(cx-s.width/2),Math.round(cy-s.height/2))}
+/* the shadow has the car's own shape (a box shadow showed as a black square on the diagonals) */
+const VSHD=new WeakMap();
+function vShadow(s){let c=VSHD.get(s);if(c)return c;c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');x.drawImage(s,0,0);x.globalCompositeOperation='source-in';x.fillStyle='#000';x.fillRect(0,0,c.width,c.height);VSHD.set(s,c);return c}
+function vPaint(t,dir,cx,cy,o){const s=vSprite(t,dir||'r',o),X=Math.round(cx-s.width/2),Y=Math.round(cy-s.height/2);const a=g.globalAlpha;g.globalAlpha=a*.3;g.drawImage(vShadow(s),X+3,Y+4);g.globalAlpha=a;g.drawImage(s,X,Y)}
 function vImg(t,dir){const s=vSprite(t,dir||'r');const c=document.createElement('canvas');c.width=s.width*2;c.height=s.height*2;const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.drawImage(s,0,0,c.width,c.height);return c.toDataURL()}
 function vDraw(c){if(!vOwned(c))return;const o={blink:c.t=='pol'&&c.siren&&(performance.now()/180|0)%2==0,dmg:c.hp<vMaxHp(c)*.4};let dir=c.dir||(c.h===false?'d':'r');vPaint(c.t,dir,c.x,c.y,o);
  if(c.broken){const t=performance.now()/300;for(let i=0;i<3;i++){const k=(t+i/3)%1;g.globalAlpha=.5*(1-k);R('#5a5a5a',c.x-3+i*3,c.y-12-k*22,5,5);g.globalAlpha=1}}}
