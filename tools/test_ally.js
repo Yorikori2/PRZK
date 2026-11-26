@@ -67,3 +67,11 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  ok(r.wore,'the shield bearer\'s shield wears while blocking');ok(r.broken,'a broken companion shield blocks nothing');ok(r.mended,'a night at the base mends it');
  ok(r.playerRank==6&&r.allyRank==0&&r.allyHit<r.playerHit,'mastery is personal: your S-rank shotgun given to a gunner starts at their F ('+r.allyHit.toFixed(2)+' vs your '+r.playerHit.toFixed(2)+')');
  ok(!errs.length,'no page errors (companion shield) '+errs.slice(0,2));await b.close()})();
+// mastery does not double-count: a real shot = +1, the killing shot = +1 +4, nothing goes to the player's level xp, a companion's hit only to the companion
+(async()=>{const {chromium,devices}=require('playwright');const b=await chromium.launch();const ctx=await b.newContext({...devices['Pixel 7']});const p=await ctx.newPage();
+ await p.goto(PAGE);await p.evaluate(()=>localStorage.clear());await p.reload();await p.waitForTimeout(1800);
+ await p.evaluate(()=>{closeBase();scene9('al');PAUSE=false;const P=S.p,M=MAST();for(const k in M)delete M[k];give({pistol:1,a9mm:50});P.eq.sec='pistol';P.as='sec';P.mag.pistol=12;M.pistol=MXP[6];window.__m0=M.pistol;window.__x0=S.pg.xp;
+  mk(P.x+80,P.y,{look:'civ1'});const q=Z[Z.length-1];q.hp=q.mhp=1e6;S.tg=q;S.tgIn=true;const _r=Math.random;Math.random=()=>.5;try{for(let i=0;i<5;i++){P.ac=0;P.rl=0;gearAct()}window.__h=M.pistol-__m0;window.__k0=M.pistol;q.hp=1;P.ac=0;gearAct()}finally{Math.random=_r}
+  const a=S.inf.allies[0];aSync();const z=aEnt(a);a.mast={};window.__pm=M[aWid(a)]|0;mk(z.x+60,z.y,{look:'civ1'});const q2=Z[Z.length-1];q2.hp=q2.mhp=1e6;Math.random=()=>.01;try{aShoot(a,z,q2)}finally{Math.random=_r}window.__a=a});
+ await p.waitForTimeout(800);const r=await p.evaluate(()=>({hits:__h,kill:MAST().pistol-__k0,lvl:S.pg.xp-__x0,ally:__a.mast[aWid(__a)]|0,toPlayer:(MAST()[aWid(__a)]|0)-__pm}));
+ ok(r.hits==5,'5 hits = +5 mastery (no double count)');ok(r.kill==5,'the killing shot = +1 hit +4 kill, once');ok(r.toPlayer==0&&r.ally==1,'a companion\'s hit goes only to the companion');await b.close()})();
