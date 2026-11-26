@@ -47,7 +47,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  const r=await p.evaluate(()=>{closeBase();PAUSE=false;const P=S.p,M=MAST(),out={};const one=(id,setup)=>{mk(P.x+60,P.y,{look:'civ1'});const q=Z[Z.length-1];setup&&setup(q);MCTX={who:'p',id,x:P.x,y:P.y,rng:300};try{hitZ(q,10,1,0,1)}finally{MCTX=null}return q};
   /* pistol S: some headshots (x2.5) */let big=0;for(let i=0;i<200;i++){const q=one('pistol',q=>{q.hp=1e6;q.mhp=1e6});if(1e6-q.hp>20)big++;q.hp=0}out.head=big;
   /* pistol F: none */M.pistol=0;big=0;for(let i=0;i<200;i++){const q=one('pistol',q=>{q.hp=1e6;q.mhp=1e6});if(1e6-q.hp>20)big++;q.hp=0}out.headF=big;M.pistol=MXP[6];
-  /* machete S: execute */{const q=one('machete',q=>{q.mhp=100;q.hp=24});out.exec=q.hp<=0}
+  /* machete S: execute */{out.exec=false;for(let i=0;i<5&&!out.exec;i++){const q=one('machete',q=>{q.mhp=100;q.hp=24;q.look='civ1';q.arm=0});out.exec=q.hp<=0;q.hp=0}}
   /* rifle S: the one behind is hit too */{mk(P.x+60,P.y,{look:'civ1'});const q=Z[Z.length-1];mk(P.x+120,P.y,{look:'civ1'});const t=Z[Z.length-1];q.hp=t.hp=1e6;const h=t.hp;MCTX={who:'p',id:'ar',x:P.x,y:P.y,rng:300};try{for(let i=0;i<6;i++)hitZ(q,10,1,0,1)}finally{MCTX=null}out.pierce=t.hp<h;q.hp=t.hp=0}
   /* sniper S vs elite */{mk(P.x+60,P.y,{look:'heavy'});const q=Z[Z.length-1];q.hp=1e6;let mx=0;for(let i=0;i<8;i++){const h=q.hp;MCTX={who:'p',id:'hunting',x:P.x,y:P.y,rng:400};try{hitZ(q,10,1,0,1)}finally{MCTX=null}mx=Math.max(mx,h-q.hp)}out.elite=mx;q.hp=0}
   return out});

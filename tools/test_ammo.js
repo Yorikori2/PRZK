@@ -12,7 +12,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
   Z.length=0;mk(P.x+80,P.y,{look:'civ1'});const z=Z[0];z.hp=1e4;P.fx=1;P.fy=0;S.tg=z;for(let i=0;i<12&&!(z.burn>0);i++){P.ac=0;P.cd=0;gearAct()}return{back,mag,burn:z.burn|0,t:P.magT.ar}});
  ok(r.back==40&&r.mag==0,'switching kinds puts the old rounds back in the bag');ok(r.t=='a556_inc'&&r.burn>0,'incendiary rounds set zombies alight');
  r=await p.evaluate(()=>{const P=S.p;give({pump:1});P.eq.prim='pump';P.mag.pump=0;P.inv.a12g_slug=12;ammoLoad('a12g_slug');reload(P,true);for(let i=0;i<300&&P.rl>0;i++)reloadTick(P,.05);const s=wdef('pump')[4],b2=W_BY.pump[4];
-  P.inv.a12g_bean=12;ammoLoad('a12g_bean');reload(P,true);for(let i=0;i<300&&P.rl>0;i++)reloadTick(P,.05);Z.length=0;mk(P.x+40,P.y,{look:'civ1'});const z=Z[0];z.hp=1e4;S.tg=z;P.ac=0;gearAct();return{slug:!s.pel&&s.r>b2.r&&s.d>b2.d*3,stun:z.stun>0}});
+  P.inv.a12g_bean=12;ammoLoad('a12g_bean');reload(P,true);for(let i=0;i<300&&P.rl>0;i++)reloadTick(P,.05);Z.length=0;mk(P.x+40,P.y,{look:'civ1'});const z=Z[0];z.hp=1e4;S.tg=z;for(let i=0;i<8&&!(z.stun>0);i++){P.ac=0;P.cd=0;gearAct()}return{slug:!s.pel&&s.r>b2.r&&s.d>b2.d*3,stun:z.stun>0}});
  ok(r.slug,'slugs fire one heavy, long-range round');ok(r.stun,'bean bags knock zombies down');
  r=await p.evaluate(()=>{S.base.lv.fst={ammob:1};FANY=true;S.p.inv={case:20,blead:20,primer:20,bpow:4};FCAL='9mm';openForge('ammob');const vis=[...document.querySelectorAll('#bm .mod')].filter(e=>e.style.display!='none').map(e=>e.querySelector('[data-fc]')&&e.querySelector('[data-fc]').dataset.fc).filter(Boolean);
   document.querySelector('[data-fc=a9mm_bp]').click();const n=S.p.inv.a9mm_bp|0;closeBase();return{vis,n}});

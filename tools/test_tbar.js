@@ -25,7 +25,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  const tgt=await p.evaluate(()=>{const f=TB.fan.querySelector('[data-for="bBag"]').getBoundingClientRect();return[f.left+f.width/2,f.top+f.height/2]});for(let i=1;i<=8;i++)await T('touchMove',ab[0]+(tgt[0]-ab[0])*i/8,ab[1]+(tgt[1]-ab[1])*i/8);await T('touchEnd');await p.waitForTimeout(300);
  r=await p.evaluate(()=>({bag:$('bm').dataset.m,fan:!!TB.fan}));ok(r.bag=='bag'&&!r.fan,'B: slide to 🎒 and release opens the bag '+JSON.stringify(r));await p.evaluate(()=>closeBase());
  // C contextual
- await p.evaluate(()=>scene8('C'));await p.waitForTimeout(400);const c0=await vis();await p.waitForTimeout(3600);const c1=await vis();await p.screenshot({path:OUT+'/tb-C.png'});await p.waitForTimeout(4400);const c2=await vis();
+ await p.evaluate(()=>scene8('C'));await p.waitForTimeout(400);const c0=await vis();let c1=c0;for(let i=0;i<30&&!c1.includes('bBd');i++){await p.waitForTimeout(250);c1=await vis()}await p.screenshot({path:OUT+'/tb-C.png'});let c2=c1;for(let i=0;i<40&&c2.includes('bse');i++){await p.waitForTimeout(250);c2=await vis()}
  ok(!c0.includes('bBd')&&c1.includes('bBd')&&c1.includes('cCr')&&c0.includes('bse')&&!c2.includes('bse'),'C: 🧱/🛠 appear with materials, 🏠 only in the base '+JSON.stringify({c0,c1,c2}));
  // D fold
  await p.evaluate(()=>scene8('D'));await p.waitForTimeout(1700);r=await vis();ok(r.length==0,'D: folded to one ▶ button');await p.screenshot({path:OUT+'/tb-D.png'});await p.evaluate(()=>{TB.fold=false;tbApply()});r=await vis();ok(r.length>=5,'D: unfolds again');

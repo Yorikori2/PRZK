@@ -33,3 +33,16 @@ if(typeof uiApply=='function'){uiIdsFix();
  new MutationObserver(place).observe($('bm'),{attributes:true,attributeFilter:['style'],childList:true});addEventListener('resize',place);setInterval(place,300);place()})();
 document.head.insertAdjacentHTML('beforeend',`<style>#bmX2{position:fixed;z-index:12;display:none;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border-radius:50%;font-size:20px;font-weight:700;background:#1d2228f2;border:2px solid #ffffff55;color:#fff;box-shadow:0 4px 14px #000a}
 #bmX2:active{transform:scale(.92)}</style>`);
+/* HUD editor: the bar must not cover the weapon panel (nor the status panel / quick slots) → try a few heights, keep the one that hides least */
+{const ar=(a,b)=>Math.max(0,Math.min(a.right,b.right)-Math.max(a.left,b.left))*Math.max(0,Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top));
+ const KEY=['wc2','tr','st'];
+ function uiBarCost(b){const r=b.getBoundingClientRect();let c=0;for(const id of KEY){const e=document.getElementById(id);if(!e)continue;const q=e.getBoundingClientRect();if(!q.width)continue;c+=ar(r,q)*(id=='wc2'?3:1)}
+  if(r.top<0||r.bottom>innerHeight)c+=1e7;return c}
+ function uiBarClear(){const b=document.getElementById('uiBar'),w=document.getElementById('wc2');if(!b||!w||b.style.display=='none')return;const wr=w.getBoundingClientRect();if(!wr.width)return;
+  b.style.left='';const h=b.getBoundingClientRect().height,cur=b.style.top||'50%',cand=[cur,Math.round(wr.top-8-h/2)+'px','50%','22%','78%'];let best=cur,bc=1/0,bl='';
+  for(const t of cand){b.style.top=t;b.style.left='';let c=uiBarCost(b);if(c<bc){bc=c;best=t;bl=''}
+   /* wide, short screens: slide it left of the weapon panel */const bw=b.getBoundingClientRect().width,L=Math.max(bw/2+6,wr.left-8-bw/2);b.style.left=L+'px';const c2=uiBarCost(b)+1;if(c2<bc){bc=c2;best=t;bl=L+'px'}b.style.left=''}
+  b.style.top=best;b.style.left=bl}
+ window.uiBarClear=uiBarClear;
+ if(typeof uiEdit=='function'){const _ue=uiEdit;uiEdit=function(on){const r=_ue.apply(this,arguments);if(on)uiBarClear();return r}}
+ addEventListener('resize',()=>setTimeout(uiBarClear,50))}

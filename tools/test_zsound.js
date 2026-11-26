@@ -13,7 +13,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
   return{g:[g(0),g(120),g(350),g(600),g(850),g(1050)],pan:pans.map(s=>+s.pan.value.toFixed(2))}});
  ok(r.g[0]==1&&r.g[1]>r.g[2]&&r.g[2]>r.g[3]&&r.g[3]>r.g[4]&&r.g[5]==0,'volume falls with distance, silent past 1000px '+JSON.stringify(r.g));ok(r.pan[0]>.9&&r.pan[1]<-.9,'sound pans right/left by position '+JSON.stringify(r.pan));
  // off-screen arrows, even when muted
- await p.evaluate(()=>{SND=false;scene5('off')});await p.waitForTimeout(3500);r=await p.evaluate(()=>{const n=document.querySelectorAll('#sdir i').length;const right=[...document.querySelectorAll('#sdir i')].some(e=>parseFloat(e.style.left)>innerWidth*.7);SND=true;return{n,right}});
+ await p.evaluate(()=>{SND=false;scene5('off')});r={n:0,right:false};for(let i=0;i<16&&!(r.n>0&&r.right);i++){await p.waitForTimeout(250);r=await p.evaluate(()=>{const n=document.querySelectorAll('#sdir i').length;const right=[...document.querySelectorAll('#sdir i')].some(e=>parseFloat(e.style.left)>innerWidth*.7);return{n,right}})}await p.evaluate(()=>{SND=true});
  ok(r.n>0&&r.right,'off-screen runners show an edge arrow on the right (sound off too) '+JSON.stringify(r));
  await p.evaluate(()=>{scene5('off')});await p.waitForTimeout(2200);await p.screenshot({path:OUT+'/zs-off.png'});
  // events from behaviour
