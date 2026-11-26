@@ -26,3 +26,11 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  ok(rd.L.some(t=>/지도/.test(t))&&rd.L.some(t=>/생존자/.test(t)),'transmission tower: two choices '+rd.L);ok(rd.unp,'closing the map after the console: the game is not stuck');ok(rd.map>=100,'map: '+rd.map+' new blocks seen');ok(rd.saved==1&&rd.tk==15,'survivor found and rescued (reward)');
  for(const s of['zs','zg','zp','op','zb']){await p.evaluate(s=>scene9(s),s);await p.waitForTimeout(300)}
  ok(!errs.length,'no page errors '+errs.slice(0,3).join(' | '));await b.close()})();
+// the tower's survivor signal is the [상호작용] action, its message stays ~8 s then goes; the minimap opens a big map
+(async()=>{const {chromium,devices}=require('playwright');const b=await chromium.launch();const ctx=await b.newContext({...devices['Pixel 7']});const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
+ await p.goto(PAGE);await p.evaluate(()=>localStorage.clear());await p.reload();await p.waitForTimeout(1800);await p.evaluate(()=>{closeBase();scene9('rd')});await p.waitForTimeout(500);
+ const hint=await p.evaluate(()=>$('iaHint').textContent);await p.evaluate(()=>ia());await p.waitForTimeout(300);const a=await p.evaluate(()=>({sos:!!S.inf.sos,box:!!$('sigM')}));
+ await p.waitForTimeout(6500);const mid=await p.evaluate(()=>!!$('sigM'));await p.waitForTimeout(2500);const gone=await p.evaluate(()=>!$('sigM'));
+ ok(/신호 찾기/.test(hint)&&a.sos&&a.box,'[상호작용] at the tower = find the survivor signal ('+hint+')');ok(mid&&gone,'the signal message stays about 8 s, then disappears');
+ await p.tap('#mmw');await p.waitForTimeout(500);const m=await p.evaluate(()=>({open:!!$('bmap'),PAUSE,names:W0.b.filter(b=>KNAME[b.kind]).length}));await p.click('#bmX');await p.waitForTimeout(200);const c=await p.evaluate(()=>({open:!!$('bmap'),PAUSE}));
+ ok(m.open&&m.PAUSE&&!c.open&&!c.PAUSE,'tapping the minimap opens the big map; ✕ closes it and the game goes on');ok(!errs.length,'no page errors (big map) '+errs.slice(0,2));await b.close()})();

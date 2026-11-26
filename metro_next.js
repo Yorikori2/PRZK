@@ -50,10 +50,10 @@ function metroUp(go){if(!go)return dunExit();const to=DUN.to;dunExit();infGoto(t
 /* ---------- the radio station console ---------- */
 const RADIO0=()=>{S.inf.radio=S.inf.radio||{};return S.inf.radio};
 function radioMap(gk){const[gx,gy]=gk.split(',').map(Number),sn=S.inf.seen=S.inf.seen||{};let n=0;for(let y=gy-8;y<=gy+8;y++)for(let x=gx-8;x<=gx+8;x++){const k=x+','+y;if(!sn[k]){sn[k]=1;n++}}
- (RADIO0()[gk]=RADIO0()[gk]||{}).map=S.day;msg('📡 반경 8블록 지도를 받았어요 · 새로 보이는 블록 '+n+'개 · 지도(M)에서 확인');try{if(typeof openMap=='function')openMap()}catch(e){}}
+ (RADIO0()[gk]=RADIO0()[gk]||{}).map=S.day;sigMsg('📡 송신탑 · 지도 수신','반경 8블록 지도를 받았어요 · 새로 보이는 블록 '+n+'개','미니맵을 누르면 큰 지도 · 위쪽 구역 칩 = 탐험 지도');}
 function radioSos(gk){const[gx,gy]=gk.split(',').map(Number),Rn=Math.random;let t=null;for(let i=0;i<60&&!t;i++){const d=3+(Rn()*6|0),a=Rn()*Math.PI*2,x=gx+Math.round(Math.cos(a)*d),y=gy+Math.round(Math.sin(a)*d),k=kindAt(x,y);if(!['park','lot','base','rbase','hospR','milR'].includes(k))t=[x,y,k]}
- if(!t)return msg('📻 잡음뿐이에요');S.inf.sos={gx:t[0],gy:t[1],k:t[2],day:S.day,nm:['민지','준호','서연','도윤','하은','지훈'][Rn()*6|0]};(RADIO0()[gk]=RADIO0()[gk]||{}).sos=S.day;
- msg('📻 "여기 '+(KNAME[t[2]]||'건물')+'에 갇혔어요… 도와주세요" · 생존자 '+S.inf.sos.nm+' · ('+t[0]+', '+t[1]+') · 화면 가장자리 화살표를 따라가요')}
+ if(!t)return sigMsg('📻 송신탑','치지직… 잡음뿐이에요','');S.inf.sos={gx:t[0],gy:t[1],k:t[2],day:S.day,nm:['민지','준호','서연','도윤','하은','지훈'][Rn()*6|0]};(RADIO0()[gk]=RADIO0()[gk]||{}).sos=S.day;
+ sigMsg('📻 생존자 신호 수신','"치직… 여기 '+(KNAME[t[2]]||'건물')+'에 갇혔어요… 제발 도와주세요…"','생존자 '+S.inf.sos.nm+' · 블록 ('+t[0]+', '+t[1]+') · '+Math.max(Math.abs(t[0]-gx),Math.abs(t[1]-gy))+'블록 · 노란 화살표를 따라가요')}
 /* the survivor appears inside that building when you are there */
 function sosPlace(){const s=S.inf&&S.inf.sos;if(!s||s.done||typeof DUN!='undefined'&&DUN)return;const b=W0.b.find(q=>q.gk==s.gx+','+s.gy);if(!b)return;if(W0.objs.some(o=>o.t=='sosnpc'))return;
  const bi=W0.b.indexOf(b),rf=W0.roofs.filter(q=>q.bi==bi).sort((a,c)=>c.w*c.h-a.w*a.h)[0];let x=rf?rf.x+rf.w/2:b.ox+BW/2,y=rf?rf.y+rf.h/2:b.oy+BH/2;
@@ -77,3 +77,13 @@ OVL.push((g2,sx,sy,k)=>{const s=S&&S.inf&&S.inf.sos;if(!s||s.done||typeof DUN!='
     B.unshift({t:S.inf.sos&&!S.inf.sos.done?'📻 생존자 신호 · '+S.inf.sos.nm+' 찾는 중':st.sos==S.day?'📻 신호 찾기 (오늘 함)':'📻 송신탑 · 생존자 신호 찾기',f:()=>radioSos(gk),off:!!(S.inf.sos&&!S.inf.sos.done)||st.sos==S.day})}
    if(o.t=='sosnpc'&&Math.hypot(o.x+o.w/2-p.x,o.y+o.h/2-p.y)<60)B.unshift({t:'🤝 생존자 구출 · '+(S.inf.sos?S.inf.sos.nm:''),f:sosSave,big:1})}
   return B}}
+
+/* ---------- an 8-second message box for the tower (then it fades away) ---------- */
+let SIGT=null;function sigMsg(h,a,b){let el=$('sigM');if(el)el.remove();clearTimeout(SIGT);document.body.insertAdjacentHTML('beforeend','<div id="sigM"><b>'+h+'</b><div>'+a+'</div>'+(b?'<small>'+b+'</small>':'')+'<i></i></div>');el=$('sigM');
+ el.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();el.classList.add('out');setTimeout(()=>el.remove(),400)});SIGT=setTimeout(()=>{const e=$('sigM');if(e){e.classList.add('out');setTimeout(()=>e.remove(),600)}},8000);
+ try{sfx((a,t)=>{for(let i=0;i<6;i++)tone(a,t+i*.07,{w:'square',f0:900+Math.random()*900,f1:600,d:.05,v:.04})})}catch(e){}}
+document.head.insertAdjacentHTML('beforeend',`<style>#sigM{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 172px);z-index:22;width:min(340px,calc(100vw - 32px));padding:10px 14px 12px;border-radius:14px;background:#1d2a1ef2;border:1.5px solid #7fd07f;box-shadow:0 6px 20px #000a;font-size:13px;line-height:1.5;animation:sigIn .3s;overflow:hidden}
+#sigM b{display:block;color:#a8f0a8;font-size:14px;margin-bottom:3px}#sigM small{display:block;color:#cfe8cf;font-size:11.5px;margin-top:4px}#sigM i{position:absolute;left:0;bottom:0;height:3px;background:#7fd07f;animation:sigBar 8s linear forwards}
+#sigM.out{opacity:0;transition:opacity .5s}@keyframes sigIn{from{opacity:0;transform:translate(-50%,-8px)}}@keyframes sigBar{from{width:100%}to{width:0}}</style>`);
+/* the [상호작용] hint words for the new actions */
+if(typeof IAW!='undefined')IAW.unshift([/생존자 신호/,'신호 찾기'],[/지도 받기/,'지도 받기'],[/생존자 구출/,'구출'],[/지하 터널/,'지하 터널'],[/다음 역으로/,'다음 역'],[/처음 역으로/,'올라가기']);
