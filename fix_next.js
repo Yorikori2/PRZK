@@ -46,3 +46,5 @@ document.head.insertAdjacentHTML('beforeend',`<style>#bmX2{position:fixed;z-inde
  window.uiBarClear=uiBarClear;
  if(typeof uiEdit=='function'){const _ue=uiEdit;uiEdit=function(on){const r=_ue.apply(this,arguments);if(on)uiBarClear();return r}}
  addEventListener('resize',()=>setTimeout(uiBarClear,50))}
+/* the [상호작용] hint stayed on top of open windows */
+document.head.insertAdjacentHTML('beforeend','<style>body:has(#bm[style*="display: block"]) #iaHint,body:has(#bmap) #iaHint{display:none!important}</style>');

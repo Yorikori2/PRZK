@@ -165,7 +165,7 @@ function useQuick(i){const p=S.p,id=p.quick[i];if(!id)return msg('빈 퀵슬롯 
 function use2(k){const p=S.p;if(!has(p,k))return msg(NM2(k)+' 없음');invTake(p,k,1);if(k=='food')p.food=Math.min(100,p.food+35);if(k=='water')p.water=Math.min(100,p.water+40);
  if(k=='bandage'){p.bleed=0;p.hp=Math.min(MHP(p),p.hp+s3Heal()*(S.base.lv.med>=3?25:10));msg('🩹 붕대 사용')}if(k=='medkit'){p.bleed=0;p.hp=Math.min(MHP(p),p.hp+s3Heal()*50);msg('💊 구급상자 사용')}if(k=='pills'){p.hp=Math.min(MHP(p),p.hp+s3Heal()*15);msg('💊 항생제 복용')}}
 function prompt2(){const p=S.p,el=$('pr');if(S.dr||$('bm').style.display=='block'){el.style.display='none';return}let t=null,x=0,y=0;
- if(Math.hypot(S.car.x-p.x,S.car.y-p.y)<46){t='🚗 <b>운전</b>'+((p.inv.fuel|0)>0?'':' · 연료 필요');x=S.car.x;y=S.car.y-30}
+ if(!S.car.none&&!(typeof vOwned=='function'&&S.car.t)&&Math.hypot(S.car.x-p.x,S.car.y-p.y)<46){t='🚗 <b>운전</b>'+((p.inv.fuel|0)>0?'':' · 연료 필요');x=S.car.x;y=S.car.y-30}
  const core=BP.find(o=>o.t=='tentS'||o.t=='container'||o.t=='hq');if(!t&&core&&rdist(core,p.x,p.y)<60){t='🏠 <b>거점 관리</b>';x=core.x+core.w/2;y=core.y-40}
  if(!t)for(const q of S.pois)if(q.on&&Math.hypot(q.x-p.x,q.y-p.y)<40){t='📦 <b>열기</b>';x=q.x;y=q.y-30}
  if(!t)for(const d of W0.objs)if(d.t=='alarmbox'&&rdist(d,p.x,p.y)<34){t='🔕 <b>경보 장치 해제</b>';x=d.x;y=d.y-28;break}

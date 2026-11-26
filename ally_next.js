@@ -121,7 +121,7 @@ function aDaily(){if(S.inf.allyDay==null)S.inf.allyDay=S.day;if(S.day<=S.inf.all
   const fr=z.walk>0?(typeof F8=='function'?F8(z.ph||0):(z.ph|0)%4):-1,dir=typeof dir8=='function'?(z.d8=dir8(z.fx,z.fy,z.d8)):'d';drawChar(aLook(a),z.x,z.y,dir,fr,wkOf(aWid(a)));if(a.shd&&typeof shdDraw=='function'){shdDraw(z.x,z.y,z.fx||0,z.fy||1,a.shd,dir);if(typeof shdCrack=='function')shdCrack(z.x,z.y,dir,shdRatioAlly(a))}
   if(z.hurt>0){z.hurt-=.016;g.globalAlpha=.45;R('#ff3a2a',z.x-9,z.y-36,18,34);g.globalAlpha=1}
   const w=26,f=Math.max(0,a.hp/aMhp(a));R('#000a',z.x-w/2-1,z.y-48,w+2,5);R(f>.5?'#5fe08a':f>.25?'#ffd36a':'#ff6a5a',z.x-w/2,z.y-47,w*f,3);
-  const GR=AGRADE[a.gr||1];g.font='bold 9px sans-serif';g.textAlign='center';g.fillStyle=GR[1];g.fillText(GR[0],z.x,z.y-62);g.fillStyle='#9ad0ff';g.fillText(R0.ic+' '+a.nm+' Lv'+a.lv+(a.st=='job'?' · '+AJOB[a.job][1]:a.st=='wait'?' · 대기':''),z.x,z.y-52);if(!(z.sayT>0&&z.say)&&aAmmoId(a)&&aOut(a)){const t=performance.now()/250;g.globalAlpha=.75+.25*Math.sin(t);g.font='bold 10px sans-serif';const w=g.measureText('탄약 없음').width+10;R('#3a0d0ae8',z.x-w/2,z.y-86,w,15);g.fillStyle='#ff8a7a';g.fillText('탄약 없음',z.x,z.y-75);g.globalAlpha=1}if(z.sayT>0&&z.say){g.font='10px sans-serif';const w=g.measureText(z.say).width+12;g.globalAlpha=Math.min(1,z.sayT);R('#fffffff0',z.x-w/2,z.y-90,w,17);R('#fffffff0',z.x-3,z.y-73,6,4);g.fillStyle='#1d1714';g.fillText(z.say,z.x,z.y-78);g.globalAlpha=1}return true}}
+  const GR=AGRADE[a.gr||1];g.font='bold 9px sans-serif';g.textAlign='center';g.fillStyle=GR[1];g.fillText(GR[0],z.x,z.y-62);g.fillStyle='#9ad0ff';g.fillText(R0.ic+' '+a.nm+' Lv'+a.lv+(a.st=='job'?' · '+AJOB[a.job][1]:a.st=='wait'?' · 대기':''),z.x,z.y-52);return true}}
 /* allies on the minimap and the map (always, in blue) */
 {const _mm=mm2;mm2=function(){_mm();if(!S||!S.p||typeof DUN!='undefined'&&DUN&&DUN.sh=='mine')return;const c=$('mm2');if(!c||$('mmw').style.display=='none')return;const x=c.getContext('2d'),W2=c.width,sc=MMBIG?.35:1,k=MK*sc,cx=S.p.x*k-W2/2,cy=S.p.y*k-W2/2;
   x.fillStyle='#5aa8ff';for(const z of Z)if(z.npc=='ally')x.fillRect(z.x*k-cx-1.5,z.y*k-cy-1.5,3,3)}}
@@ -198,3 +198,18 @@ function aStashFill(a,z,quiet){const id=aAmmoId(a);if(!id||!S.base||!S.base.st)r
    sub.insertAdjacentHTML('beforeend','<br>· <b>소음</b>: 동료가 쏘면 그 무기 소음만큼 주변 좀비가 몰려와요 (정찰병은 한 단계 조용) · 소음기 달린 총을 건네면 조용히 싸워요')}}}
 /* a faint ring where a companion's shot was heard */
 {const _zd=zDraw4;zDraw4=function(z){if(z.npc=='ally'&&z.nzT>0){z.nzT-=.016;const k=1-z.nzT/.5;g.save();g.globalAlpha=.35*(1-k);g.strokeStyle='#ffd36a';g.lineWidth=1.5;g.beginPath();g.arc(z.x,z.y-10,20+(Math.min(z.nzR||160,260)-20)*k,0,6.2832);g.stroke();g.restore()}return _zd.apply(this,arguments)}}
+/* ---------- speech bubbles and the "탄약 없음" tag: drawn sharp at screen resolution (the world is drawn small and blown up) ---------- */
+function aBubbles(){if(!S||!S.inf||typeof ctx=='undefined')return;const c=ctx,k=zoom*dpr;let any=false;
+ for(const z of Z){if(z.npc!='ally')continue;const a=aById(z.ally);if(!a||a.st=='down')continue;const say=z.sayT>0&&z.say,out=!say&&aAmmoId(a)&&aOut(a);if(!say&&!out)continue;
+  const X=(z.x-camX)*k,Y=(z.y-camY)*k;if(X<-200||Y<-100||X>c.canvas.width+200||Y>c.canvas.height+200)continue;any=true;c.save();c.setTransform(1,0,0,1,0,0);c.textAlign='center';c.textBaseline='middle';
+  const fs=Math.round(13*dpr),pad=8*dpr,top=Y-76*k;
+  if(say){c.font='600 '+fs+'px system-ui,sans-serif';const w=c.measureText(z.say).width+pad*2,h=fs+pad*1.1,x0=Math.round(X-w/2),y0=Math.round(top-h);c.globalAlpha=Math.min(1,z.sayT);
+   c.fillStyle='#000000';c.globalAlpha*=.35;aRR(c,x0+1.5*dpr,y0+2*dpr,w,h,7*dpr);c.fill();c.globalAlpha=Math.min(1,z.sayT);
+   c.fillStyle='#fffdf7';c.strokeStyle='#3a2f28';c.lineWidth=1.5*dpr;aRR(c,x0,y0,w,h,7*dpr);c.fill();c.stroke();
+   c.beginPath();c.moveTo(X-5*dpr,y0+h-.5);c.lineTo(X,y0+h+6*dpr);c.lineTo(X+5*dpr,y0+h-.5);c.closePath();c.fill();c.beginPath();c.moveTo(X-5*dpr,y0+h);c.lineTo(X,y0+h+6*dpr);c.lineTo(X+5*dpr,y0+h);c.stroke();
+   c.fillStyle='#1d1714';c.fillText(z.say,X,y0+h/2+.5)}
+  else{const t=performance.now()/250;c.font='700 '+Math.round(11*dpr)+'px system-ui,sans-serif';const tx='탄약 없음',w=c.measureText(tx).width+pad*1.4,h=Math.round(11*dpr)+pad*.8,x0=Math.round(X-w/2),y0=Math.round(top-h);c.globalAlpha=.8+.2*Math.sin(t);
+   c.fillStyle='#3a0d0aee';c.strokeStyle='#ff8a7a';c.lineWidth=1*dpr;aRR(c,x0,y0,w,h,5*dpr);c.fill();c.stroke();c.fillStyle='#ffb0a4';c.fillText(tx,X,y0+h/2+.5)}
+  c.restore()}}
+function aRR(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+{const _dw=draw;draw=function(){const r=_dw.apply(this,arguments);try{aBubbles()}catch(e){}return r}}

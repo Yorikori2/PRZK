@@ -38,7 +38,7 @@ const DKC=document.createElement('canvas'),DKX=DKC.getContext('2d');
   for(const[lx,ly,r,a]of W0.lights)hole(lx,ly,r*.8,Math.min(1,a*1.8));
   for(const f of S.fires||[])hole(f.x,f.y,f.r*2.2,.9);for(const l of S.flares||[])hole(l.x,l.y,200,.95);for(const f of fx)if(f.k=='boom'||f.k=='fl')hole(f.x,f.y,f.k=='boom'?170:60,.9);
   for(const o of BP)if(o.t=='campfire')hole(o.x+15,o.y,110,.9);if(S.base.pow&&typeof BL!='undefined')hole(BL.ox+448,BL.oy+360,380,.8);
-  if(typeof S.car=='object'&&S.dr&&S.car)hole(S.car.x+(S.car.w||60)/2,S.car.y,240,.85);
+  if(typeof S.car=='object'&&S.dr&&S.car)hole(S.car.x+(S.car.t?0:(S.car.w||60)/2),S.car.y,S.car.mods&&S.car.mods.lamp?420:240,.85);
   for(const b of myBeams()){const X=SX(p.x),Y=SY(p.y-14),R2=b.r*k,gr=x.createRadialGradient(X,Y,0,X,Y,R2);gr.addColorStop(0,'rgba(0,0,0,1)');gr.addColorStop(.75,'rgba(0,0,0,.85)');gr.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=gr;x.beginPath();x.moveTo(X,Y);x.arc(X,Y,R2,b.a-b.h,b.a+b.h);x.closePath();x.fill()}
   ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(DKC,0,0);
   /* warm beam colour on top, and a mild green for night vision */
