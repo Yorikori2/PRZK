@@ -117,3 +117,10 @@ document.head.insertAdjacentHTML('beforeend',`<style>#shdHud{position:fixed;left
   el.querySelector('.mN').insertAdjacentHTML('beforeend','<div class="sbn'+(on?' on':'')+'">'+(on?'':'🔒 S랭크: ')+B[0]+' '+B[1]+' · '+B[2]+'</div>'+(SHD[id]&&!a?'<div class="sbn">내구 '+shdHp(id)+'/'+SHDHP[id]+(shdHp(id)<=0?' · 부서짐':'')+'</div>':''))});
   const sub=document.querySelector('#bm .sub:last-child');if(sub)sub.insertAdjacentHTML('beforeend','<br>· <b>S랭크 보너스</b>: 무기 종류마다 하나씩 (권총 헤드샷 · 기관단총 탄 절약 · 소총 관통 · 산탄총 강한 반동 · 저격총 거물 사냥 · 활 화살 회수 · 근접 처형 · 투척 하나 더 · 철거 숙련 철거 · 방패 완벽한 막기)<br>· <b>방패 내구도</b>: 막을 때마다 닳아요 · 25% 아래면 막는 힘 70% · 0이면 부서져서 못 막아요 · 거점 작업대에서 고철(희귀 이상 강철 · 전설 전자부품)로 수리')}}
 document.head.insertAdjacentHTML('beforeend',`<style>#bm .sbn{font-size:10.5px;color:#8a9096;margin-top:2px}#bm .sbn.on{color:#ffd36a;font-weight:700}</style>`);
+/* ================= the shield bearer's shield wears too, and is mended overnight at the base ================= */
+function shdRatioAlly(a){const mx=SHDHP[a.shd];if(a.shdHp==null)a.shdHp=mx;return a.shdHp/mx}
+function shdBlockAlly(a){const r=shdRatioAlly(a);if(r<=0)return 0;return shdBlock(a.shd,a.mast||{})*(r<.25?.7:1)}
+function shdWearAlly(a,blocked){const mx=SHDHP[a.shd],b0=a.shdHp;a.shdHp=Math.max(0,a.shdHp-blocked*.5);if(b0>0&&a.shdHp<=0){msg('💥 '+a.nm+'의 '+NM2(a.shd)+'이(가) 부서졌어요 · 거점에서 하룻밤 쉬면 고쳐져요');if(typeof aSay=='function'){const z=aEnt(a);if(z){z.say='방패가… 부서졌어요!';z.sayT=3}}}
+ else if(b0>=mx*.25&&a.shdHp<mx*.25){const z=typeof aEnt=='function'&&aEnt(a);if(z){z.say='방패가 많이 상했어요…';z.sayT=3}}}
+/* cracks on a worn shield (yours or a companion's) */
+function shdCrack(x,y,dir,ratio){if(ratio>=.5)return;const side=/r/.test(dir||'')?1:/l/.test(dir||'')?-1:0;if((dir||'')[0]=='u')return;const X=x+side*8+(side?0:-5),Y=y-26;R('#1d1714',X-3,Y+4,1,6);R('#1d1714',X-2,Y+9,3,1);R('#1d1714',X+1,Y+9,1,5);if(ratio<=0){R('#1d1714',X+2,Y+2,1,8);R('#ff6a5a',X-5,Y+17,10,1)}}

@@ -56,3 +56,14 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  const s=await p.evaluate(()=>{const P=S.p,M=MAST();const worn=shdBlock('shd3',M);P.hp=100;const d0=shdHp('shd3');hurtP(40,'t');const d1=shdHp('shd3');SHDST().shd3=1;hurtP(40,'t');const broke=shdHp('shd3')==0&&shdBlock('shd3',M)==0;const L=iaList().map(q=>q.t);const sc=P.inv.scrap;iaList().find(q=>/방패 수리 · 강화/.test(q.t)).f();return{worn,wear:d0-d1,broke,menu:L.some(t=>/방패 수리/.test(t)),fixed:shdHp('shd3')==SHDHP.shd3,paid:sc-P.inv.scrap,full:shdBlock('shd3',M),hud:!!$('shdHud')}});
  ok(s.wear>0,'a block wears the shield ('+s.wear+')');ok(s.worn<s.full,'below 25%: blocks less ('+s.worn.toFixed(2)+' < '+s.full.toFixed(2)+')');ok(s.broke,'at 0 the shield is broken and blocks nothing');
  ok(s.menu&&s.fixed&&s.paid>0,'repair at the base workbench for scrap (+steel / parts by grade)');ok(s.hud,'shield durability shows on screen');ok(!errs.length,'no page errors (S bonus · durability) '+errs.slice(0,2));await b.close()})();
+// the shield bearer's shield wears and is mended overnight at the base · mastery belongs to each person (giving your S-rank weapon does not give your rank)
+(async()=>{const {chromium,devices}=require('playwright');const b=await chromium.launch();const ctx=await b.newContext({...devices['Pixel 7']});const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
+ await p.goto(PAGE);await p.evaluate(()=>localStorage.clear());await p.reload();await p.waitForTimeout(1800);await p.evaluate(()=>{closeBase();scene9('al2')});await p.waitForTimeout(500);
+ const r=await p.evaluate(()=>{closeBase();PAUSE=false;const out={};S.inf.allies=[];Z=Z.filter(z=>z.npc!='ally');const a=allyNew('경호','shield',1);a.st='follow';aSync();const z=aEnt(a);
+  mk(z.x+15,z.y,{look:'civ1'});const q=Z[Z.length-1];q.dmg=40;const d0=shdRatioAlly(a);for(let i=0;i<120;i++)aThink(a,z,.05);out.wore=shdRatioAlly(a)<d0;q.hp=0;
+  a.shdHp=0;out.broken=shdBlockAlly(a)==0;a.hp=aMhp(a);a.st='base';S.inf.allyDay=S.day;S.day++;aDaily();out.mended=a.shdHp==SHDHP[a.shd];
+  /* mastery is personal */const g=allyNew('사수','gun',1);MAST().pump=MXP[6];give({pump:1});g.wpn='pump';out.playerRank=mRank(MAST().pump);out.allyRank=mRank((g.mast||{}).pump|0);
+  out.allyHit=mHit('pump',out.allyRank);out.playerHit=mHit('pump',out.playerRank);return out});
+ ok(r.wore,'the shield bearer\'s shield wears while blocking');ok(r.broken,'a broken companion shield blocks nothing');ok(r.mended,'a night at the base mends it');
+ ok(r.playerRank==6&&r.allyRank==0&&r.allyHit<r.playerHit,'mastery is personal: your S-rank shotgun given to a gunner starts at their F ('+r.allyHit.toFixed(2)+' vs your '+r.playerHit.toFixed(2)+')');
+ ok(!errs.length,'no page errors (companion shield) '+errs.slice(0,2));await b.close()})();
