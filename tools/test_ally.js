@@ -21,22 +21,23 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  const lv=await p.evaluate(()=>{const a=S.inf.allies[1];const l0=a.lv;a.xp=aNext(a)-1;const z={x:0,y:0,lastAlly:a.id,look:'civ1'};kill(z);return[l0,a.lv]});ok(lv[1]==lv[0]+1,'companions level up from their kills');
  await p.evaluate(()=>{aOpen()});const sheet=await p.evaluate(()=>$('bm').dataset.m);ok(sheet=='ally','companion sheet opens');
  ok(!errs.length,'no page errors '+errs.slice(0,3).join(' | '));await b.close()})();
-// variety: 9 roles with their own skills, 10 traits, grades, jobs-before, looks, lines
+// variety: 5 roles (사수 · 돌격 · 의무병 · 정찰병 · 방패병), traits, grades, looks · 사수 uses any weapon · mastery F → S for you and them · shields (5 grades, pistols only)
 (async()=>{const {chromium,devices}=require('playwright');const b=await chromium.launch();const ctx=await b.newContext({...devices['Pixel 7']});const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.goto(PAGE);await p.evaluate(()=>localStorage.clear());await p.reload();await p.waitForTimeout(1800);await p.evaluate(()=>{closeBase();scene9('al5')});await p.waitForTimeout(500);
  const r=await p.evaluate(()=>{const out={};const P=S.p;S.inf.allies=[];Z=Z.filter(z=>z.npc!='ally');const mkA=(role,gr)=>{const a=allyNew(null,role,gr);a.st='follow';aSync();return[a,aEnt(a)]};
-  const ring=(z,n,d)=>{const L=[];for(let i=0;i<n;i++){mk(z.x+d+i*14,z.y+(i%2?8:-8),{look:'civ1'});L.push(Z[Z.length-1])}return L};
-  /* shotgun hits several */{const[a,z]=mkA('sg');const L=ring(z,4,60);const h0=L.map(q=>q.hp);aShoot(a,z,L[0]);out.sg=L.filter((q,i)=>q.hp<h0[i]).length;L.forEach(q=>q.hp=0)}
-  /* sniper pierces */{const[a,z]=mkA('snp');mk(z.x+200,z.y,{look:'civ1'});const q1=Z[Z.length-1];mk(z.x+260,z.y+4,{look:'civ1'});const q2=Z[Z.length-1];const h=[q1.hp,q2.hp];aShoot(a,z,q1);out.snp=[q1.hp<h[0],q2.hp<h[1]];q1.hp=0;q2.hp=0}
-  /* scout finds things, engineer makes ammo */{const[a,z]=mkA('scout');z.skT=0;const n0=JSON.stringify(P.inv);aSkill(a,z,.016,[]);out.scout=JSON.stringify(P.inv)!=n0}
-  {P.eq.sec='pistol';P.as='sec';const[a,z]=mkA('eng');z.skT=0;const am=AMMO_ITEM(W_BY.pistol[4].ammo),n0=P.inv[am]|0;aSkill(a,z,.016,[]);out.eng=(P.inv[am]|0)-n0}
-  /* demolitionist throws at a group away from you */{const[a,z]=mkA('demo');z.skT=0;const L=ring({x:z.x+200,y:z.y},3,0);aSkill(a,z,.016,hostiles());out.demo=(S.aNade||[]).length;L.forEach(q=>q.hp=0)}
-  /* shield slows what is next to him */{const[a,z]=mkA('shield');mk(z.x+30,z.y,{look:'civ1'});const q=Z[Z.length-1];aSkill(a,z,.016,[q]);out.shield=q.sm<1;q.hp=0}
-  /* traits change numbers */{const a=allyNew(null,'gun',1);a.tr=[];const base=aMhp(a);a.tr=['tough'];out.tough=aMhp(a)>base;a.tr=['marks'];out.marks=aRng(a)>AROLE.gun.rng}
-  /* variety: grades, traits, bios, looks */const G={},T=new Set(),B=new Set(),LK=new Set(),RO=new Set();for(let i=0;i<120;i++){const a=allyNew();G[a.gr]=(G[a.gr]|0)+1;a.tr.forEach(t=>T.add(t));B.add(a.bio);LK.add(JSON.stringify(a.app));RO.add(a.role);if(a.tr.length!=a.gr)out.trBad=1}
-  out.var={G,traits:T.size,bios:B.size,looks:LK.size,roles:RO.size};return out});
- ok(r.sg>=3,'🔥 산탄수 hits several in a cone ('+r.sg+')');ok(r.snp[0]&&r.snp[1],'🎯 저격수 goes through two in a line');ok(r.scout,'🧭 정찰병 brings things');ok(r.eng>0,'🔧 정비공 makes ammo for your gun ('+r.eng+')');
- ok(r.demo>=1,'🧨 폭파병 throws a grenade at a group');ok(r.shield,'🛡 방패병 slows what is next to him');ok(r.tough&&r.marks,'traits change the numbers');
- ok(!r.trBad&&r.var.traits>=9&&r.var.bios>=15&&r.var.looks>=100&&r.var.roles==9&&r.var.G[1]>r.var.G[2]&&r.var.G[2]>(r.var.G[3]|0),'variety: '+JSON.stringify(r.var));
- await p.evaluate(()=>{closeBase();scene9('al4')});const dex=await p.evaluate(()=>document.querySelectorAll('#bm canvas[data-dl]').length);ok(dex==9,'companion guide shows all 9 roles');
- ok(!errs.length,'no page errors (variety) '+errs.slice(0,2));await b.close()})();
+  out.roles=Object.keys(AROLE).sort().join();
+  /* gunner with a shotgun hits several, and learns it */{const[a,z]=mkA('gun');a.wpn='pump';a.mast={pump:MXP[6]};const L=[];for(let i=0;i<4;i++){mk(z.x+60+i*14,z.y+(i%2?8:-8),{look:'civ1'});L.push(Z[Z.length-1])}const h0=L.map(q=>q.hp);aShoot(a,z,L[0]);out.sg=L.filter((q,i)=>q.hp<h0[i]).length;L.forEach(q=>q.hp=0)}
+  {const[a,z]=mkA('gun');a.mast={};mk(z.x+80,z.y,{look:'civ1'});const q=Z[Z.length-1];for(let i=0;i<10;i++){q.hp=1e6;aShoot(a,z,q)}out.gunXp=a.mast[aWid(a)]|0;q.hp=0}
+  /* scout finds things · shield bearer has a shield and slows */{const[a,z]=mkA('scout');z.skT=0;const n0=JSON.stringify(P.inv);aSkill(a,z,.016,[]);out.scout=JSON.stringify(P.inv)!=n0}
+  {const[a,z]=mkA('shield');mk(z.x+30,z.y,{look:'civ1'});const q=Z[Z.length-1];aSkill(a,z,.016,[q]);out.shield=q.sm<1&&a.shd=='shd2';q.hp=0}
+  /* mastery: hit chance F → S, ranks */out.hit=[mHit('pistol',0),mHit('pistol',6),mHit('pistol',0,280,300)];out.ranks=MRK.join('');
+  /* misses at F happen, almost never at S */{const roll=rk=>{let miss=0;const M=MAST();M.pistol=MXP[rk];for(let i=0;i<300;i++){mk(P.x+60,P.y,{look:'civ1'});const q=Z[Z.length-1];q.hp=1e6;const h=q.hp;MCTX={who:'p',id:'pistol',x:P.x,y:P.y,rng:200};hitZ(q,5,1,0,1);MCTX=null;if(q.hp==h)miss++;q.hp=0}return miss};out.missF=roll(0);out.missS=roll(6)}
+  /* shields */out.shd=Object.keys(SHD).map(k=>I_BY[k][3]).join('');give({shd1:1,ar:1,pistol:1});P.eq.shd='shd1';P.eq.prim='ar';P.eq.sec='pistol';P.as='prim';gearUpd(.016);out.only=actW(P);P.hp=100;hurtP(20,'t');out.blk=Math.round(100-P.hp);P.eq.shd='';
+  const G={},T=new Set(),LK=new Set(),RO=new Set();for(let i=0;i<120;i++){const a=allyNew();G[a.gr]=(G[a.gr]|0)+1;a.tr.forEach(t=>T.add(t));LK.add(JSON.stringify(a.app));RO.add(a.role);if(a.tr.length!=a.gr)out.trBad=1}out.var={G,traits:T.size,looks:LK.size,roles:RO.size};return out});
+ ok(r.roles=='gun,med,mel,scout,shield','roles: 사수 · 돌격 · 의무병 + 정찰병 · 방패병 only ('+r.roles+')');ok(r.sg>=3,'a gunner given a shotgun hits several ('+r.sg+')');ok(r.gunXp>=5,'the gunner gains mastery with the weapon in hand ('+r.gunXp+')');
+ ok(r.scout,'정찰병 brings things');ok(r.shield,'방패병 carries a shield and slows');ok(r.ranks=='FEDCBAS'&&r.hit[0]<.8&&r.hit[1]>.95&&r.hit[2]<r.hit[0],'hit chance rises F → S, far shots miss more at low rank '+r.hit.map(x=>x.toFixed(2)));
+ ok(r.missF>40&&r.missS<25,'misses: F '+r.missF+'/300 · S '+r.missS+'/300');ok(r.shd=='curel','shields in the weapon grades (일반 → 전설)');ok(r.only=='pistol','holding a shield: pistols only');ok(r.blk<20,'the shield takes part of the hit (20 → '+r.blk+')');
+ ok(!r.trBad&&r.var.traits>=9&&r.var.looks>=100&&r.var.roles==5,'variety: '+JSON.stringify(r.var));
+ await p.evaluate(()=>{closeBase();scene9('ms')});await p.waitForTimeout(600);const ms=await p.evaluate(()=>({m:$('bm').dataset.m,rows:document.querySelectorAll('#bm .mR').length}));ok(ms.m=='mast'&&ms.rows>=5,'mastery sheet lists your weapons and tools ('+ms.rows+')');
+ await p.evaluate(()=>{closeBase();scene9('al4')});const dex=await p.evaluate(()=>document.querySelectorAll('#bm canvas[data-dl]').length);ok(dex==5,'companion guide shows the 5 roles');
+ ok(!errs.length,'no page errors (variety · mastery · shields) '+errs.slice(0,2));await b.close()})();
