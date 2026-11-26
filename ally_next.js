@@ -36,7 +36,13 @@ const aGB=a=>1+.1*((a.gr||1)-1);/* grade bonus: ★ 1 · ★★ 1.1 · ★★★
 const aMhp=a=>Math.round(AROLE[a.role].hp*(1+.12*(a.lv-1))*(tr(a,'tough')?1.25:1)*aGB(a));
 const AROLEF={gun:1,mel:1.1,med:.6,scout:.8,shield:.85};const aWid=a=>a.wpn&&W_BY[a.wpn]?a.wpn:(a.role=='mel'?'axe':'pistol');const aWS=a=>W_BY[aWid(a)][4];const aMelee=a=>W_BY[aWid(a)][2]=='m';
 const aDmg=a=>{let d=(aWS(a).d||10)*(AROLEF[a.role]||1)*(1+.1*(a.lv-1))*aGB(a);if(tr(a,'brave')&&a.hp<aMhp(a)*.4)d*=1.3;if(tr(a,'night')&&NIGHT)d*=1.25;if(tr(a,'lone')&&ALLY().filter(q=>q.st=='follow').length==1)d*=1.2;return d};
-const aRng=a=>Math.min(420,aWS(a).r||40)*(tr(a,'marks')?1.2:1),aSpd=a=>AROLE[a.role].spd*(tr(a,'quick')?1.2:1);
+/* ammo: companions carry their own rounds (a pouch per ammo type) and a loaded magazine */
+const aAmmoId=a=>{const W=aWS(a);return!aMelee(a)&&W.ammo&&W.ammo!='fuel'?AMMO_ITEM(W.ammo):null};
+const aMagSz=a=>Math.max(1,aWS(a).mag||8);
+const aPouch=a=>{a.am=a.am||{};return a.am};
+const aLeft=a=>{const id=aAmmoId(a);return id?(a.mag|0)+(aPouch(a)[id]|0):Infinity};
+const aOut=a=>aLeft(a)<=0;
+const aRng=a=>aOut(a)?34:Math.min(420,aWS(a).r||40)*(tr(a,'marks')?1.2:1),aSpd=a=>AROLE[a.role].spd*(tr(a,'quick')?1.2:1);
 const aNext=a=>60*a.lv;
 const aXp=(a,n)=>Math.round(n*(tr(a,'coward')?1.2:1)*(tr(a,'chatty')?1.25:1));
 function allyNew(nm,role,grade){const L=ALLY(),id=(S.inf.allyN=(S.inf.allyN||0)+1),bio=pick(ABIO);role=role||(bio[1]&&Math.random()<.75?bio[1]:pick(Object.keys(AROLE)));
@@ -62,7 +68,7 @@ function aSync(){for(const a of ALLY()){const w=aWhere(a);let z=aEnt(a);if(!w){i
  for(let i=Z.length-1;i>=0;i--){const z=Z[i];if(z.npc=='ally'&&!aById(z.ally))Z.splice(i,1)}}
 const hostiles=()=>Z.filter(z=>!z.npc&&z.hp>0&&!z.gone&&!z.env);
 const wkOf=id=>{const w=W_BY[id];if(!w)return'pistol';if(w[2]=='m')return['bat','pipe','baton','wrench','sledge','crowbar','fist'].includes(id)?'bat':'axe';return GCLASS[id]=='pistol'?'pistol':'rifle'};
-function aShoot(a,z,q){const id=aWid(a),W=aWS(a),RG=aRng(a),dx=q.x-z.x,dy=q.y-z.y,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d;z.fx=dx;z.fy=dy;
+function aShoot(a,z,q){if(!aFeed(a,z)){if(aOut(a))aBash(a,z,q);return}const id=aWid(a),W=aWS(a),RG=aRng(a),dx=q.x-z.x,dy=q.y-z.y,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d;z.fx=dx;z.fy=dy;
  const prev=typeof MCTX!='undefined'?MCTX:null;if(typeof MCTX!='undefined')MCTX={who:a,id,x:z.x,y:z.y,rng:RG};
  try{const hit=(t,m)=>{t.lastAlly=a.id;hitZ(t,aDmg(a)*(m||1),ux,uy,W.pel?4:1)};
   if(W.pel){let n=0;for(const t of hostiles()){if(n>=Math.min(4,W.pel))break;const ex=t.x-z.x,ey=t.y-z.y,e=Math.hypot(ex,ey);if(e>RG+10)continue;const an=Math.atan2(ey,ex)-Math.atan2(dy,dx);if(Math.abs(Math.atan2(Math.sin(an),Math.cos(an)))>.4)continue;hit(t,1+(1-e/RG)*.5);fx.push({k:'tr',a:[z.x+ux*10,z.y-16],b:[t.x,t.y-14],l:.06});n++}}
@@ -152,3 +158,23 @@ function aGiveOpen(a){const b=$('bm'),p=S.p;b.dataset.m='agive';PAUSE=true;const
   (L.length?L.map(id=>{const r=mRank((a.mast||{})[id]|0),w=W_BY[id][4];return'<button class="agB" data-gv="'+id+'"><img src="'+icon(id)+'"><span><b>'+NM2(id)+'</b><small>피해 '+w.d+(w.pel?'×'+w.pel:'')+' · 사거리 '+(w.r||40)+' · '+a.nm+'의 숙련도 <b style="color:'+MRCOL[r]+'">'+MRK[r]+'</b> · 명중 '+Math.round(mHit(id,r)*100)+'%</small></span></button>'}).join(''):'<div class="sub">건넬 무기가 가방에 없어요</div>');
  b.style.display='block';b.querySelectorAll('[data-gv]').forEach(bt=>bt.onclick=()=>{const id=bt.dataset.gv;if(!(p.inv[id]>0))return;if(a.given&&a.wpn)give({[a.wpn]:1});invTake(p,id,1);for(const k in p.eq)if(p.eq[k]==id&&!has(p,id))p.eq[k]='';a.wpn=id;a.given=1;msg('🔫 '+a.nm+': "'+NM2(id)+', 잘 쓸게요!"');aOpen()})}
 document.head.insertAdjacentHTML('beforeend',`<style>#bm .agB{display:flex;gap:9px;align-items:center;width:100%;text-align:left;padding:8px;margin:5px 0;border-radius:10px}#bm .agB img{width:32px;height:32px;image-rendering:pixelated}#bm .agB small{display:block;color:var(--mut);font-size:11px}</style>`);
+
+/* ---------- ammo for companions ---------- */
+function aReload(a,z){const id=aAmmoId(a),P=aPouch(a),need=aMagSz(a)-(a.mag|0);let take=Math.min(need,P[id]|0);
+ if(take<=0&&a.auto!==false&&S&&S.p&&(S.p.inv[id]|0)>0&&Math.hypot(S.p.x-z.x,S.p.y-z.y)<220){const n=Math.min(need,S.p.inv[id]);invTake(S.p,id,n);P[id]=(P[id]|0)+n;take=n;msg('🔫 '+a.nm+': "탄약 좀 가져갈게요" · '+NM2(id)+' '+n+'발');if(typeof hud2=='function')hud2()}
+ if(take>0){P[id]-=take;a.mag=(a.mag|0)+take;z.cd2=Math.max(z.cd2||0,1.6);z.say='장전!';z.sayT=1;return true}return false}
+/* true = a round is ready (and spent) · melee and fuel weapons never need ammo */
+function aFeed(a,z){const id=aAmmoId(a);if(!id)return true;if(a.am==null){aPouch(a)[id]=aMagSz(a)*2;a.mag=aMagSz(a)}/* companions from before ammo existed */if((a.mag|0)<=0){if(!aReload(a,z)){if(!a.outSaid){a.outSaid=1;z.say='탄약이 떨어졌어요!';z.sayT=3;msg('⚠ '+a.nm+'의 탄약이 떨어졌어요 · 동료 관리에서 건네주세요')}return false}return false}a.mag--;a.outSaid=0;return true}
+/* out of ammo: a weak bash with the gun */
+function aBash(a,z,q){const dx=q.x-z.x,dy=q.y-z.y,d=Math.hypot(dx,dy)||1;if(d>40)return;z.fx=dx;z.fy=dy;q.lastAlly=a.id;hitZ(q,6*(1+.1*(a.lv-1)),dx/d,dy/d,2);fx.push({k:'sw',x:z.x,y:z.y,fx:dx/d,fy:dy/d,l:.15})}
+/* new companions start with two magazines in the pouch */
+{const _an=allyNew;allyNew=function(){const a=_an.apply(this,arguments);const id=aAmmoId(a);if(id){aPouch(a)[id]=aMagSz(a)*2;a.mag=aMagSz(a)}return a}}
+/* give ammo from the companion sheet */
+function aGiveAmmo(a,all){const id=aAmmoId(a);if(!id)return;const p=S.p,have=p.inv[id]|0;if(!have)return msg('🔫 '+NM2(id)+'이(가) 가방에 없어요');const n=all?have:Math.min(have,aMagSz(a)*2);invTake(p,id,n);aPouch(a)[id]=(aPouch(a)[id]|0)+n;msg('🔫 '+a.nm+'에게 '+NM2(id)+' '+n+'발');aOpen()}
+{const _ao=aOpen;aOpen=function(){_ao();document.querySelectorAll('#bm .alC').forEach((el,i)=>{const a=ALLY()[i];if(!a)return;const id=aAmmoId(a);const w=el.querySelector('.alW');if(!w)return;
+  w.insertAdjacentHTML('afterend',id?'<div class="alAm"><span>🔫 '+NM2(id)+' <b>'+(a.mag|0)+'</b>/'+aMagSz(a)+' · 주머니 <b>'+(aPouch(a)[id]|0)+'</b>'+(aOut(a)?' · <b style="color:#ff8a7a">탄 없음</b>':'')+'</span><button data-am="'+a.id+'">+ 2탄창</button><button data-aa="'+a.id+'">전부</button><button data-ar="'+a.id+'" class="'+(a.auto===false?'':'on')+'">자동 보충 '+(a.auto===false?'끔':'켬')+'</button></div>':'<div class="alAm"><span class="mut">근접 무기 · 탄약 필요 없음</span></div>')});
+  const b=$('bm');b.querySelectorAll('[data-am]').forEach(x=>x.onclick=()=>aGiveAmmo(aById(+x.dataset.am),false));b.querySelectorAll('[data-aa]').forEach(x=>x.onclick=()=>aGiveAmmo(aById(+x.dataset.aa),true));
+  b.querySelectorAll('[data-ar]').forEach(x=>x.onclick=()=>{const a=aById(+x.dataset.ar);a.auto=a.auto===false;aOpen()});
+  const sub=b.querySelector('.sub:last-child');if(sub)sub.insertAdjacentHTML('beforeend','<br>· <b>탄약</b>: 동료도 쏠 때마다 탄을 써요 · 탄창이 비면 주머니에서 장전 (1.6초) · 주머니도 비면 <b>자동 보충</b>이 켜져 있을 때 가까이(220) 있는 내 가방에서 한 탄창 가져가요 · 다 떨어지면 총으로 내려쳐요 (약함)')}}
+{const _gv=aGiveOpen;aGiveOpen=function(a){_gv(a);document.querySelectorAll('#bm [data-gv]').forEach(bt=>{const f=bt.onclick;bt.onclick=()=>{f();const n=aById(a.id);if(n){n.mag=0;n.outSaid=0}}})}}
+document.head.insertAdjacentHTML('beforeend',`<style>#bm .alAm{display:flex;flex-wrap:wrap;align-items:center;gap:5px;font-size:11.5px;margin:3px 0}#bm .alAm span{flex:1 1 100%}#bm .alAm button{padding:3px 8px;font-size:11px}#bm .alAm button.on{border-color:#7fd07f;color:#9fe09f}</style>`);

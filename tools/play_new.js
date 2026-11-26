@@ -45,6 +45,9 @@ const issues=[];const note=(k,m)=>{issues.push(k+': '+m);console.log('⚠ '+k+':
  await ev(()=>{S.p.eq.shd=''});
  /* 8) Lv4 tool can take on a police station, Lv3 cannot */
  const pf=await findK(['police'],1);const dt=await ev(f=>{infGoto(f[0],f[1]);Z=Z.filter(z=>z.npc);give({dt3:1,dt4:1});return{need:DLV.police,lv3:DT.dt3.lv,lv4:DT.dt4.lv}},pf);okk(dt.need==4&&dt.lv3<dt.need&&dt.lv4>=dt.need,'demolition levels',JSON.stringify(dt));
+ /* 8b) every window closes with the floating ✕ above it and the game is never left paused */
+ for(const f of['openBag','openStash','openCraft','openBase','openChar','openRunes','openAEnh','openMixer','aOpen','mastOpen']){const ok2=await ev(f=>{try{window[f]();return $('bm').style.display=='block'}catch(e){return'ERR '+e.message}},f);if(ok2!==true){note('window',f+' '+ok2);continue}
+  await p.waitForTimeout(150);const vis=await ev(()=>getComputedStyle($('bmX2')).display!='none');await p.click('#bmX2').catch(()=>{});await p.waitForTimeout(150);const st=await ev(()=>({open:$('bm').style.display,PAUSE}));okk(vis&&st.open=='none'&&!st.PAUSE,'✕ closes '+f,JSON.stringify(st))}
  /* 9) save → reload → continue keeps the companion, mastery and marks */
  const before=await ev(()=>{(S.inf.marks=S.inf.marks||[]).push({gx:0,gy:0,lx:100,ly:100,ic:1,nm:'집'});save();return{al:(S.inf.allies||[]).length,m:MAST().pistol|0,mk:S.inf.marks.length}});
  await p.reload();await p.waitForTimeout(1500);await ev(()=>{const b2=$('ld');if(b2&&b2.style.display!='none')b2.click()});await p.waitForTimeout(1200);

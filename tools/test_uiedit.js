@@ -5,21 +5,21 @@ const box=(p,id)=>p.evaluate(id=>{const r=document.getElementById(id).getBoundin
 const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
 let UIEw;(async()=>{const b=await chromium.launch();const ctx=await b.newContext({viewport:{width:412,height:860}});const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.goto(url);await p.waitForTimeout(300);await p.evaluate(()=>{localStorage.clear();start('S',false);if(typeof S!='undefined'&&S&&S.pg&&!S.pg.tr.length){S.pg.tr=['cop'];$('bm').dataset.m='';closeBase();PAUSE=false}});await p.waitForTimeout(500);
- const TBID=await p.evaluate(()=>(document.getElementById('tbH')&&getComputedStyle(document.getElementById('tbH')).display!='none'?'tbH':'sd'));const wc0=await box(p,'wc'),st0=await box(p,'st'),sd0=await box(p,TBID);
+ const TBID=await p.evaluate(()=>(document.getElementById('tbH')&&getComputedStyle(document.getElementById('tbH')).display!='none'?'tbH':'sd'));const wc0=await box(p,'wc2'),st0=await box(p,'st'),sd0=await box(p,TBID);
  const ub=await box(p,'uiE');await p.mouse.click(ub.x+ub.w/2,ub.y+ub.h/2);await p.waitForTimeout(200);
  ok(await p.evaluate(()=>UIE.on&&PAUSE&&document.body.classList.contains('uied')),'editor opens and pauses game');
  const t0=await p.evaluate(()=>S.t);await p.waitForTimeout(600);ok(await p.evaluate(t=>S.t==t,t0),'game clock frozen while editing');
- const qkA=await box(p,'qk');
+ const qkA=await box(p,'tr');
  // a tap (tiny jitter) only selects: nothing moves, nothing saved
  await p.mouse.move(wc0.x+30,wc0.y+20);await p.mouse.down();await p.mouse.move(wc0.x+33,wc0.y+22);await p.mouse.up();
- {const w=await box(p,'wc'),q=await box(p,'qk');ok(w.x==wc0.x&&w.y==wc0.y&&q.y==qkA.y&&!Object.keys(UIEw=await p.evaluate(()=>UIE.work.p||{})).length,'tap selects without moving weapon card or quick slots')}
+ {const w=await box(p,'wc2'),q=await box(p,'tr');ok(w.x==wc0.x&&w.y==wc0.y&&q.y==qkA.y&&!Object.keys(UIEw=await p.evaluate(()=>UIE.work.p||{})).length,'tap selects without moving weapon card or quick slots')}
  // drag weapon card to the upper middle
  await p.mouse.move(wc0.x+20,wc0.y+15);await p.mouse.down();await p.mouse.move(150,300,{steps:8});await p.mouse.up();
- let wc1=await box(p,'wc');ok(Math.abs(wc1.x-130)<4&&Math.abs(wc1.y-285)<4,'weapon card dragged to '+wc1.x+','+wc1.y);
- {const q=await box(p,'qk');ok(q.x==qkA.x&&q.y==qkA.y,'quick slots stay put when weapon card moves '+q.x+','+q.y)}
+ let wc1=await box(p,'wc2');ok(Math.abs(wc1.x-130)<4&&Math.abs(wc1.y-285)<4,'weapon card dragged to '+wc1.x+','+wc1.y);
+ {const q=await box(p,'tr');ok(q.x==qkA.x&&q.y==qkA.y,'quick slots stay put when weapon card moves '+q.x+','+q.y)}
  // drag past screen edge clamps inside
- const qk0=await box(p,'qk');await p.mouse.move(qk0.x+5,qk0.y+5);await p.mouse.down();await p.mouse.move(405,855,{steps:6});await p.mouse.up();
- const qk1=await box(p,'qk');ok(qk1.x+qk1.w<=413&&qk1.y+qk1.h<=861,'quick slots clamped on screen '+JSON.stringify(qk1));
+ const qk0=await box(p,'tr');await p.mouse.move(qk0.x+5,qk0.y+5);await p.mouse.down();await p.mouse.move(405,855,{steps:6});await p.mouse.up();
+ const qk1=await box(p,'tr');ok(qk1.x+qk1.w<=413&&qk1.y+qk1.h<=861,'quick slots clamped on screen '+JSON.stringify(qk1));
  // drag toolbar
  await p.mouse.move(sd0.x+10,sd0.y+10);await p.mouse.down();await p.mouse.move(200,560,{steps:6});await p.mouse.up();
  const sd1=await box(p,TBID);ok(Math.abs(sd1.x-190)<4&&Math.abs(sd1.y-550)<4,TBID+' dragged to '+sd1.x+','+sd1.y);
@@ -31,18 +31,18 @@ let UIEw;(async()=>{const b=await chromium.launch();const ctx=await b.newContext
  await p.mouse.click(sd1.x+20,sd1.y+20);ok(await p.evaluate(()=>getComputedStyle(document.getElementById('bm')).display=='none'),'buttons inert in edit mode');
  await p.evaluate(()=>uiEdit(false));await p.waitForTimeout(400);
  ok(await p.evaluate(()=>!UIE.on&&!PAUSE),'editor closes and game resumes');ok(await p.evaluate(t=>S.t>t,t0),'clock running again');
- const saved=await p.evaluate(()=>JSON.parse(localStorage.getItem('pl_ui')));ok(saved.p&&saved.p.wc&&saved.p[TBID]&&saved.p.st.s==1.2&&saved.p.qk&&!saved.l,'saved portrait layout only '+JSON.stringify(saved));
+ const saved=await p.evaluate(()=>JSON.parse(localStorage.getItem('pl_ui')));ok(saved.p&&saved.p.wc2&&saved.p[TBID]&&saved.p.st.s==1.2&&saved.p.tr&&!saved.l,'saved portrait layout only '+JSON.stringify(saved));
  await p.screenshot({path:OUT+'/uiedit-portrait.png'});
  // landscape uses its own (default) layout
- await p.setViewportSize({width:860,height:412});await p.waitForTimeout(300);const wcL=await box(p,'wc');ok(wcL.x>600,'landscape keeps default weapon card '+wcL.x);
- await p.setViewportSize({width:412,height:860});await p.waitForTimeout(300);wc1=await box(p,'wc');ok(Math.abs(wc1.x-130)<4,'portrait layout returns after rotate');
+ await p.setViewportSize({width:860,height:412});await p.waitForTimeout(300);const wcL=await box(p,'wc2');ok(Math.abs(wcL.x-130)>40,'landscape keeps its own (default) weapon panel '+wcL.x);
+ await p.setViewportSize({width:412,height:860});await p.waitForTimeout(300);wc1=await box(p,'wc2');ok(Math.abs(wc1.x-130)<4,'portrait layout returns after rotate');
  // reload: layout persists after start
  await p.reload();await p.waitForTimeout(300);await p.evaluate(()=>{start('S',false);if(typeof S!='undefined'&&S&&S.pg&&!S.pg.tr.length){S.pg.tr=['cop'];$('bm').dataset.m='';closeBase();PAUSE=false}});await p.waitForTimeout(400);
- const wc2=await box(p,'wc');ok(Math.abs(wc2.x-130)<4&&Math.abs(wc2.y-285)<4,'layout persists after reload');
+ const wc2=await box(p,'wc2');ok(Math.abs(wc2.x-130)<4&&Math.abs(wc2.y-285)<4,'layout persists after reload');
  // play actions still work after customisation
  await p.evaluate(()=>{give({pistol:1,a9mm:20});if(typeof TB!='undefined'){TB.open=true;tbApply()}});await p.waitForTimeout(300);const bag=await box(p,'bBag');await p.mouse.click(bag.x+bag.w/2,bag.y+bag.h/2);await p.waitForTimeout(200);
  ok(await p.evaluate(()=>getComputedStyle(document.getElementById('bm')).display!='none'),'moved toolbar bag button opens bag');await p.evaluate(()=>closeBase());
  // reset all
- await p.evaluate(()=>{uiEdit(true);uiReset(true);uiEdit(false)});await p.waitForTimeout(300);const wc3=await box(p,'wc'),sd3=await box(p,TBID);
+ await p.evaluate(()=>{uiEdit(true);uiReset(true);uiEdit(false)});await p.waitForTimeout(300);const wc3=await box(p,'wc2'),sd3=await box(p,TBID);
  ok(Math.abs(wc3.x-wc0.x)<2&&Math.abs(wc3.y-wc0.y)<2&&Math.abs(sd3.y-sd0.y)<2,'reset restores defaults');
  ok(errs.length==0,'no page errors '+errs.join('|'));await b.close()})();

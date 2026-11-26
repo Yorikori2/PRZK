@@ -75,3 +75,17 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
   const a=S.inf.allies[0];aSync();const z=aEnt(a);a.mast={};window.__pm=M[aWid(a)]|0;mk(z.x+60,z.y,{look:'civ1'});const q2=Z[Z.length-1];q2.hp=q2.mhp=1e6;Math.random=()=>.01;try{aShoot(a,z,q2)}finally{Math.random=_r}window.__a=a;window.__tp=(M[aWid(a)]|0)-__pm});
  await p.waitForTimeout(800);const r=await p.evaluate(()=>({hits:__h,kill:MAST().pistol-__k0,lvl:S.pg.xp-__x0,ally:__a.mast[aWid(__a)]|0,toPlayer:__tp}));
  ok(r.hits==5,'5 hits = +5 mastery (no double count)');ok(r.kill==5,'the killing shot = +1 hit +4 kill, once');ok(r.toPlayer==0&&r.ally>=1,'a companion\'s hit goes only to the companion '+JSON.stringify(r));await b.close()})();
+// companions use ammo: magazine, reload from their pouch, take a magazine from you when empty (auto refill), bash when out
+(async()=>{const {chromium,devices}=require('playwright');const b=await chromium.launch();const ctx=await b.newContext({...devices['Pixel 7']});const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
+ await p.goto(PAGE);await p.evaluate(()=>localStorage.clear());await p.reload();await p.waitForTimeout(1800);await p.evaluate(()=>{closeBase();scene9('al')});await p.waitForTimeout(400);
+ const r=await p.evaluate(()=>{closeBase();PAUSE=false;const P=S.p;S.inf.allies=[];Z=Z.filter(z=>z.npc!='ally');const a=allyNew('탄','gun',1);a.st='follow';aSync();const z=aEnt(a);const id=aAmmoId(a),o={start:[a.mag,aPouch(a)[id]]};
+  mk(z.x+80,z.y,{look:'civ1'});const q=Z[Z.length-1];q.hp=q.mhp=1e9;const shoot=n=>{for(let i=0;i<n;i++){z.cd2=0;aShoot(a,z,q)}};
+  const m0=a.mag;shoot(3);o.spent=m0-a.mag;a.mag=0;shoot(1);o.reloaded=a.mag==aMagSz(a);
+  /* empty pouch, auto refill from your bag */P.inv[id]=50;a.mag=0;aPouch(a)[id]=0;shoot(1);o.tookFromYou=50-(P.inv[id]|0);
+  /* nothing anywhere: bash (weak), says so */P.inv[id]=0;a.mag=0;aPouch(a)[id]=0;const h=q.hp;q.x=z.x+30;shoot(1);o.out=aOut(a);o.bash=h-q.hp;o.rng=aRng(a);
+  /* auto refill off: never takes */a.auto=false;P.inv[id]=50;a.mag=0;shoot(1);o.offTook=50-(P.inv[id]|0);
+  /* melee companions need none */const m=allyNew('도끼','mel',1);o.melee=aAmmoId(m)==null&&!aOut(m);
+  /* giving ammo from the sheet */a.auto=true;P.inv[id]=40;aGiveAmmo(a,false);o.given=aPouch(a)[id];closeBase();PAUSE=false;return o});
+ ok(r.start[0]>0&&r.start[1]>0,'new companions start with a loaded magazine and spare rounds '+r.start);ok(r.spent==3,'each shot spends a round');ok(r.reloaded,'an empty magazine reloads from their pouch');
+ ok(r.tookFromYou>0,'pouch empty → takes one magazine from your bag ('+r.tookFromYou+')');ok(r.out&&r.bash>0&&r.rng<40,'no ammo at all → walks in and bashes with the gun');ok(r.offTook==0,'auto refill off: never takes your ammo');ok(r.melee,'melee companions need no ammo');ok(r.given>0,'give ammo from the companion sheet ('+r.given+')');
+ ok(!errs.length,'no page errors (companion ammo) '+errs.slice(0,2));await b.close()})();
