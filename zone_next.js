@@ -33,14 +33,14 @@ const ZTN={near:'거점 2블록 안',start:'시작 동네',calm:'숨 고르기',
 const zType=(zn,d)=>d<=2?'near':zn<=0?'start':ZPEAK(zn)?'peak':ZSTEP(zn)==1?'calm':ZSTEP(zn)==2?'rise':'start';
 const ZPAIR={hosp:'hospR',mil:'milR'};
 const OLDK=kindAt;/* the rule before this sample (kept to compare) */
-function zPick(gx,gy,noPair){const d=Math.max(Math.abs(gx),Math.abs(gy)),W=ZTAB[zType(zoneOf(gx,gy),d)];let tot=0;const ok=k=>!(ZPAIR[k]&&(noPair||(gx&1)));for(const k in W)if(ok(k))tot+=W[k];
+function zKindPick(gx,gy,noPair){const d=Math.max(Math.abs(gx),Math.abs(gy)),W=ZTAB[zType(zoneOf(gx,gy),d)];let tot=0;const ok=k=>!(ZPAIR[k]&&(noPair||(gx&1)));for(const k in W)if(ok(k))tot+=W[k];
  let t=bh(gx,gy,41)*tot;for(const k in W){if(!ok(k))continue;t-=W[k];if(t<=0)return k}return'houses'}
 const ZKEEP=['base','lot','rbase'];
 let ZG=0;/* the old chain asks kindAt about its neighbours: inside, answer with the old rule */
 kindAt=function(gx,gy){if(ZG)return OLDK(gx,gy);ZG=1;try{return zKind(gx,gy)}finally{ZG=0}};
 function zKind(gx,gy){const cur=OLDK(gx,gy);if(ZKEEP.includes(cur))return cur;
- if(gx&1){const L=OLDK(gx-1,gy);if(!ZKEEP.includes(L)&&!(gx-1==0&&gy==0)){const lk=zPick(gx-1,gy,false);if(ZPAIR[lk])return ZPAIR[lk]}return zPick(gx,gy,true)}
- const k=zPick(gx,gy,false);if(ZPAIR[k]){const R=OLDK(gx+1,gy);if(ZKEEP.includes(R)||(gx+1==0&&gy==0))return zPick(gx,gy,true)}return k}
+ if(gx&1){const L=OLDK(gx-1,gy);if(!ZKEEP.includes(L)&&!(gx-1==0&&gy==0)){const lk=zKindPick(gx-1,gy,false);if(ZPAIR[lk])return ZPAIR[lk]}return zKindPick(gx,gy,true)}
+ const k=zKindPick(gx,gy,false);if(ZPAIR[k]){const R=OLDK(gx+1,gy);if(ZKEEP.includes(R)||(gx+1==0&&gy==0))return zKindPick(gx,gy,true)}return k}
 /* ---------- rare loot in the peak zones (3 · 6 · 9 …) ---------- */
 {const _sr=s3SearchRoll;s3SearchRoll=function(o,kind,tier,r){const pid=_sr.apply(this,arguments);if(typeof DUN!='undefined'&&DUN)return pid;let zn=0;try{zn=zoneOf(...gOf(o.x,o.y))}catch(e){}
   if(ZPEAK(zn)){const c=ZCYC(zn),hot=(TIER[kind]||1)>=3?2:1;if(Math.random()<(.18+.06*c)*hot)r[stoneFor(zn)]=(r[stoneFor(zn)]||0)+1;if(Math.random()<(.05+.02*c)*hot){const rn=c<=1?'orn1':c==2?'orn2':'orn3';r[rn]=(r[rn]||0)+1}

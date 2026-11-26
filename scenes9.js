@@ -376,6 +376,6 @@ function placeFree(x,y,b){/* stand just outside the building's nearest door */{c
   for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const X=cx+dx,Y=cy+dy;if(X<0||Y<0||X>=GX||Y>=GY)continue;const k=Y*GX+X;if(seen[k])continue;seen[k]=1;if(!blocker(X0+X*C+4,Y0+Y*C+4,8))q.push(X,Y)}}
  if(best){S.p.x=best[0];S.p.y=best[1]}}
 /* sample only: no overweight (the load never goes over the limit, so you never slow down) */
-{const _w=weight;weight=function(p){const w=_w(p);return p===S.p?Math.min(w,capacity(p)):w}}
+{const _w=weight;weight=function(p){const w=_w(p);return p===S.p&&!window.NOCAP?Math.min(w,capacity(p)):w}}
 
 document.head.insertAdjacentHTML('beforeend',`<style>#bm .alDex{display:grid;grid-template-columns:1fr;gap:6px}#bm .alD{display:flex;gap:10px;padding:8px;border-radius:10px;background:#ffffff0c}#bm .alD canvas{width:40px;height:48px;image-rendering:pixelated;background:#0006;border-radius:8px}#bm .alD small{display:block;font-size:11px}</style>`);

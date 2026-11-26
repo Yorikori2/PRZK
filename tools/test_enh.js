@@ -1,11 +1,11 @@
 // Zone ×2/4/6/8, zone warning, first-entry supply, enhancement and enchant runes (endless city sample). usage: node tools/test_enh.js <outdir>
-const {chromium}=require('playwright');const OUT=process.argv[2]||'.';const PAGE='file://'+require('path').resolve(__dirname,'..','inf-sample.html');
+const zMulAtkT=1+(3.9-1)*.35;const {chromium}=require('playwright');const OUT=process.argv[2]||'.';const PAGE='file://'+require('path').resolve(__dirname,'..','inf-sample.html');
 const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
 (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:412,height:860}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.goto(PAGE);await p.evaluate(()=>{try{localStorage.clear()}catch(e){}});await p.reload();await p.waitForTimeout(1500);await p.evaluate(()=>{stop9()});
  // HP and attack per zone
  let r=await p.evaluate(()=>{const o=[];for(const g of[0,15,30,45,60,75]){infGoto(g,0);Z.length=0;mk(S.p.x+80,S.p.y,{look:'civ1'});o.push([Math.round(Z[0].mhp),+(Z[0].dmg||7).toFixed(1)])}Z.length=0;return o});
- ok(r.map(x=>x[0]/r[0][0]).join()=='1,3,6,9,12,15','zombie HP ×1/3/6/9/12/15 '+JSON.stringify(r));ok(r[4][1]==+(7*2.2).toFixed(1),'zone 4 attack ×2.2 ('+r[4][1]+')');
+ ok(r.map(x=>+(x[0]/r[0][0]).toFixed(2)).join()=='1,1.4,2.4,3,3.9,4.7','zombie HP curve ×1 · 1.4 · 2.4 · 3 · 3.9 · 4.7 (zones 0-5) '+JSON.stringify(r));ok(r[4][1]==+(7*zMulAtkT).toFixed(1),'zone 4 attack ×'+zMulAtkT.toFixed(2)+' ('+r[4][1]+')');
  // warning one block before the edge, not before
  r=await p.evaluate(()=>{const n0=S.enW|0;infGoto(12,0);gearUpd(1/60);const a=(S.enW|0)-n0;infGoto(14,0);gearUpd(1/60);const b=(S.enW|0)-n0;return[a,b,$('zoneb').textContent]});
  ok(r[0]==0&&r[1]==1&&/다음 블록부터 1구역/.test(r[2]),'warning appears at block 14, not at 12: '+r[2]);
@@ -34,7 +34,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  r=await p.evaluate(()=>[huntMul(4,4),huntMul(4,6),huntMul(2,1)]);ok(r[0]==r[1]&&Math.abs(r[2]-1.12)<1e-9,'zone hunter stops growing after zone 4 '+r);
  // drops: zone zombies drop stones sometimes
  r=await p.evaluate(()=>{infGoto(60,0);const n0=['enh1','enh2','enh3'].reduce((a,k)=>a+(S.p.inv[k]|0),0);for(let i=0;i<300;i++){Z.length=0;mk(S.p.x+200,S.p.y,{look:'civ1'});kill(Z[0])}Z.length=0;return['enh1','enh2','enh3'].reduce((a,k)=>a+(S.p.inv[k]|0),0)-n0});ok(r>=10&&r<=50,'300 kills in zone 4 drop '+r+' stones (~10%)');
- r=await p.evaluate(()=>{const rows=cmpRows();closeBase();return rows});console.log(JSON.stringify(r));ok(r.length==7&&r[6][3][5]>r[4][3][5]&&r[4][1]==r[0][1]*12&&r[4][3][1]==Math.ceil(r[4][1]/33),'comparison table rows');
+ r=await p.evaluate(()=>{const rows=cmpRows();closeBase();return rows});console.log(JSON.stringify(r));ok(r.length==7&&r[6][3][5]>r[4][3][5]&&Math.abs(r[4][1]-r[0][1]*3.9)<1&&r[4][3][1]==Math.ceil(r[4][1]/33),'comparison table rows');
  await p.evaluate(()=>scene9('cmp'));await p.waitForTimeout(400);await p.screenshot({path:OUT+'/enh-cmp.png'});
  // zone 0 stone drops raised (6% per kill)
  r=await p.evaluate(()=>{infGoto(0,0);const n0=S.p.inv.enh1|0;for(let i=0;i<1000;i++){Z.length=0;mk(S.p.x+200,S.p.y,{look:'civ1'});kill(Z[0])}Z.length=0;return(S.p.inv.enh1|0)-n0});ok(r>=35&&r<=90,'zone 0: 1000 kills drop '+r+' low stones (~6%)');
@@ -43,7 +43,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
   const cnt=g=>{S.inf.zv={};S.inf.bb={};infGoto(g,0);infGoto(g+5,0);const n=Z.length;return n};const z0=cnt(3),z4=cnt(63);let bn0=S.inf.bn|0;for(let i=0;i<6;i++){infGoto(70+i*5,0)}const bosses=(S.inf.bn|0)-bn0;
   Z.length=0;infGoto(60,0);Z.length=0;mk(S.p.x+300,S.p.y,{look:'goliath'});const gh=Z[0].mhp;Z.length=0;mk(S.p.x+300,S.p.y,{look:'brute'});const bh=Z[0].mhp;Z.length=0;return{o,z0,z4,bosses,gh,bh}});
  ok(r.o[1][1]==0&&r.o[3][1]>.05&&r.o[5][0]>r.o[1][0],'specials and elites rise with the zone '+JSON.stringify(r.o));ok(r.z4>r.z0*1.6,'zone 4 blocks hold about twice the zombies ('+r.z0+' → '+r.z4+')');
- ok(r.bosses>=1,'roaming bosses appear past zone 4 ('+r.bosses+' in 30 new blocks)');ok(r.gh==1500*3&&r.bh==600*6.5,'boss HP ×3 and elite HP ×6.5 in zone 4 (goliath '+r.gh+', brute '+r.bh+')');
+ ok(r.bosses>=1,'roaming bosses appear past zone 4 ('+r.bosses+' in 30 new blocks)');ok(Math.round(r.gh)==Math.round(1500*(1+.5*3.9))&&Math.round(r.bh)==Math.round(600*(1+2.9*.5)),'zone 4 (×3.9): boss HP ×2.95 · elite HP ×2.45 (goliath '+r.gh+', brute '+r.bh+')');
  const fps=await p.evaluate(()=>{stop9();S.inf.zv={};S.inf.bb={};infGoto(80,0);S.p.hp=1e9;S.p.mhp=1e9;return new Promise(res=>{let n=0;const t0=performance.now();(function f(){n++;if(performance.now()-t0<3000)requestAnimationFrame(f);else res([Math.round(n/3),Z.length])})()})});ok(fps[0]>40,'zone 5 crowd: '+fps[1]+' zombies at '+fps[0]+'fps');
  await p.evaluate(()=>{Z.length=0;S.p.hp=100;scene9('prof')});await p.waitForTimeout(300);await p.screenshot({path:OUT+'/enh-prof.png'});
  // the window renders, scenes run

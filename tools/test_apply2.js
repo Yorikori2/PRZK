@@ -6,7 +6,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  await p.goto(PAGE);await p.evaluate(()=>localStorage.clear());await p.reload();await p.waitForTimeout(1500);
  await p.evaluate(()=>{if(!run){document.querySelector('[data-d=S]').click()}$('bm').dataset.m='';closeBase();PAUSE=false;if(S.pg&&!S.pg.tr.length)S.pg.tr=['cop'];if(typeof stop9=='function')stop9()});
  let r=await p.evaluate(()=>({slots:SLOTS.map(s=>s[0]).join(','),fany:FANY,sets:Object.keys(ASETS).length,light:Object.keys(CSLOT).every(c=>CSLOT[c].includes('light')),ammo:Object.keys(AVAR).length}));
- ok(r.slots=='prim,sec,mel,thr,head,body,legs,feet,spec,bag'&&r.sets==5&&r.light&&r.ammo==29&&r.fany===false,'all modules are in the game '+JSON.stringify(r));
+ ok(/^prim,sec,mel,thr,head,body,legs,feet,spec,(shd,)?bag$/.test(r.slots)&&r.sets==5&&r.light&&r.ammo==29&&r.fany===false,'all modules are in the game '+JSON.stringify(r));
  r=await p.evaluate(()=>{const P=S.p;S.t=1800;NIGHT=true;const d=darkLv();P.inv.flashl=1;P.eq.spec='flashl';const b2=myBeams().length;P.eq.spec='';S.t=600;NIGHT=false;return{d,b2}});ok(r.d>=.75&&r.b2==1,'dark nights and a flashlight beam');
  r=await p.evaluate(()=>{const P=S.p;for(const id of['visor','milarmor','cpants','silboots'])P.inv[id]=1;for(const id of['visor','milarmor','cpants','silboots'])P.eq[ARMX[id][0]]=id;const on=setOn('mil'),k=plLook();for(const s of['head','body','legs','feet'])P.eq[s]='';return{on,k}});
  ok(r.on&&/^pa_/.test(r.k),'military set is on and changes the look');

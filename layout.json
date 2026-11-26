@@ -1,0 +1,40 @@
+{
+ "phone-portrait": {
+  "bad": [],
+  "off": [],
+  "hudCover": "22%",
+  "errs": []
+ },
+ "phone-landscape": {
+  "bad": [],
+  "off": [],
+  "hudCover": "18%",
+  "errs": []
+ },
+ "small-landscape": {
+  "bad": [],
+  "off": [],
+  "hudCover": "24%",
+  "errs": []
+ },
+ "small-portrait": {
+  "bad": [
+   "st×tr 6x150"
+  ],
+  "off": [],
+  "hudCover": "27%",
+  "errs": []
+ },
+ "tablet-landscape": {
+  "bad": [],
+  "off": [],
+  "hudCover": "7%",
+  "errs": []
+ },
+ "tablet-portrait": {
+  "bad": [],
+  "off": [],
+  "hudCover": "8%",
+  "errs": []
+ }
+}

@@ -3,7 +3,7 @@ const {chromium}=require('playwright');const path=require('path');const PAGE='fi
 const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
 (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:412,height:860}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.goto(PAGE);await p.evaluate(()=>localStorage.clear());await p.reload();await p.waitForTimeout(1800);await p.evaluate(()=>{closeBase();PAUSE=false;stop9()});
- let r=await p.evaluate(()=>SLOTS.map(s=>s[0]).join(','));ok(r=='prim,sec,mel,thr,head,body,legs,feet,spec,bag','special slot comes after the shoes ('+r+')');
+ let r=await p.evaluate(()=>SLOTS.map(s=>s[0]).join(','));ok(/^prim,sec,mel,thr,head,body,legs,feet,spec,(shd,)?bag$/.test(r),'special slot comes after the shoes ('+r+')');
  r=await p.evaluate(()=>{const P=S.p;P.eq.spec='';invAdd(P,'gasmask',1);const a=P.eq.spec;invAdd(P,'nvg',1);const b2=P.eq.spec;P.hp=100;P.eq.spec='';hurtP(40,'💥 부머가 터졌습니다!');const d0=100-P.hp;P.hp=100;P.eq.spec='gasmask';hurtP(40,'💥 부머가 터졌습니다!');const d1=100-P.hp;P.hp=100;return{a,b2,d0,d1}});
  ok(r.a=='gasmask'&&r.b2=='gasmask','special gear only fills an empty slot automatically');ok(Math.abs(r.d1-r.d0*.3)<.01,'gas mask: bloater gas -70% ('+r.d0.toFixed(1)+'→'+r.d1.toFixed(1)+')');
  r=await p.evaluate(()=>{const P=S.p;P.inv.weld=1;const f=L=>{P.eq.spec=L;S.fires=[];S4.burn=1;P.hp=100;for(let i=0;i<30;i++)gearUpd(1/60);S4.burn=0;return 100-P.hp};return{n:f(''),w:f('weld')}});ok(r.w<r.n*.65&&r.w>r.n*.5,'welding goggles: burning -40% ('+r.n.toFixed(2)+'→'+r.w.toFixed(2)+')');
@@ -12,7 +12,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  r=await p.evaluate(()=>{const all=Object.keys(CSLOT).every(c=>CSLOT[c].includes('light')),L=PARTS.filter(q=>q[2]=='light').map(q=>q[0]);const P=S.p;give({pistol:1});P.eq.sec='pistol';P.as='sec';const pg=PGo();pg.mods.pistol={under:'u_light'};pg.lightMig=0;lightMigrate();const mig=pg.mods.pistol.light=='u_light'&&!pg.mods.pistol.under;const b=myBeams().length;return{all,L,mig,b}});
  ok(r.all&&r.L.length==3,'전술조명 slot on every gun class, 3 lights ('+r.L.join(',')+')');ok(r.mig&&r.b==1,'old under-barrel light moves to the new slot and lights the way');
  r=await p.evaluate(()=>{const P=S.p;for(const id in ARMX)P.inv[id]=1;for(const k of['head','body','legs','feet'])P.eq[k]='';const a0=armMul2(P);for(const id of['helmet','armor','legguard','tacboots'])P.eq[ARMX[id][0]]=id;const pol=setOn('police'),a1=armMul2(P);
-  for(const id of['visor','milarmor','cpants','silboots'])P.eq[ARMX[id][0]]=id;P.inv.a556=100;const w1=weight(P);P.eq.feet='tacboots';const w0=weight(P);
+  for(const id of['visor','milarmor','cpants','silboots'])P.eq[ARMX[id][0]]=id;window.NOCAP=1;P.inv.a556=100;const w1=weight(P);P.eq.feet='tacboots';const w0=weight(P);
   for(const id of['spechelm','eod','exo','shockboots'])P.eq[ARMX[id][0]]=id;const bl=blastMul(P),sp=speedMul(P);P.eq.body='milarmor';const sp2=speedMul(P);return{pol,a1:a1/a0,w0,w1,bl,sp,sp2}});
  ok(r.pol&&Math.abs(r.a1-(.9*.6*.9*.95*.95))<.001,'police set (armour body counts) gives -5% more');ok(r.w0>r.w1,'military set halves ammo weight ('+r.w0.toFixed(1)+'→'+r.w1.toFixed(1)+'kg)');
  ok(r.bl==0&&r.sp>=r.sp2,'spec-ops set: blasts do nothing and the EOD suit no longer slows you');

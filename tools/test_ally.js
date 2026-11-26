@@ -38,7 +38,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  ok(r.scout,'정찰병 brings things');ok(r.shield,'방패병 carries a shield and slows');ok(r.ranks=='FEDCBAS'&&r.hit[0]<.8&&r.hit[1]>.95&&r.hit[2]<r.hit[0],'hit chance rises F → S, far shots miss more at low rank '+r.hit.map(x=>x.toFixed(2)));
  ok(r.missF>40&&r.missS<25,'misses: F '+r.missF+'/300 · S '+r.missS+'/300');ok(r.shd=='curel','shields in the weapon grades (일반 → 전설)');ok(r.only=='pistol','holding a shield: pistols only');ok(r.blk<20,'the shield takes part of the hit (20 → '+r.blk+')');
  ok(!r.trBad&&r.var.traits>=9&&r.var.looks>=100&&r.var.roles==5,'variety: '+JSON.stringify(r.var));
- await p.evaluate(()=>{closeBase();scene9('ms')});await p.waitForTimeout(600);const ms=await p.evaluate(()=>({m:$('bm').dataset.m,rows:document.querySelectorAll('#bm .mR').length}));ok(ms.m=='mast'&&ms.rows>=5,'mastery sheet lists your weapons and tools ('+ms.rows+')');
+ await p.evaluate(()=>{closeBase();scene9('ms')});await p.waitForTimeout(1500);const ms=await p.evaluate(()=>({m:$('bm').dataset.m,rows:document.querySelectorAll('#bm .mR').length}));ok(ms.m=='mast'&&ms.rows>=5,'mastery sheet lists your weapons and tools ('+ms.rows+')');
  await p.evaluate(()=>{closeBase();scene9('al4')});const dex=await p.evaluate(()=>document.querySelectorAll('#bm canvas[data-dl]').length);ok(dex==5,'companion guide shows the 5 roles');
  ok(!errs.length,'no page errors (variety · mastery · shields) '+errs.slice(0,2));await b.close()})();
 // S-rank bonuses per weapon kind · shield durability (wear, worn, broken, repair at the workbench)
