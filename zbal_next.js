@@ -15,16 +15,16 @@ function zMap(fn,R,px){const c=document.createElement('canvas'),n=2*R+1;c.width=
  x.strokeStyle='#fff';x.lineWidth=1;x.strokeRect((R-5)*px,(R-5)*px,11*px,11*px);return c.toDataURL()}
 const zLegend=()=>'<div style="display:flex;flex-wrap:wrap;gap:4px 10px;font-size:10.5px;margin:4px 0">'+ZGRP.flatMap(([,L])=>L).filter(k=>KNAME[k]).map(k=>'<span><i style="display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:3px;background:'+(KCOL[k]||'#555')+'"></i>'+KNAME[k]+'</span>').join('')+'<span>흰 네모 = 거점 5블록 · 주황 = 구역 경계</span></div>';
 /* ---------- the sheets ---------- */
-function zSheetStr(){const rows=[];for(const z of[0,1,2,3,4,5,6,7,8,9,12,15,20,30]){const t=zType(z,99),P=zProf(z),c={near:'#7fd07f',start:'#7fd07f',calm:'#9ad0f0',rise:'#ffd36a',peak:'#ff6a5a'}[t];
+function zSheetStr(){const rows=[];for(let z=0;z<=30;z++){const t=zType(z,99),P=zProf(z),c={near:'#7fd07f',start:'#7fd07f',calm:'#9ad0f0',rise:'#ffd36a',peak:'#ff6a5a'}[t];
   rows.push('<tr'+(ZPEAK(z)?' style="background:#ff6a5a1c"':'')+'><td><b>'+z+'</b></td><td><b style="color:'+c+'">'+ZTN[t]+'</b></td><td>×'+(+zMulHp(z).toFixed(2))+'<br><small style="color:#888">이전 ×'+(z<=0?1:3*z)+'</small></td><td>×'+zMulAtk(z).toFixed(2)+'<br><small style="color:#888">이전 ×'+(1+.3*z).toFixed(1)+'</small></td><td>×'+(+zMulRaid(z).toFixed(2))+'</td><td>'+Math.round(P.sp*100)+'% · '+Math.round(P.el*100)+'%</td><td>'+(ZPEAK(z)?'<b style="color:#ffd36a">많음</b>':'—')+'</td></tr>')}
- sheet('💀 구역별 강도','끝없이 올라가요 · 3의 배수 구역은 위험 · 희귀',
+ sheet('💀 구역별 강도','끝없이 올라가요 · 3의 배수 구역은 위험 · 희귀','<div class="zex"><b>한 줄 요약</b><br>구역 숫자를 3으로 나눠서 <b>나머지</b>로 종류가 정해져요 · 끝없이 반복<br>· 나머지 <b style="color:#ff6a5a">0</b> (3 · 6 · 9 · 12 …) = <b style="color:#ff6a5a">위험 · 희귀</b>: 위험 건물 많음 · 희귀템 많음 · 특수 · 정예 좀비 더<br>· 나머지 <b style="color:#9ad0f0">1</b> (1 · 4 · 7 · 10 …) = <b style="color:#9ad0f0">숨 고르기</b>: 위험 구역 다음이라 건물이 다시 조용해져요 (주거 · 상점 많음) · <u>좀비는 약해지지 않아요</u><br>· 나머지 <b style="color:#ffd36a">2</b> (2 · 5 · 8 · 11 …) = <b style="color:#ffd36a">위험 증가</b>: 다음 위험 구역을 앞두고 위험 건물이 늘어요<br>· 0구역만 <b style="color:#7fd07f">시작 동네</b> (위험 건물 없음)</div>'+'<div class="zcy">'+[0,1,2,3,4,5,6,7,8,9].map(z=>{const t=zType(z,99);return'<span class="'+t+'"><b>'+z+'</b>'+ZTN[t]+'</span>'}).join('')+'<span class="more">…</span></div>'+
   '<div style="overflow-x:auto"><table class="cmpT" style="white-space:normal"><tr><th>구역</th><th>종류</th><th>좀비 체력</th><th>좀비 공격</th><th>약탈자<br>체력</th><th>특수 · 정예</th><th>희귀템</th></tr>'+rows.join('')+'</table></div>'+
   '<div class="sub" style="line-height:1.65">· 체력: 0구역 ×1 · 1구역 ×1.4 · 2구역 ×2.4 · <b>3구역 ×3</b> · 4구역 ×3.9 · 5구역 ×4.7 · <b>6구역 ×6</b> · 그 뒤로 끝없이: 3의 배수 구역 = 구역 숫자 배 (9 → ×9 · 30 → ×30) · 사이 두 구역은 +0.9 · +1.7<br>· 공격: 체력이 오른 만큼의 1/3씩 (×3 구역 = 공격 ×1.7 · ×9 구역 = ×3.8) · 체력만큼 올리면 한두 방에 죽어서<br>· 약탈자: 좀비와 같은 체력 배수 · 같은 공격 배수<br>· 위험 구역(3 · 6 · 9 …)은 특수 좀비 +10% · 정예 +8% · 약탈자 기지 · 파밍에 강화석 · 옵션의 룬 · 교환권이 추가로 나와요 (★3 이상 건물은 두 배)<br>· 이전 규칙은 1구역부터 체력 ×3 · ×6 · ×9 (구역 × 3)</div>')}
 function zSheetHow(){const st=zoneStep(),D={S:'쉬움',V:'보통',N:'어려움'}[curD()];
  const steps=[
   ['① 바둑판','도시는 끝없는 블록 격자예요. 거점이 (0, 0) 블록이고, 블록마다 좌표 (가로, 세로)가 있어요.'],
   ['② 거리와 구역','거리 = 가로 · 세로 중 큰 쪽 (거점을 둘러싼 네모 고리). 구역 = 거리 ÷ '+st+' (난이도 '+D+' · 보통 12 · 어려움 10 + 1구역부터 시작).'],
-  ['③ 구역의 종류 (3구역 한 바퀴)','<b>0구역</b> 시작 동네 · <b>1 · 4 · 7구역</b> 잠잠 (리셋) · <b>2 · 5 · 8구역</b> 위험 증가 · <b>3 · 6 · 9구역</b> 위험 · 희귀. 거점 2블록 안은 늘 안전한 동네.'],
+  ['③ 구역의 종류 (3구역 한 바퀴)','<b>0구역</b> 시작 동네 · <b>1 · 4 · 7구역</b> 숨 고르기 · <b>2 · 5 · 8구역</b> 위험 증가 · <b>3 · 6 · 9구역</b> 위험 · 희귀. 거점 2블록 안은 늘 안전한 동네.'],
   ['④ 고정 난수','지도 시드 + 블록 좌표로 블록마다 0~1 숫자를 만들어요. 같은 시드면 늘 같은 도시.'],
   ['⑤ 그 구역 종류의 가중치 표에서 하나 뽑기','표마다 건물별 무게가 달라요 (⚖ 구역별 건물 장면). 위험 · 희귀 구역일수록 경찰서 · 총포상 · 군부대 · 연구소 · 교도소 · 병원 · 은행 무게가 커지고 주거 · 공원이 줄어요.'],
   ['⑥ 2블록 건물','병원 · 군부대는 짝수 가로 좌표에서만 뽑히고 오른쪽 블록까지 써요. 오른쪽이 빈터 · 거점 · 약탈자 기지면 다른 건물로.'],
@@ -44,7 +44,7 @@ function zSheetProp(){const A=zCount(OLDK),B=zCount(kindAt),C=['near',0,1,2,3],H
 function zSheetOps(){const O=[
   ['✅ 이번 샘플에 넣은 것',[
    ['구역 강도 곡선','0 ×1 · 1 ×1.4 · 2 ×2.4 · 3 ×3 · 4 ×3.9 · 5 ×4.7 · 6 ×6 · 끝없이 (좀비 · 약탈자) · 💀 구역별 강도'],
-   ['구역별 건물 새 규칙','시작 · 잠잠(리셋) · 위험 증가 · 위험 · 희귀 · ⚖ 구역별 건물'],
+   ['구역별 건물 새 규칙','시작 · 숨 고르기 · 위험 증가 · 위험 · 희귀 · ⚖ 구역별 건물'],
    ['위험 구역 희귀템','3 · 6 · 9구역 파밍에 강화석 · 옵션의 룬 · 교환권'],
    ['철거 레벨 = 위험도','★1 ~ ★5 → Lv1 ~ Lv5 · 새 도구 Lv4 플라즈마 절단기 · Lv5 중장비 파쇄기 · 🔨 장면'],
    ['경보 50%','총포상 · 은행 · 교도소'],
@@ -61,3 +61,6 @@ function zSheetOps(){const O=[
   ['⏸ 보류',[['플레이어 그림 교체',''],['탄약 혼자 쓰는 총 5종',''],['헤비 좀비 약점','']]],
   ['🎯 시작 전 목표',[['튜토리얼',''],['엔딩',''],['생존자 의뢰',''],['앱(PWA)',''],['알림 연결 정리','']]]];
  let n=0;sheet('📋 의견 정리','이번에 넣은 것 + 남은 의견 + 할 일',O.map(([h,L])=>'<div style="margin:8px 0 4px;font-weight:bold;font-size:13.5px">'+h+'</div>'+L.map(([t,d])=>'<div style="display:flex;gap:8px;padding:6px 9px;margin:3px 0;border-radius:9px;background:#ffffff0c;font-size:12.5px;line-height:1.5"><b style="color:#e0b03a;min-width:18px">'+(++n)+'</b><div><b>'+t+'</b>'+(d?'<br><span style="color:var(--mut)">'+d+'</span>':'')+'</div></div>').join('')).join(''))}
+
+document.head.insertAdjacentHTML('beforeend',`<style>#bm .zex{padding:9px 11px;border-radius:10px;background:#ffffff0c;font-size:12.5px;line-height:1.7;margin:6px 0}#bm .zcy{display:flex;gap:3px;overflow-x:auto;margin:6px 0 8px}#bm .zcy span{flex:0 0 auto;min-width:54px;padding:5px 4px;border-radius:8px;text-align:center;font-size:10.5px;background:#ffffff10}#bm .zcy b{display:block;font-size:15px}
+#bm .zcy .start{background:#7fd07f22;color:#9fe09f}#bm .zcy .calm{background:#9ad0f022;color:#9ad0f0}#bm .zcy .rise{background:#ffd36a22;color:#ffd36a}#bm .zcy .peak{background:#ff6a5a33;color:#ff8a7a}#bm .zcy .more{color:var(--mut)}</style>`);

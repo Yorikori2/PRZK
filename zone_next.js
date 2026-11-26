@@ -20,7 +20,7 @@ const zMulRaid=zn=>zMulHp(zn);
 {const _mk=mk;mk=function(x,y,o){const n0=Z.length,r=_mk.apply(this,arguments),z=Z.length>n0?Z[Z.length-1]:null;if(z&&z.zone!=null&&!z._za&&!z.raider){z.dmg*=zMulAtk(z.zone)/zAtkMul(z.zone);z._za=1}return r}}
 {const _rs=rSpawn;rSpawn=function(x,y,zn,goal){const out=_rs.apply(this,arguments),m=zMulRaid(zn),d=zMulAtk(zn);for(const r of out){r.hp*=m;r.mhp*=m;r.dmg*=d}return out}}
 /* zone banner / message: the new numbers */
-{const _zb=zoneBanner;zoneBanner=function(z,up){_zb(z,up);const el=$('zoneb');if(!el||!up)return;const s=el.querySelector('small');if(s)s.innerHTML='좀비 체력 ×'+(+zMulHp(z).toFixed(2))+' · 공격 ×'+zMulAtk(z).toFixed(2)+(ZPEAK(z)?' · <b style="color:#ffd36a">위험 구역 · 희귀템</b>':ZSTEP(z)==1&&z>1?' · 잠잠한 구역':'')}}
+{const _zb=zoneBanner;zoneBanner=function(z,up){_zb(z,up);const el=$('zoneb');if(!el||!up)return;const s=el.querySelector('small');if(s)s.innerHTML='좀비 체력 ×'+(+zMulHp(z).toFixed(2))+' · 공격 ×'+zMulAtk(z).toFixed(2)+(ZPEAK(z)?' · <b style="color:#ffd36a">위험 구역 · 희귀템</b>':ZSTEP(z)==1&&z>1?' · 숨 고르기 구역':'')}}
 {const _zc=infZoneCheck;infZoneCheck=function(q){const _m=msg;msg=function(t){if(typeof t=='string'&&/구역 진입/.test(t)){const z=+(t.match(/(\d+)구역/)||[0,0])[1];t='⚠ '+z+'구역 진입 · 좀비 체력 ×'+(+zMulHp(z).toFixed(2))+(ZPEAK(z)?' · 위험 구역 · 희귀템이 많아요':'')}return _m.apply(this,[t,...[].slice.call(arguments,1)])};try{return _zc.apply(this,arguments)}finally{msg=_m}}}
 /* ---------- buildings: one weight table per kind of zone ---------- */
 const ZTAB={
@@ -29,7 +29,7 @@ const ZTAB={
  calm:{houses:4,apt:2.5,park:1.8,mart:1,hard:1,pharm:.8,ware:1,school:1,church:.7,fire:.8,garage:.9,clinic:.7,bank:.5,mall:.7,park2:.7,subway:.7,police:.4,gunshop:.35,radio:.3,hosp:.3,mil:.1,lab:.1,prison:.05},
  rise:{houses:3.2,apt:2.5,park:1.5,mart:.8,hard:.8,pharm:.7,ware:1,school:.8,church:.6,fire:.8,garage:1,clinic:.8,bank:.7,mall:.8,park2:.8,subway:.8,police:.8,gunshop:.7,radio:.5,hosp:.6,mil:.4,lab:.3,prison:.3},
  peak:{houses:2.2,apt:2,park:1,mart:.6,hard:.6,pharm:.6,ware:.8,school:.6,church:.5,fire:.6,garage:.8,clinic:.8,bank:1,mall:.8,park2:.7,subway:.8,police:1.2,gunshop:1.1,radio:.8,hosp:.9,mil:.9,lab:.8,prison:.8}};
-const ZTN={near:'거점 2블록 안',start:'시작 동네',calm:'잠잠 (리셋)',rise:'위험 증가',peak:'위험 · 희귀'};
+const ZTN={near:'거점 2블록 안',start:'시작 동네',calm:'숨 고르기',rise:'위험 증가',peak:'위험 · 희귀'};
 const zType=(zn,d)=>d<=2?'near':zn<=0?'start':ZPEAK(zn)?'peak':ZSTEP(zn)==1?'calm':ZSTEP(zn)==2?'rise':'start';
 const ZPAIR={hosp:'hospR',mil:'milR'};
 const OLDK=kindAt;/* the rule before this sample (kept to compare) */
