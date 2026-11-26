@@ -178,3 +178,23 @@ function aGiveAmmo(a,all){const id=aAmmoId(a);if(!id)return;const p=S.p,have=p.i
   const sub=b.querySelector('.sub:last-child');if(sub)sub.insertAdjacentHTML('beforeend','<br>· <b>탄약</b>: 동료도 쏠 때마다 탄을 써요 · 탄창이 비면 주머니에서 장전 (1.6초) · 주머니도 비면 <b>자동 보충</b>이 켜져 있을 때 가까이(220) 있는 내 가방에서 한 탄창 가져가요 · 다 떨어지면 총으로 내려쳐요 (약함)')}}
 {const _gv=aGiveOpen;aGiveOpen=function(a){_gv(a);document.querySelectorAll('#bm [data-gv]').forEach(bt=>{const f=bt.onclick;bt.onclick=()=>{f();const n=aById(a.id);if(n){n.mag=0;n.outSaid=0}}})}}
 document.head.insertAdjacentHTML('beforeend',`<style>#bm .alAm{display:flex;flex-wrap:wrap;align-items:center;gap:5px;font-size:11.5px;margin:3px 0}#bm .alAm span{flex:1 1 100%}#bm .alAm button{padding:3px 8px;font-size:11px}#bm .alAm button.on{border-color:#7fd07f;color:#9fe09f}</style>`);
+/* ---------- noise: companions make noise like you do (their weapon's noise level · scouts one step quieter) ---------- */
+const ANZN=['무음','작음','보통','큼','매우 큼','최대'];
+function aNz(a){const W=aWS(a);let n=W.nz!=null?W.nz:aMelee(a)?0:3;if(a.role=='scout')n-=1;return Math.max(0,Math.min(5,n))}
+{const _as=aShoot;aShoot=function(a,z,q){const m0=a.mag|0,out0=aOut(a);const r=_as.apply(this,arguments);
+  if(!z||typeof noise!='function')return r;const fired=aMelee(a)||(a.mag|0)<m0;if(fired){const n=aNz(a);if(n>0){noise(z.x,z.y,n);z.nzT=.5;z.nzR=NZR[n]}}else if(out0&&aOut(a))noise(z.x,z.y,1);return r}}
+/* ---------- base: fill the pouch from the stash (option) ---------- */
+const AFILL_MAGS=3;let aFillT=0;
+function aStashFill(a,z,quiet){const id=aAmmoId(a);if(!id||!S.base||!S.base.st)return 0;const want=aMagSz(a)*AFILL_MAGS-(aPouch(a)[id]|0)-Math.max(0,aMagSz(a)-(a.mag|0));const have=S.base.st[id]|0;const n=Math.min(Math.max(0,want),have);
+ if(n<=0)return 0;S.base.st[id]=have-n;aPouch(a)[id]=(aPouch(a)[id]|0)+n;if(z&&typeof mFloat=='function')mFloat(z.x,z.y-44,'🏠 +'+n+'발','#9fe09f',1.6);if(!quiet)msg('🏠 '+a.nm+': 창고에서 '+NM2(id)+' '+n+'발 챙겼어요');return n}
+{const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(!S||!S.inf||!run||PAUSE||S.inf.aFill===false||(typeof DUN!='undefined'&&DUN))return;aFillT-=dt;if(aFillT>0)return;aFillT=2;
+  for(const a of ALLY()){if(a.st=='down'||a.st=='hurt'||a.job=='scav'&&a.st=='job')continue;const z=aEnt(a),home=a.st=='base'||a.st=='job'||a.st=='wait'&&z&&typeof inBase=='function'&&inBase(z.x,z.y)||a.st=='follow'&&z&&typeof inBase=='function'&&inBase(z.x,z.y);if(home)aStashFill(a,z)}}}
+/* ---------- the sheet: ammo in one line (how many rounds · how many shots) · the stash option · noise ---------- */
+{const _ao=aOpen;aOpen=function(){_ao.apply(this,arguments);const b=$('bm');if(!b)return;
+  b.querySelectorAll('.alAm').forEach(row=>{const bt=row.querySelector('[data-am]');const a=bt?aById(+bt.dataset.am):null;const sp=row.querySelector('span');if(!a||!sp)return;const id=aAmmoId(a),tot=(a.mag|0)+(aPouch(a)[id]|0),shots=tot;
+   const col=tot<=0?'#ff8a7a':shots<aMagSz(a)?'#ffd36a':'#9fe09f';sp.innerHTML='🔫 '+NM2(id)+' <b style="color:'+col+'">'+tot+'발</b> · 약 <b style="color:'+col+'">'+shots+'번</b> 쏠 수 있어요 <span class="mut">(탄창 '+(a.mag|0)+'/'+aMagSz(a)+' · 주머니 '+(aPouch(a)[id]|0)+' · 창고 '+((S.base&&S.base.st&&S.base.st[id])|0)+')</span> · 🔊 '+ANZN[aNz(a)]});
+  const sub=b.querySelector('.sub:last-child');if(sub&&!b.querySelector('#aFillB')){sub.insertAdjacentHTML('beforebegin','<div class="alAm"><button id="aFillB" class="'+(S.inf.aFill===false?'':'on')+'">🏠 거점에서 창고 탄약 자동 채우기 '+(S.inf.aFill===false?'끔':'켬')+'</button><span class="mut">거점에 있는 동료가 창고에서 '+AFILL_MAGS+'탄창까지 챙겨요</span></div>');
+   $('aFillB').onclick=()=>{S.inf.aFill=S.inf.aFill===false;if(S.inf.aFill)for(const a of ALLY()){const z=aEnt(a);if(a.st!='follow'||z&&typeof inBase=='function'&&inBase(z.x,z.y))aStashFill(a,z)}aOpen()};
+   sub.insertAdjacentHTML('beforeend','<br>· <b>소음</b>: 동료가 쏘면 그 무기 소음만큼 주변 좀비가 몰려와요 (정찰병은 한 단계 조용) · 소음기 달린 총을 건네면 조용히 싸워요')}}}
+/* a faint ring where a companion's shot was heard */
+{const _zd=zDraw4;zDraw4=function(z){if(z.npc=='ally'&&z.nzT>0){z.nzT-=.016;const k=1-z.nzT/.5;g.save();g.globalAlpha=.35*(1-k);g.strokeStyle='#ffd36a';g.lineWidth=1.5;g.beginPath();g.arc(z.x,z.y-10,20+(Math.min(z.nzR||160,260)-20)*k,0,6.2832);g.stroke();g.restore()}return _zd.apply(this,arguments)}}
