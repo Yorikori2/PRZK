@@ -64,9 +64,10 @@ function sosPlace(){const s=S.inf&&S.inf.sos;if(!s||s.done||typeof DUN!='undefin
 function sosSave(){const s=S.inf.sos;s.done=1;W0.objs=W0.objs.filter(o=>o.t!=='sosnpc');try{infDerived()}catch(e){}S.inf.saved=(S.inf.saved||0)+1;const g={food:3,water:3,bandage:2,medkit:1,tkn:15};give(g);s3Xp&&s3Xp(150,'구출');
  msg('🤝 '+s.nm+' 구출! 거점으로 보냈어요 · 보답: 음식 3 · 물 3 · 붕대 2 · 구급상자 · 교환권 15 · 구출한 생존자 '+S.inf.saved+'명 (다음 단계: NPC 동료)');S.inf.sos=null}
 /* arrow at the screen edge toward the signal */
-OVL.push((g2,sx,sy,k)=>{const s=S&&S.inf&&S.inf.sos;if(!s||s.done||typeof DUN!='undefined'&&DUN)return;const[ox,oy]=bo(s.gx-OGX,s.gy-OGY),tx=ox+BW/2,ty=oy+BH/2,p=S.p,dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy);if(d<BW/2)return;
- const W=g2.canvas.width,H=g2.canvas.height,a=Math.atan2(dy,dx),cx=W/2+Math.cos(a)*Math.min(W,H)*.38,cy=H/2+Math.sin(a)*Math.min(W,H)*.38;g2.save();g2.translate(cx,cy);g2.rotate(a);g2.fillStyle='#ffd36a';g2.strokeStyle='#1d1714';g2.lineWidth=3;
- g2.beginPath();g2.moveTo(18,0);g2.lineTo(-10,-11);g2.lineTo(-4,0);g2.lineTo(-10,11);g2.closePath();g2.stroke();g2.fill();g2.restore();g2.font='bold 12px sans-serif';g2.textAlign='center';g2.fillStyle='#ffd36a';g2.fillText('📻 '+s.nm+' · '+Math.round(d/(BW+RD))+'블록',cx,cy+26)});
+OVL.push((g2,sx,sy,k)=>{const s=S&&S.inf&&S.inf.sos;if(!s||s.done||typeof DUN!='undefined'&&DUN)return;const[ox,oy]=bo(s.gx-OGX,s.gy-OGY),tx=ox+BW/2,ty=oy+BH/2,p=S.p,dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy);if(d<BW*.45)return;
+ /* a yellow arrow circling you (like the green one to the base), pointing at the survivor */const a=Math.atan2(dy,dx),t=performance.now()/1000,R0=(58+4*Math.sin(t*5))*Math.max(1,k),cx=sx(p.x)+Math.cos(a)*R0,cy=sy(p.y)-16*k+Math.sin(a)*R0;
+ g2.save();g2.translate(cx,cy);g2.rotate(a);g2.fillStyle='#ffd36a';g2.strokeStyle='#1d1714';g2.lineWidth=3;g2.beginPath();g2.moveTo(16,0);g2.lineTo(-9,-11);g2.lineTo(-3,0);g2.lineTo(-9,11);g2.closePath();g2.stroke();g2.fill();g2.restore();
+ const bl=Math.round(d/(BW+RD));g2.font='bold 11px sans-serif';g2.textAlign='center';const txt='📻 '+s.nm+' '+bl+'블록',w=g2.measureText(txt).width+10;g2.fillStyle='#000a';g2.fillRect(cx-w/2,cy+14,w,16);g2.fillStyle='#ffd36a';g2.fillText(txt,cx,cy+26)});
 /* ---------- interaction entries ---------- */
 {const _c=dmCtx;dmCtx=function(){const B=_c(),p=S.p;
   if(typeof DUN!='undefined'&&DUN&&DUN.sh=='metro'){for(const o of W0.objs)if(o.t=='mup'&&Math.hypot(o.x+o.w/2-p.x,o.y+o.h/2-p.y)<70)B.unshift({t:o.go?'⬆ 다음 역으로 올라가기 ('+DUN.to.join(', ')+')':'⬆ 처음 역으로 올라가기',f:()=>metroUp(!!o.go),big:1});return B}
