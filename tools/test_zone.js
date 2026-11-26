@@ -23,6 +23,6 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  /* radio */
  await p.evaluate(()=>scene9('rd'));await p.waitForTimeout(400);
  const rd=await p.evaluate(()=>{const L=iaList().map(q=>q.t);const n0=Object.keys(S.inf.seen||{}).length;iaList().find(q=>/지도 받기/.test(q.t)).f();const x=[...document.querySelectorAll('#bm button')].find(b=>/✕/.test(b.textContent));x.click();const unp=!PAUSE;const n1=Object.keys(S.inf.seen).length;iaList().find(q=>/생존자 신호/.test(q.t)).f();const s=S.inf.sos;infGoto(s.gx,s.gy);sosPlace();const o=W0.objs.find(o=>o.t=='sosnpc');S.p.x=o.x+10;S.p.y=o.y+30;const q=iaList().find(q=>/구출/.test(q.t));const tk=S.p.inv.tkn|0;q.f();return{unp,L,map:n1-n0,saved:S.inf.saved,tk:(S.p.inv.tkn|0)-tk,again:iaList().length}});
- ok(rd.L.some(t=>/지도/.test(t))&&rd.L.some(t=>/생존자/.test(t)),'console: two choices '+rd.L);ok(rd.unp,'closing the map after the console: the game is not stuck');ok(rd.map>=100,'map: '+rd.map+' new blocks seen');ok(rd.saved==1&&rd.tk==15,'survivor found and rescued (reward)');
+ ok(rd.L.some(t=>/지도/.test(t))&&rd.L.some(t=>/생존자/.test(t)),'transmission tower: two choices '+rd.L);ok(rd.unp,'closing the map after the console: the game is not stuck');ok(rd.map>=100,'map: '+rd.map+' new blocks seen');ok(rd.saved==1&&rd.tk==15,'survivor found and rescued (reward)');
  for(const s of['zs','zg','zp','op','zb']){await p.evaluate(s=>scene9(s),s);await p.waitForTimeout(300)}
  ok(!errs.length,'no page errors '+errs.slice(0,3).join(' | '));await b.close()})();

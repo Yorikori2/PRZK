@@ -49,3 +49,6 @@ function zKind(gx,gy){const cur=OLDK(gx,gy);if(ZKEEP.includes(cur))return cur;
 for(const k in TIER)if(DLV[k]!=null||['pharm','gunshop','garage','bank','hosp','mall','park2','subway','prison','radio'].includes(k))DLV[k]=Math.min(3,TIER[k]||1);
 /* ---------- alarms: gun shop · bank · prison 50 % ---------- */
 Object.assign(ALR,{gunshop:.5,bank:.5,prison:.5});
+/* the block chip at the top and the "next zone" warning showed the old numbers */
+{const _gu=gearUpd;gearUpd=function(dt){_gu(dt);const el=$('zonec');if(!el||!S||!S.p)return;const zn=zoneOf(...gOf(S.p.x,S.p.y)),h=el.innerHTML.replace(/좀비 체력 ×[\d.]+/,'좀비 체력 ×'+(+zMulHp(zn).toFixed(2))+(ZPEAK(zn)?' · 위험 · 희귀':''));if(h!=el.innerHTML)el.innerHTML=h}}
+{const _zr=zoneRaw;zoneRaw=function(h){const a=[].slice.call(arguments);if(typeof h=='string'){const m=h.match(/(\d+)구역/);if(m){const z=+m[1];a[0]=h.replace(/좀비 체력 ×[\d.]+/,'좀비 체력 ×'+(+zMulHp(z).toFixed(2))).replace(/공격 ×[\d.]+/,'공격 ×'+zMulAtk(z).toFixed(2))}}return _zr.apply(this,a)}}

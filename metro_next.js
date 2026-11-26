@@ -1,5 +1,5 @@
 /* PROJECT LEGACY — sample: (1) the subway tunnel — the tunnel mouth at the end of a station's tracks leads down into
-   a long dark tunnel; walk it to come up at the next station. (2) the radio station console — get the map around
+   a long dark tunnel; walk it to come up at the next station. (2) the radio station's transmission tower — get the map around
    you, or pick up a survivor's signal, find them and bring them home. Loaded after zone_next.js. */
 'use strict';
 /* ---------- props ---------- */
@@ -72,8 +72,8 @@ OVL.push((g2,sx,sy,k)=>{const s=S&&S.inf&&S.inf.sos;if(!s||s.done||typeof DUN!='
   if(typeof DUN!='undefined'&&DUN&&DUN.sh=='metro'){for(const o of W0.objs)if(o.t=='mup'&&Math.hypot(o.x+o.w/2-p.x,o.y+o.h/2-p.y)<70)B.unshift({t:o.go?'⬆ 다음 역으로 올라가기 ('+DUN.to.join(', ')+')':'⬆ 처음 역으로 올라가기',f:()=>metroUp(!!o.go),big:1});return B}
   if(typeof DUN!='undefined'&&DUN)return B;
   for(const o of W0.objs){if(o.t=='tmouth'&&Math.hypot(o.x+o.w/2-p.x,o.y+o.h/2-p.y)<80){const at=gOf(o.x,o.y),to=nextStation(at[0],at[1]);B.unshift({t:to?'🚇 지하 터널로 · 다음 역 '+to[2]+'블록':'🚇 지하 터널 (막힘)',f:()=>metroEnter(o),big:1})}
-   if(o.t=='mic'&&Math.hypot(o.x+o.w/2-p.x,o.y+o.h/2-p.y)<90){const gk=gOf(o.x,o.y).join(),st=RADIO0()[gk]||{};
-    B.unshift({t:st.map==S.day?'📡 지도 받기 (오늘 함)':'📡 주변 지도 받기 · 반경 8블록',f:()=>radioMap(gk),off:st.map==S.day});
-    B.unshift({t:S.inf.sos&&!S.inf.sos.done?'📻 생존자 신호 · '+S.inf.sos.nm+' 찾는 중':st.sos==S.day?'📻 신호 찾기 (오늘 함)':'📻 생존자 신호 찾기',f:()=>radioSos(gk),off:!!(S.inf.sos&&!S.inf.sos.done)||st.sos==S.day})}
+   /* the transmission tower in the fenced yard (not the studio console) */if(o.t=='mast'&&Math.hypot(o.x+o.w/2-p.x,o.y+o.h-p.y)<80){const gk=gOf(o.x,o.y).join(),st=RADIO0()[gk]||{};
+    B.unshift({t:st.map==S.day?'📡 지도 받기 (오늘 함)':'📡 송신탑 · 주변 지도 받기 (반경 8블록)',f:()=>radioMap(gk),off:st.map==S.day});
+    B.unshift({t:S.inf.sos&&!S.inf.sos.done?'📻 생존자 신호 · '+S.inf.sos.nm+' 찾는 중':st.sos==S.day?'📻 신호 찾기 (오늘 함)':'📻 송신탑 · 생존자 신호 찾기',f:()=>radioSos(gk),off:!!(S.inf.sos&&!S.inf.sos.done)||st.sos==S.day})}
    if(o.t=='sosnpc'&&Math.hypot(o.x+o.w/2-p.x,o.y+o.h/2-p.y)<60)B.unshift({t:'🤝 생존자 구출 · '+(S.inf.sos?S.inf.sos.nm:''),f:sosSave,big:1})}
   return B}}
