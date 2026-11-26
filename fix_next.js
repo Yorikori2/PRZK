@@ -10,3 +10,5 @@
 
 /* floor-level things (hatch, hole to the next floor, fuel island) are drawn with the floor, never on top of the player */
 Object.assign(FLAT,{hatch:1,mhole:1,island:1});
+/* closing the explore map (✕) hid it but left the game paused: you could not move afterwards */
+{const _cb=closeBase;closeBase=function(){const m=$('bm').dataset.m;const r=_cb.apply(this,arguments);if(m=='xmap'&&$('bm').style.display=='none'){PAUSE=false;$('bm').dataset.m=''}return r}}

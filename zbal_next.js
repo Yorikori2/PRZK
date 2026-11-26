@@ -15,11 +15,11 @@ function zMap(fn,R,px){const c=document.createElement('canvas'),n=2*R+1;c.width=
  x.strokeStyle='#fff';x.lineWidth=1;x.strokeRect((R-5)*px,(R-5)*px,11*px,11*px);return c.toDataURL()}
 const zLegend=()=>'<div style="display:flex;flex-wrap:wrap;gap:4px 10px;font-size:10.5px;margin:4px 0">'+ZGRP.flatMap(([,L])=>L).filter(k=>KNAME[k]).map(k=>'<span><i style="display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:3px;background:'+(KCOL[k]||'#555')+'"></i>'+KNAME[k]+'</span>').join('')+'<span>흰 네모 = 거점 5블록 · 주황 = 구역 경계</span></div>';
 /* ---------- the sheets ---------- */
-function zSheetStr(){const rows=[];for(let z=0;z<=9;z++){const t=zType(z,99),P=zProf(z),c={near:'#7fd07f',start:'#7fd07f',calm:'#9ad0f0',rise:'#ffd36a',peak:'#ff6a5a'}[t];
+function zSheetStr(){const rows=[];for(const z of[0,1,2,3,4,5,6,7,8,9,12,15,20,30]){const t=zType(z,99),P=zProf(z),c={near:'#7fd07f',start:'#7fd07f',calm:'#9ad0f0',rise:'#ffd36a',peak:'#ff6a5a'}[t];
   rows.push('<tr'+(ZPEAK(z)?' style="background:#ff6a5a1c"':'')+'><td><b>'+z+'</b></td><td><b style="color:'+c+'">'+ZTN[t]+'</b></td><td>×'+(+zMulHp(z).toFixed(2))+'<br><small style="color:#888">이전 ×'+(z<=0?1:3*z)+'</small></td><td>×'+zMulAtk(z).toFixed(2)+'<br><small style="color:#888">이전 ×'+(1+.3*z).toFixed(1)+'</small></td><td>×'+(+zMulRaid(z).toFixed(2))+'</td><td>'+Math.round(P.sp*100)+'% · '+Math.round(P.el*100)+'%</td><td>'+(ZPEAK(z)?'<b style="color:#ffd36a">많음</b>':'—')+'</td></tr>')}
- sheet('💀 구역별 강도','3구역마다 한 번에 3배 · 그 사이는 조금씩',
+ sheet('💀 구역별 강도','끝없이 올라가요 · 3의 배수 구역은 위험 · 희귀',
   '<div style="overflow-x:auto"><table class="cmpT" style="white-space:normal"><tr><th>구역</th><th>종류</th><th>좀비 체력</th><th>좀비 공격</th><th>약탈자<br>체력</th><th>특수 · 정예</th><th>희귀템</th></tr>'+rows.join('')+'</table></div>'+
-  '<div class="sub" style="line-height:1.65">· 체력: 3구역마다 ×3 (0 → 3 → 6 → 9구역 = ×1 → ×3 → ×9 → ×27) · 그 사이 두 구역은 +30% · +60%<br>· 공격: 3구역마다 ×1.5 · 사이 +15%씩 (체력처럼 ×3이면 한두 방에 죽어서 공격은 덜 올려요)<br>· 약탈자: 체력 ×(3구역마다 3배 · 사이 +20%) · 공격은 그 제곱근<br>· 위험 구역(3 · 6 · 9)은 특수 좀비 +10% · 정예 +8% · 약탈자 기지도 이 구역에만 · 파밍에 강화석 · 옵션의 룬 · 교환권이 추가로 나와요 (★3 이상 건물은 두 배)<br>· 이전 규칙은 1구역부터 체력 ×3 · ×6 · ×9로 초반이 아주 가팔랐어요</div>')}
+  '<div class="sub" style="line-height:1.65">· 체력: 0구역 ×1 · 1구역 ×1.4 · 2구역 ×2.4 · <b>3구역 ×3</b> · 4구역 ×3.9 · 5구역 ×4.7 · <b>6구역 ×6</b> · 그 뒤로 끝없이: 3의 배수 구역 = 구역 숫자 배 (9 → ×9 · 30 → ×30) · 사이 두 구역은 +0.9 · +1.7<br>· 공격: 체력이 오른 만큼의 1/3씩 (×3 구역 = 공격 ×1.7 · ×9 구역 = ×3.8) · 체력만큼 올리면 한두 방에 죽어서<br>· 약탈자: 좀비와 같은 체력 배수 · 같은 공격 배수<br>· 위험 구역(3 · 6 · 9 …)은 특수 좀비 +10% · 정예 +8% · 약탈자 기지 · 파밍에 강화석 · 옵션의 룬 · 교환권이 추가로 나와요 (★3 이상 건물은 두 배)<br>· 이전 규칙은 1구역부터 체력 ×3 · ×6 · ×9 (구역 × 3)</div>')}
 function zSheetHow(){const st=zoneStep(),D={S:'쉬움',V:'보통',N:'어려움'}[curD()];
  const steps=[
   ['① 바둑판','도시는 끝없는 블록 격자예요. 거점이 (0, 0) 블록이고, 블록마다 좌표 (가로, 세로)가 있어요.'],
@@ -43,7 +43,7 @@ function zSheetProp(){const A=zCount(OLDK),B=zCount(kindAt),C=['near',0,1,2,3],H
   '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px"><div><b style="font-size:12px">이전</b><img src="'+zMap(OLDK,3*st+3,2)+'" style="width:100%;image-rendering:pixelated;border-radius:6px"></div><div><b style="font-size:12px">새 규칙</b><img src="'+zMap(kindAt,3*st+3,2)+'" style="width:100%;image-rendering:pixelated;border-radius:6px"></div></div>'+zLegend())}
 function zSheetOps(){const O=[
   ['✅ 이번 샘플에 넣은 것',[
-   ['구역 강도 3구역 주기','0 · 1 · 2 조금씩 → 3구역 3배 → 4 · 5 조금씩 → 6구역 3배 (좀비 · 약탈자) · 💀 구역별 강도'],
+   ['구역 강도 곡선','0 ×1 · 1 ×1.4 · 2 ×2.4 · 3 ×3 · 4 ×3.9 · 5 ×4.7 · 6 ×6 · 끝없이 (좀비 · 약탈자) · 💀 구역별 강도'],
    ['구역별 건물 새 규칙','시작 · 잠잠(리셋) · 위험 증가 · 위험 · 희귀 · ⚖ 구역별 건물'],
    ['위험 구역 희귀템','3 · 6 · 9구역 파밍에 강화석 · 옵션의 룬 · 교환권'],
    ['철거 레벨 = 위험도','★1 → Lv1 · ★2 → Lv2 · ★3 이상 → Lv3 (도구가 Lv3까지라서)'],

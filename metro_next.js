@@ -33,9 +33,18 @@ function metroEnter(o){const p=S.p,c=(NBX-1)/2|0,r=(NBY-1)/2|0;const at=gOf(o.x,
  SURF={x:p.x,y:p.y,Z,dec,carW:W0.car};DUN={sh:'metro',seed:bh(at[0],at[1],13)*1e6|0,gk:'metro:'+at.join(),from:at,to:[to[0],to[1]],len:to[2]};Z=[];dec=[];buildWorld();infDerived();
  const[ox,oy]=bo(c-1,r),W=3*BW+2*RD;addSolid({x:0,y:0,w:WW,h:oy+40,wall:1});addSolid({x:0,y:oy+490,w:WW,h:WH,wall:1});addSolid({x:0,y:0,w:ox,h:WH,wall:1});addSolid({x:ox+W,y:0,w:WW,h:WH,wall:1});
  p.x=ox+130;p.y=oy+270;document.body.dataset.dun='metro';
- const Rn=mulberry(DUN.seed+3),L=['civ1','civ2','runner','crawler','sleeper','civ3'],n=10+to[2]*2;for(let i=0;i<n;i++)mk(ox+450+Rn()*(W-700),oy+250+Rn()*210,{look:L[Rn()*L.length|0]});
+ /* underground = two zones more dangerous than the station above, more of them the longer the line, guards at the far stairs */
+ const Rn=mulberry(DUN.seed+3),L=['civ1','civ2','runner','crawler','sleeper','runner','spitter','civ3'],n0=Z.length,n=16+to[2]*4;for(let i=0;i<n;i++)mk(ox+450+Rn()*(W-800),oy+250+Rn()*210,{look:L[Rn()*L.length|0]});
  for(let k=0;k<2;k++)mk(ox+W/2+(k?340:-340),oy+440,{look:'heavy'});mk(ox+W/2,oy+300,{look:'screamer'});
- msg('🚇 지하 선로 · 끝까지 걸어가면 '+to[2]+'블록 떨어진 지하철역 ('+to[0]+', '+to[1]+')으로 나와요 · 위쪽 문 2개 = 정비실 · 배전실');S.metroN=(S.metroN||0)+1}
+ mk(ox+W-200,oy+300,{look:'brute'});mk(ox+W-260,oy+250,{look:'stalker'});mk(ox+W-260,oy+420,{look:'stalker'});
+ metroHarden(Z.slice(n0));DUN.amb=0;DUN.W=W;DUN.ox=ox;DUN.oy=oy;
+ msg('🚇 지하 선로 · 지상보다 2구역 더 위험 · '+(n+6)+'마리 · 끝 계단 = '+to[2]+'블록 떨어진 지하철역 ('+to[0]+', '+to[1]+') · 출구를 브루트가 지켜요');S.metroN=(S.metroN||0)+1}
+const MZ=2;/* how many zones harder the tunnel is */
+function metroHarden(L){const zn=Math.max(0,zoneOf(...DUN.from)),f=zMulHp(zn+MZ)/zMulHp(zn),fa=zMulAtk(zn+MZ)/zMulAtk(zn);for(const z of L){z.hp*=f;z.mhp*=f;if(z.dmg!=null)z.dmg*=fa;z.metro=1}}
+/* halfway: the train horn wakes the line — a pack from behind and from ahead */
+{const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(typeof DUN=='undefined'||!DUN||DUN.sh!='metro'||DUN.amb||!DUN.W)return;const p=S.p;if(p.x<DUN.ox+DUN.W*.42)return;DUN.amb=1;const n0=Z.length;
+  for(let i=0;i<7;i++)mk(p.x-520-Math.random()*200,DUN.oy+260+Math.random()*200,{look:i%3?'runner':'dog'});for(let i=0;i<4;i++)mk(p.x+480+Math.random()*200,DUN.oy+260+Math.random()*200,{look:i%2?'runner':'crawler'});
+  metroHarden(Z.slice(n0));msg('📢 전동차 경적이 울렸어요 · 앞뒤에서 좀비 떼가 몰려와요!');try{sfx((a,t)=>{tone(a,t,{w:'square',f0:330,f1:320,d:.9,v:.14});tone(a,t+.05,{w:'square',f0:415,f1:405,d:.85,v:.1})})}catch(e){}}}
 function metroUp(go){if(!go)return dunExit();const to=DUN.to;dunExit();infGoto(to[0],to[1]);const b=W0.b.find(q=>q.gk==to.join());if(b){const m=W0.objs.find(o=>o.t=='tmouth'&&o.b==W0.b.indexOf(b));S.p.x=m?m.x-30:b.ox+BW/2;S.p.y=m?m.y+50:b.oy+BH-60}
  msg('🚇 ('+to[0]+', '+to[1]+') 지하철역으로 올라왔어요');(S.inf.mline=S.inf.mline||{})[to.join()]=1}
 /* ---------- the radio station console ---------- */

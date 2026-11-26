@@ -8,14 +8,17 @@
 'use strict';
 /* ---------- strength ---------- */
 const ZCYC=zn=>Math.floor(Math.max(0,zn)/3),ZSTEP=zn=>Math.max(0,zn)%3,ZPEAK=zn=>zn>=3&&zn%3==0;
-const zMulHp=zn=>Math.pow(3,ZCYC(zn))*(1+.3*ZSTEP(zn));          /* 1 · 1.3 · 1.6 · 3 · 3.9 · 4.8 · 9 … */
-const zMulAtk=zn=>Math.pow(1.5,ZCYC(zn))*(1+.15*ZSTEP(zn));      /* 1 · 1.15 · 1.3 · 1.5 · 1.73 · 1.95 · 2.25 … */
-const zMulRaid=zn=>Math.pow(3,ZCYC(zn))*(1+.2*ZSTEP(zn));
+/* the curve asked for: 0 ×1 · 1 ×1.4 · 2 ×2.4 · 3 ×3 · 4 ×3.9 · 5 ×4.7 · 6 ×6, then forever: every 3rd zone = zone number,
+   the two zones between = +0.9 · +1.7 (7 ×6.9 · 8 ×7.7 · 9 ×9 · 12 ×12 · 30 ×30 …) */
+const ZCURVE=[1,1.4,2.4];
+const zMulHp=zn=>{const z=Math.max(0,zn);if(z<3)return ZCURVE[z];const c=ZCYC(z);return 3*c+[0,.9,1.7][ZSTEP(z)]};
+const zMulAtk=zn=>1+(zMulHp(zn)-1)*.35;   /* attack rises a third as fast: 1 · 1.14 · 1.49 · 1.7 · 2.02 · 2.3 · 2.75 … */
+const zMulRaid=zn=>zMulHp(zn);
 {const _zp=zProf;zProf=function(zn){const P=_zp(zn),z=Math.max(0,zn),m=zMulHp(z);P.hp=m;P.ehp=1+(m-1)*.5;P.bhp=1+.5*m;P.atk=zMulAtk(z);
   /* the peak zones bring the special and elite zombies forward */if(ZPEAK(z)){P.sp=Math.min(.45,P.sp+.1);P.el=Math.min(.3,P.el+.08)}return P}}
 /* the zombie attack multiplier is read through zAtkMul in a few places (const) → patch where zombies are made */
 {const _mk=mk;mk=function(x,y,o){const n0=Z.length,r=_mk.apply(this,arguments),z=Z.length>n0?Z[Z.length-1]:null;if(z&&z.zone!=null&&!z._za&&!z.raider){z.dmg*=zMulAtk(z.zone)/zAtkMul(z.zone);z._za=1}return r}}
-{const _rs=rSpawn;rSpawn=function(x,y,zn,goal){const out=_rs.apply(this,arguments),m=zMulRaid(zn),d=Math.sqrt(m);for(const r of out){r.hp*=m;r.mhp*=m;r.dmg*=d}return out}}
+{const _rs=rSpawn;rSpawn=function(x,y,zn,goal){const out=_rs.apply(this,arguments),m=zMulRaid(zn),d=zMulAtk(zn);for(const r of out){r.hp*=m;r.mhp*=m;r.dmg*=d}return out}}
 /* zone banner / message: the new numbers */
 {const _zb=zoneBanner;zoneBanner=function(z,up){_zb(z,up);const el=$('zoneb');if(!el||!up)return;const s=el.querySelector('small');if(s)s.innerHTML='좀비 체력 ×'+(+zMulHp(z).toFixed(2))+' · 공격 ×'+zMulAtk(z).toFixed(2)+(ZPEAK(z)?' · <b style="color:#ffd36a">위험 구역 · 희귀템</b>':ZSTEP(z)==1&&z>1?' · 잠잠한 구역':'')}}
 {const _zc=infZoneCheck;infZoneCheck=function(q){const _m=msg;msg=function(t){if(typeof t=='string'&&/구역 진입/.test(t)){const z=+(t.match(/(\d+)구역/)||[0,0])[1];t='⚠ '+z+'구역 진입 · 좀비 체력 ×'+(+zMulHp(z).toFixed(2))+(ZPEAK(z)?' · 위험 구역 · 희귀템이 많아요':'')}return _m.apply(this,[t,...[].slice.call(arguments,1)])};try{return _zc.apply(this,arguments)}finally{msg=_m}}}
