@@ -13,7 +13,7 @@ await put({w:'knife',z:[[30,0]]});R.inRange=await p.evaluate(()=>{updTarget(S.p)
 // 4. sticky: keeps target unless another is much closer
 await put({w:'ar',z:[[200,0],[180,10]]});R.sticky=await p.evaluate(()=>{S.tg=Z[0];const t=updTarget(S.p);const keep=t===Z[0];Z[1].x=S.p.x+60;const t2=updTarget(S.p);return{keep,switchWhenMuchCloser:t2===Z[1]}});
 // 5. line of sight: zombie behind a wall is not targeted (clinic wall)
-R.los=await p.evaluate(()=>{const P=S.p,b=W0.b.find(b=>b.kind=='clinic'),h=W0.hw.find(h=>h.x1-h.x0>300&&h.y>b.oy+200&&h.y<b.oy+600);P.x=(h.x0+h.x1)/2;P.y=h.y+40;Z=[];S.tg=null;mk(P.x,h.y-40,{look:'civ1'});Z[0].stun=99;return{targeted:!!updTarget(P)}});
+R.los=await p.evaluate(()=>{const P=S.p,wall=b=>W0.hw.find(h=>h.x1-h.x0>300&&h.x0>=b.ox-10&&h.x1<=b.ox+BW+10&&h.y>b.oy+200&&h.y<b.oy+600),b=W0.b.find(b=>b.kind=='clinic'&&wall(b))||W0.b.find(b=>wall(b)),h=wall(b);/* any building with a long wall (the clinic is not always in view any more) */P.x=(h.x0+h.x1)/2;P.y=h.y+40;Z=[];S.tg=null;mk(P.x,h.y-40,{look:'civ1'});Z[0].stun=99;return{targeted:!!updTarget(P)}});
 // 6. switching weapon changes the range ring radius used
 R.rangeBySlot=await p.evaluate(()=>{const P=S.p;P.inv={};invAdd(P,'knife',1);invAdd(P,'sniper',1);P.eq.mel='knife';P.eq.prim='sniper';P.as='mel';const a=wdef(actW(P))[4].r;P.as='prim';const c=wdef(actW(P))[4].r;return[a,c]});
 // screenshot with a gun target and a melee ring
