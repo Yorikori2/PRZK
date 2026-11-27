@@ -52,3 +52,5 @@ document.head.insertAdjacentHTML('beforeend',`<style>#bmX2{position:fixed;z-inde
 document.head.insertAdjacentHTML('beforeend','<style>body:has(#bm[style*="display: block"]) #iaHint,body:has(#bmap) #iaHint{display:none!important}</style>');
 /* the shield durability chip sat on top of open windows (same layer) → under them */
 document.head.insertAdjacentHTML('beforeend','<style>#shdHud{z-index:4!important}</style>');
+/* other chips that could cover an open window: the zone banner and the demolition button */
+document.head.insertAdjacentHTML('beforeend','<style>#zoneb,#demoB{z-index:4!important}</style>');
