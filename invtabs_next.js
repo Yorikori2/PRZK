@@ -76,13 +76,13 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 #bm .ivA{display:flex;flex-direction:column;gap:6px}#bm .ivC{display:flex;gap:10px;align-items:center;padding:6px 8px;border-radius:12px;border:1px solid #ffffff1a;background:#ffffff08;cursor:pointer}
 #bm .ivC canvas{width:44px;height:auto;image-rendering:pixelated;flex:none}#bm .ivC>div{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}#bm .ivC small{font-size:11px;color:var(--mut)}#bm .ivGo{font-size:22px;color:var(--mut)}</style>`);
 /* ---------- production facilities and the gun bench live in the base window (거점 관리), not in decorating ---------- */
-const FACS=['garden','coop','barrel','pond','coffeem','gunbench'];
+const FACS=['garden','coop','barrel','pond','coffeem','purifier','gunbench'];
 if(typeof DTH!='undefined')for(const t in DTH){const L=DTH[t][2];for(let i=L.length-1;i>=0;i--)if(FACS.includes(L[i]))L.splice(i,1)}
 if(typeof DECO!='undefined')for(const k of FACS)if(DECO[k])DECO[k][3]=0;/* facilities give no comfort */
 {const _ob=openBase;openBase=function(){_ob.apply(this,arguments);try{const b=$('bm');if(b.querySelector('.fcS'))return;const cnt={};for(const d of DSTORE())cnt[d.t]=(cnt[d.t]|0)+1;
-  const desc={garden:'매일 아침 통조림 1 (그 자리에 쌓임 · 보관함 연결 가능)',coop:'매일 아침 통조림 1 (달걀)',barrel:'매일 아침 물병 1',pond:'매일 아침 물병 1',coffeem:'원두 1 + 물병 1 → 캔커피 2',gunbench:'총열 · 손잡이 파츠를 끼우고 빼는 곳'};
+  const desc={purifier:'더러운 물 → 깨끗한 물병 (천 1장으로 3병 거르기)',garden:'매일 아침 통조림 1 (그 자리에 쌓임 · 보관함 연결 가능)',coop:'매일 아침 통조림 1 (달걀)',barrel:'매일 아침 물병 1',pond:'매일 아침 물병 1',coffeem:'원두 1 + 물병 1 → 캔커피 2',gunbench:'총열 · 손잡이 파츠를 끼우고 빼는 곳'};
   const row=k=>{const D=DECO[k];if(!D)return'';const ok=typeof dHave=='function'&&dHave(D[2]);return'<div class="mod"><div class="ic">'+D[0]+'</div><div><b>'+D[1]+'</b>'+(cnt[k]?' <span class="lv">×'+cnt[k]+'</span>':'')+'<div class="ef">'+desc[k]+'</div><div class="cost">'+Object.entries(D[2]).map(([i,v])=>NM2(i)+' '+v).join(' · ')+'</div></div><button '+(ok?'':'disabled')+' data-fc="'+k+'">'+(cnt[k]?'하나 더':'건설')+'</button></div>'};
-  b.insertAdjacentHTML('beforeend','<div class="fcS"><h3>🏭 생산 시설</h3>'+['garden','coop','barrel','pond','coffeem'].map(row).join('')+'<h3>🔧 작업 시설</h3>'+row('gunbench')+'<div class="sub">짓기를 누르면 설치 화면이 열려요 · 다 지은 시설은 앞에서 [상호작용]으로 회수 · 연결 · 옮기기</div></div>');
+  b.insertAdjacentHTML('beforeend','<div class="fcS"><h3>🏭 생산 시설</h3>'+['garden','coop','barrel','pond','coffeem','purifier'].filter(k=>DECO[k]).map(row).join('')+'<h3>🔧 작업 시설</h3>'+row('gunbench')+'<div class="sub">짓기를 누르면 설치 화면이 열려요 · 다 지은 시설은 앞에서 [상호작용]으로 회수 · 연결 · 옮기기</div></div>');
   b.querySelectorAll('[data-fc]').forEach(x=>x.onclick=()=>dStart(x.dataset.fc))}catch(e){}}}
 document.head.insertAdjacentHTML('beforeend','<style>#bm .fcS h3{margin:14px 0 4px;font-size:14px}</style>');
 /* ---------- light parts (사이드 · 사이트) can be changed anywhere; 총열 · 손잡이 need the bench ---------- */
