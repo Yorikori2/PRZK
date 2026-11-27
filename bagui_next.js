@@ -4,7 +4,7 @@
    Loaded last of the bag wrappers. */
 'use strict';
 let BTAB='bag';
-{const _ob=openBag;openBag=function(id){_ob.apply(this,arguments);try{const b=$('bm'),sh=b.querySelector('.sh');if(!sh)return;
+{const _ob=openBag;openBag=function(id){const bm=$('bm'),keep=bm&&bm.dataset.m=='bag'&&bm.style.display=='block'?bm.scrollTop:0;_ob.apply(this,arguments);try{const b=$('bm'),sh=b.querySelector('.sh');if(!sh)return;
   /* tabs under the title */
   const eq=b.querySelector('.eq'),flt=b.querySelector('.flt'),grid=b.querySelector('.grid'),det=b.querySelector('.det');
   const eqPart=[];if(eq){let n=eq;while(n&&n!==flt){eqPart.push(n);n=n.nextElementSibling}}
@@ -12,7 +12,7 @@ let BTAB='bag';
   sh.insertAdjacentHTML('afterend','<div class="bTab"><button data-bt="bag" class="'+(BTAB=='bag'?'on':'')+'">🎒 가방</button><button data-bt="eq" class="'+(BTAB=='eq'?'on':'')+'">🦺 장비 <small>'+worn+'</small></button></div>');
   const tabs=b.querySelector('.bTab');
   /* the detail card goes right under the tabs */
-  if(det){tabs.after(det);det.classList.add('top');if(id)b.scrollTop=0}
+  if(det){tabs.after(det);det.classList.add('top')}b.scrollTop=keep;
   /* show one tab */
   for(const n of eqPart)n.style.display=BTAB=='eq'?'':'none';
   if(flt)flt.style.display=BTAB=='bag'?'':'none';if(grid)grid.style.display=BTAB=='bag'?'':'none';
@@ -23,5 +23,5 @@ let BTAB='bag';
 document.head.insertAdjacentHTML('beforeend',`<style>
 #bm .bTab{display:flex;gap:6px;margin:6px 0 8px}#bm .bTab button{flex:1;padding:9px 0;font-size:14px;border-radius:12px;background:#ffffff0a;border:1px solid #ffffff22;color:#e8e2d6}
 #bm .bTab button.on{background:#e0b03a26;border-color:#e0b03a;color:#ffd36a}#bm .bTab small{font-size:11px;opacity:.8}
-#bm .det.top{margin:0 0 10px;border:1px solid #ffd36a55;border-radius:12px;padding:8px;background:#ffffff08}
+#bm .det.top{position:sticky;top:-2px;z-index:5;margin:0 0 10px;border:1px solid #ffd36a88;border-radius:12px;padding:8px;background:#1a1f24;box-shadow:0 6px 16px #000a}
 #bm .bHint{margin:0 0 8px;font-size:12px}</style>`);
