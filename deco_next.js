@@ -143,10 +143,10 @@ function dOpen(){const b=$('bm'),c=comfort(),n=dTier();b.dataset.m='deco';PAUSE=
   if(n>=1&&typeof inBase=='function'){const p=S.p;const hr=dSetOn('rest')?1:.5;if(inBase(p.x,p.y)&&p.hp>0)p.hp=Math.min(MHP(p),p.hp+hr*dt);if(typeof ALLY=='function')for(const a of ALLY()){const z=aEnt(a);if(z&&a.hp>0&&inBase(z.x,z.y))a.hp=Math.min(aMhp(a),a.hp+hr*dt)}}
   if(dSetOn('nat')&&typeof inBase=='function'&&inBase(S.p.x,S.p.y)&&S.p.st!=null)S.p.st=Math.min(100,S.p.st+6*dt);
   if(S.base.decoDay==null)S.base.decoDay=S.day;if(S.day>S.base.decoDay){S.base.decoDay=S.day;const st=S.base.st,got={};const add=(k,v)=>{st[k]=(st[k]|0)+v;got[k]=(got[k]|0)+v};
-   for(const d of DSTORE()){if(d.t=='garden'||d.t=='coop')add('food',1);if(d.t=='barrel'||d.t=='pond')add('water',1)}if(dSetOn('farm'))add('food',2);if(dSetOn('fun')&&typeof ALLY=='function')for(const a of ALLY())if(a.st=='base'||a.st=='job'&&a.job!='scav')a.xp=(a.xp|0)+10;
+   const made=dProduce();if(dSetOn('farm'))add('food',2);if(dSetOn('fun')&&typeof ALLY=='function')for(const a of ALLY())if(a.st=='base'||a.st=='job'&&a.job!='scav')a.xp=(a.xp|0)+10;
    if(n>=2){add('food',1);add('water',1)}
    if(n>=3&&typeof ALLY=='function')for(const a of ALLY())if(a.st=='base'||a.st=='job'&&a.job!='scav')a.xp=(a.xp|0)+15;
-   const t=Object.entries(got).map(([k,v])=>NM2(k)+' '+v).join(' · ');if(t)setTimeout(()=>msg('🏡 아침 · 거점 창고에 '+t+(n>=3?' · 거점 동료 경험치 +15':'')),1500)}}}
+   const t=Object.entries(got).map(([k,v])=>NM2(k)+' '+v).join(' · ');const m2=[t?'거점 창고에 '+t:'',made].filter(Boolean).join(' · ');if(m2)setTimeout(()=>msg('🏡 아침 · '+m2+(n>=3?' · 거점 동료 경험치 +15':'')),1500)}}}
 /* requests pay more when the base is lively */
 if(typeof rqReward=='function'){const _r=rqReward;rqReward=function(lv){const R0=_r(lv);try{if(S&&S.base&&dTier()>=3)for(const k in R0)R0[k]=Math.ceil(R0[k]*1.2)}catch(e){}return R0}}
 document.head.insertAdjacentHTML('beforeend',`<style>
@@ -157,3 +157,23 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 /* the memorial set: vouchers for every finished request */
 if(typeof rqTurnIn=='function'){const _t=rqTurnIn;rqTurnIn=function(q){const s0=RQS().done;const r=_t.apply(this,arguments);try{if(RQS().done>s0&&dSetOn('mem')){invAdd(S.p,'tkn',3);setTimeout(()=>msg('🏅 기념 세트 · 교환권 +3'),800)}}catch(e){}return r}}
 document.head.insertAdjacentHTML('beforeend',`<style>#bm .dqS{display:grid;grid-template-columns:1fr;gap:3px;margin:4px 0 8px}#bm .dqS div{font-size:12px;color:var(--mut);opacity:.75}#bm .dqS div.on{color:#ffd36a;opacity:1}#bm .dqS small{font-size:11px}#bm .dqH{margin:14px 0 6px;font-size:14px}#bm .dqH small{font-weight:400;font-size:11px;color:var(--mut)}#bm .dqI small.v{color:#c0a0ff}</style>`);
+
+/* ---------- producers keep what they make (garden · coop · rain barrel · pond) ----------
+   Each morning a producer adds one to its own tray (up to 5). Open it ([상호작용] → 🧺 회수) to take it,
+   or link it to a storage box (📦 연결): then it goes into the stash by itself (while the stash has room). */
+const DPROD={garden:'food',coop:'food',barrel:'water',pond:'water'},DPCAP=5;
+function dBoxNames(){try{const c=stCtx('base');return[bxName(c,-1),...c.H.boxes.map((b,i)=>bxName(c,i))]}catch(e){return['거점 보관함']}}
+function dDeliver(d){const id=DPROD[d.t];if(!id||!d.buf||d.to==null)return 0;const put=typeof stPutBase=='function'?stPutBase(id,d.buf):(S.base.st[id]=(S.base.st[id]|0)+d.buf,d.buf);d.buf-=put;return put}
+function dProduce(){const sent={},wait={};for(const d of DSTORE()){const id=DPROD[d.t];if(!id)continue;d.buf=Math.min(DPCAP,(d.buf|0)+1);if(d.to!=null){const n=dDeliver(d);if(n)sent[id]=(sent[id]|0)+n}if(d.buf)wait[DECO[d.t][1]]=(wait[DECO[d.t][1]]|0)+d.buf}
+ const a=Object.entries(sent).map(([k,v])=>NM2(k)+' '+v).join(' · '),b=Object.entries(wait).map(([k,v])=>k+' '+v).join(' · ');return[a?'📦 보관함으로 '+a:'',b?'🧺 회수 대기: '+b:''].filter(Boolean).join(' · ')}
+function dCollect(d){const id=DPROD[d.t],n=d.buf|0;if(!n)return;invAdd(S.p,id,n);d.buf=0;msg('🧺 '+DECO[d.t][1]+'에서 '+NM2(id)+' '+n+'개 회수')}
+function dLink(d){const L=dBoxNames();d.to=d.to==null?0:d.to+1>=L.length?null:d.to+1;const n=dDeliver(d);msg(d.to==null?'📦 연결 끔 · 그 자리에 쌓여요 (최대 '+DPCAP+')':'📦 '+L[d.to]+'(으)로 연결 · 매일 아침 자동으로 들어가요'+(n?' · 지금 '+n+'개 보냄':''))}
+{const _c=dmCtx;dmCtx=function(){const B=_c();try{if(!S||!run||S.dr||typeof DUN!='undefined'&&DUN||typeof DPL!='undefined'&&DPL)return B;const p=S.p;
+  for(const o of W0.objs){if(o.did==null)continue;const t=o.t.slice(5);if(!DPROD[t])continue;if(Math.hypot(Math.max(o.x-p.x,0,p.x-o.x-o.w),Math.max(o.y-p.y,0,p.y-o.y-o.h))>40)continue;const d=DSTORE().find(q=>q.id==o.did);if(!d)break;const L=dBoxNames();
+   if(d.buf)B.unshift({t:'🧺 '+DECO[t][1]+' 회수 · '+NM2(DPROD[t])+' '+d.buf,f:()=>dCollect(d),big:1});
+   B.push({t:'📦 '+DECO[t][1]+' 보관함 연결: '+(d.to==null?'끔':L[d.to]||'보관함')+' → '+(d.to==null?L[0]:d.to+1>=L.length?'끔':L[d.to+1]),f:()=>dLink(d),sm:1});break}}catch(e){}return B}}
+if(typeof IAW!='undefined')IAW.unshift([/회수/,'회수'],[/보관함 연결/,'연결']);
+/* a little sign over each producer: what waits in it, or 📦 when linked */
+if(typeof OVL!='undefined')OVL.push((g,sx,sy,k)=>{if(!S||!S.base||typeof DUN!='undefined'&&DUN)return;const p=S.p;g.save();g.textAlign='center';g.textBaseline='middle';g.font='600 12px system-ui,sans-serif';
+ for(const o of W0.objs){if(o.did==null)continue;const t=o.t.slice(5);if(!DPROD[t])continue;const cx=o.x+o.w/2,cy=o.y-10;if(Math.hypot(cx-p.x,cy-p.y)>420)continue;const d=DSTORE().find(q=>q.id==o.did);if(!d)continue;
+  const tx=(d.buf?(DPROD[t]=='food'?'🥫':'💧')+' '+d.buf+(d.buf>=DPCAP?' 가득':''):'')+(d.to!=null?(d.buf?' ':'')+'📦':'');if(!tx)continue;const w=g.measureText(tx).width+12,X=sx(cx),Y=sy(cy);g.fillStyle=d.buf>=DPCAP?'#3a1d0ae6':'#0d1114d9';g.fillRect(X-w/2,Y-9,w,18);g.strokeStyle=d.buf>=DPCAP?'#ffb04a':'#ffffff33';g.lineWidth=1;g.strokeRect(X-w/2+.5,Y-8.5,w-1,17);g.fillStyle='#fff';g.fillText(tx,X,Y+.5)}g.restore()});
