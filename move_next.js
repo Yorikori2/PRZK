@@ -99,3 +99,21 @@ let mvBreathT=0;
   if(mvEff()!='walk')return;const p=S.p,lim=110*MV_WALK*(typeof speedMul=='function'?speedMul(p):1)*1.08*dt;
   for(const[z,[x0,y0]]of before){const a=typeof aById=='function'&&aById(z.ally);if(!a||a.st!='follow')continue;const near=Z.some(q=>!q.npc&&q.hp>0&&Math.hypot(q.x-z.x,q.y-z.y)<200);if(near)continue;
    if(Math.hypot(p.x-z.x,p.y-z.y)>220)continue;/* far behind: let them catch up */const dx=z.x-x0,dy=z.y-y0,d=Math.hypot(dx,dy);if(d>lim){z.x=x0+dx/d*lim;z.y=y0+dy/d*lim}}}}
+/* ---------- drinks that give 기력 back ----------
+   캔커피: 기력 +35 · 목마름 +10        (마트 · 편의점 · 쇼핑몰 · 주택 · 아파트 · 경찰서)
+   에너지 음료: 기력 +60 · 30초 동안 달려도 기력이 줄지 않아요 (🔋 활력)   (마트 · 쇼핑몰 · 학교 · 군부대 · 체육관 같은 곳에서 가끔) */
+{const add=(id,nm,rar,wt,ds,draw)=>{if(I_BY[id])return;const it=[id,nm,'c',rar,wt,ds];ITEMS.push(it);I_BY[id]=it;IC[id]=draw};
+ add('coffee','캔커피','c',.2,'기력 +35 · 목마름 +10 · 달리기 전에 한 캔',()=>{R('#1d1714',7,4,10,17);R('#6a3a24',8,5,8,15);R('#8a5034',8,5,8,3);R('#c9ccd0',8,4,8,2);R('#e8e2d6',9,10,6,5);R('#6a3a24',10,11,4,3);R('#a8744a',9,17,6,1)});
+ add('energy','에너지 음료','u',.3,'기력 +60 · 30초 동안 달려도 기력이 줄지 않아요 (🔋 활력)',()=>{R('#1d1714',7,2,10,20);R('#1f2a3a',8,3,8,18);R('#c9ccd0',8,2,8,2);R('#7fe07f',8,8,8,3);R('#ffd36a',10,12,4,6);R('#1f2a3a',11,13,2,4);R('#7fe07f',9,19,6,1)})}
+{const _u2=use2;use2=function(k){if(k!='coffee'&&k!='energy')return _u2.apply(this,arguments);const p=S.p;if(!has(p,k))return msg(NM2(k)+' 없음');invTake(p,k,1);
+  if(k=='coffee'){p.st=Math.min(100,p.st+35);p.water=Math.min(100,(p.water||0)+10);msg('☕ 캔커피 · 기력 +35')}
+  else{p.st=Math.min(100,p.st+60);p.boostT=30;msg('🔋 에너지 음료 · 기력 +60 · 30초 동안 달려도 지치지 않아요')}
+  if(mvTired&&p.st>=ST_BACK){mvTired=false;mvLayout()}if(typeof hud2=='function')hud2()}}
+/* while 활력 lasts, running costs nothing (the drain above is given back) */
+{const _gu=gearUpd;gearUpd=function(dt){const p=S&&S.p,st0=p?p.st:0;_gu(dt);if(!p||PAUSE||!run)return;if(p.boostT>0){p.boostT-=dt;if(p.st<st0)p.st=st0;if(p.boostT<=0){p.boostT=0;msg('🔋 활력이 끝났어요')}}const o=$('mvO');if(o)o.classList.toggle('boost',p.boostT>0)}}
+document.head.insertAdjacentHTML('beforeend','<style>#mvO.boost{box-shadow:0 0 0 3px #7fe07f88,0 0 14px #7fe07f88!important}#mvO.boost .stb i{background:#7fe07f!important}</style>');
+/* found while searching */
+{const T={mart:[.28,.12],mall:[.22,.1],houses:[.1,.03],apt:[.1,.03],police:[.12,.04],school:[.06,.08],mil:[.04,.12],gunshop:[.08,.05],fire:[.08,.06],ware:[.06,.04]};
+ const _sr=s3SearchRoll;s3SearchRoll=function(o,kind,tier,r){const pid=_sr.apply(this,arguments);try{if(typeof DUN!='undefined'&&DUN)return pid;const c=T[kind];if(!c)return pid;if(Math.random()<c[0])r.coffee=(r.coffee|0)+1;if(Math.random()<c[1])r.energy=(r.energy|0)+1}catch(e){}return pid}}
+/* the merchant sometimes has them */
+if(typeof STK_ID!='undefined')Object.assign(STK_ID,{coffee:10,energy:10});
