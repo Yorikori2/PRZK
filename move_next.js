@@ -27,7 +27,7 @@ if(typeof UIE!='undefined'&&UIE.ids&&!UIE.ids.some(x=>x[0]=='mvT'))UIE.ids.push(
    auto : no button · push the stick to the edge and hold ½ s = run, ease off = walk */
 let MVSTYLE='two';try{MVSTYLE=localStorage.getItem('pl_mvs')||'two'}catch(e){}
 let mvEdgeT=0,mvAutoRun=false,mvLastTap=0,mvSignT=0;
-function mvStyle(s){MVSTYLE=s;try{localStorage.setItem('pl_mvs',s)}catch(e){}mvLayout();msg({two:'걷기 · 달리기 버튼 2개',one:'버튼 1개 · 누를 때마다 바뀜',dtap:'스틱 자리를 두 번 톡 = 바꾸기',auto:'스틱을 끝까지 밀고 ½초 = 달리기'}[s])}
+function mvStyle(s){MVSTYLE=s;try{localStorage.setItem('pl_mvs',s)}catch(e){}mvLayout();msg({two:'걷기 · 달리기 버튼 2개',one:'버튼 1개 · 누를 때마다 바뀜',dtap:'스틱 자리를 두 번 톡 = 바꾸기',auto:'스틱을 끝까지 밀고 ½초 = 달리기',wpn:'무기칸 위 버튼 · 누를 때마다 걷기 ↔ 달리기'}[s])}
 function mvLayout(){const t=$('mvT'),o=$('mvO');if(t)t.style.display=MVSTYLE=='two'?'':'none';if(o){o.style.display=MVSTYLE=='one'?'':'none';o.textContent=MVMODE=='walk'?'🚶':'🏃';o.className=MVMODE}}
 document.body.insertAdjacentHTML('beforeend','<button id="mvO"></button><div id="mvSign"></div>');
 $('mvO').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();mvSet(MVMODE=='walk'?'run':'walk')});
@@ -44,4 +44,15 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 #mvSign{position:fixed;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 250px);z-index:3;pointer-events:none;font-size:12px;padding:4px 9px;border-radius:99px;background:#0d1114cc;border:1px solid #ffffff22;color:#e8e2d6;opacity:.75;transition:transform .15s}
 #mvSign.pop{transform:scale(1.25);opacity:1}#mvSign.run{color:#ffd09a}#mvSign.walk{color:#bfe6ff}
 body.bld #mvO,body.bld #mvSign{visibility:hidden}</style>`);
+mvLayout();
+/* ---------- the chosen place: one toggle button right above the weapon panel (bottom right) ---------- */
+MVSTYLE='wpn';try{localStorage.setItem('pl_mvs','wpn')}catch(e){}
+{const _l=mvLayout;mvLayout=function(){_l();const t=$('mvT'),o=$('mvO');if(MVSTYLE!='wpn'){if(o)o.classList.remove('wpn');return}if(t)t.style.display='none';if(o){o.style.display='';o.classList.add('wpn');o.innerHTML=(MVMODE=='walk'?'🚶':'🏃')+'<small>'+(MVMODE=='walk'?'걷기':'달리기')+'</small>';o.className='wpn '+MVMODE}mvPlace()}}
+function mvPlace(){const o=$('mvO');if(!o||MVSTYLE!='wpn')return;const w=$('wc2');if(!w||getComputedStyle(w).display=='none'){o.style.left='';o.style.right='';o.style.bottom='';o.style.top='';return}
+ const r=w.getBoundingClientRect(),W=o.offsetWidth||54,H=o.offsetHeight||54;let right=Math.max(8,innerWidth-r.right),x0=innerWidth-right-W,top=r.top-8-H;
+ for(const id of['tr','iaHint','vHud']){const e=$(id);if(!e||getComputedStyle(e).display=='none'||getComputedStyle(e).visibility=='hidden')continue;const q=e.getBoundingClientRect();if(!q.width)continue;if(q.right>x0&&q.left<x0+W&&q.bottom>top&&q.top<top+H)top=q.top-8-H}
+ o.style.left='auto';o.style.bottom='auto';o.style.right=right+'px';o.style.top=Math.max(60,top)+'px'}
+setInterval(mvPlace,250);addEventListener('resize',mvPlace);
+document.head.insertAdjacentHTML('beforeend',`<style>#mvO.wpn{width:54px;height:54px;border-radius:14px;font-size:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;line-height:1.1}#mvO.wpn small{font-size:10px;font-weight:600}
+#mvO.wpn.run{color:#ffd09a}#mvO.wpn.walk{color:#bfe6ff}body.uied #mvO{display:none!important}</style>`);
 mvLayout();
