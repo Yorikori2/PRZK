@@ -54,3 +54,8 @@ document.head.insertAdjacentHTML('beforeend','<style>body:has(#bm[style*="displa
 document.head.insertAdjacentHTML('beforeend','<style>#shdHud{z-index:4!important}</style>');
 /* other chips that could cover an open window: the zone banner and the demolition button */
 document.head.insertAdjacentHTML('beforeend','<style>#zoneb,#demoB{z-index:4!important}</style>');
+/* the shield chip moves to the side when the tool drawer (bottom left) is open over it */
+setInterval(()=>{const h=document.getElementById('shdHud');if(!h)return;h.style.left='';const r=h.getBoundingClientRect();if(!r.width)return;let push=0;
+ for(const id of['sd','tbH']){const e=document.getElementById(id);if(!e||getComputedStyle(e).display=='none'||getComputedStyle(e).visibility=='hidden')continue;const q=e.getBoundingClientRect();if(!q.width)continue;
+  if(q.right>r.left&&q.left<r.right&&q.bottom>r.top&&q.top<r.bottom)push=Math.max(push,q.right+8)}
+ if(push)h.style.left=push+'px'},150);
