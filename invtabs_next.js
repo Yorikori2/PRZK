@@ -75,3 +75,26 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 #bm .ptS .sl.on{border-color:#ffd36a;background:#e0b03a22}#bm .ptS .sl.no{opacity:.4}#bm .ptS small{font-size:11px;color:var(--mut)}#bm .ptS b{font-size:13px}#bm .ptS .em{color:var(--mut);font-weight:400}
 #bm .ivA{display:flex;flex-direction:column;gap:6px}#bm .ivC{display:flex;gap:10px;align-items:center;padding:6px 8px;border-radius:12px;border:1px solid #ffffff1a;background:#ffffff08;cursor:pointer}
 #bm .ivC canvas{width:44px;height:auto;image-rendering:pixelated;flex:none}#bm .ivC>div{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}#bm .ivC small{font-size:11px;color:var(--mut)}#bm .ivGo{font-size:22px;color:var(--mut)}</style>`);
+/* ---------- production facilities and the gun bench live in the base window (거점 관리), not in decorating ---------- */
+const FACS=['garden','coop','barrel','pond','coffeem','gunbench'];
+if(typeof DTH!='undefined')for(const t in DTH){const L=DTH[t][2];for(let i=L.length-1;i>=0;i--)if(FACS.includes(L[i]))L.splice(i,1)}
+if(typeof DECO!='undefined')for(const k of FACS)if(DECO[k])DECO[k][3]=0;/* facilities give no comfort */
+{const _ob=openBase;openBase=function(){_ob.apply(this,arguments);try{const b=$('bm');if(b.querySelector('.fcS'))return;const cnt={};for(const d of DSTORE())cnt[d.t]=(cnt[d.t]|0)+1;
+  const desc={garden:'매일 아침 통조림 1 (그 자리에 쌓임 · 보관함 연결 가능)',coop:'매일 아침 통조림 1 (달걀)',barrel:'매일 아침 물병 1',pond:'매일 아침 물병 1',coffeem:'원두 1 + 물병 1 → 캔커피 2',gunbench:'총열 · 손잡이 파츠를 끼우고 빼는 곳'};
+  const row=k=>{const D=DECO[k];if(!D)return'';const ok=typeof dHave=='function'&&dHave(D[2]);return'<div class="mod"><div class="ic">'+D[0]+'</div><div><b>'+D[1]+'</b>'+(cnt[k]?' <span class="lv">×'+cnt[k]+'</span>':'')+'<div class="ef">'+desc[k]+'</div><div class="cost">'+Object.entries(D[2]).map(([i,v])=>NM2(i)+' '+v).join(' · ')+'</div></div><button '+(ok?'':'disabled')+' data-fc="'+k+'">'+(cnt[k]?'하나 더':'건설')+'</button></div>'};
+  b.insertAdjacentHTML('beforeend','<div class="fcS"><h3>🏭 생산 시설</h3>'+['garden','coop','barrel','pond','coffeem'].map(row).join('')+'<h3>🔧 작업 시설</h3>'+row('gunbench')+'<div class="sub">짓기를 누르면 설치 화면이 열려요 · 다 지은 시설은 앞에서 [상호작용]으로 회수 · 연결 · 옮기기</div></div>');
+  b.querySelectorAll('[data-fc]').forEach(x=>x.onclick=()=>dStart(x.dataset.fc))}catch(e){}}}
+document.head.insertAdjacentHTML('beforeend','<style>#bm .fcS h3{margin:14px 0 4px;font-size:14px}</style>');
+/* ---------- light parts (사이드 · 사이트) can be changed anywhere; 총열 · 손잡이 need the bench ---------- */
+const PLIGHT=['side','optic'];
+const canPart=sl=>PLIGHT.includes(sl)||nearGunBench();
+{const _pt=partsTab;partsTab=function(){let h=_pt();const can=nearGunBench();if(!can)h=h.replace(/<div class="ptB">[\s\S]*?<\/div>/,'<div class="ptB lite">✋ <b>사이드 · 사이트</b>는 여기서 바로 바꿀 수 있어요 · <b>총열 · 손잡이</b>는 거점의 🔧 총기 파츠 작업대에서</div>');return h}}
+{const _pb=partsBind;partsBind=function(){_pb();try{const b=$('bm');if(nearGunBench()||!PSL||!PLIGHT.includes(PSL))return;const pg=PGo();
+  /* buttons for light parts when away from the bench (the original list hides them there) */const cl=GCLASS[PGUN],cur=(pg.mods[PGUN]||{})[PSL],cap=typeof s3Rar=='function'?s3Rar():'l';
+  b.querySelectorAll('.pl .pi').forEach(el=>{if(el.querySelector('button')||el.querySelector('em'))return;if(el.classList.contains('cur')){el.insertAdjacentHTML('beforeend','<button data-lun="1">빼기</button>');return}
+   const nm=el.querySelector('b')&&el.querySelector('b').textContent,q=PARTS.find(q=>q[1]==nm&&q[2]==PSL);if(!q)return;const okR=RORD.indexOf(q[3])<=RORD.indexOf(cap),fr=partsFree(q[0]);el.insertAdjacentHTML('beforeend',!okR?'<em>🔒 총기 개조 스킬 필요</em>':fr>0?'<button data-lpu="'+q[0]+'">장착</button>':'<em>다른 총에 장착 중</em>')});
+  b.querySelectorAll('[data-lpu]').forEach(x=>x.onclick=()=>{const m=pg.mods[PGUN]=pg.mods[PGUN]||{};m[PSL]=x.dataset.lpu;s3dirty();msg('✋ '+P_BY[x.dataset.lpu][1]+' 장착');hud2();openBag()});
+  b.querySelectorAll('[data-lun]').forEach(x=>x.onclick=()=>{const m=pg.mods[PGUN]||{},q=m[PSL];delete m[PSL];s3dirty();msg('✋ '+P_BY[q][1]+' 빼기');hud2();openBag()})}catch(e){}}}
+document.head.insertAdjacentHTML('beforeend','<style>#bm .ptB.lite{background:#7fb4ff14;border-color:#7fb4ff55}#bm .ptS .sl small.lt{color:#9ad0ff}</style>');
+/* mark the light places on the slot cards */
+{const _pt2=partsTab;partsTab=function(){let h=_pt2();return h.replace(/<small>(사이드 \(레이저 · 플래시\)|사이트)<\/small>/g,'<small>$1 · ✋ 어디서나</small>').replace(/<small>(총열|손잡이)<\/small>/g,'<small>$1 · 🔧 작업대</small>')}}
