@@ -46,7 +46,7 @@ function scene9(k){stop9();{const pp=document.getElementById('iaPop');if(pp)pp.r
   for(const a of A){a.st='base';a.given=0;a.am={};a.mag=Math.floor(aMagSz(a)/3)}infGoto(0,0);Z=Z.filter(z=>z.npc);S.t=600;S.inf.aFill=true;S.base.st.a556=(S.base.st.a556|0)+120;S.base.st.a9mm=(S.base.st.a9mm|0)+60;
   closeBase();PAUSE=false;S.p.x=W0.base.ox+480;S.p.y=W0.base.oy+600;msg('🏠 창고에 5.56 120발 · 9mm 60발 · 동료들 탄약이 거의 없어요 → 2초 안에 창고에서 챙겨요');setTimeout(()=>{try{aOpen()}catch(e){}},3200);return}
  if(k=='bxnm'){scene9('box');S.base.stNm='식량 창고';S.base.boxes[0].nm='탄약 창고';S.base.boxes[1].nm='재료 창고';S.base.boxes[2].nm='무기 금고';infRebuild();setTimeout(()=>{closeBase();PAUSE=false;msg('🏷 보관함 이름표 · 보관함 창 → 🗄 줄 펼치기 → 이름 칸에 쓰거나 빠른 이름 누르기')},600);return}
- if(k=='dgrid'){scene9('deco');setTimeout(()=>{closeBase();give({wood:60,cloth:30,scrap:30});dStart('bench');msg('🪴 설치 화면 · 화면을 끌면 벤치만 움직여요 (캐릭터는 그대로) · 톡 누르면 그 자리로 · 거점 밖으로는 안 나가요')},500);return}
+ if(k=='dgrid'){scene9('deco');setTimeout(()=>{closeBase();give({wood:60,cloth:30,scrap:30});dStart('bench');msg('🪴 [↻ 돌리기]로 세로로도 · 설치 화면 · 화면을 끌면 벤치만 움직여요 (캐릭터는 그대로) · 톡 누르면 그 자리로 · 거점 밖으로는 안 나가요')},500);return}
  if(k=='box'){if(DUN)dunExit();S.dr=0;BPL=null;infGoto(0,0);Z=Z.filter(z=>z.npc);closeBase();PAUSE=false;S.t=600;S.base.boxes=[];S.base.stLv=2;S.base.st={a9mm:600,food:30,scrap:120,wood:60,cloth:20,elec:10};give({wood:200,scrap:300,steel:40,elec:30,cloth:30,tkn:60});
   const c=rqCore(),B=W0.base;[[-120,90],[-80,90],[-40,90]].forEach(([dx,dy],i)=>S.base.boxes.push({rx:c.x+c.w/2-B.ox+dx,ry:c.y+c.h-B.oy+dy,lv:[1,4,8][i]}));infRebuild();S.p.x=c.x+c.w/2-80;S.p.y=c.y+c.h+130;
   msg('🗄 보관함 4/10개 (나무 · 철제 · 금고) · 어느 것을 열어도 같은 물건 · 창에서 하나 더 만들기 · 확장');setTimeout(()=>openStash('base'),400);return}

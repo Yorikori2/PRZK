@@ -50,14 +50,19 @@ const DVAR={rug:[['#7a2a2a','#a83a3a','#d9a52a'],['#2a3a6a','#3a5a9a','#e8e2d6']
  flower:[['#ff6a8a','#ffd36a','#9ad0ff','#ffffff','#ff9a3a'],['#ffffff','#ffd0e0','#ffe9f0','#fff4c0','#ffffff'],['#c84a3a','#a83a8a','#e8c84a','#c84a3a','#ff6a5a']],
  catbed:[['#e8a050','#c87830'],['#3a3a3a','#1d1d1d'],['#e8e2d6','#a8a49a']],hammock:[['#c84a3a','#e8e2d6'],['#2a6aa8','#ffd36a'],['#2a8a5a','#e8e2d6']],mural:[0,1,2]};
 const dV=(o,k)=>{const L=DVAR[k];return L?L[(o&&o.v|0)%L.length]:null};
+const DROT=new Set(['rug','bench','table','flower','garden','lights','line','hammock','pond','candles']);
+const dDim=(t,r)=>{const D=DECO[t];if(!r||!DROT.has(t))return D;const E=D.slice();E[4]=D[5];E[5]=D[4];return E};
+/* a turned piece: draw it flat on a scrap canvas, then lay that canvas down turned a quarter */
+function dDrawRot(t,cx,cy,o){const D=DECO[t],PD=24,c=document.createElement('canvas');c.width=D[4]+PD*2;c.height=D[5]+PD*2;const x=c.getContext('2d'),old=g;g=x;try{dArt[t](PD,PD,D[4],D[5],o)}catch(e){}g=old;
+ g.save();g.translate(Math.round(cx),Math.round(cy));g.rotate(Math.PI/2);g.drawImage(c,-c.width/2|0,-c.height/2|0);g.restore()}
 const DLIST=Object.keys(DECO);Object.assign(FLAT,{deco_candles:1});Object.assign(FLAT,{deco_rug:1,deco_flower:1,deco_garden:1});
 const DTIER=[[5,'🛋 아늑함','거점에서 나와 동료 체력 회복 +0.5/초'],[12,'🏡 내 집 같음','매일 아침 생존자들이 음식 · 물을 나눠요'],[20,'🎉 활기참','의뢰 보상 +20% · 거점 동료 매일 경험치']];
 const DSTORE=()=>{S.base.deco=S.base.deco||[];return S.base.deco};
 const comfort=()=>DSTORE().reduce((a,d)=>a+(DECO[d.t]?DECO[d.t][3]:0),0);
 const dTier=()=>{const c=comfort();let n=0;for(const[t]of DTIER)if(c>=t)n++;return n};
 /* ---------- in the world ---------- */
-{const _bw=buildWorld;buildWorld=function(){const w=_bw.apply(this,arguments);try{if(!(typeof DUN!='undefined'&&DUN)&&S&&S.base&&W0.base){const B=W0.base;for(const d of S.base.deco||[]){const D=DECO[d.t];if(!D)continue;
-  W0.objs.push({t:'deco_'+d.t,x:B.ox+d.rx-D[4]/2,y:B.oy+d.ry-D[5]/2,w:D[4],h:D[5],did:d.id,v:d.v|0});
+{const _bw=buildWorld;buildWorld=function(){const w=_bw.apply(this,arguments);try{if(!(typeof DUN!='undefined'&&DUN)&&S&&S.base&&W0.base){const B=W0.base;for(const d of S.base.deco||[]){if(!DECO[d.t])continue;const D=dDim(d.t,d.r);
+  W0.objs.push({t:'deco_'+d.t,x:B.ox+d.rx-D[4]/2,y:B.oy+d.ry-D[5]/2,w:D[4],h:D[5],did:d.id,v:d.v|0,r:d.r|0});
   if(d.t=='fire')W0.lights.push([B.ox+d.rx,B.oy+d.ry,150,.9,'#ffb060']);if(d.t=='lights')W0.lights.push([B.ox+d.rx,B.oy+d.ry,110,.7,'#ffe0a0']);if(d.t=='candles')W0.lights.push([B.ox+d.rx,B.oy+d.ry,70,.6,'#ffc070'])}}}catch(e){}return w}}
 const dArt={
  plant:(x,y)=>{R('#5a3a24',x+3,y+9,10,7);R('#7a5034',x+3,y+9,10,2);R('#2f7a3a',x+2,y+1,12,9);R('#4aa04e',x+4,y,8,5);R('#6ac06a',x+5,y+1,3,2)},
@@ -99,22 +104,22 @@ Object.assign(dArt,{
  pond:(x,y,w,h)=>{const t=performance.now()/600;R('#6a6a5a',x,y,w,h);R('#2a5a8a',x+2,y+2,w-4,h-4);R('#3a7aaa',x+4,y+3,w-8,3);for(let i=0;i<3;i++){const fx2=x+8+((t*8+i*15)%(w-16)),fy=y+8+i*6;R('#ff8a3a',fx2|0,fy,4,2);R('#ffb070',fx2+3|0,fy,1,1)}R('#3a8a3a',x+6,y+h-10,6,4);R('#6ac06a',x+7,y+h-10,2,1);R('#3a8a3a',x+w-14,y+6,6,4);R('#ff8ac0',x+w-12,y+5,2,2)},
  tree:(x,y,w,h)=>{const t=performance.now()/900,s=Math.sin(t)*1.5|0;R('#5a3a24',x+w/2-2|0,y+18,5,h-18);R('#2f6a34',x+3+s,y+2,w-6,20);R('#3a8a3e',x+6+s,y,w-12,14);R('#4aa04e',x+9+s,y+2,8,6);R('#2a5a2e',x+4+s,y+16,w-8,4)},
  birdhouse:(x,y,w,h)=>{const t=performance.now()/500,b=((t|0)%4==0);R('#5a3a24',x+7,y+14,2,h-14);R('#a8744a',x+2,y+4,12,11);R('#7a2a2a',x,y,16,5);R('#1d1714',x+6,y+8,4,4);if(b){R('#5a8ec5',x+12,y+12,4,3);R('#e8a030',x+16,y+13,1,1)}}});
-for(const k of DLIST){const D=DECO[k];P('deco_'+k,D[1],null,o=>dArt[k](o.x,o.y,o.w,o.h,o),D[6])}
+for(const k of DLIST){const D=DECO[k];P('deco_'+k,D[1],null,o=>o.r&&DROT.has(k)?dDrawRot(k,o.x+o.w/2,o.y+o.h/2,o):dArt[k](o.x,o.y,o.w,o.h,o),D[6])}
 /* ---------- placing ---------- */
 let DPL=null;/* {t, move:id} */
 function dSpot(){const p=S.p,f=Math.hypot(p.fx||0,p.fy||0)||1;return[p.x+(p.fx||0)/f*46,p.y+(p.fy||1)/f*46]}
-function dOk(){if(!DPL)return'';const[x,y]=dSpot(),D=DECO[DPL.t];if(!(typeof inBase=='function'&&inBase(x,y)))return'거점 안에만 놓을 수 있어요';if(D[6]&&blocker(x,y,Math.min(D[4],D[5])/2))return'여기는 막혀 있어요';
+function dOk(){if(!DPL)return'';const[x,y]=dSpot(),D=dDim(DPL.t,DPL.r);if(!(typeof inBase=='function'&&inBase(x,y)))return'거점 안에만 놓을 수 있어요';if(D[6]&&blocker(x,y,Math.min(D[4],D[5])/2))return'여기는 막혀 있어요';
  for(const o of W0.objs)if(o.did!=null&&o.did!==DPL.move&&Math.abs(o.x+o.w/2-x)<(o.w+D[4])/2&&Math.abs(o.y+o.h/2-y)<(o.h+D[5])/2)return'다른 장식과 겹쳐요';
  if(!DPL.move&&!dHave(D[2]))return'재료가 부족해요';return''}
 function dHave(c){const p=S.p;return Object.entries(c).every(([k,v])=>((p.inv[k]|0)+((S.base.st||{})[k]|0))>=v)}
 function dPay(c,back){const p=S.p;if(back){for(const k in c){const n=Math.floor(c[k]/2);if(n)invAdd(p,k,n)}return}for(const k in c){const a=Math.min(p.inv[k]|0,c[k]);if(a)invTake(p,k,a);if(c[k]-a)S.base.st[k]-=c[k]-a}}
-function dStart(t,move){DPL={t,move:move||null};closeBase();PAUSE=false;msg('🪴 '+DECO[t][1]+(move?' 옮기기':' 놓기')+' · 원하는 곳으로 걸어가서 [설치] · 바라보는 쪽 앞에 놓여요')}
-function dDo(){const bad=dOk();if(bad)return msg('🪴 '+bad);const[x,y]=dSpot(),B=W0.base,D=DECO[DPL.t];if(DPL.move){const d=DSTORE().find(q=>q.id==DPL.move);if(d){d.rx=Math.round(x-B.ox);d.ry=Math.round(y-B.oy)}}
- else{dPay(D[2]);S.base.decoN=(S.base.decoN||0)+1;DSTORE().push({t:DPL.t,rx:Math.round(x-B.ox),ry:Math.round(y-B.oy),id:S.base.decoN})}
+function dStart(t,move){const od=move?DSTORE().find(q=>q.id==move):null;DPL={t,move:move||null,r:od?od.r|0:0};closeBase();PAUSE=false;msg('🪴 '+DECO[t][1]+(move?' 옮기기':' 놓기')+' · 원하는 곳으로 걸어가서 [설치] · 바라보는 쪽 앞에 놓여요')}
+function dDo(){const bad=dOk();if(bad)return msg('🪴 '+bad);const[x,y]=dSpot(),B=W0.base,D=DECO[DPL.t];if(DPL.move){const d=DSTORE().find(q=>q.id==DPL.move);if(d){d.rx=Math.round(x-B.ox);d.ry=Math.round(y-B.oy);d.r=DPL.r?1:0}}
+ else{dPay(D[2]);S.base.decoN=(S.base.decoN||0)+1;DSTORE().push({t:DPL.t,rx:Math.round(x-B.ox),ry:Math.round(y-B.oy),id:S.base.decoN,r:DPL.r?1:0})}
  const t0=dTier();DPL=null;infRebuild();const t1=dTier();msg('🪴 '+D[1]+' 설치 · 아늑함 '+comfort()+(t1>t0?' · '+DTIER[t1-1][1]+'! '+DTIER[t1-1][2]:''))}
 function dRemove(o){const i=DSTORE().findIndex(q=>q.id==o.did);if(i<0)return;const d=DSTORE().splice(i,1)[0];dPay(DECO[d.t][2],true);infRebuild();msg('🪴 '+DECO[d.t][1]+' 치움 · 재료 절반 돌려받음 · 아늑함 '+comfort())}
 /* the ghost where it will go (sharp overlay) */
-if(typeof OVL!='undefined')OVL.push((g,sx,sy,k)=>{if(!DPL||!S||!S.p)return;const[x,y]=dSpot(),D=DECO[DPL.t],bad=dOk();g.save();g.fillStyle=bad?'#ff6a5a33':'#7fd07f33';g.strokeStyle=bad?'#ff6a5acc':'#7fd07fcc';g.lineWidth=2;g.setLineDash([5,4]);
+if(typeof OVL!='undefined')OVL.push((g,sx,sy,k)=>{if(!DPL||!S||!S.p)return;const[x,y]=dSpot(),D=dDim(DPL.t,DPL.r),bad=dOk();g.save();g.fillStyle=bad?'#ff6a5a33':'#7fd07f33';g.strokeStyle=bad?'#ff6a5acc':'#7fd07fcc';g.lineWidth=2;g.setLineDash([5,4]);
  g.fillRect(sx(x-D[4]/2),sy(y-D[5]/2),D[4]*k,D[5]*k);g.strokeRect(sx(x-D[4]/2),sy(y-D[5]/2),D[4]*k,D[5]*k);g.setLineDash([]);g.font='600 13px system-ui,sans-serif';g.textAlign='center';g.lineWidth=3;g.strokeStyle='#000a';const tx=D[0]+' '+(bad||D[1]+' 여기에');g.strokeText(tx,sx(x),sy(y-D[5]/2)-8);g.fillStyle='#fff';g.fillText(tx,sx(x),sy(y-D[5]/2)-8);g.restore()});
 /* ---------- [상호작용] ---------- */
 {const _c=dmCtx;dmCtx=function(){if(DPL){const bad=dOk(),D=DECO[DPL.t];return[{t:'✅ '+D[1]+' 설치'+(bad?' · '+bad:''),f:dDo,off:!!bad,big:1},{t:'✖ 취소',f:()=>{DPL=null;msg('🪴 취소')},sm:1}]}
