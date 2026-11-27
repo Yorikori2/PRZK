@@ -104,16 +104,31 @@ let mvBreathT=0;
    에너지 음료: 기력 +60 · 30초 동안 달려도 기력이 줄지 않아요 (🔋 활력)   (마트 · 쇼핑몰 · 학교 · 군부대 · 체육관 같은 곳에서 가끔) */
 {const add=(id,nm,rar,wt,ds,draw)=>{if(I_BY[id])return;const it=[id,nm,'c',rar,wt,ds];ITEMS.push(it);I_BY[id]=it;IC[id]=draw};
  add('coffee','캔커피','c',.2,'기력 +35 · 목마름 +10 · 달리기 전에 한 캔',()=>{R('#1d1714',7,4,10,17);R('#6a3a24',8,5,8,15);R('#8a5034',8,5,8,3);R('#c9ccd0',8,4,8,2);R('#e8e2d6',9,10,6,5);R('#6a3a24',10,11,4,3);R('#a8744a',9,17,6,1)});
- add('energy','에너지 음료','u',.3,'기력 +60 · 30초 동안 달려도 기력이 줄지 않아요 (🔋 활력)',()=>{R('#1d1714',7,2,10,20);R('#1f2a3a',8,3,8,18);R('#c9ccd0',8,2,8,2);R('#7fe07f',8,8,8,3);R('#ffd36a',10,12,4,6);R('#1f2a3a',11,13,2,4);R('#7fe07f',9,19,6,1)})}
+ add('energy','에너지 음료','u',.3,'기력 +40 · 20초 동안 달려도 지치지 않아요 (🔋 활력) · 마시면 목마름 −15 · 끝나면 15초 반동 (기력 회복 절반 · 달리기 소모 1.5배)',()=>{R('#1d1714',7,2,10,20);R('#1f2a3a',8,3,8,18);R('#c9ccd0',8,2,8,2);R('#7fe07f',8,8,8,3);R('#ffd36a',10,12,4,6);R('#1f2a3a',11,13,2,4);R('#7fe07f',9,19,6,1)})}
 {const _u2=use2;use2=function(k){if(k!='coffee'&&k!='energy')return _u2.apply(this,arguments);const p=S.p;if(!has(p,k))return msg(NM2(k)+' 없음');invTake(p,k,1);
   if(k=='coffee'){p.st=Math.min(100,p.st+35);p.water=Math.min(100,(p.water||0)+10);msg('☕ 캔커피 · 기력 +35')}
-  else{p.st=Math.min(100,p.st+60);p.boostT=30;msg('🔋 에너지 음료 · 기력 +60 · 30초 동안 달려도 지치지 않아요')}
+  else{if(p.crashT>0){p.hp=Math.max(1,p.hp-8);msg('💓 반동 중에 또 마셨어요 · 심장이 두근거려요 (체력 −8)')}p.st=Math.min(100,p.st+40);p.boostT=20;p.crashT=0;p.water=Math.max(0,(p.water||0)-15);msg('🔋 에너지 음료 · 기력 +40 · 20초 활력 · 목마름 −15')}
   if(mvTired&&p.st>=ST_BACK){mvTired=false;mvLayout()}if(typeof hud2=='function')hud2()}}
 /* while 활력 lasts, running costs nothing (the drain above is given back) */
-{const _gu=gearUpd;gearUpd=function(dt){const p=S&&S.p,st0=p?p.st:0;_gu(dt);if(!p||PAUSE||!run)return;if(p.boostT>0){p.boostT-=dt;if(p.st<st0)p.st=st0;if(p.boostT<=0){p.boostT=0;msg('🔋 활력이 끝났어요')}}const o=$('mvO');if(o)o.classList.toggle('boost',p.boostT>0)}}
-document.head.insertAdjacentHTML('beforeend','<style>#mvO.boost{box-shadow:0 0 0 3px #7fe07f88,0 0 14px #7fe07f88!important}#mvO.boost .stb i{background:#7fe07f!important}</style>');
+{const _gu=gearUpd;gearUpd=function(dt){const p=S&&S.p,st0=p?p.st:0;_gu(dt);if(!p||PAUSE||!run)return;const o0=$('mvO');if(p.boostT>0){p.boostT-=dt;if(p.st<st0)p.st=st0;if(p.boostT<=0){p.boostT=0;p.crashT=15;msg('😵 활력이 끝났어요 · 15초 반동: 기력 회복 절반 · 달리기 소모 1.5배')}}
+  if(p.crashT>0){p.crashT-=dt;if(p.st>st0)p.st=st0+(p.st-st0)*.5;else if(p.st<st0&&p.mv&&mvEff()=='run')p.st=Math.max(0,st0-(st0-p.st)*1.5);if(p.crashT<=0){p.crashT=0;msg('반동이 끝났어요')}}if(o0)o0.classList.toggle('crash',p.crashT>0);const o=$('mvO');if(o)o.classList.toggle('boost',p.boostT>0)}}
+document.head.insertAdjacentHTML('beforeend','<style>#mvO.crash{box-shadow:0 0 0 3px #b07aff88!important}#mvO.crash .stb i{background:#b07aff!important}#mvO.boost{box-shadow:0 0 0 3px #7fe07f88,0 0 14px #7fe07f88!important}#mvO.boost .stb i{background:#7fe07f!important}</style>');
 /* found while searching */
 {const T={mart:[.28,.12],mall:[.22,.1],houses:[.1,.03],apt:[.1,.03],police:[.12,.04],school:[.06,.08],mil:[.04,.12],gunshop:[.08,.05],fire:[.08,.06],ware:[.06,.04]};
  const _sr=s3SearchRoll;s3SearchRoll=function(o,kind,tier,r){const pid=_sr.apply(this,arguments);try{if(typeof DUN!='undefined'&&DUN)return pid;const c=T[kind];if(!c)return pid;if(Math.random()<c[0])r.coffee=(r.coffee|0)+1;if(Math.random()<c[1])r.energy=(r.energy|0)+1}catch(e){}return pid}}
 /* the merchant sometimes has them */
 if(typeof STK_ID!='undefined')Object.assign(STK_ID,{coffee:10,energy:10});
+
+/* ---------- coffee machine at the base: 원두 1 + 물병 1 → 캔커피 2 ----------
+   원두 (coffee beans) only turn up in convenience stores (마트) and the mall. The machine is a base decoration (🛋 휴식 theme). */
+if(!I_BY.beans){const it=['beans','원두','m','u',.2,'커피 머신에 넣으면 캔커피 2개 (물병 1개 필요) · 편의점 · 쇼핑몰에서 나와요'];ITEMS.push(it);I_BY.beans=it;IC.beans=()=>{R('#1d1714',5,6,14,13);R('#8a5a34',6,7,12,11);R('#a8744a',6,7,12,2);for(const[x,y]of[[8,10],[12,9],[14,13],[9,14],[12,15]]){R('#3a2010',x,y,3,2);R('#5a3420',x,y,1,1)}}}
+if(typeof STK_ID!='undefined')STK_ID.beans=20;
+{const _sr=s3SearchRoll;s3SearchRoll=function(o,kind,tier,r){const pid=_sr.apply(this,arguments);try{if(!(typeof DUN!='undefined'&&DUN)&&(kind=='mart'||kind=='mall')&&Math.random()<(kind=='mart'?.22:.15))r.beans=(r.beans|0)+1}catch(e){}return pid}}
+if(typeof DECO!='undefined'&&!DECO.coffeem){DECO.coffeem=['☕','커피 머신',{elec:4,scrap:8,steel:1},2,26,22,true,'원두 1 + 물병 1 → 캔커피 2 · 앞에서 [상호작용]'];DLIST.push('coffeem');if(DTH&&DTH.rest)DTH.rest[2].push('coffeem');
+ dArt.coffeem=(x,y,w,h)=>{const t=performance.now()/400;R('#1d1714',x,y-8,w,h+8);R('#5a6068',x+1,y-7,w-2,h+6);R('#7a8088',x+1,y-7,w-2,2);R('#2a2c30',x+5,y+2,w-10,8);R('#c9ccd0',x+6,y+3,w-12,1);R('#ff6a5a',x+w-5,y-4,2,2);R('#3a2010',x+9,y+6,8,4);R('#e8e2d6',x+8,y+5,10,1);
+  for(let i=0;i<2;i++){const k=(t+i*.5)%1;g.globalAlpha=.5*(1-k);R('#e8e2d6',x+11+i*3,y-12-k*10|0,2,3);g.globalAlpha=1}};
+ P('deco_coffeem','커피 머신',null,o=>dArt.coffeem(o.x,o.y,o.w,o.h,o),true)}
+function brew(){const p=S.p,st=S.base.st||{},have=k=>(p.inv[k]|0)+(st[k]|0);if(have('beans')<1)return msg('☕ 원두가 없어요 · 편의점 · 쇼핑몰을 수색해 보세요');if(have('water')<1)return msg('☕ 물병이 필요해요');
+ for(const k of['beans','water']){if(p.inv[k]>0)invTake(p,k,1);else st[k]--}invAdd(p,'coffee',2);msg('☕ 커피를 내렸어요 · 캔커피 +2')}
+{const _c=dmCtx;dmCtx=function(){const B=_c();try{if(!S||!run||S.dr||typeof DUN!='undefined'&&DUN)return B;const p=S.p;for(const o of W0.objs)if(o.t=='deco_coffeem'&&Math.hypot(o.x+o.w/2-p.x,o.y+o.h/2-p.y)<50){const st=S.base.st||{},n=(p.inv.beans|0)+(st.beans|0);B.unshift({t:'☕ 커피 내리기 · 원두 '+n+'개 (원두 1 + 물병 1 → 캔커피 2)',f:brew,off:!n,big:1});break}}catch(e){}return B}}
+if(typeof IAW!='undefined')IAW.unshift([/커피 내리기/,'커피']);
