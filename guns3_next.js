@@ -25,7 +25,7 @@ let NSTK=false;
 function stockAR(x,y,P){if(NSTK)return;R(MT[1],x,y+2,7,4);R(MT[2],x,y+2,7,1);bx3(x+6,y,18,10,P);R(P[0],x+8,y+3,12,1);R(P[0],x+8,y+6,12,1);R(K0,x+23,y,2,11)}
 function stockWood(x,y,P,len,drop){if(NSTK)return;const L=len||28;for(let i=0;i<L;i++){const t=Math.min(11,6+Math.floor(i/4)),dy=Math.floor(i*(drop||1)/7);R(P[1],x+i,y+dy,1,t);R(P[2],x+i,y+dy,1,1);R(P[0],x+i,y+dy+t-1,1,1)}R('#2a1a10',x+L-2,y+Math.floor(L*(drop||1)/7),3,11)}
 function stockWire(x,y){if(NSTK)return;R(MT[1],x,y,22,2);R(MT[1],x,y+7,20,2);R(MT[1],x+20,y,3,11);R(MT[3],x,y,22,1)}
-function stockFold(x,y){if(NSTK)return;R(MT[0],x,y+2,4,5);R(MT[1],x+2,y+3,16,2);R(MT[2],x+2,y+3,16,1)}
+function stockFold(x,y){if(NSTK)return;/* a folding stock, unfolded: hinge · top and bottom struts · butt plate */R(MT[0],x,y+1,4,8);R(MT[2],x,y+1,4,1);R(PL[1],x+3,y+1,18,3);R(PL[2],x+3,y+1,18,1);ln(x+4,y+8,x+18,y+5,PL[1]);R(PL[1],x+18,y,4,11);R(PL[2],x+18,y,4,1);R(K0,x+21,y,2,11)}
 /* ---------- shape families ---------- */
 const GF={
  /* slide pistol: o.L slide length · o.ext long mag · o.comp ported · o.hammer · o.two (two-tone slide) · o.fr frame palette */
@@ -57,9 +57,11 @@ const GF={
  pump(o,F){const bl=o.bl??8;barrel(bl,60,17,3);R('#e8e2d6',bl+1,16,1,1);R(MT[0],12,21,48,3);R(MT[1],12,21,48,1);bx3(26,20,20,6,F);slots(26,21,20,F,4);bx3(58,15,20,11,MT);R(MT[3],59,15,18,1);R(K0,62,18,8,3);guard(66,26,10);
   if(o.pg){vgrip(80,26,F,11)}else stockWood(78,17,F,30,1);if(o.side)for(let i=0;i<4;i++)R('#c84a3a',62+i*3,22,2,3);
   return{side:[36,25],under:[36,27],optic:[66,15],muzzle:[bl,18],stock:o.pg?null:[78,17,F]}},
- dbl(o,F){const bl=o.bl??6;barrel(bl,58,16,3);barrel(bl,58,19,3);R(MT[3],bl,16,4,1);bx3(30,21,26,6,F);bx3(58,15,14,11,MT);R('#c9a42a',62,18,6,1);R(MT[0],70,13,3,3);guard(64,26,8);
-  if(o.pg)vgrip(74,26,F,11);else stockWood(72,17,F,34,1);
-  return{side:[40,26],under:[40,27],optic:[62,15],muzzle:[bl,17],stock:o.pg?null:[72,17,F]}},
+ dbl(o,F){/* over-under double barrel */const bl=o.bl??6;R(MT[0],bl,14,58-bl,3);R(MT[2],bl,14,58-bl,1);R(K0,bl,17,58-bl,1);R(MT[0],bl,18,58-bl,3);R(MT[1],bl,18,58-bl,1);R(MT[3],bl,14,3,1);R(MT[3],bl,18,3,1);
+  /* top rib + bead */R(MT[1],bl+2,13,56-bl,1);R('#e8e2d6',bl+1,12,1,1);/* wooden forend under the barrels */if(58-bl>20){for(let i=0;i<22;i++){const t=i<3?3+i:6;R(F[1],34+i,21,1,t)}R(F[2],34,21,22,1);R(F[0],36,26,18,1)}
+  /* receiver (silver, engraved) + top lever + hammers */bx3(58,13,14,13,['#6e7680','#a8b0b8','#c9d0d6','#e8ecf0']);for(let i=0;i<4;i++)R('#8a929a',60+i*3,17+(i%2),2,1);R('#c9a42a',61,22,7,1);R(MT[0],68,10,5,3);R(MT[0],70,12,2,2);
+  guard(62,26,9);/* pistol-grip stock */if(o.pg)vgrip(74,26,F,12);else{for(let i=0;i<34;i++){const top=13+Math.floor(i/6),bot=i<6?26:i<12?28-Math.floor((i-6)/2):25+Math.floor(i/5);R(F[1],72+i,top,1,Math.max(6,bot-top));R(F[2],72+i,top,1,1)}for(let j=0;j<4;j++)R(F[0],73+j*2,26+j,6,1);R('#2a1a10',104,18,3,13)}
+  return{side:[40,24],under:[40,26],optic:[62,13],muzzle:[bl,16],stock:o.pg?null:[72,15,F]}},
  sbox(o,F){/* AK-style magazine shotgun (Saiga · AA-12) */barrel(10,40,19,3);R(MT[0],14,16,24,2);if(o.big){bx3(30,15,50,13,F);slots(32,18,26,F,6)}else{bx3(30,17,14,9,F);slots(30,19,14,F,4);bx3(44,15,30,11,MT);R(MT[3],45,15,28,1)}
   if(o.drum)drum(56,34,7,MT);else magS(52,26,MT,14,9);vgrip(74,26,F,11);guard(66,26,8);if(o.big)stockAR(82,16,F);else stockWood(74,17,F,28,1);
   return{side:[34,25],under:[34,27],optic:[58,14],muzzle:[10,20],stock:[80,16,F]}},
@@ -70,7 +72,7 @@ const GF={
   if(o.hg=='round'){bx3(34,17,24,9,F);for(let x=36;x<56;x+=2)R(F[0],x,18,1,7)}else if(o.hg=='rail'){bx3(34,17,24,10,F);rail(35,16,22);rail(35,26,22);slots(34,20,24,F,3)}else{bx3(34,17,24,10,F);slots(34,20,24,F,2);slots(34,23,24,F,1);rail(35,16,22)}
   bx3(56,15,26,10,MT);R(MT[3],57,15,24,1);R(K0,62,18,9,3);R(MT[2],80,17,3,2);if(o.ch){R(MT[1],58,10,18,2);R(MT[1],58,10,2,5);R(MT[1],74,10,2,5);R(MT[3],58,10,18,1)}else rail(57,14,24);
   if(o.mag=='s')magS(58,25,MT,15,7);else if(o.mag=='p'){magS(58,25,PL,15,8)}else magC(58,25,MT,15);vgrip(75,25,F,12);guard(66,27,9);
-  const st=NSTK?'none':o.st||'ar';if(st=='ar'){R(MT[1],82,18,8,4);R(MT[2],82,18,8,1);bx3(88,16,20,11,F);R(F[0],90,19,14,1);R(F[0],90,23,14,1);R(K0,106,16,3,12)}else if(st=='fixed'){bx3(82,16,24,11,F);R(F[0],84,22,18,1);R(K0,104,16,3,13)}else if(st=='side'){bx3(82,17,6,8,F);R(F[1],86,19,18,3);R(F[1],102,17,4,10)}else if(st=='fold')stockFold(82,17);
+  const st=NSTK?'none':o.st||'ar';if(st=='ar'){R(MT[1],82,18,8,4);R(MT[2],82,18,8,1);bx3(88,16,20,11,F);R(F[0],90,19,14,1);R(F[0],90,23,14,1);R(K0,106,16,3,12)}else if(st=='fixed'){bx3(82,16,24,11,F);R(F[0],84,22,18,1);R(K0,104,16,3,13)}else if(st=='side'){/* side-folding skeleton stock, open */R(MT[1],82,18,6,4);R(MT[2],82,18,6,1);bx3(86,16,6,10,F);R(F[1],90,16,14,3);R(F[2],90,16,14,1);ln(91,25,103,19,F[1]);R(F[1],102,16,5,11);R(F[2],102,16,5,1);R(K0,106,16,2,11)}else if(st=='fold')stockFold(82,17);
   return{side:[42,25],under:[44,27],optic:[66,14],muzzle:[bl,22],stock:[86,16,F]}},
  ak(o,F){const bl=o.bl??12;barrel(bl,36,21,3);R(MT[1],18,17,20,3);R(MT[2],18,17,20,1);R(MT[0],bl+2,15,2,6);/* wood lower + upper handguard */bx3(36,19,20,8,WD);bx3(38,16,16,3,WD);
   bx3(56,15,24,11,MT);R(MT[3],57,15,22,1);R(MT[0],58,13,20,2);R(MT[2],70,18,6,2);magC(60,26,o.mag=='pl'?['#5a2a1a','#7a3a22','#9a5030']:MT,17);vgrip(74,26,o.pg||WD,12);guard(66,27,8);
@@ -114,8 +116,14 @@ const GF={
   return{side:[cx,30],under:[cx,32],optic:[cx+2,14],muzzle:[cx-41,23],stock:null}},
  xbow(o,F){bx3(30,19,70,7,F);R(F[0],60,26,4,9);vgrip(66,26,F,10);/* prod */R(MT[1],26,6,4,34);R(MT[2],26,6,2,34);ln(28,6,52,19,'#e8e2d6');ln(28,40,52,26,'#e8e2d6');R('#8a6a3a',22,21,40,2);R('#c9ccd0',18,20,5,4);R(K0,96,18,4,10);
   return{side:[40,26],under:[40,27],optic:[60,17],muzzle:[18,22],stock:null}},
- flamer(o,F){barrel(8,40,19,4);R('#c84a3a',8,18,4,6);bx3(40,15,30,11,MT);bx3(44,26,26,9,['#7a2a1a','#a83a2a','#c85a3a']);R('#e8c84a',50,28,12,2);vgrip(74,26,PL,11);guard(66,26,8);R(MT[1],38,24,4,6);
-  return{side:[24,24],under:[30,24],optic:[56,14],muzzle:[8,21],stock:null}},
+ flamer(o,F){/* nozzle with a pilot light · long wand with heat-shield vents · two grips · fuel tank under · hose to the back */
+  const t=performance.now()/120;R(MT[0],0,17,10,7);R(MT[2],0,17,10,1);R(K0,0,19,2,3);R('#5aa8ff',-4,19,3,2);g.globalAlpha=.7+.3*Math.sin(t);R('#ffb030',-5,18,2,4);R('#ffe9a0',-3,19,1,2);g.globalAlpha=1;
+  bx3(10,16,50,8,MT);for(let x=14;x<56;x+=5)R(K0,x,18,3,3);R(MT[3],12,16,46,1);
+  /* front grip */bx3(28,24,5,11,PL);/* body + rear grip + trigger */bx3(60,14,22,12,['#6a2018','#8a2a1a','#b04030','#cc5a40']);R('#e8c84a',62,17,18,2);R(K0,64,21,4,2);vgrip(78,26,PL,12);guard(70,26,8);
+  /* fuel tank (rounded) + hazard stripe + gauge */for(let i=0;i<34;i++){const e=i<3||i>30?2:0;R('#8a2a1a',38+i,28+e,1,9-e*2);R('#c84a3a',38+i,28+e,1,1)}for(let i=40;i<70;i+=6)R('#e8c84a',i,32,3,2);R('#e8e2d6',64,29,4,4);R(K0,65,30,2,1);
+  /* hose */for(let i=0;i<14;i++)R('#2a2c30',72+i,36-Math.round(Math.sin(i/13*Math.PI)*6),2,2);R('#2a2c30',85,26,2,10);
+  /* shoulder rest */bx3(84,16,16,9,PL);R(K0,98,15,3,11);
+  return{side:[24,23],under:[30,24],optic:[66,13],muzzle:[-5,20],stock:null}},
  tool(o,F){const C=o.c;bx3(40,14,34,11,C);R(C[3],41,14,32,1);R(K0,42,17,4,4);vgrip(68,25,o.g||PL,12);guard(58,25,9);if(o.k=='nail'){R(MT[1],34,16,6,6);magS(44,25,MT,10,12);for(let i=46;i<56;i+=2)R('#c9ccd0',i,26,1,8)}if(o.k=='flare'){barrel(26,40,17,6);R('#ff8a3a',26,18,3,3)}if(o.k=='taser'){R('#2a2a2a',34,16,6,7);R('#5aa8ff',33,17,1,2);R('#5aa8ff',33,21,1,2)}
   return{side:[46,24],under:[46,26],optic:[56,14],muzzle:[34,19],stock:null}}};
 /* ---------- every gun: [family, options, furniture] ---------- */
