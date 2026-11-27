@@ -96,9 +96,9 @@ let mvBreathT=0;
   if(on&&!PAUSE){mvBreathT-=dt;if(mvBreathT<=0){mvBreathT=st<8?.9:1.4;try{sfx((A,t)=>{if(typeof nz=='function'){nz(A,t,{f:700,q:.6,v:.035,d:.32,type:'bandpass'});nz(A,t+.45,{f:500,q:.6,v:.028,d:.4,type:'bandpass'})}})}catch(e){}}}else mvBreathT=0}}
 /* ---------- 3) companions keep your pace: while you walk (or are worn out) the ones following you walk too ---------- */
 {const _gu=gearUpd;gearUpd=function(dt){if(!S||!S.inf||PAUSE||!run||S.dr)return _gu(dt);const before=new Map();for(const z of Z)if(z.npc=='ally')before.set(z,[z.x,z.y]);_gu(dt);
-  if(mvEff()!='walk')return;const p=S.p,lim=110*MV_WALK*(typeof speedMul=='function'?speedMul(p):1)*1.08*dt;
+  const p=S.p,lim=110*(mvEff()=='walk'?MV_WALK:1)*(typeof speedMul=='function'?speedMul(p):1)*.9*dt;/* a little slower than you, walking or running */
   for(const[z,[x0,y0]]of before){const a=typeof aById=='function'&&aById(z.ally);if(!a||a.st!='follow')continue;const near=Z.some(q=>!q.npc&&q.hp>0&&Math.hypot(q.x-z.x,q.y-z.y)<200);if(near)continue;
-   if(Math.hypot(p.x-z.x,p.y-z.y)>220)continue;/* far behind: let them catch up */const dx=z.x-x0,dy=z.y-y0,d=Math.hypot(dx,dy);if(d>lim){z.x=x0+dx/d*lim;z.y=y0+dy/d*lim}}}}
+   const far=Math.hypot(p.x-z.x,p.y-z.y);if(far>260)continue;/* very far: free to catch up */const L2=lim*(far>80?1.25:1);/* behind the slot: a bit faster than you, at the slot: a bit slower */const dx=z.x-x0,dy=z.y-y0,d=Math.hypot(dx,dy);if(d>L2){z.x=x0+dx/d*L2;z.y=y0+dy/d*L2}}}}
 /* ---------- drinks that give 기력 back ----------
    캔커피: 기력 +35 · 목마름 +10        (마트 · 편의점 · 쇼핑몰 · 주택 · 아파트 · 경찰서)
    에너지 음료: 기력 +60 · 30초 동안 달려도 기력이 줄지 않아요 (🔋 활력)   (마트 · 쇼핑몰 · 학교 · 군부대 · 체육관 같은 곳에서 가끔) */
@@ -132,3 +132,6 @@ function brew(){const p=S.p,st=S.base.st||{},have=k=>(p.inv[k]|0)+(st[k]|0);if(h
  for(const k of['beans','water']){if(p.inv[k]>0)invTake(p,k,1);else st[k]--}invAdd(p,'coffee',2);msg('☕ 커피를 내렸어요 · 캔커피 +2')}
 {const _c=dmCtx;dmCtx=function(){const B=_c();try{if(!S||!run||S.dr||typeof DUN!='undefined'&&DUN)return B;const p=S.p;for(const o of W0.objs)if(o.t=='deco_coffeem'&&Math.hypot(o.x+o.w/2-p.x,o.y+o.h/2-p.y)<50){const st=S.base.st||{},n=(p.inv.beans|0)+(st.beans|0);B.unshift({t:'☕ 커피 내리기 · 원두 '+n+'개 (원두 1 + 물병 1 → 캔커피 2)',f:brew,off:!n,big:1});break}}catch(e){}return B}}
 if(typeof IAW!='undefined')IAW.unshift([/커피 내리기/,'커피']);
+
+/* companions keep a little room between each other (no stacking on one spot) */
+{const _gu=gearUpd;gearUpd=function(dt){_gu(dt);if(!S||!S.inf||PAUSE||!run)return;const A=Z.filter(z=>z.npc=='ally');for(let i=0;i<A.length;i++)for(let j=i+1;j<A.length;j++){const a=A[i],b=A[j],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||.01;if(d<30){const push=(30-d)/2*Math.min(1,dt*8),ux=dx/d,uy=dy/d;if(typeof blocker!='function'||!blocker(a.x-ux*push,a.y-uy*push,6)){a.x-=ux*push;a.y-=uy*push}if(typeof blocker!='function'||!blocker(b.x+ux*push,b.y+uy*push,6)){b.x+=ux*push;b.y+=uy*push}}}}}

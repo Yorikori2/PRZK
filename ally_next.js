@@ -89,7 +89,7 @@ function aThink(a,z,dt){const p=S.p,R0=AROLE[a.role],dp=Math.hypot(p.x-z.x,p.y-z
  if(a.st=='down'){a.downT-=dt;if(a.downT<=0){a.st='hurt';a.hurtDay=S.day;a.hp=Math.round(aMhp(a)*.5);msg('🩹 '+a.nm+'이(가) 거점으로 피신했어요 · 하루 쉬어야 해요')}return}
  const H=hostiles(),scared=tr(a,'coward')&&a.hp<aMhp(a)*.3;let tgt=null,bd=1e9;const scan=a.st=='follow'?Math.max(RG,260):a.job=='guard'?Math.max(RG,320):RG;
  for(const q of H){const d=Math.hypot(q.x-z.x,q.y-z.y);if(d<scan&&d<bd&&(typeof rSee!='function'||rSee(z,q))){bd=d;tgt=q}}
- /* move */let gx=null,gy=null;if(a.st=='follow'){const i=ALLY().filter(q=>q.st=='follow').indexOf(a),bx=p.x-(p.fx||0)*(scared?30:50)+(i?28:-28),by=p.y-(p.fy||1)*(scared?30:50);
+ /* move */let gx=null,gy=null;if(a.st=='follow'){const i=ALLY().filter(q=>q.st=='follow').indexOf(a),fl=Math.hypot(p.fx||0,p.fy||1)||1,ux=(p.fx||0)/fl,uy=(p.fy||1)/fl,sd=(i%2?34:-34)*(1+(i>>1)),bk=(scared?30:52)+(i>>1)*26,bx=p.x-ux*bk-uy*sd,by=p.y-uy*bk+ux*sd;
    if(RG<60&&tgt&&dp<260&&!scared){gx=tgt.x;gy=tgt.y}else if(Math.hypot(bx-z.x,by-z.y)>36){gx=bx;gy=by}}
  if(gx!=null){const dx=gx-z.x,dy=gy-z.y,d=Math.hypot(dx,dy)||1,sp=SP*(dp>320||scared?1.7:1);if(d>(RG<60&&tgt?RG-6:8)){mv(z,dx/d*sp*dt,dy/d*sp*dt,7,'p');z.mv=1;z.fx=dx;z.fy=dy}}
  z.walk=z.mv?.15:Math.max(0,(z.walk||0)-dt);if(z.mv)z.ph=(z.ph||0)+dt*SP/18;
@@ -202,7 +202,7 @@ function aStashFill(a,z,quiet){const id=aAmmoId(a);if(!id||!S.base||!S.base.st)r
 function aBubbles(){if(!S||!S.inf||typeof ctx=='undefined')return;const c=ctx,k=zoom*dpr;let any=false;
  /* tags (name line + bubble if any) of companions standing close together are stacked so they never overlap */
  {const L=[];for(const z of Z){if(z.npc!='ally')continue;const a=aById(z.ally);if(!a)continue;const bub=a.st!='down'&&(z.sayT>0&&z.say||aAmmoId(a)&&aOut(a));const Y=(z.y-camY)*k,bot=Y-54*k+8*dpr,top=bub?Y-76*k-28*dpr:a.st=='down'?Y-54*k-9*dpr:Y-64*k-8*dpr;L.push({z,X:(z.x-camX)*k,b:bot,h:bot-top})}
-  L.sort((p,q)=>q.b-p.b);const pl=[];for(const t of L){let dy=0;for(let n=0;n<8;n++){let hit=null;for(const u of pl)if(Math.abs(u.X-t.X)<100*dpr&&t.b+dy>u.b+u.dy-u.h&&t.b+dy-t.h<u.b+u.dy){hit=u;break}if(!hit)break;dy=hit.b+hit.dy-hit.h-t.b-2*dpr}t.dy=dy;t.z._tdy=dy;pl.push(t)}}
+  L.sort((p,q)=>(p.z.ally|0)-(q.z.ally|0));const pl=[];for(const t of L){let dy=0;for(let n=0;n<8;n++){let hit=null;for(const u of pl)if(Math.abs(u.X-t.X)<100*dpr&&t.b+dy>u.b+u.dy-u.h&&t.b+dy-t.h<u.b+u.dy){hit=u;break}if(!hit)break;dy=hit.b+hit.dy-hit.h-t.b-2*dpr}const pv=t.z._tdy||0;t.z._tdy=Math.abs(dy-pv)<1?dy:pv+(dy-pv)*.18;t.dy=t.z._tdy;pl.push(t)}}
  for(const z of Z){if(z.npc!='ally')continue;const a=aById(z.ally);if(!a)continue;
   {const X=(z.x-camX)*k,Y=(z.y-camY)*k;if(X>-200&&Y>-100&&X<c.canvas.width+200&&Y<c.canvas.height+200){c.save();c.setTransform(1,0,0,1,0,0);c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';
    if(a.st=='down'){const t=performance.now()/300;c.font='700 '+Math.round(12*dpr)+'px system-ui,sans-serif';const tx='🆘 '+a.nm+' · '+Math.ceil(a.downT)+'초';c.lineWidth=3.5*dpr;c.strokeStyle='#000c';const yy=Y-54*k+(z._tdy||0)+Math.sin(t)*2*dpr;c.strokeText(tx,X,yy);c.fillStyle='#ff9a8a';c.fillText(tx,X,yy)}
