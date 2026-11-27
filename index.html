@@ -252,7 +252,7 @@ function chunk(i,j){const k=i+','+j;let c=CHC.get(k);if(c){CHC.delete(k);CHC.set
 function mark(X,Y){const y=Math.round(Y+Math.sin(performance.now()/250)*2);R('#3a2a00',X-4,y-4,9,9);R('#ffd23f',X-3,y-3,7,7);R('#fff6b0',X-2,y-3,3,2)}
 function arrow(x,y,dx,dy){const pu=Math.round(Math.sin(performance.now()/180)*2),cx=Math.round(x-dx*6+dx*pu),cy=Math.round(y-dy*6+dy*pu);for(const[c,o]of[['#0a2a14',1],['#5fe08a',0]])for(let k=0;k<5;k++){const X=cx+dx*(4-k)+o,Y=cy+dy*(4-k)+o;if(dx)R(c,X,Y-k,1,2*k+1);else R(c,X-k,Y,2*k+1,1)}}
 function draw(){const p=S.p,bw=buf.width,bh=buf.height;g=bctx;NIGHT=S.t>=1500||S.t<100;
- camX=Math.round(Math.max(0,Math.min(WW-bw,p.x-bw/2)));camY=Math.round(Math.max(0,Math.min(WH-bh,p.y-bh/2-12)));
+ {const cf=typeof camFocus=='function'&&camFocus()||p;camX=Math.round(Math.max(0,Math.min(WW-bw,cf.x-bw/2)));camY=Math.round(Math.max(0,Math.min(WH-bh,cf.y-bh/2-12)))}
  bctx.setTransform(1,0,0,1,0,0);bctx.fillStyle='#000';bctx.fillRect(0,0,bw,bh);bctx.setTransform(1,0,0,1,-camX,-camY);
  for(let j=Math.floor(camY/CH);j<=Math.floor((camY+bh)/CH);j++)for(let i=Math.floor(camX/CH);i<=Math.floor((camX+bw)/CH);i++)if(i>=0&&j>=0)bctx.drawImage(chunk(i,j),i*CH,j*CH);
  const vis=(x,y,w,h)=>x<camX+bw&&x+w>camX&&y<camY+bh+20&&y+h>camY-20;

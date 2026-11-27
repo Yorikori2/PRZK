@@ -152,12 +152,3 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 /* the memorial set: vouchers for every finished request */
 if(typeof rqTurnIn=='function'){const _t=rqTurnIn;rqTurnIn=function(q){const s0=RQS().done;const r=_t.apply(this,arguments);try{if(RQS().done>s0&&dSetOn('mem')){invAdd(S.p,'tkn',3);setTimeout(()=>msg('🏅 기념 세트 · 교환권 +3'),800)}}catch(e){}return r}}
 document.head.insertAdjacentHTML('beforeend',`<style>#bm .dqS{display:grid;grid-template-columns:1fr;gap:3px;margin:4px 0 8px}#bm .dqS div{font-size:12px;color:var(--mut);opacity:.75}#bm .dqS div.on{color:#ffd36a;opacity:1}#bm .dqS small{font-size:11px}#bm .dqH{margin:14px 0 6px;font-size:14px}#bm .dqH small{font-weight:400;font-size:11px;color:var(--mut)}#bm .dqI small.v{color:#c0a0ff}</style>`);
-/* ---------- snap to grid: decorations line up neatly (16 px grid from the base corner) ---------- */
-const DGRID=16;const dGridOn=()=>!!(S&&S.base&&S.base.dGrid);
-{const _sp=dSpot;dSpot=function(){const r=_sp();if(!dGridOn()||!W0.base)return r;const B=W0.base;return[B.ox+Math.round((r[0]-B.ox)/DGRID)*DGRID,B.oy+Math.round((r[1]-B.oy)/DGRID)*DGRID]}}
-function dGridT(){S.base.dGrid=!S.base.dGrid;msg(S.base.dGrid?'▦ 격자에 맞추기 켬 · 16칸 간격으로 줄 맞춰 놓여요':'격자에 맞추기 끔')}
-{const _c=dmCtx;dmCtx=function(){const B=_c();if(DPL&&Array.isArray(B))B.splice(1,0,{t:dGridOn()?'▦ 격자 끄기':'▦ 격자에 맞추기',f:dGridT,sm:1});return B}}
-if(typeof OVL!='undefined')OVL.unshift((g,sx,sy,k)=>{if(!DPL||!dGridOn()||!W0.base||!S.p)return;const B=W0.base,p=S.p,[cx,cy]=dSpot();g.save();g.strokeStyle='#ffffff22';g.lineWidth=1;
- for(let x=cx-DGRID*8;x<=cx+DGRID*8;x+=DGRID){g.beginPath();g.moveTo(sx(x),sy(cy-DGRID*6));g.lineTo(sx(x),sy(cy+DGRID*6));g.stroke()}for(let y=cy-DGRID*6;y<=cy+DGRID*6;y+=DGRID){g.beginPath();g.moveTo(sx(cx-DGRID*8),sy(y));g.lineTo(sx(cx+DGRID*8),sy(y));g.stroke()}g.restore()});
-{const _o=dOpen;dOpen=function(){_o.apply(this,arguments);const h=$('bm').querySelector('.dqB');if(h)h.insertAdjacentHTML('beforebegin','<div class="vR" style="margin:2px 0 6px"><button id="dGb" class="'+(dGridOn()?'on':'')+'">▦ 격자에 맞추기 '+(dGridOn()?'켬':'끔')+'</button></div>');const x=$('dGb');if(x)x.onclick=()=>{dGridT();dOpen()}}}
-if(typeof IAW!='undefined')IAW.unshift([/격자/,'격자']);
