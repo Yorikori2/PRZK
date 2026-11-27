@@ -65,7 +65,11 @@ function vRepair(){const c=VC(),p=S.p,n=vFixCost(c);if(n<=0)return;const have=p.
 function vCharge(){const c=VC(),p=S.p;if(!(p.inv.elec>0))return msg('🔋 전자부품이 필요해요');invTake(p,'elec',1);c.bat=Math.min(100,(c.bat||0)+25);msg('🔋 배터리 '+Math.round(c.bat)+'%')}
 function vToggle(){const c=VC();if(!vOwned(c))return;if(c.t=='pol'){c.siren=!c.siren;vSirT=0;msg(c.siren?'🚨 사이렌 켬 · 좀비가 이 차로 몰려와요 · 세워 두고 내리면 미끼가 돼요':'사이렌 끔')}else if(c.t=='mil'){c.gun=c.gun===false;msg(c.gun?'🪖 지붕 기관총 켬 (5.56 탄 사용)':'지붕 기관총 끔 (탄 아끼기)')}vHud(true)}
 /* ---------- the dropped key → the car is parked nearby ---------- */
-function vSpot(x,y){let X=x,Y=y+70;for(let i=0;i<60&&blocker(X,Y,30);i++){const a=i*.9,r=40+i*8;X=x+Math.cos(a)*r;Y=y+Math.sin(a)*r}return[X,Y]}
+/* where the found car stands: outside every building (roof), clear of walls and things, never in the base · nearest such spot, else the road beside the block */
+const vIndoor=(X,Y,m)=>W0.roofs.some(r=>X>r.x-m&&X<r.x+r.w+m&&Y>r.y-m&&Y<r.y+r.h+m);
+function vSpotOk(X,Y){return!vIndoor(X,Y,34)&&!blocker(X,Y,34)&&!(typeof inBase=='function'&&inBase(X,Y))&&X>40&&Y>40&&X<WW-40&&Y<WH-40}
+function vSpot(x,y){for(let i=0;i<260;i++){const a=i*2.39996,r=30+i*4,X=x+Math.cos(a)*r,Y=y+Math.sin(a)*r;if(vSpotOk(X,Y))return[X,Y]}
+ const[gx,gy]=gOf(x,y),[ox,oy]=bo(gx-OGX,gy-OGY),Y=oy+BH+RD/2;for(let d=0;d<BW;d+=24)for(const X of[x+d,x-d])if(vSpotOk(X,Y))return[X,Y];return[x,Y]}
 function vWildAdd(t){const p=S.p;if(VWILD().some(w=>w.t==t))return;const[x,y]=vSpot(p.x,p.y),[gx,gy]=gOf(x,y),[ox,oy]=bo(gx-OGX,gy-OGY);const w={t,gk:gx+','+gy,rx:Math.round(x-ox),ry:Math.round(y-oy),dir:Math.random()<.5?'r':'l',vid:Date.now()%1e6};VWILD().push(w);
  if(typeof MARKS=='function'){if(typeof MKI!='undefined'&&!MKI.some(m=>m[0]=='🔑'))MKI.push(['🔑','#ffd36a','차량']);MARKS().push({gx,gy,lx:w.rx,ly:w.ry,ic:MKI.findIndex(m=>m[0]=='🔑'),nm:VEH[t].nm,veh:w.vid})}
  infRebuild();setTimeout(()=>msg('🔑 '+VEH[t].kn+' 차 열쇠! · 근처에 '+VEH[t].nm+'이(가) 서 있어요 (지도에 🔑)'),700)}
