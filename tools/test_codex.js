@@ -11,7 +11,7 @@ const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m);if(!c)process.exitCode=1};
  await p.screenshot({path:OUT+'/cx-me.png'});
  r=await tab('job');ok(r.rows==12&&r.on==2,'직업·약점: 12 listed, 2 mine highlighted '+r.rows+'/'+r.on);
  r=await tab('perk');ok(r.rows==15&&r.on==2,'레벨 보너스: 15 listed, 2 chosen '+r.rows+'/'+r.on);
- r=await tab('skill');ok(r.rows==16&&r.on==2,'스킬: 16 listed, 2 learned '+r.rows+'/'+r.on);
+ r=await tab('skill');ok(r.rows==17&&r.on==2,'스킬: 17 listed (지구력 added), 2 learned '+r.rows+'/'+r.on);
  r=await tab('stat');ok(r.rows==5&&r.on==1,'능력치: 5 listed, raised one highlighted '+r.rows+'/'+r.on);
  r=await p.evaluate(()=>{CXT='gun';openChar('codex');const b=$('bm');return{groups:b.querySelectorAll('.cxg').length,guns:b.querySelectorAll('.cxgun span').length,have:b.querySelectorAll('.cxgun span.have').length,cur:(b.querySelector('.cxg.cur h4')||{}).textContent}});
  ok(r.groups==19&&r.guns==66&&r.have>=2&&/연속 명중/.test(r.cur),'총기 특징: 19 traits covering all 66 guns, owned guns bold, current one marked '+JSON.stringify(r));await p.screenshot({path:OUT+'/cx-gun.png'});

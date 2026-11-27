@@ -6,14 +6,14 @@
    Loaded after bagui_next.js and ia2_next.js. */
 'use strict';
 /* ---------- the four places ---------- */
-const PS4=[['barrel','총열'],['side','사이드 (레이저 · 플래시)'],['under','손잡이'],['optic','사이트']];
+const PS4=[['barrel','총열'],['light','사이드 (레이저 · 플래시)'],['under','손잡이'],['optic','사이트']];
 const PS4K=PS4.map(x=>x[0]);
 if(typeof PSLOTS!='undefined'){PSLOTS.splice(0,PSLOTS.length,...PS4)}
-if(typeof CSLOT!='undefined')for(const cl in CSLOT){const had=CSLOT[cl];const n=PS4K.filter(k=>k=='side'?had.includes('under'):had.includes(k)||(k=='under'&&cl=='pistol'));CSLOT[cl].splice(0,CSLOT[cl].length,...n)}
+if(typeof CSLOT!='undefined')for(const cl in CSLOT){const had=CSLOT[cl];const n=PS4K.filter(k=>k=='light'?true:had.includes(k)||(k=='under'&&cl=='pistol'));CSLOT[cl].splice(0,CSLOT[cl].length,...n)}
 /* laser and light move to the side rail · two new parts so each place has a choice */
-if(typeof P_BY!='undefined'){for(const id of['u_laser','u_light'])if(P_BY[id])P_BY[id][2]='side';
+if(typeof P_BY!='undefined'){for(const id of['u_laser','u_light'])if(P_BY[id])P_BY[id][2]='light';
  const add=(p)=>{if(!P_BY[p[0]]){PARTS.push(p);P_BY[p[0]]=p}};
- add(['sd_combo','레이저 · 플래시 콤보','side','r',['pistol','smg','rifle','shotgun'],{acc:8,night:1},'경찰서 · 군부대']);
+ add(['sd_combo','레이저 · 플래시 콤보','light','r',['pistol','smg','rifle','shotgun'],{acc:8,night:1},'경찰서 · 군부대']);
  add(['g_angle','앵글 손잡이','under','u',['pistol','smg','rifle','shotgun'],{rec:-8,mov:2},'철물점 · 경찰서']);
  add(['g_stub','짧은 손잡이','under','c',['pistol','smg','rifle'],{rec:-5,acc:2},'주택 · 철물점'])}
 /* only the four places count (old muzzle / magazine / stock / trigger parts are taken off once) */
@@ -56,8 +56,8 @@ function partsTab(){const p=S.p,pg=PGo(),guns=Object.keys(p.inv).filter(id=>p.in
 function partsBind(){const b=$('bm'),pg=PGo();b.querySelectorAll('[data-pg]').forEach(x=>x.onclick=()=>{PGUN=x.dataset.pg;PSL=null;openBag()});b.querySelectorAll('[data-ps]').forEach(x=>x.onclick=()=>{if(x.classList.contains('no'))return;PSL=PSL==x.dataset.ps?null:x.dataset.ps;openBag()});
  b.querySelectorAll('[data-ppu]').forEach(x=>x.onclick=()=>{if(!nearGunBench())return;const m=pg.mods[PGUN]=pg.mods[PGUN]||{};m[PSL]=x.dataset.ppu;s3dirty();try{s3MagFix(PGUN)}catch(e){}msg('🔧 '+P_BY[x.dataset.ppu][1]+' 장착');hud2();openBag()});
  b.querySelectorAll('[data-pun]').forEach(x=>x.onclick=()=>{if(!nearGunBench())return;const m=pg.mods[PGUN]||{},q=m[PSL];delete m[PSL];s3dirty();try{s3MagFix(PGUN)}catch(e){}msg('🔧 '+P_BY[q][1]+' 빼기');hud2();openBag()});
- const c=$('ptC');if(c&&PGUN&&typeof blueprint=='function'){try{const m=Object.assign({},pg.mods[PGUN]||{});delete m.side;const bp=blueprint(PGUN,m);c.width=bp.width*3;c.height=bp.height*3;const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.drawImage(bp,0,0,c.width,c.height);
-  const sd=(pg.mods[PGUN]||{}).side;if(sd){x.fillStyle='#1d1714';x.fillRect(c.width*.52,c.height*.52,24,12);x.fillStyle=sd=='u_light'?'#ffe9a0':'#ff4a3a';x.fillRect(c.width*.52+18,c.height*.52+3,6,6);if(sd!='u_light'){x.globalAlpha=.6;x.fillRect(c.width*.52+24,c.height*.52+5,c.width*.4,2);x.globalAlpha=1}}}catch(e){}}}
+ const c=$('ptC');if(c&&PGUN&&typeof blueprint=='function'){try{const m=Object.assign({},pg.mods[PGUN]||{});delete m.light;const bp=blueprint(PGUN,m);c.width=bp.width*3;c.height=bp.height*3;const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.drawImage(bp,0,0,c.width,c.height);
+  const sd=(pg.mods[PGUN]||{}).light;if(sd){x.fillStyle='#1d1714';x.fillRect(c.width*.52,c.height*.52,24,12);x.fillStyle=sd=='u_light'?'#ffe9a0':'#ff4a3a';x.fillRect(c.width*.52+18,c.height*.52+3,6,6);if(sd!='u_light'){x.globalAlpha=.6;x.fillRect(c.width*.52+24,c.height*.52+5,c.width*.4,2);x.globalAlpha=1}}}catch(e){}}}
 /* ---- 👥 companions ---- */
 function allyTab(){const L=(S.inf&&S.inf.allies)||[];if(!L.length)return'<div class="sub">아직 동료가 없어요 · 생존자 신호를 찾아 구출해 보세요</div>';
  return'<div class="ivA">'+L.map(a=>{const R0=AROLE[a.role]||{},mx=aMhp(a),f=Math.max(0,a.hp/mx),id=typeof aAmmoId=='function'?aAmmoId(a):null,ammo=id?(a.mag|0)+(aPouch(a)[id]|0)+'발':'근접';const GR=AGRADE[a.gr||1];
@@ -86,7 +86,7 @@ if(typeof DECO!='undefined')for(const k of FACS)if(DECO[k])DECO[k][3]=0;/* facil
   b.querySelectorAll('[data-fc]').forEach(x=>x.onclick=()=>dStart(x.dataset.fc))}catch(e){}}}
 document.head.insertAdjacentHTML('beforeend','<style>#bm .fcS h3{margin:14px 0 4px;font-size:14px}</style>');
 /* ---------- light parts (사이드 · 사이트) can be changed anywhere; 총열 · 손잡이 need the bench ---------- */
-const PLIGHT=['side','optic'];
+const PLIGHT=['light','optic'];
 const canPart=sl=>PLIGHT.includes(sl)||nearGunBench();
 {const _pt=partsTab;partsTab=function(){let h=_pt();const can=nearGunBench();if(!can)h=h.replace(/<div class="ptB">[\s\S]*?<\/div>/,'<div class="ptB lite">✋ <b>사이드 · 사이트</b>는 여기서 바로 바꿀 수 있어요 · <b>총열 · 손잡이</b>는 거점의 🔧 총기 파츠 작업대에서</div>');return h}}
 {const _pb=partsBind;partsBind=function(){_pb();try{const b=$('bm');if(nearGunBench()||!PSL||!PLIGHT.includes(PSL))return;const pg=PGo();

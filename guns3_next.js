@@ -164,5 +164,5 @@ gBody=function(cl,id,m){const s=GS[id];if(!s){const fam={pistol:'pist',smg:'smg'
  const o=Object.assign({},s[1]);/* a barrel part changes the length a little */const b=m&&m.barrel;if(b&&o.bl!=null){if(b=='b_short')o.bl+=10;if(b=='b_long'||b=='b_match'||b=='b_pext')o.bl-=8;if(b=='b_heavy')o.th=(o.th||3)+1}
  if(b=='b_integ')o.sup=1;NSTK=!!(m&&m.stock);try{return GF[s[0]](o,PAL[s[2]]||PL)}finally{NSTK=false}};
 /* parts on odd families: no stock place for pistols · bows · launchers (already none); bows have no parts places */
-if(CSLOT.bow)CSLOT.bow.splice(0,CSLOT.bow.length,'optic');
+if(CSLOT.bow)CSLOT.bow.splice(0,CSLOT.bow.length,'optic','light');
 window.GS=GS;window.GF=GF;}

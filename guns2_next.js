@@ -13,10 +13,10 @@
  add(['b_integ','일체형 소음 총열','barrel','e',['smg','rifle','pistol'],{nz:-3,dmg:-3},'군부대 무기고']);
  add(['b_pext','연장 총열 (권총)','barrel','u',['pistol'],{rng:12,dmg:5},'경찰서 · 총포상']);
  add(['b_pcomp','보정 총열 (권총)','barrel','r',['pistol'],{rec:-15,acc:4},'총포상 · 군부대']);
- add(['s_green','녹색 레이저','side','r',['pistol','smg','rifle','shotgun'],{acc:10},'경찰서 · 총포상']);
- add(['s_ir','적외선 레이저','side','e',['smg','rifle','sniper'],{acc:8,night:2},'군부대 · 연구소']);
- add(['s_strobe','스트로브 플래시','side','u',['pistol','smg','rifle','shotgun'],{night:1,acc:2},'경찰서']);
- add(['s_peq','전술 조준 장치','side','l',['rifle','sniper','smg'],{acc:12,night:2},'군부대 무기고']);
+ add(['s_green','녹색 레이저','light','r',['pistol','smg','rifle','shotgun'],{acc:10},'경찰서 · 총포상']);
+ add(['s_ir','적외선 레이저','light','e',['smg','rifle','sniper'],{acc:8,night:2},'군부대 · 연구소']);
+ add(['s_strobe','스트로브 플래시','light','u',['pistol','smg','rifle','shotgun'],{night:1,acc:2},'경찰서']);
+ add(['s_peq','전술 조준 장치','light','l',['rifle','sniper','smg'],{acc:12,night:2},'군부대 무기고']);
  add(['g_hand','핸드스톱','under','c',['smg','rifle','shotgun'],{rec:-6,acc:3},'철물점 · 주택']);
  add(['g_fold','접이식 손잡이','under','u',['smg','rifle','shotgun'],{rec:-10,mov:2},'경찰서']);
  add(['g_tri','삼각 손잡이 (양각대 겸용)','under','r',['rifle','sniper','lmg'],{rec:-15,acc:5,mov:-2},'군부대']);
@@ -67,7 +67,7 @@ function gBody(cl,id,m){const F=FURN[gFurn(id,cl)],M=[MET[0],MET[1],MET[2]],bar=
 /* ---------- the parts on the gun ---------- */
 function gSide(p,x,y){if(!p)return;const beam=(c,a)=>{g.globalAlpha=a;R(c,x-44,y+1,40,1);g.globalAlpha=1};R(GK,x-4,y-1,10,5);R('#2a2f35',x-3,y,8,3);R('#4a5058',x-3,y,8,1);
  if(p=='u_laser'){R('#ff3030',x-4,y+1,1,1);beam('#ff3030',.4)}else if(p=='s_green'){R('#5fe08a',x-4,y+1,1,1);beam('#5fe08a',.45)}else if(p=='s_ir'){R('#a060ff',x-4,y+1,1,1);beam('#a060ff',.2)}
- else if(p=='u_light'||p=='s_strobe'){R('#ffd36a',x-4,y,1,3);g.globalAlpha=p=='s_strobe'&&(performance.now()/120|0)%2?.05:.2;R('#ffe8a0',x-26,y-3,22,9);g.globalAlpha=1}
+ else if(p=='u_light'||p=='s_strobe'||p=='l_hi'||p=='l_strobe'){R('#ffd36a',x-4,y,1,3);g.globalAlpha=p=='s_strobe'&&(performance.now()/120|0)%2?.05:.2;R('#ffe8a0',x-26,y-3,22,9);g.globalAlpha=1}
  else if(p=='sd_combo'){R('#ff3030',x-4,y,1,1);R('#ffd36a',x-4,y+2,1,2);beam('#ff3030',.35)}else if(p=='s_peq'){R('#4a5434',x-6,y-2,14,6);R('#5f6b40',x-6,y-2,14,1);R('#a060ff',x-7,y,1,1);R('#ff3030',x-7,y+2,1,1);beam('#a060ff',.2)}}
 function gGrip(p,x,y){if(!p)return;const P=['#24282d','#3a4047','#5a626b'];
  if(p=='u_grip'){box(x,y,4,10,P)}else if(p=='g_angle'){for(let j=0;j<6;j++)R(P[1],x+j,y+j,5,1);R(P[2],x,y,5,1)}else if(p=='g_stub'){box(x,y,4,5,P)}else if(p=='g_hand'){R(P[1],x,y,3,3);R(P[2],x,y,3,1)}
@@ -80,7 +80,7 @@ function gSight(p,x,y){if(!p)return;const P=['#24282d','#3a4047','#5a626b'];
 function gMuzzleTip(cl,p,x,y){/* barrels already tell their length; a crown highlight */R('#8a949e',x,y,1,1)}
 /* the new blueprint (same size as before: 126 × 48) */
 blueprint=function(id,mods){const cl=GCLASS[id]||'rifle',c=document.createElement('canvas');c.width=126;c.height=48;const o=g;g=c.getContext('2d');g.translate(12,0);
- try{const A=gBody(cl,id,mods||{});if(A.stock&&(mods||{}).stock)gStock(mods.stock,...A.stock);gGrip((mods||{}).under,...A.under);gSide((mods||{}).side,...A.side);gSight((mods||{}).optic,...A.optic);gMuzzleTip(cl,mods&&mods.barrel,...A.muzzle)}catch(e){}
+ try{const A=gBody(cl,id,mods||{});if(A.stock&&(mods||{}).stock)gStock(mods.stock,...A.stock);gGrip((mods||{}).under,...A.under);gSide((mods||{}).light,...A.side);gSight((mods||{}).optic,...A.optic);gMuzzleTip(cl,mods&&mods.barrel,...A.muzzle)}catch(e){}
  g=o;/* outline */const x=c.getContext('2d'),im=x.getImageData(0,0,126,48),d=im.data,src=new Uint8ClampedArray(d);for(let j=0;j<48;j++)for(let i=0;i<126;i++){const k=(j*126+i)*4;if(src[k+3]>40)continue;
   for(const[a,b]of[[1,0],[-1,0],[0,1],[0,-1]]){const ii=i+a,jj=j+b;if(ii<0||jj<0||ii>=126||jj>=48)continue;const q=(jj*126+ii)*4;if(src[q+3]>200){d[k]=14;d[k+1]=16;d[k+2]=18;d[k+3]=255;break}}}
  x.putImageData(im,0,0);return c};
@@ -114,3 +114,7 @@ function gStock(p,x,y,F){const M=['#24282d','#3a4047','#5a626b','#8a949e'],W=['#
  else if(p=='s_prec'){box(x,y,26,11,F);box(x+6,y-4,14,4,F);R(M[2],x+8,y-4,2,4);R(M[2],x+16,y-4,2,4);R(F[0],x+8,y+11,10,3);R('#1d1714',x+25,y-1,3,13)}
  else if(p=='s_brace'){R(M[1],x,y+3,10,3);box(x+10,y,10,9,['#2a2a2e','#3a3a40','#55555c']);R(M[0],x+12,y+3,6,1);R(M[0],x+12,y+5,6,1)}
  else if(p=='s_bull'){/* bullpup: a short butt with a cheek riser */box(x,y-1,16,12,F);box(x+2,y-4,10,3,F);R('#1d1714',x+15,y-1,3,13);R(M[2],x+4,y+4,6,2)}}
+
+/* flashlights on the gun light the way at night (beam); lasers do not */
+if(P_BY.s_strobe)P_BY.s_strobe[5]={night:1,acc:2,beam:290,strobe:1};if(P_BY.sd_combo)P_BY.sd_combo[5]={acc:8,night:1,beam:250};
+if(typeof myBeams=='function'){const _mb=myBeams;myBeams=function(){return _mb.apply(this,arguments).filter(b=>{const q=P_BY[b.k];return!q||q[2]!='light'||!!q[5].beam})}}
