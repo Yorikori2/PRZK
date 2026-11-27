@@ -12,3 +12,10 @@ document.head.insertAdjacentHTML('beforeend','<style>#shdHud{display:none!import
   /* a tiny shield at the left end */const sx=Math.round(X-w/2-7*dpr),sy=Math.round(Y-2*dpr);c.fillStyle='#000a';c.fillRect(sx-1,sy-1,6*dpr+2,7*dpr+2);c.fillStyle=f<=0?'#777':'#c9d3dc';c.fillRect(sx,sy,6*dpr,5*dpr);c.fillRect(sx+dpr,sy+5*dpr,4*dpr,dpr);c.fillRect(sx+2*dpr,sy+6*dpr,2*dpr,dpr);
   if(f<=0||f<.3||SBAR.t>0){c.font='700 '+Math.round(10*dpr)+'px system-ui,sans-serif';c.textAlign='left';c.textBaseline='middle';const tx=f<=0?'방패 부서짐':Math.ceil(hp)+'/'+mx;c.lineWidth=3*dpr;c.strokeStyle='#000c';c.strokeText(tx,X+w/2+5*dpr,Y+h/2);c.fillStyle=f<=0?'#aaa':f>.5?'#bfe6ff':f>.25?'#ffe9a0':'#ffb0a4';c.fillText(tx,X+w/2+5*dpr,Y+h/2)}
   c.restore()}catch(e){}return r}}
+/* companions carrying a shield: the same bar under their feet */
+{const _dw=draw;draw=function(){const r=_dw.apply(this,arguments);try{if(!S||!S.inf||typeof shdRatioAlly!='function')return r;const c=ctx,k=zoom*dpr;
+  for(const z of Z){if(z.npc!='ally')continue;const a=typeof aById=='function'&&aById(z.ally);if(!a||!a.shd||a.st=='down')continue;const f=Math.max(0,Math.min(1,shdRatioAlly(a)));
+   const X=(z.x-camX)*k,Y=(z.y-camY)*k+7*k,w=Math.round(26*k),h=Math.max(3,Math.round(2*k));if(X<-50||Y<-50||X>c.canvas.width+50||Y>c.canvas.height+50)continue;c.save();c.setTransform(1,0,0,1,0,0);
+   c.fillStyle='#000000aa';c.fillRect(Math.round(X-w/2)-1,Math.round(Y)-1,w+2,h+2);c.fillStyle=f<=0?'#555':f>.5?'#7fc8ff':f>.25?'#ffd36a':'#ff6a5a';c.fillRect(Math.round(X-w/2),Math.round(Y),Math.round(w*f),h);
+   const sx=Math.round(X-w/2-7*dpr),sy=Math.round(Y-2*dpr);c.fillStyle='#000a';c.fillRect(sx-1,sy-1,6*dpr+2,7*dpr+2);c.fillStyle=f<=0?'#777':'#c9d3dc';c.fillRect(sx,sy,6*dpr,5*dpr);c.fillRect(sx+dpr,sy+5*dpr,4*dpr,dpr);
+   if(f<=0||f<.3){c.font='700 '+Math.round(9*dpr)+'px system-ui,sans-serif';c.textAlign='left';c.textBaseline='middle';const tx=f<=0?'부서짐':Math.round(f*100)+'%';c.lineWidth=3*dpr;c.strokeStyle='#000c';c.strokeText(tx,X+w/2+4*dpr,Y+h/2);c.fillStyle=f<=0?'#aaa':'#ffb0a4';c.fillText(tx,X+w/2+4*dpr,Y+h/2)}c.restore()}}catch(e){}return r}}

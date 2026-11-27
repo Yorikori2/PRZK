@@ -33,7 +33,7 @@ document.body.insertAdjacentHTML('beforeend','<button id="mvO"></button><div id=
 $('mvO').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();mvSet(MVMODE=='walk'?'run':'walk')});
 {const _p=mvPaint;mvPaint=function(){_p();mvLayout()}}
 /* the auto style decides the mode itself every frame */
-{const _u=upd;upd=function(dt){if(MVSTYLE=='auto'&&S&&!S.dr){const m=Math.hypot(jx,jy);if(m>.92)mvEdgeT+=dt;else mvEdgeT=0;const r=mvEdgeT>.5;if(r!=mvAutoRun){mvAutoRun=r;mvSignT=1.2}MVMODE=r?'run':'walk'}if(mvSignT>0)mvSignT-=dt;return _u.apply(this,arguments)}}
+{const _u=upd;upd=function(dt){if(MVSTYLE=='auto'&&S&&!S.dr){const m=Math.hypot(jx,jy);if(m>.92)mvEdgeT+=dt;else mvEdgeT=0;const r=mvEdgeT>.5&&!(typeof mvTired!='undefined'&&mvTired);if(r!=mvAutoRun){mvAutoRun=r;mvSignT=1.2}MVMODE=r?'run':'walk'}if(mvSignT>0)mvSignT-=dt;return _u.apply(this,arguments)}}
 /* double tap on the left part of the screen (where the stick is) */
 document.addEventListener('pointerdown',e=>{if(MVSTYLE!='dtap'||!run||PAUSE)return;if(e.target.closest&&e.target.closest('button,#bm,#bmap,#sd,#tbH,#bld'))return;if(e.clientX>innerWidth*.55)return;const t=performance.now();if(t-mvLastTap<300){mvSet(MVMODE=='walk'?'run':'walk');mvSignT=1.2;mvLastTap=0}else mvLastTap=t},true);
 /* the small sign by the player when the mode changes (dtap · auto) */
@@ -56,3 +56,30 @@ setInterval(mvPlace,250);addEventListener('resize',mvPlace);
 document.head.insertAdjacentHTML('beforeend',`<style>#mvO.wpn{width:54px;height:54px;border-radius:14px;font-size:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;line-height:1.1}#mvO.wpn small{font-size:10px;font-weight:600}
 #mvO.wpn.run{color:#ffd09a}#mvO.wpn.walk{color:#bfe6ff}body.uied #mvO{display:none!important}</style>`);
 mvLayout();
+/* ---------- stamina: running uses 기력 ----------
+   run: −8 / s (overweight ×1.5, heavy armour that slows you ×1.25) · walk +10 / s · standing +18 / s (as before)
+   at 0 you are worn out: forced to walk until 기력 is back to 35 (the button blinks), then running resumes by itself.
+   hungry or thirsty (under 20) → recovery halves. */
+const ST_RUN=8,ST_BACK=35;let mvTired=false;
+const mvEff=()=>MVMODE=='run'&&!mvTired?'run':'walk';
+/* the walk / run speed uses the effective mode */
+{const _u=upd;upd=function(dt){if(MVSTYLE=='auto'||!mvTired)return _u.apply(this,arguments);const keep=MVMODE;MVMODE='walk';try{return _u.apply(this,arguments)}finally{MVMODE=keep}}}
+{const _gu=gearUpd;gearUpd=function(dt){const p=S&&S.p,st0=p?p.st:0;_gu(dt);if(!p||S.dr||PAUSE||!run)return;
+  const moving=p.mv&&Math.hypot(jx,jy)>.1;
+  if(moving&&mvEff()=='run'){let d=ST_RUN+10;/* +10 cancels the regen while moving */if(weight(p)>capacity(p))d*=1.5;const sl=typeof ARMX!='undefined'?Object.values(p.eq).reduce((a,id)=>a+((ARMX[id]&&ARMX[id][4].mov)||0),0):0;if(sl<0)d*=1.25;p.st=Math.max(0,p.st-d*dt);
+   if(p.st<=0&&!mvTired){mvTired=true;msg('😮‍💨 지쳤어요 · 기력이 '+ST_BACK+'까지 찰 때까지 걸어요');mvLayout()}}
+  else if(p.st>st0&&((p.food|0)<20||(p.water|0)<20))p.st=st0+(p.st-st0)*.5;
+  if(mvTired&&p.st>=ST_BACK){mvTired=false;msg(MVMODE=='run'?'🏃 기력 회복 · 다시 달려요':'기력 회복');mvLayout()}
+  mvStam()}}
+function mvStam(){const o=$('mvO');if(!o||!S||!S.p)return;let b=o.querySelector('.stb');if(!b){o.insertAdjacentHTML('beforeend','<span class="stb"><i></i></span>');b=o.querySelector('.stb')}const f=Math.max(0,Math.min(1,S.p.st/100));b.firstChild.style.width=f*100+'%';b.firstChild.style.background=mvTired?'#ff6a5a':f<.3?'#ffd36a':'#8ad06a';o.classList.toggle('tired',mvTired)}
+{const _l=mvLayout;mvLayout=function(){_l();const o=$('mvO');if(o&&MVSTYLE=='wpn'&&mvTired){o.innerHTML='😮‍💨<small>지침</small>'}mvStam()}}
+document.head.insertAdjacentHTML('beforeend',`<style>#mvO .stb{position:absolute;left:6px;right:6px;bottom:4px;height:4px;border-radius:2px;background:#ffffff22;overflow:hidden}#mvO .stb i{display:block;height:100%;width:100%}
+#mvO{position:fixed}#mvO.wpn{padding-bottom:6px}#mvO.tired{animation:mvBlink .5s steps(2) infinite;border-color:#ff6a5a!important;color:#ffb0a4!important}@keyframes mvBlink{50%{opacity:.45}}</style>`);
+/* ---------- the choice of how to switch lives in ⚙ (the UI editor bar) ---------- */
+{const bar=$('uiBar');if(bar&&!$('mvSet')){const last=bar.querySelector('.ur:last-child');const row='<div class="ur" id="mvSet"><i>걷기 · 달리기</i>'+[['wpn','무기칸 위'],['two','버튼 2개'],['dtap','두 번 톡'],['auto','자동']].map(([k,n])=>'<button data-mvs="'+k+'">'+n+'</button>').join('')+'</div>';
+ if(last)last.insertAdjacentHTML('beforebegin',row);else bar.insertAdjacentHTML('beforeend',row);
+ bar.querySelectorAll('[data-mvs]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();mvStyle(b.dataset.mvs);mvSetPaint()}));}}
+function mvSetPaint(){document.querySelectorAll('#mvSet [data-mvs]').forEach(b=>b.classList.toggle('on',b.dataset.mvs==MVSTYLE))}mvSetPaint();
+document.head.insertAdjacentHTML('beforeend','<style>#mvSet button.on{background:#e0b03a33;border-color:#e0b03a;color:#ffd36a}</style>');
+/* the style 'one' is folded into 'wpn' (same button, better place) */
+{const _s=mvStyle;mvStyle=function(s){if(s=='one')s='wpn';_s(s);mvSetPaint()}}
