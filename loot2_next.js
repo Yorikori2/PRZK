@@ -48,3 +48,21 @@ function purify(){const p=S.p,st=(S.base&&S.base.st)||{},have=k=>(p.inv[k]|0)+(s
 /* the purifier's own window gets the action (one line in the list, like every facility) */
 if(typeof ia2Deco=='function'){const _id=ia2Deco;ia2Deco=function(o,t,acts){if(t=='purifier'){const st=S.base.st||{},n=(S.p.inv.dwater|0)+(st.dwater|0);acts=[{t:'💧 물 거르기 · 더러운 물 '+n+'개',f:purify,off:!n},...acts]}return _id.call(this,o,t,acts)}}
 if(typeof IAW!='undefined')IAW.unshift([/물 거르기/,'정수']);
+
+/* ---------- fridge: fresh food in the base boxes spoils 4× slower (needs the generator) ---------- */
+if(typeof DECO!='undefined'&&!DECO.fridge){DECO.fridge=['🧊','냉장고',{elec:8,scrap:14,steel:3},0,22,30,true,'거점 보관함의 신선 음식이 4배 천천히 상해요 · 발전기 필요'];DLIST.push('fridge');
+ dArt.fridge=(x,y,w,h)=>{const K='#1d1714',on=!!(S&&S.base&&S.base.lv&&S.base.lv.gen);R(K,x,y-16,w,h+16);R('#d8dde2',x+1,y-15,w-2,h+14);R('#eef2f5',x+1,y-15,w-2,2);R('#a8b0b8',x+1,y-2,w-2,1);R('#8a929a',x+w-5,y-12,2,7);R('#8a929a',x+w-5,y+2,2,9);R(on?'#5fe08a':'#c84a3a',x+3,y-12,2,2);R('#9ad0ff',x+3,y+4,4,2)};
+ P('deco_fridge','냉장고',null,o=>dArt.fridge(o.x,o.y,o.w,o.h,o),true)}
+const fridgeOn=()=>!!(S&&S.base&&S.base.lv&&S.base.lv.gen&&(S.base.deco||[]).some(d=>d.t=='fridge'));
+{const _sp=spoil;spoil=function(box){if(!(S&&S.base&&box===S.base.st&&fridgeOn()))return _sp(box);const keep=Object.assign({},FRESH);for(const k in FRESH)FRESH[k]/=4;try{return _sp(box)}finally{Object.assign(FRESH,keep)}}}
+/* ---------- cooking at a campfire (the base fire or a 🔥 모닥불 decoration): meat → grilled meat · boil dirty water ---------- */
+if(!I_BY.cmeat){const it=['cmeat','구운 고기','c','r',.5,'허기 +60 · 구워서 잘 안 상해요 (하루마다 10%)'];ITEMS.push(it);I_BY.cmeat=it;IC.cmeat=()=>{R('#1d1714',4,8,16,10);R('#8a4a24',5,9,14,8);R('#b06a34',5,9,14,2);R('#3a1d10',8,12,8,1);R('#3a1d10',8,15,8,1);R('#f0e0d0',15,10,3,6)}}
+FRESH.cmeat=.1;if(typeof STK_ID!='undefined')STK_ID.cmeat=10;
+{const _u2=use2;use2=function(k){if(k!='cmeat')return _u2.apply(this,arguments);const p=S.p;if(!has(p,k))return msg(NM2(k)+' 없음');invTake(p,k,1);p.food=Math.min(100,p.food+60);msg('🍖 구운 고기 · 허기 +60');if(typeof hud2=='function')hud2()}}
+const nearFire=()=>{if(!S||!S.p||typeof DUN!='undefined'&&DUN)return false;const p=S.p,L=[...(typeof BP!='undefined'?BP:[]),...W0.objs];return L.some(o=>(o.t=='campfire'||o.t=='deco_fire')&&Math.hypot(o.x+o.w/2-p.x,o.y+o.h/2-p.y)<70)};
+function fireUse(what){const p=S.p,st=(S.base&&S.base.st)||{},have=k=>(p.inv[k]|0)+(st[k]|0),take=(k,c)=>{const a=Math.min(p.inv[k]|0,c);if(a)invTake(p,k,a);if(c-a)st[k]-=c-a};
+ const src=what=='meat'?'meat':'dwater',n=Math.min(have(src),have('wood')*3);if(!have(src))return msg(what=='meat'?'🔥 구울 고기가 없어요':'🔥 끓일 더러운 물이 없어요');if(!n)return msg('🔥 땔감(목재)이 필요해요 · 목재 1개 = 3개');
+ take(src,n);take('wood',Math.ceil(n/3));invAdd(p,what=='meat'?'cmeat':'water',n);msg(what=='meat'?'🍖 고기 '+n+'개를 구웠어요 (목재 '+Math.ceil(n/3)+')':'💧 더러운 물 '+n+'병을 끓였어요 (목재 '+Math.ceil(n/3)+')')}
+{const _c=dmCtx;dmCtx=function(){const B=_c();try{if(!S||!run||S.dr||!nearFire())return B;const p=S.p,st=(S.base&&S.base.st)||{},m=(p.inv.meat|0)+(st.meat|0),d=(p.inv.dwater|0)+(st.dwater|0);
+  if(m)B.unshift({t:'🔥 모닥불 요리 · 고기 '+m+'개 굽기',f:()=>fireUse('meat'),big:1});if(d)B.push({t:'🔥 모닥불 · 더러운 물 '+d+'병 끓이기',f:()=>fireUse('water')})}catch(e){}return B}}
+if(typeof IAW!='undefined')IAW.unshift([/고기 .*굽기/,'요리'],[/끓이기/,'끓이기']);
