@@ -50,3 +50,5 @@ document.head.insertAdjacentHTML('beforeend',`<style>#bmX2{position:fixed;z-inde
  addEventListener('resize',()=>setTimeout(uiBarClear,50))}
 /* the [상호작용] hint stayed on top of open windows */
 document.head.insertAdjacentHTML('beforeend','<style>body:has(#bm[style*="display: block"]) #iaHint,body:has(#bmap) #iaHint{display:none!important}</style>');
+/* the shield durability chip sat on top of open windows (same layer) → under them */
+document.head.insertAdjacentHTML('beforeend','<style>#shdHud{z-index:4!important}</style>');
