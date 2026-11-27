@@ -83,3 +83,19 @@ function mvSetPaint(){document.querySelectorAll('#mvSet [data-mvs]').forEach(b=>
 document.head.insertAdjacentHTML('beforeend','<style>#mvSet button.on{background:#e0b03a33;border-color:#e0b03a;color:#ffd36a}</style>');
 /* the style 'one' is folded into 'wpn' (same button, better place) */
 {const _s=mvStyle;mvStyle=function(s){if(s=='one')s='wpn';_s(s);mvSetPaint()}}
+/* ---------- 1) 지구력 skill (🌿 생존 tree): running uses 15 % less 기력 a rank (3 ranks) ---------- */
+let SK_END=null;if(typeof SKILLS!='undefined'&&SKILLS.surv){let i=SKILLS.surv[1].findIndex(s=>s[0]=='지구력');if(i<0){SKILLS.surv[1].push(['지구력','달리기 기력 소모 -15% / 랭크']);i=SKILLS.surv[1].length-1}SK_END='surv'+i}
+const mvEnd=()=>SK_END&&typeof s3sk=='function'?s3sk(SK_END):0;
+/* the drain above already ran this frame; give back the skill's share */
+{const _gu=gearUpd;gearUpd=function(dt){const p=S&&S.p,st0=p?p.st:0;_gu(dt);if(!p||S.dr||PAUSE||!run)return;const r=mvEnd();if(r&&p.st<st0&&p.mv&&mvEff()=='run')p.st=Math.min(100,p.st+(st0-p.st)*.15*r)}}
+/* ---------- 2) low 기력: the screen edge darkens and you hear breathing ---------- */
+document.body.insertAdjacentHTML('beforeend','<div id="stVig"></div>');
+document.head.insertAdjacentHTML('beforeend','<style>#stVig{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:0;transition:opacity .4s;background:radial-gradient(ellipse at center,transparent 55%,#000000d0 100%)}</style>');
+let mvBreathT=0;
+{const _gu=gearUpd;gearUpd=function(dt){_gu(dt);const v=$('stVig');if(!v||!S||!S.p)return;const st=S.p.st,on=run&&!PAUSE&&!S.dr&&st<25;v.style.opacity=on?((25-st)/25*.85).toFixed(2):0;
+  if(on&&!PAUSE){mvBreathT-=dt;if(mvBreathT<=0){mvBreathT=st<8?.9:1.4;try{sfx((A,t)=>{if(typeof nz=='function'){nz(A,t,{f:700,q:.6,v:.035,d:.32,type:'bandpass'});nz(A,t+.45,{f:500,q:.6,v:.028,d:.4,type:'bandpass'})}})}catch(e){}}}else mvBreathT=0}}
+/* ---------- 3) companions keep your pace: while you walk (or are worn out) the ones following you walk too ---------- */
+{const _gu=gearUpd;gearUpd=function(dt){if(!S||!S.inf||PAUSE||!run||S.dr)return _gu(dt);const before=new Map();for(const z of Z)if(z.npc=='ally')before.set(z,[z.x,z.y]);_gu(dt);
+  if(mvEff()!='walk')return;const p=S.p,lim=110*MV_WALK*(typeof speedMul=='function'?speedMul(p):1)*1.08*dt;
+  for(const[z,[x0,y0]]of before){const a=typeof aById=='function'&&aById(z.ally);if(!a||a.st!='follow')continue;const near=Z.some(q=>!q.npc&&q.hp>0&&Math.hypot(q.x-z.x,q.y-z.y)<200);if(near)continue;
+   if(Math.hypot(p.x-z.x,p.y-z.y)>220)continue;/* far behind: let them catch up */const dx=z.x-x0,dy=z.y-y0,d=Math.hypot(dx,dy);if(d>lim){z.x=x0+dx/d*lim;z.y=y0+dy/d*lim}}}}
