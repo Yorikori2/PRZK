@@ -25,3 +25,17 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 #bm .bTab button.on{background:#e0b03a26;border-color:#e0b03a;color:#ffd36a}#bm .bTab small{font-size:11px;opacity:.8}
 #bm .det.top{position:sticky;top:-2px;z-index:5;margin:0 0 10px;border:1px solid #ffd36a88;border-radius:12px;padding:8px;background:#1a1f24;box-shadow:0 6px 16px #000a}
 #bm .bHint{margin:0 0 8px;font-size:12px}</style>`);
+/* ---------- compare: the item you tapped against what is worn in that slot now ---------- */
+function bgCmpRows(id){const W=W_BY[id];if(W){const s=wdef(id)[4]||W[4],rps=s.rps||(s.cd?1/s.cd:0);return[['피해',s.d*(s.pel||1),1],['초당 공격',+rps.toFixed(2),1],['사거리',s.r||0,1],['탄창',s.mag||0,1],['소음',s.nz||0,-1],['무게',s.wt||0,-1]].filter(r=>r[1]||r[0]=='소음')}
+ if(typeof ARMX!='undefined'&&ARMX[id]){const e=ARMX[id][4];return[['받는 피해 감소',Math.round((e.dr||0)*100),1,'%'],['폭발 감소',Math.round((e.blast||0)*100),1,'%'],['이동',Math.round((e.mov||0)*100),1,'%'],['넘어짐 감소',Math.round((e.kd||0)*100),1,'%'],['무게',ARMX[id][3],-1,'kg']].filter((r,i)=>r[1]||i==0||r[0]=='무게')}
+ if(typeof BAGCAP!='undefined'&&BAGCAP[id]!=null)return[['가방 무게 +',BAGCAP[id],1,'kg'],['무게',wtOf(id),-1,'kg']];
+ if(typeof SHD!='undefined'&&SHD[id]){const S0=SHD[id];return Object.keys(S0).filter(k=>typeof S0[k]=='number').slice(0,4).map(k=>[k,S0[k],1])}return null}
+function bgCmpHtml(id){const p=S.p,sl=typeof slotFor=='function'?slotFor(id):null;if(!sl)return'';const cur=p.eq[sl];if(cur==id)return'<div class="cmp same">✅ 지금 끼고 있어요</div>';
+ const A=bgCmpRows(id);if(!A)return'';const B=cur?bgCmpRows(cur)||[]:[];const val=n=>{const r=B.find(x=>x[0]==n);return r?r[1]:0};
+ const row=([n,v,good,u])=>{const o=val(n),d=+(v-o).toFixed(2),cl=!d?'eq':(d>0)==(good>0)?'up':'dn';return'<tr><td>'+n+'</td><td>'+(cur?o+(u||''):'—')+'</td><td>→</td><td><b>'+v+(u||'')+'</b></td><td class="'+cl+'">'+(d?(d>0?'▲':'▼')+Math.abs(d):'=')+'</td></tr>'};
+ return'<div class="cmp"><div class="cmpH">⚖ '+(cur?'<img src="'+icon(cur)+'">'+NM2(cur)+' <small>지금</small> → <img src="'+icon(id)+'">'+NM2(id):'빈 칸 → <img src="'+icon(id)+'">'+NM2(id))+'</div><table>'+A.map(row).join('')+'</table><small class="cmpL"><b class="up">초록</b> 좋아짐 · <b class="dn">빨강</b> 나빠짐</small></div>'}
+{const _ob=openBag;openBag=function(id){_ob.apply(this,arguments);try{const det=$('bm').querySelector('.det');if(det&&BSEL&&!det.querySelector('.cmp')){const h=bgCmpHtml(BSEL);if(h){const info=[...det.children].find(c=>c.tagName=='DIV'&&!c.classList.contains('ba'));if(info)info.insertAdjacentHTML('beforeend',h);else det.insertAdjacentHTML('beforeend',h)}}}catch(e){}}}
+document.head.insertAdjacentHTML('beforeend',`<style>#bm .cmp{flex-basis:100%;margin:6px 0 2px;padding:6px 8px;border-radius:10px;background:#ffffff0a;font-size:12px}#bm .cmp.same{color:#9fe09f}
+#bm .cmpH{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:4px}#bm .cmpH img{width:20px;height:20px;image-rendering:pixelated}#bm .cmpH small{color:var(--mut)}
+#bm .cmp table{width:100%;border-collapse:collapse}#bm .cmp td{padding:1px 4px}#bm .cmp td:first-child{color:var(--mut)}#bm .cmp td:nth-child(2){text-align:right;color:var(--mut)}#bm .cmp td:nth-child(3){text-align:center;color:var(--mut);width:14px}#bm .cmp td:nth-child(5){text-align:right;width:48px}
+#bm .cmp .up{color:#7fe07f}#bm .cmp .dn{color:#ff8a7a}#bm .cmp .eq{color:var(--mut)}#bm .cmpL{color:var(--mut);font-size:10.5px}#bm .det.top{flex-wrap:wrap}</style>`);

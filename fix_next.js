@@ -25,13 +25,15 @@ if(typeof uiApply=='function'){uiIdsFix();
 /* the close button of every window (bag, stash, workshop, companions …) floats just above the window, big and easy to hit;
    it presses the window's own ✕, so each window still closes its own way. In landscape (side panel) it sits on its left. */
 (function(){const bx=document.createElement('button');bx.id='bmX2';bx.textContent='✕';bx.setAttribute('aria-label','닫기');document.body.appendChild(bx);
- const own=()=>{const b=$('bm');if(!b)return null;return[...b.querySelectorAll('.sh button')].find(x=>x.textContent.trim()=='✕')||null};
+ const own=()=>{const m=document.getElementById('bmap');if(m)return document.getElementById('bmX');const b=$('bm');if(!b)return null;return[...b.querySelectorAll('.sh button')].find(x=>x.textContent.trim()=='✕')||[...b.querySelectorAll('button')].find(x=>x.textContent.trim()=='닫기')||null};
+ /* every window: the close button inside it is hidden, the floating ✕ above does the job */
+ const hideInner=()=>{const b=$('bm');if(b)b.querySelectorAll('button').forEach(x=>{const t=x.textContent.trim();if((t=='✕'||t=='닫기'||t=='×')&&x.id!='bmX2'&&x.style.display!='none')x.style.display='none'});const mx=document.getElementById('bmX');if(mx&&mx.style.display!='none')mx.style.display='none'};
  bx.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation()});
  bx.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();const o=own();if(o)o.click();else{closeBase();PAUSE=false}place()});
- function place(){const b=$('bm');const vis=b&&b.style.display=='block'&&getComputedStyle(b).display!='none';if(!vis||(typeof UIE!='undefined'&&UIE.on)){bx.style.display='none';document.body.classList.remove('bmx2');return}
+ function place(){const map=document.getElementById('bmap');if(map&&getComputedStyle(map).display!='none'){hideInner();bx.style.display='flex';bx.style.top='calc(env(safe-area-inset-top,0px) + 10px)';bx.style.left=(innerWidth-56)+'px';return}const b=$('bm');const vis=b&&b.style.display=='block'&&getComputedStyle(b).display!='none';if(!vis||(typeof UIE!='undefined'&&UIE.on)){bx.style.display='none';document.body.classList.remove('bmx2');return}hideInner();
   const r=b.getBoundingClientRect();bx.style.display='flex';document.body.classList.add('bmx2');{const o=own();if(o&&o.style.display!='none')o.style.display='none'}if(r.top>60){bx.style.top=(r.top-50)+'px';bx.style.left=(r.right-56)+'px'}else{bx.style.top='10px';bx.style.left=Math.max(6,r.left-52)+'px'}}
- new MutationObserver(place).observe($('bm'),{attributes:true,attributeFilter:['style'],childList:true});addEventListener('resize',place);setInterval(place,300);place()})();
-document.head.insertAdjacentHTML('beforeend',`<style>#bmX2{position:fixed;z-index:12;display:none;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border-radius:50%;font-size:20px;font-weight:700;background:#1d2228f2;border:2px solid #ffffff55;color:#fff;box-shadow:0 4px 14px #000a}
+ new MutationObserver(place).observe($('bm'),{attributes:true,attributeFilter:['style'],childList:true});new MutationObserver(place).observe(document.body,{childList:true});addEventListener('resize',place);setInterval(place,300);place()})();
+document.head.insertAdjacentHTML('beforeend',`<style>#bmX2{position:fixed;z-index:200;display:none;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border-radius:50%;font-size:20px;font-weight:700;background:#1d2228f2;border:2px solid #ffffff55;color:#fff;box-shadow:0 4px 14px #000a}
 #bmX2:active{transform:scale(.92)}</style>`);
 /* HUD editor: the bar must not cover the weapon panel (nor the status panel / quick slots) → try a few heights, keep the one that hides least */
 {const ar=(a,b)=>Math.max(0,Math.min(a.right,b.right)-Math.max(a.left,b.left))*Math.max(0,Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top));
