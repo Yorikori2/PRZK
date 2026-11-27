@@ -44,26 +44,26 @@ function gBody(cl,id,m){const F=FURN[gFurn(id,cl)],M=[MET[0],MET[1],MET[2]],bar=
  if(cl=='shotgun'){const bx=BL[bar]??8;R(MET[0],bx,17,60-bx,3);R(MET[2],bx,17,60-bx,1);R(MET[3],bx+2,17,8,1);/* bead */R('#e8e2d6',bx+1,16,1,1);
   /* tube */R(MET[0],12,21,48,3);R(MET[1],12,21,48,1);/* pump forend (grooves) */box(28,20,20,6,F);for(let x=30;x<46;x+=3)R(F[0],x,21,1,4);
   /* receiver */box(58,15,20,11,M);R(MET[3],59,15,18,1);R(GK,62,18,8,3);R(MET[2],63,18,6,1);/* guard + trigger */R(MET[0],66,26,10,1);R(MET[0],66,26,1,4);R(MET[0],66,29,9,1);R(MET[2],70,27,1,2);
-  /* stock (wood, thick) */for(let i=0;i<30;i++){const t=Math.min(10,5+Math.floor(i/4));R(i%2?F[1]:F[1],78+i,17+Math.floor(i/6),1,t)}R(F[2],78,17,30,1);R(F[0],78,25,24,2);R('#2a1a10',106,19,3,10);
-  out.side=[36,25];out.under=[36,27];out.optic=[66,15];out.muzzle=[bx,18];return out}
+  if(!m.stock){/* stock (wood, thick) */for(let i=0;i<30;i++){const t=Math.min(10,5+Math.floor(i/4));R(i%2?F[1]:F[1],78+i,17+Math.floor(i/6),1,t)}R(F[2],78,17,30,1);R(F[0],78,25,24,2);R('#2a1a10',106,19,3,10)}
+  out.side=[36,25];out.under=[36,27];out.optic=[66,15];out.muzzle=[bx,18];out.stock=[78,17,F];return out}
  if(cl=='sniper'){const bx=BL[bar]??4;R(MET[0],bx,19,42-bx,3);R(MET[2],bx,19,42-bx,1);if(bar=='b_flute')for(let x=bx+3;x<40;x+=4)R(MET[3],x,20,2,1);if(bar=='b_heavy')R(MET[0],bx,18,42-bx,5);
   /* chassis stock */box(40,17,42,9,F);for(let x=44;x<60;x+=4)R(F[0],x,19,2,4);/* receiver + rail + bolt */box(56,14,20,5,M);teeth(56,13,20,MET[2]);R(MET[2],74,19,5,2);R(MET[3],78,18,3,3);
   /* mag + guard + grip */box(60,26,7,6,M);R(F[0],66,26,9,1);R(F[0],66,26,1,4);R(F[0],66,29,8,1);for(let j=0;j<11;j++)R(F[1],73-Math.floor(j/4),26+j,7,1);
-  /* thumbhole stock */box(82,16,24,11,F);R(GK,88,22,8,3);R(F[0],104,16,3,13);R('#1d1714',105,17,2,11);
-  out.side=[46,23];out.under=[40,26];out.optic=[64,13];out.muzzle=[bx,20];return out}
+  if(!m.stock){/* thumbhole stock */box(82,16,24,11,F);R(GK,88,22,8,3);R(F[0],104,16,3,13);R('#1d1714',105,17,2,11)}
+  out.side=[46,23];out.under=[40,26];out.optic=[64,13];out.muzzle=[bx,20];out.stock=[82,16,F];return out}
  if(cl=='smg'){const bx=BL[bar]??32;R(MET[0],bx,20,44-bx,3);R(MET[2],bx,20,44-bx,1);if(bar=='b_cool')for(let x=bx+1;x<42;x+=3)R(GK,x,20,1,3);if(bar=='b_integ')box(bx-4,18,16,7,M);
   /* receiver */box(44,16,32,11,M);R(MET[3],45,16,30,1);teeth(48,15,24,MET[2]);R(GK,58,18,9,3);R(MET[2],59,18,7,1);R(MET[3],74,18,2,2);
   /* straight mag */box(52,27,7,15,M);for(let j=30;j<41;j+=3)R(MET[0],53,j,5,1);/* grip */for(let j=0;j<11;j++)R(F[1],68-Math.floor(j/4),27+j,8,1);R(F[2],68,27,7,1);for(let j=29;j<37;j+=2)R(F[0],66,j,6,1);
-  /* guard */R(MET[0],60,27,8,1);R(MET[0],60,27,1,4);R(MET[0],60,30,7,1);/* wire stock */R(MET[1],76,18,24,2);R(MET[1],76,25,22,2);R(MET[1],98,18,3,11);R(MET[3],76,18,24,1);
-  out.side=[46,25];out.under=[46,27];out.optic=[58,15];out.muzzle=[bx,21];return out}
+  /* guard */R(MET[0],60,27,8,1);R(MET[0],60,27,1,4);R(MET[0],60,30,7,1);if(!m.stock){/* wire stock */R(MET[1],76,18,24,2);R(MET[1],76,25,22,2);R(MET[1],98,18,3,11);R(MET[3],76,18,24,1)}
+  out.side=[46,25];out.under=[46,27];out.optic=[58,15];out.muzzle=[bx,21];out.stock=[76,17,F];return out}
  /* rifle (and lmg / anything else) */const bx=BL[bar]??14;const th=bar=='b_heavy'?4:3;R(MET[0],bx,21-(th>3?1:0),36-bx,th);R(MET[2],bx,21-(th>3?1:0),36-bx,1);if(bar=='b_flute')for(let x=bx+2;x<34;x+=4)R(MET[3],x,22,2,1);if(bar=='b_cool')for(let x=bx+1;x<34;x+=3)R(GK,x,21,1,3);if(bar=='b_poly')R('#3a5a8a',bx,22,36-bx,1);if(bar=='b_integ')box(bx-2,18,18,8,M);if(bar=='b_match')R(MET[3],bx,21,36-bx,1);
  /* front sight post */R(MET[0],33,16,2,5);
  /* handguard with slots */box(34,17,24,10,F);for(let x=37;x<56;x+=5)R(F[0],x,20,3,2),R(F[0],x,23,3,1);teeth(35,16,22,MET[2]);
  /* upper receiver + rail + port + charging handle */box(56,15,26,10,M);R(MET[3],57,15,24,1);teeth(57,14,24,MET[2]);R(GK,62,18,9,3);R(MET[2],63,18,7,1);R(MET[2],80,17,3,2);
  /* lower: mag well + curved mag */box(58,25,10,4,M);for(let j=0;j<15;j++)R(j%3?MET[1]:MET[0],58+Math.floor(j/3),29+j,7,1);R(MET[2],58,29,1,10);
  /* guard + trigger + grip */R(MET[0],66,27,9,1);R(MET[0],74,27,1,4);R(MET[0],66,30,8,1);R(MET[2],70,28,1,2);for(let j=0;j<12;j++)R(F[1],75-Math.floor(j/4),25+j,7,1);R(F[2],75,25,6,1);for(let j=27;j<36;j+=2)R(F[0],73,j,5,1);
- /* buffer tube + stock */R(MET[1],82,18,8,4);R(MET[2],82,18,8,1);box(88,16,20,11,F);R(F[0],90,19,14,1);R(F[0],90,23,14,1);R('#1d1714',106,16,3,12);
- out.side=[42,25];out.under=[44,27];out.optic=[66,14];out.muzzle=[bx,22];return out}
+ /* buffer tube + stock */R(MET[1],82,18,8,4);R(MET[2],82,18,8,1);if(!m.stock){box(88,16,20,11,F);R(F[0],90,19,14,1);R(F[0],90,23,14,1);R('#1d1714',106,16,3,12)}
+ out.side=[42,25];out.under=[44,27];out.optic=[66,14];out.muzzle=[bx,22];out.stock=[86,16,F];return out}
 /* ---------- the parts on the gun ---------- */
 function gSide(p,x,y){if(!p)return;const beam=(c,a)=>{g.globalAlpha=a;R(c,x-44,y+1,40,1);g.globalAlpha=1};R(GK,x-4,y-1,10,5);R('#2a2f35',x-3,y,8,3);R('#4a5058',x-3,y,8,1);
  if(p=='u_laser'){R('#ff3030',x-4,y+1,1,1);beam('#ff3030',.4)}else if(p=='s_green'){R('#5fe08a',x-4,y+1,1,1);beam('#5fe08a',.45)}else if(p=='s_ir'){R('#a060ff',x-4,y+1,1,1);beam('#a060ff',.2)}
@@ -80,9 +80,37 @@ function gSight(p,x,y){if(!p)return;const P=['#24282d','#3a4047','#5a626b'];
 function gMuzzleTip(cl,p,x,y){/* barrels already tell their length; a crown highlight */R('#8a949e',x,y,1,1)}
 /* the new blueprint (same size as before: 126 × 48) */
 blueprint=function(id,mods){const cl=GCLASS[id]||'rifle',c=document.createElement('canvas');c.width=126;c.height=48;const o=g;g=c.getContext('2d');g.translate(12,0);
- try{const A=gBody(cl,id,mods||{});gGrip((mods||{}).under,...A.under);gSide((mods||{}).side,...A.side);gSight((mods||{}).optic,...A.optic);gMuzzleTip(cl,mods&&mods.barrel,...A.muzzle)}catch(e){}
+ try{const A=gBody(cl,id,mods||{});if(A.stock&&(mods||{}).stock)gStock(mods.stock,...A.stock);gGrip((mods||{}).under,...A.under);gSide((mods||{}).side,...A.side);gSight((mods||{}).optic,...A.optic);gMuzzleTip(cl,mods&&mods.barrel,...A.muzzle)}catch(e){}
  g=o;/* outline */const x=c.getContext('2d'),im=x.getImageData(0,0,126,48),d=im.data,src=new Uint8ClampedArray(d);for(let j=0;j<48;j++)for(let i=0;i<126;i++){const k=(j*126+i)*4;if(src[k+3]>40)continue;
   for(const[a,b]of[[1,0],[-1,0],[0,1],[0,-1]]){const ii=i+a,jj=j+b;if(ii<0||jj<0||ii>=126||jj>=48)continue;const q=(jj*126+ii)*4;if(src[q+3]>200){d[k]=14;d[k+1]=16;d[k+2]=18;d[k+3]=255;break}}}
  x.putImageData(im,0,0);return c};
 /* the parts tab: side parts now show on the picture itself (the old patch drew a box) */
 if(typeof partsBind=='function'){const _pb=partsBind;partsBind=function(){_pb();try{const c=$('ptC');if(!c||!PGUN)return;const bp=blueprint(PGUN,PGo().mods[PGUN]||{});c.width=bp.width*3;c.height=bp.height*3;const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.clearRect(0,0,c.width,c.height);x.drawImage(bp,0,0,c.width,c.height)}catch(e){}}}
+
+/* ---------- 개머리판: a fifth place (rifles · SMGs · shotguns · snipers · LMGs; heavy → workbench) ---------- */
+if(!PS4K.includes('stock')){PS4.push(['stock','개머리판']);PS4K.push('stock');if(typeof PSLOTS!='undefined'&&!PSLOTS.some(x=>x[0]=='stock'))PSLOTS.push(['stock','개머리판'])}
+for(const cl of['smg','rifle','shotgun','sniper','lmg'])if(CSLOT[cl]&&!CSLOT[cl].includes('stock'))CSLOT[cl].push('stock');
+{const add=p=>{if(!P_BY[p[0]]){PARTS.push(p);P_BY[p[0]]=p}};const LG=['smg','rifle','shotgun','sniper','lmg'];
+ add(['s_fold','접이식 개머리판','stock','c',['smg','rifle','shotgun'],{mov:6,rec:6},'주택 · 철물점']);
+ add(['s_skel','골격형 개머리판','stock','u',['smg','rifle','sniper'],{mov:5,rec:-4},'총포상 · 경찰서']);
+ add(['s_pad','반동 패드 개머리판','stock','u',['shotgun','rifle','sniper','lmg'],{rec:-18,mov:-2},'경찰서 · 철물점']);
+ add(['s_wood','원목 개머리판','stock','c',['rifle','shotgun','sniper'],{acc:4,rec:-6,mov:-2},'주택 · 교회']);
+ add(['s_crane','크레인 개머리판','stock','r',['smg','rifle','lmg'],{rec:-12,acc:4},'군부대']);
+ add(['s_prec','정밀 사격 개머리판','stock','e',['sniper','rifle'],{acc:10,rec:-15,mov:-4},'군부대 무기고']);
+ add(['s_brace','팔걸이 브레이스','stock','r',['smg'],{mov:8,rec:-6},'총포상']);
+ add(['s_bull','불펍 개머리판','stock','l',['rifle','smg'],{mov:8,rng:10,acc:5},'군부대 무기고'])}
+/* a stock is heavy work: bench only (as 총열 · 손잡이) */
+if(typeof partsTab=='function'){const _pt=partsTab;partsTab=function(){return _pt().replace(/<small>개머리판<\/small>/g,'<small>개머리판 · 🔧 작업대</small>').replace('<b>총열 · 손잡이</b>는','<b>총열 · 손잡이 · 개머리판</b>은')}}
+/* the drawings: x = where the stock meets the gun, it goes to the right */
+function gStock(p,x,y,F){const M=['#24282d','#3a4047','#5a626b','#8a949e'],W=['#5a3a22','#8a5a33','#b07a45'];
+ if(p=='s_light'){R(M[1],x,y+1,22,2);R(M[1],x,y+7,18,2);R(M[1],x+20,y+1,3,10);R(M[3],x,y+1,22,1)}
+ else if(p=='s_tac'){box(x,y,20,10,F);for(let i=x+3;i<x+18;i+=4)R(F[0],i,y+3,2,4);R('#1d1714',x+20,y-1,3,12)}
+ else if(p=='s_cheek'){box(x,y,22,10,F);box(x+4,y-3,12,3,F);R('#1d1714',x+21,y,3,11)}
+ else if(p=='s_fold'){/* folded flat along the side */R(M[0],x,y+3,4,5);R(M[1],x+2,y+4,18,2);R(M[2],x+2,y+4,18,1);R(M[1],x+18,y+2,2,7)}
+ else if(p=='s_skel'){R(M[1],x,y,22,2);R(M[1],x,y+8,20,2);ln(x+2,y+2,x+12,y+8,M[1]);ln(x+12,y+2,x+20,y+8,M[1]);R(M[1],x+20,y,3,11);R(M[3],x,y,22,1)}
+ else if(p=='s_pad'){box(x,y,20,10,F);R('#c84a3a',x+20,y-1,4,12);R('#e86a5a',x+20,y-1,4,1);R('#7a2a22',x+23,y,1,11)}
+ else if(p=='s_wood'){for(let i=0;i<24;i++)R(i%5==2?W[0]:W[1],x+i,y+Math.floor(i/8),1,9+Math.floor(i/8));R(W[2],x,y,24,1);R('#2a1a10',x+23,y+2,2,10)}
+ else if(p=='s_crane'){box(x,y,22,10,F);R(F[0],x+4,y+3,6,4);R(F[0],x+12,y+3,6,4);R(M[0],x+2,y+10,4,2);R('#1d1714',x+21,y-1,3,12)}
+ else if(p=='s_prec'){box(x,y,26,11,F);box(x+6,y-4,14,4,F);R(M[2],x+8,y-4,2,4);R(M[2],x+16,y-4,2,4);R(F[0],x+8,y+11,10,3);R('#1d1714',x+25,y-1,3,13)}
+ else if(p=='s_brace'){R(M[1],x,y+3,10,3);box(x+10,y,10,9,['#2a2a2e','#3a3a40','#55555c']);R(M[0],x+12,y+3,6,1);R(M[0],x+12,y+5,6,1)}
+ else if(p=='s_bull'){/* bullpup: a short butt with a cheek riser */box(x,y-1,16,12,F);box(x+2,y-4,10,3,F);R('#1d1714',x+15,y-1,3,13);R(M[2],x+4,y+4,6,2)}}
