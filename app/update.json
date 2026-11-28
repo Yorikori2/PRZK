@@ -1,9 +1,9 @@
 {
-"v": 2,
+"v": 3,
 "files": [
 {
 "p": "index.html",
-"h": "28cd9972c05fcd0c0cb170d508c905188b783bea"
+"h": "b77ed7d7c300c8693f3c16870075b91d928c3214"
 },
 {
 "p": "manifest.webmanifest",
@@ -111,7 +111,7 @@
 },
 {
 "p": "fix_next.js",
-"h": "e6fd2a3d445a5367b40945979b5a10499147b14f"
+"h": "2c306c72b39fab5946ce3406b5506fb477e443d7"
 },
 {
 "p": "gear.js",
@@ -248,6 +248,10 @@
 {
 "p": "search.js",
 "h": "abcd8bf52eb064342dd40653afdbeb4545b1e36b"
+},
+{
+"p": "set_next.js",
+"h": "c42d1ec8bbd4ae5589f50e1002451b7112e6320f"
 },
 {
 "p": "shdbar_next.js",

@@ -59,14 +59,6 @@ setInterval(()=>{const h=document.getElementById('shdHud');if(!h)return;h.style.
  for(const id of['sd','tbH']){const e=document.getElementById(id);if(!e||getComputedStyle(e).display=='none'||getComputedStyle(e).visibility=='hidden')continue;const q=e.getBoundingClientRect();if(!q.width)continue;
   if(q.right>r.left&&q.left<r.right&&q.bottom>r.top&&q.top<r.bottom)push=Math.max(push,q.right+8)}
  if(push)h.style.left=push+'px'},150);
-/* ---------- restart from inside the game (⚙ bar): back to the title (keeps the save) · or a brand-new game ---------- */
-{const bar=document.getElementById('uiBar');if(bar&&!document.getElementById('rsRow')){const last=bar.querySelector('.ur:last-child');
-  const row='<div class="ur" id="rsRow"><i>게임</i><button id="rsT">🔄 재시작 (타이틀로)</button><button id="rsN">🆕 처음부터 새 게임</button></div>';if(last)last.insertAdjacentHTML('beforebegin',row);else bar.insertAdjacentHTML('beforeend',row);
-  const leave=()=>{try{if(typeof save=='function'&&run)save()}catch(e){}location.reload()};
-  let armT=-1e9;document.getElementById('rsT').addEventListener('click',e=>{e.stopPropagation();if(typeof uiEdit=='function')uiEdit(false);leave()});
-  document.getElementById('rsN').addEventListener('click',e=>{e.stopPropagation();const b=e.currentTarget;if(performance.now()-armT>4000){armT=performance.now();b.textContent='⚠ 저장이 지워져요 · 한 번 더 누르면 새 게임';b.classList.add('warn');setTimeout(()=>{if(performance.now()-armT>=3900){b.textContent='🆕 처음부터 새 게임';b.classList.remove('warn')}},4000);return}
-   if(typeof uiEdit=='function'){UIE.on=false}run=false;try{localStorage.removeItem(SAVE)}catch(e){}location.reload()});
-  document.head.insertAdjacentHTML('beforeend','<style>#rsRow button.warn{background:#5a1a14;border-color:#ff6a5a;color:#ffb0a4}</style>')}}
 /* keep the ⚙ bar fully on screen after it's been placed */
 if(window.uiBarClear){const _c=uiBarClear;window.uiBarClear=function(){_c();const b=document.getElementById('uiBar');if(!b||b.style.display=='none')return;const r=b.getBoundingClientRect();if(r.left<4||r.right>innerWidth-4)b.style.left=''}
  if(typeof uiEdit=='function'){const _u2=uiEdit;uiEdit=function(on){const r=_u2.apply(this,arguments);if(on)uiBarClear();return r}}}
